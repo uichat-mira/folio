@@ -73,7 +73,18 @@ type HeadingCandidate = {
   index: number;
   depth: number;
   text: string;
+  explicitId?: string;
 };
+
+export function createHeadingIdGenerator() {
+  const seen = new Map<string, number>();
+  return (text: string, explicitId?: string): string => {
+    const base = explicitId?.trim() || slugify(text) || "section";
+    const count = seen.get(base) ?? 0;
+    seen.set(base, count + 1);
+    return count === 0 ? base : `${base}-${count + 1}`;
+  };
+}
 
 function cleanHeadingText(value: string): string {
   return value.replace(/<[^>]+>/g, "").replace(/[*_`]/g, "").trim();
@@ -90,28 +101,25 @@ export function extractHeadings(body: string): FolioHeading[] {
     });
   }
 
-  for (const match of body.matchAll(/<h([2-4])\b[^>]*>([\s\S]*?)<\/h\1>/gi)) {
+  for (const match of body.matchAll(/<h([2-4])\b([^>]*)>([\s\S]*?)<\/h\1>/gi)) {
+    const idMatch = match[2].match(/\bid\s*=\s*["']([^"']+)["']/i);
     candidates.push({
       index: match.index ?? 0,
       depth: Number(match[1]),
-      text: cleanHeadingText(match[2]),
+      text: cleanHeadingText(match[3]),
+      explicitId: idMatch?.[1],
     });
   }
 
-  const seen = new Map<string, number>();
+  const nextId = createHeadingIdGenerator();
   return candidates
     .filter((candidate) => candidate.text)
     .sort((left, right) => left.index - right.index)
-    .map((candidate) => {
-      const base = slugify(candidate.text) || "section";
-      const count = seen.get(base) ?? 0;
-      seen.set(base, count + 1);
-      return {
-        depth: candidate.depth,
-        text: candidate.text,
-        id: count === 0 ? base : `${base}-${count + 1}`,
-      };
-    });
+    .map((candidate) => ({
+      depth: candidate.depth,
+      text: candidate.text,
+      id: nextId(candidate.text, candidate.explicitId),
+    }));
 }
 
 function list(value: unknown): string[] {
