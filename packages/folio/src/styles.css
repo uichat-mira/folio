@@ -10,9 +10,9 @@
 body { margin: 0; min-width: 320px; background: #f7f5f1; }
 a { color: inherit; text-decoration: none; }
 
-.mira-shell { min-height: 100vh; }
+.folio-shell { min-height: 100vh; }
 
-.mira-header {
+.folio-header {
   position: sticky;
   top: 0;
   z-index: 10;
@@ -26,33 +26,33 @@ a { color: inherit; text-decoration: none; }
   backdrop-filter: blur(14px);
 }
 
-.mira-brand {
+.folio-brand {
   display: flex;
   align-items: center;
   gap: 10px;
   font-weight: 700;
 }
 
-.mira-brand img {
+.folio-brand img {
   width: 30px;
   height: 30px;
   object-fit: contain;
 }
 
-.mira-header nav {
+.folio-header nav {
   display: flex;
   gap: 20px;
   font-size: 14px;
 }
 
-.mira-header-actions { margin-left: auto; }
+.folio-header-actions { margin-left: auto; }
 
-.mira-layout {
+.folio-layout {
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
 }
 
-.mira-sidebar {
+.folio-sidebar {
   position: sticky;
   top: 64px;
   height: calc(100vh - 64px);
@@ -61,9 +61,9 @@ a { color: inherit; text-decoration: none; }
   border-right: 1px solid #ded9d1;
 }
 
-.mira-sidebar section + section { margin-top: 28px; }
+.folio-sidebar section + section { margin-top: 28px; }
 
-.mira-sidebar h2 {
+.folio-sidebar h2 {
   margin: 0 0 10px;
   color: #8a7463;
   font-size: 12px;
@@ -71,7 +71,7 @@ a { color: inherit; text-decoration: none; }
   text-transform: uppercase;
 }
 
-.mira-sidebar a {
+.folio-sidebar a {
   display: block;
   padding: 7px 10px;
   border-radius: 8px;
@@ -79,22 +79,22 @@ a { color: inherit; text-decoration: none; }
   font-size: 14px;
 }
 
-.mira-sidebar a:hover,
-.mira-sidebar a.active {
+.folio-sidebar a:hover,
+.folio-sidebar a.active {
   background: #ece7df;
   color: #2d2926;
 }
 
-.mira-content { min-width: 0; }
+.folio-content { min-width: 0; }
 
-.mira-doc-page,
-.mira-home {
+.folio-doc-page,
+.folio-home {
   width: min(900px, calc(100% - 48px));
   margin: 0 auto;
   padding: 76px 0 96px;
 }
 
-.mira-eyebrow {
+.folio-eyebrow {
   margin-bottom: 12px;
   color: #b55b3d;
   font-size: 12px;
@@ -103,8 +103,8 @@ a { color: inherit; text-decoration: none; }
   text-transform: uppercase;
 }
 
-.mira-doc-page > h1,
-.mira-hero h1 {
+.folio-doc-page > h1,
+.folio-hero h1 {
   margin: 0;
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(42px, 7vw, 72px);
@@ -112,22 +112,22 @@ a { color: inherit; text-decoration: none; }
   font-weight: 500;
 }
 
-.mira-lede,
-.mira-hero p {
+.folio-lede,
+.folio-hero p {
   max-width: 720px;
   color: #6b625a;
   font-size: 19px;
   line-height: 1.7;
 }
 
-.mira-card-grid {
+.folio-card-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
   margin-top: 52px;
 }
 
-.mira-card {
+.folio-card {
   padding: 24px;
   border: 1px solid #ddd7ce;
   border-radius: 18px;
@@ -136,47 +136,47 @@ a { color: inherit; text-decoration: none; }
   transition: 160ms ease;
 }
 
-.mira-card:hover {
+.folio-card:hover {
   transform: translateY(-2px);
   border-color: #c7bcae;
 }
 
-.mira-card span {
+.folio-card span {
   color: #b55b3d;
   font-size: 12px;
   font-weight: 700;
 }
 
-.mira-card h2 {
+.folio-card h2 {
   margin: 12px 0 8px;
   font-size: 20px;
 }
 
-.mira-card p {
+.folio-card p {
   margin: 0;
   color: #756c64;
   line-height: 1.6;
 }
 
-.mira-markdown {
+.folio-markdown {
   margin-top: 48px;
   color: #3d3834;
   font-size: 17px;
   line-height: 1.82;
 }
 
-.mira-markdown h2 {
+.folio-markdown h2 {
   margin-top: 52px;
   font-family: Georgia, serif;
   font-size: 32px;
 }
 
-.mira-markdown h3 {
+.folio-markdown h3 {
   margin-top: 34px;
   font-size: 22px;
 }
 
-.mira-markdown pre {
+.folio-markdown pre {
   overflow: auto;
   padding: 18px;
   border-radius: 14px;
@@ -184,25 +184,25 @@ a { color: inherit; text-decoration: none; }
   color: #f5efe8;
 }
 
-.mira-markdown code {
+.folio-markdown code {
   font-family: "SFMono-Regular", Consolas, monospace;
   font-size: 0.9em;
 }
 
-.mira-markdown :not(pre) > code {
+.folio-markdown :not(pre) > code {
   padding: 0.14em 0.34em;
   border-radius: 5px;
   background: #ebe6df;
 }
 
-.mira-markdown blockquote {
+.folio-markdown blockquote {
   margin-left: 0;
   padding-left: 20px;
   border-left: 3px solid #c76a48;
   color: #6b625a;
 }
 
-.mira-footer {
+.folio-footer {
   padding: 28px;
   border-top: 1px solid #ded9d1;
   color: #8a8179;
@@ -210,22 +210,22 @@ a { color: inherit; text-decoration: none; }
   font-size: 13px;
 }
 
-.mira-prerender {
+.folio-prerender {
   width: min(900px, calc(100% - 48px));
   margin: 80px auto;
 }
 
 @media (max-width: 780px) {
-  .mira-header { padding: 0 18px; }
-  .mira-header nav { display: none; }
-  .mira-layout { display: block; }
-  .mira-sidebar { display: none; }
+  .folio-header { padding: 0 18px; }
+  .folio-header nav { display: none; }
+  .folio-layout { display: block; }
+  .folio-sidebar { display: none; }
 
-  .mira-doc-page,
-  .mira-home {
+  .folio-doc-page,
+  .folio-home {
     width: min(100% - 32px, 900px);
     padding-top: 48px;
   }
 
-  .mira-card-grid { grid-template-columns: 1fr; }
+  .folio-card-grid { grid-template-columns: 1fr; }
 }

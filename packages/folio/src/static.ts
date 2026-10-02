@@ -6,9 +6,9 @@ import {
 } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { marked } from "marked";
-import type { MiraDoc, MiraDocsConfig } from "./types";
+import type { FolioDoc, FolioConfig } from "./types";
 
-export type MiraDocsStaticRoute = {
+export type FolioStaticRoute = {
   path: string;
   title: string;
   description: string;
@@ -17,35 +17,35 @@ export type MiraDocsStaticRoute = {
   image?: string;
   robots?: string;
   jsonLd?: unknown;
-  doc?: MiraDoc;
+  doc?: FolioDoc;
 };
 
-export type MiraDocsStaticBuildContext = {
-  config: MiraDocsConfig;
-  docs: MiraDoc[];
+export type FolioStaticBuildContext = {
+  config: FolioConfig;
+  docs: FolioDoc[];
   roots: string[];
   base: string;
   outDir: string;
 };
 
-export type MiraDocsStaticImageMetadata = {
+export type FolioStaticImageMetadata = {
   type?: string;
   width?: number;
   height?: number;
 };
 
-export type MiraDocsStaticBuildOptions = {
-  routes?: (context: MiraDocsStaticBuildContext) => MiraDocsStaticRoute[];
-  notFound?: (context: MiraDocsStaticBuildContext) => MiraDocsStaticRoute;
+export type FolioStaticBuildOptions = {
+  routes?: (context: FolioStaticBuildContext) => FolioStaticRoute[];
+  notFound?: (context: FolioStaticBuildContext) => FolioStaticRoute;
   locale?: string;
   siteName?: string;
   defaultImage?: string;
-  image?: MiraDocsStaticImageMetadata;
+  image?: FolioStaticImageMetadata;
   twitterCard?: "summary" | "summary_large_image";
-  title?: (route: MiraDocsStaticRoute, config: MiraDocsConfig) => string;
+  title?: (route: FolioStaticRoute, config: FolioConfig) => string;
   transformTemplate?: (
     template: string,
-    context: MiraDocsStaticBuildContext,
+    context: FolioStaticBuildContext,
   ) => string;
   rootPlaceholder?: string;
   sitemap?: boolean;
@@ -62,7 +62,7 @@ function normalizeRoute(path: string): string {
   return normalized.length > 1 ? normalized.replace(/\/+$/, "") : normalized;
 }
 
-export function miraDocsEscapeHtml(value: string): string {
+export function folioEscapeHtml(value: string): string {
   return value.replace(
     /[&<>"']/g,
     (character) =>
@@ -76,7 +76,7 @@ export function miraDocsEscapeHtml(value: string): string {
   );
 }
 
-export function miraDocsAbsoluteRouteUrl(
+export function folioAbsoluteRouteUrl(
   siteUrl: string,
   base: string,
   path: string,
@@ -86,7 +86,7 @@ export function miraDocsAbsoluteRouteUrl(
   return `${origin}${normalizeBase(base)}${route === "/" ? "/" : `${route}/`}`;
 }
 
-export function miraDocsAbsoluteAssetUrl(
+export function folioAbsoluteAssetUrl(
   siteUrl: string,
   base: string,
   path: string,
@@ -114,8 +114,8 @@ function dataList(value: unknown): string[] {
 }
 
 function defaultJsonLd(
-  route: MiraDocsStaticRoute,
-  context: MiraDocsStaticBuildContext,
+  route: FolioStaticRoute,
+  context: FolioStaticBuildContext,
   canonical: string,
   image: string | undefined,
 ): unknown {
@@ -143,9 +143,9 @@ function defaultJsonLd(
 }
 
 function resolveImage(
-  route: MiraDocsStaticRoute,
-  context: MiraDocsStaticBuildContext,
-  options: MiraDocsStaticBuildOptions,
+  route: FolioStaticRoute,
+  context: FolioStaticBuildContext,
+  options: FolioStaticBuildOptions,
 ): string | undefined {
   const value = route.image || options.defaultImage || context.config.logo;
   if (!value) return undefined;
@@ -153,14 +153,14 @@ function resolveImage(
   if (!context.config.siteUrl) {
     return `${normalizeBase(context.base)}/${value.replace(/^\/+/, "")}`;
   }
-  return miraDocsAbsoluteAssetUrl(context.config.siteUrl, context.base, value);
+  return folioAbsoluteAssetUrl(context.config.siteUrl, context.base, value);
 }
 
-export function renderMiraDocsStaticHtml(
+export function renderFolioStaticHtml(
   template: string,
-  route: MiraDocsStaticRoute,
-  context: MiraDocsStaticBuildContext,
-  options: MiraDocsStaticBuildOptions = {},
+  route: FolioStaticRoute,
+  context: FolioStaticBuildContext,
+  options: FolioStaticBuildOptions = {},
 ): string {
   const pageTitle =
     options.title?.(route, context.config) ??
@@ -168,7 +168,7 @@ export function renderMiraDocsStaticHtml(
       ? route.title
       : `${route.title} · ${context.config.title}`);
   const canonical = context.config.siteUrl
-    ? miraDocsAbsoluteRouteUrl(context.config.siteUrl, context.base, route.path)
+    ? folioAbsoluteRouteUrl(context.config.siteUrl, context.base, route.path)
     : "";
   const image = resolveImage(route, context, options);
   const robots = route.robots || "index,follow";
@@ -177,24 +177,24 @@ export function renderMiraDocsStaticHtml(
   const imageMetadata = options.image ?? {};
 
   const head = [
-    `<meta name="description" content="${miraDocsEscapeHtml(route.description)}">`,
-    `<meta name="robots" content="${miraDocsEscapeHtml(robots)}">`,
+    `<meta name="description" content="${folioEscapeHtml(route.description)}">`,
+    `<meta name="robots" content="${folioEscapeHtml(robots)}">`,
     canonical
-      ? `<link rel="canonical" href="${miraDocsEscapeHtml(canonical)}">`
+      ? `<link rel="canonical" href="${folioEscapeHtml(canonical)}">`
       : "",
-    `<meta property="og:locale" content="${miraDocsEscapeHtml(options.locale || "en_US")}">`,
-    `<meta property="og:title" content="${miraDocsEscapeHtml(pageTitle)}">`,
-    `<meta property="og:description" content="${miraDocsEscapeHtml(route.description)}">`,
-    `<meta property="og:type" content="${miraDocsEscapeHtml(route.type || "website")}">`,
+    `<meta property="og:locale" content="${folioEscapeHtml(options.locale || "en_US")}">`,
+    `<meta property="og:title" content="${folioEscapeHtml(pageTitle)}">`,
+    `<meta property="og:description" content="${folioEscapeHtml(route.description)}">`,
+    `<meta property="og:type" content="${folioEscapeHtml(route.type || "website")}">`,
     canonical
-      ? `<meta property="og:url" content="${miraDocsEscapeHtml(canonical)}">`
+      ? `<meta property="og:url" content="${folioEscapeHtml(canonical)}">`
       : "",
-    `<meta property="og:site_name" content="${miraDocsEscapeHtml(options.siteName || context.config.title)}">`,
+    `<meta property="og:site_name" content="${folioEscapeHtml(options.siteName || context.config.title)}">`,
     image
-      ? `<meta property="og:image" content="${miraDocsEscapeHtml(image)}"><meta property="og:image:secure_url" content="${miraDocsEscapeHtml(image)}">`
+      ? `<meta property="og:image" content="${folioEscapeHtml(image)}"><meta property="og:image:secure_url" content="${folioEscapeHtml(image)}">`
       : "",
     image && imageMetadata.type
-      ? `<meta property="og:image:type" content="${miraDocsEscapeHtml(imageMetadata.type)}">`
+      ? `<meta property="og:image:type" content="${folioEscapeHtml(imageMetadata.type)}">`
       : "",
     image && imageMetadata.width
       ? `<meta property="og:image:width" content="${imageMetadata.width}">`
@@ -203,10 +203,10 @@ export function renderMiraDocsStaticHtml(
       ? `<meta property="og:image:height" content="${imageMetadata.height}">`
       : "",
     `<meta name="twitter:card" content="${options.twitterCard || "summary_large_image"}">`,
-    `<meta name="twitter:title" content="${miraDocsEscapeHtml(pageTitle)}">`,
-    `<meta name="twitter:description" content="${miraDocsEscapeHtml(route.description)}">`,
+    `<meta name="twitter:title" content="${folioEscapeHtml(pageTitle)}">`,
+    `<meta name="twitter:description" content="${folioEscapeHtml(route.description)}">`,
     image
-      ? `<meta name="twitter:image" content="${miraDocsEscapeHtml(image)}">`
+      ? `<meta name="twitter:image" content="${folioEscapeHtml(image)}">`
       : "",
     jsonLd
       ? `<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, "\\u003c")}</script>`
@@ -217,7 +217,7 @@ export function renderMiraDocsStaticHtml(
   const rootPlaceholder = options.rootPlaceholder || '<div id="root"></div>';
 
   return transformed
-    .replace(/<title>[\s\S]*?<\/title>/i, `<title>${miraDocsEscapeHtml(pageTitle)}</title>`)
+    .replace(/<title>[\s\S]*?<\/title>/i, `<title>${folioEscapeHtml(pageTitle)}</title>`)
     .replace(/<meta name="description"[^>]*>\s*/gi, "")
     .replace(/<meta name="robots"[^>]*>\s*/gi, "")
     .replace(/<link rel="canonical"[^>]*>\s*/gi, "")
@@ -228,20 +228,20 @@ export function renderMiraDocsStaticHtml(
     .replace(rootPlaceholder, `<div id="root">${route.body}</div>`);
 }
 
-function defaultRoutes(context: MiraDocsStaticBuildContext): MiraDocsStaticRoute[] {
+function defaultRoutes(context: FolioStaticBuildContext): FolioStaticRoute[] {
   return [
     {
       path: "/",
       title: context.config.title,
       description: context.config.description,
-      body: `<main class="mira-prerender"><h1>${miraDocsEscapeHtml(context.config.title)}</h1><p>${miraDocsEscapeHtml(context.config.description)}</p></main>`,
+      body: `<main class="folio-prerender"><h1>${folioEscapeHtml(context.config.title)}</h1><p>${folioEscapeHtml(context.config.description)}</p></main>`,
       type: "website",
     },
     ...context.docs.map((doc) => ({
       path: doc.path,
       title: doc.title,
       description: doc.description || context.config.description,
-      body: `<main class="mira-prerender"><p>${miraDocsEscapeHtml(doc.group)}</p><h1>${miraDocsEscapeHtml(doc.title)}</h1><p>${miraDocsEscapeHtml(doc.description)}</p><article>${marked.parse(doc.body) as string}</article></main>`,
+      body: `<main class="folio-prerender"><p>${folioEscapeHtml(doc.group)}</p><h1>${folioEscapeHtml(doc.title)}</h1><p>${folioEscapeHtml(doc.description)}</p><article>${marked.parse(doc.body) as string}</article></main>`,
       type: doc.type === "article" ? "article" : "website",
       image: doc.cover,
       doc,
@@ -249,20 +249,20 @@ function defaultRoutes(context: MiraDocsStaticBuildContext): MiraDocsStaticRoute
   ];
 }
 
-function defaultNotFound(context: MiraDocsStaticBuildContext): MiraDocsStaticRoute {
+function defaultNotFound(context: FolioStaticBuildContext): FolioStaticRoute {
   return {
     path: "/404",
     title: "Page not found",
     description: "The requested page could not be found.",
-    body: `<main class="mira-prerender"><h1>Page not found</h1><p>The requested page could not be found.</p></main>`,
+    body: `<main class="folio-prerender"><h1>Page not found</h1><p>The requested page could not be found.</p></main>`,
     type: "website",
     robots: "noindex,nofollow",
   };
 }
 
-export function writeMiraDocsStaticSite(
-  context: MiraDocsStaticBuildContext,
-  options: MiraDocsStaticBuildOptions = {},
+export function writeFolioStaticSite(
+  context: FolioStaticBuildContext,
+  options: FolioStaticBuildOptions = {},
 ): { routes: number } {
   const indexPath = resolve(context.outDir, "index.html");
   if (!existsSync(indexPath)) return { routes: 0 };
@@ -278,7 +278,7 @@ export function writeMiraDocsStaticSite(
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(
       target,
-      renderMiraDocsStaticHtml(template, route, context, options),
+      renderFolioStaticHtml(template, route, context, options),
       "utf8",
     );
   }
@@ -286,15 +286,15 @@ export function writeMiraDocsStaticSite(
   const notFound = options.notFound?.(context) ?? defaultNotFound(context);
   writeFileSync(
     resolve(context.outDir, "404.html"),
-    renderMiraDocsStaticHtml(template, notFound, context, options),
+    renderFolioStaticHtml(template, notFound, context, options),
     "utf8",
   );
 
   if (context.config.siteUrl && options.sitemap !== false) {
     const urls = [...routeMap.values()]
       .map((route) =>
-        `<url><loc>${miraDocsEscapeHtml(
-          miraDocsAbsoluteRouteUrl(
+        `<url><loc>${folioEscapeHtml(
+          folioAbsoluteRouteUrl(
             context.config.siteUrl!,
             context.base,
             route.path,
@@ -312,7 +312,7 @@ export function writeMiraDocsStaticSite(
   if (context.config.siteUrl && options.robots !== false) {
     writeFileSync(
       resolve(context.outDir, "robots.txt"),
-      `User-agent: *\nAllow: /\nSitemap: ${miraDocsAbsoluteAssetUrl(
+      `User-agent: *\nAllow: /\nSitemap: ${folioAbsoluteAssetUrl(
         context.config.siteUrl,
         context.base,
         "sitemap.xml",

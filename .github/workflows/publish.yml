@@ -38,7 +38,7 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          VERSION=$(node -p "require('./packages/mira-docs/package.json').version")
+          VERSION=$(node -p "require('./packages/folio/package.json').version")
           test "${RELEASE_TAG}" = "v${VERSION}"
 
           git fetch origin prod --no-tags
@@ -52,16 +52,16 @@ jobs:
         shell: bash
         run: |
           VERSION="${{ steps.package.outputs.version }}"
-          if npm view "@uichat-mira/docs@${VERSION}" version --registry=https://registry.npmjs.org >/dev/null 2>&1; then
+          if npm view "@uichat-mira/folio@${VERSION}" version --registry=https://registry.npmjs.org >/dev/null 2>&1; then
             echo "published=true" >> "$GITHUB_OUTPUT"
-            echo "@uichat-mira/docs@${VERSION} is already published; skipping npm publish."
+            echo "@uichat-mira/folio@${VERSION} is already published; skipping npm publish."
           else
             echo "published=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Publish @uichat-mira/docs with npm Trusted Publishing
+      - name: Publish @uichat-mira/folio with npm Trusted Publishing
         if: steps.registry.outputs.published != 'true'
-        working-directory: packages/mira-docs
+        working-directory: packages/folio
         run: npm publish --access public
 
       - name: Record release result
@@ -69,9 +69,9 @@ jobs:
         run: |
           VERSION="${{ steps.package.outputs.version }}"
           if [ "${{ steps.registry.outputs.published }}" = "true" ]; then
-            echo "### @uichat-mira/docs@${VERSION}" >> "$GITHUB_STEP_SUMMARY"
+            echo "### @uichat-mira/folio@${VERSION}" >> "$GITHUB_STEP_SUMMARY"
             echo "The version already existed on npm, so publishing was safely skipped." >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "### @uichat-mira/docs@${VERSION}" >> "$GITHUB_STEP_SUMMARY"
+            echo "### @uichat-mira/folio@${VERSION}" >> "$GITHUB_STEP_SUMMARY"
             echo "Published from the prod release lineage through npm Trusted Publishing (OIDC)." >> "$GITHUB_STEP_SUMMARY"
           fi

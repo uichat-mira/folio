@@ -1,15 +1,15 @@
 # Static build contract
 
-MiraDocs owns static file generation while each site keeps control of its brand, page markup, authorship rules, and structured-data content.
+Folio owns static file generation while each site keeps control of its brand, page markup, authorship rules, and structured-data content.
 
 ```ts
-import { miraDocs } from "@uichat-mira/docs/vite";
+import { folio } from "@uichat-mira/folio/vite";
 import type {
-  MiraDocsStaticBuildOptions,
-  MiraDocsStaticRoute,
-} from "@uichat-mira/docs/vite";
+  FolioStaticBuildOptions,
+  FolioStaticRoute,
+} from "@uichat-mira/folio/vite";
 
-const staticBuild: MiraDocsStaticBuildOptions = {
+const staticBuild: FolioStaticBuildOptions = {
   routes: ({ docs }) =>
     docs.map((doc) => ({
       path: doc.path,
@@ -34,7 +34,7 @@ const staticBuild: MiraDocsStaticBuildOptions = {
 
 export default {
   plugins: [
-    miraDocs({
+    folio({
       contentDir: "content",
       config: {
         title: "My site",
@@ -47,7 +47,7 @@ export default {
 };
 ```
 
-## MiraDocs responsibilities
+## Folio responsibilities
 
 - Write route HTML into the Vite output directory.
 - Inject title, description, robots, canonical, Open Graph, and Twitter metadata.
