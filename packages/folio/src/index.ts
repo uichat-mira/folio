@@ -1,4 +1,7 @@
 export { FolioApp } from "./app";
+export { FolioMarkdown } from "./markdown-react";
+export type { FolioMarkdownProps } from "./markdown-react";
+export { searchFolioDocs } from "./search";
 export {
   defineFolioConfig,
   normalizeBasePath,
@@ -20,6 +23,8 @@ export type {
   FolioConfig,
   FolioNavigationItem,
   FolioSlots,
+  FolioThemePreference,
+  FolioUiOptions,
   FolioEntryType,
   FolioHeading,
 } from "./types";
