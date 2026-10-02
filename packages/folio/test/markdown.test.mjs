@@ -65,3 +65,17 @@ test("code and Mermaid source are safely escaped", () => {
   assert.equal(html.includes('data-mermaid-source='), true);
   assert.equal(html.includes("graph TD"), true);
 });
+
+
+test("renderer heading ids match extracted toc ids for h4, duplicates, and explicit ids", () => {
+  const html = renderFolioMarkdown(
+    '## Same\n\n## Same\n\n#### Fourth\n\n<h2 id="custom-anchor">Custom</h2>',
+  );
+
+  assert.match(html, /<h2 id="same">/);
+  assert.match(html, /<h2 id="same-2">/);
+  assert.match(html, /<h4 id="fourth">/);
+  assert.match(html, /<h2 id="custom-anchor">/);
+  assert.match(html, /href="#same-2"/);
+  assert.match(html, /href="#fourth"/);
+});
