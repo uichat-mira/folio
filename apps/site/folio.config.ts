@@ -8,7 +8,7 @@ export default defineFolioConfig({
   github: "https://github.com/uichat-mira/folio",
   navigation: [
     { label: "文档", href: "/docs/introduction" },
-    { label: "博客", href: "/blogs/why-miradocs" },
+    { label: "博客", href: "/blogs/why-folio" },
     { label: "项目", href: "/projects/folio" },
   ],
   footer: "Folio · Git-native, skill-ready, self-hostable.",
