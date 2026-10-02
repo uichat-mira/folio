@@ -12,9 +12,9 @@
   --site-surface-dark: #181715;
   --site-on-dark: #faf9f5;
   --site-on-dark-soft: #a09d96;
-  --site-display: Iowan Old Style, "Palatino Linotype", Palatino, Georgia, serif;
-  --site-sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --site-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --site-display: var(--folio-font-display);
+  --site-sans: var(--folio-font-sans);
+  --site-mono: var(--folio-font-mono);
 }
 
 html { scroll-behavior: smooth; }
