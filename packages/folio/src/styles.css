@@ -1,5 +1,8 @@
 :root {
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --folio-font-sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --folio-font-display: "Cormorant Garamond", Garamond, "Times New Roman", serif;
+  --folio-font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-family: var(--folio-font-sans);
   color: #2d2926;
   background: #f7f5f1;
   font-synthesis: none;
@@ -188,7 +191,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .folio-markdown code {
-  font-family: "SFMono-Regular", Consolas, monospace;
+  font-family: var(--folio-font-mono);
   font-size: 0.9em;
 }
 
