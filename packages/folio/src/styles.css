@@ -644,6 +644,198 @@ button, input { font: inherit; }
   margin: 80px auto;
 }
 
+
+/* Document reading UI extracted from the mature Mira consumer. */
+.folio-document-shell {
+  display: grid;
+  width: min(1120px, calc(100% - 56px));
+  grid-template-columns: minmax(0, 820px) 200px;
+  gap: 56px;
+  align-items: start;
+  margin: 0 auto;
+}
+
+.folio-document-shell .folio-doc-page {
+  width: 100%;
+  margin: 0;
+}
+
+.folio-doc-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.folio-mobile-toc-button {
+  display: none;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--folio-hairline);
+  border-radius: var(--folio-radius-md);
+  background: var(--folio-canvas);
+  color: var(--folio-muted);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.folio-mobile-toc {
+  display: none;
+  margin: 0 0 24px;
+  padding: 14px 16px;
+  border: 1px solid var(--folio-hairline);
+  border-radius: var(--folio-radius-lg);
+  background: var(--folio-surface-soft);
+}
+
+.folio-mobile-toc > strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--folio-muted-soft);
+  font-size: 11px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.folio-mobile-toc ul,
+.folio-toc ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.folio-mobile-toc li a,
+.folio-toc li a {
+  display: block;
+  padding: 4px 0 4px 10px;
+  border-left: 2px solid transparent;
+  color: var(--folio-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.folio-mobile-toc li.depth-3 a,
+.folio-toc li.depth-3 a {
+  padding-left: 18px;
+  font-size: 12px;
+}
+
+.folio-mobile-toc li a:hover,
+.folio-mobile-toc li a.active,
+.folio-toc li a:hover,
+.folio-toc li a.active {
+  border-left-color: var(--folio-primary);
+  color: var(--folio-ink);
+}
+
+.folio-toc {
+  position: sticky;
+  top: 88px;
+  align-self: start;
+  height: max-content;
+  padding-top: 64px;
+}
+
+.folio-toc h2 {
+  margin: 0 0 10px;
+  color: var(--folio-muted-soft);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.folio-page-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 56px;
+  padding-top: 24px;
+  border-top: 1px solid var(--folio-hairline);
+}
+
+.folio-page-nav > span {
+  flex: 1;
+}
+
+.folio-page-nav a {
+  max-width: 48%;
+  color: var(--folio-body);
+}
+
+.folio-page-nav a.next {
+  margin-left: auto;
+  text-align: right;
+}
+
+.folio-page-nav a > span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--folio-muted-soft);
+  font: 10.5px var(--folio-font-mono);
+  text-transform: uppercase;
+}
+
+.folio-page-nav a > strong {
+  display: block;
+  font: 600 17px var(--folio-font-display);
+}
+
+.folio-page-nav a:hover strong {
+  color: var(--folio-primary-active);
+}
+
+.folio-markdown h2,
+.folio-markdown h3 {
+  scroll-margin-top: 88px;
+}
+
+.folio-markdown figure {
+  margin: 32px 0;
+}
+
+.folio-markdown figure img,
+.folio-markdown img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--folio-radius-lg);
+}
+
+.folio-markdown figcaption {
+  margin-top: 10px;
+  color: var(--folio-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.folio-markdown hr {
+  margin: 40px 0;
+  border: 0;
+  border-top: 1px solid var(--folio-hairline);
+}
+
+@media (max-width: 1100px) {
+  .folio-document-shell {
+    width: min(820px, calc(100% - 40px));
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .folio-toc {
+    display: none;
+  }
+
+  .folio-mobile-toc-button {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .folio-mobile-toc {
+    display: block;
+  }
+}
+
 @media (max-width: 780px) {
   .folio-header { padding: 0 16px; gap: 12px; }
   .folio-desktop-nav,
