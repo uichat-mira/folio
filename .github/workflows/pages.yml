@@ -1,21 +1,21 @@
 name: Deploy GitHub Pages
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
-      - main
+      - dev
+      - test
+      - prod
+  push:
+    branches:
+      - prod
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -29,97 +29,34 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Build MiraDocs official site
+      - name: Build official site
         run: |
           npm ci --no-audit --no-fund
           npm run build
 
-      - name: Install pnpm for legacy preview
-        if: github.event_name == 'pull_request'
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11.5.2
-
-      - name: Checkout UIChat Mira Docs migration branch
-        if: github.event_name == 'pull_request'
-        run: |
-          git clone --depth 1 \
-            --branch codex/mira-docs-migration-20260725 \
-            https://github.com/dangjingtao/uichat-mira-docs.git \
-            legacy-preview-source
-
-      - name: Build legacy site under MiraDocs preview path
-        if: github.event_name == 'pull_request'
-        working-directory: legacy-preview-source
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm run build -- --mode github-pages --base /mira-docs/legacy-preview/
-
-      - name: Make legacy preview non-indexable
-        if: github.event_name == 'pull_request'
-        working-directory: legacy-preview-source
-        run: |
-          node --input-type=module <<'NODE'
-          import { readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
-          import { resolve } from "node:path";
-
-          const visit = (directory) => {
-            for (const name of readdirSync(directory)) {
-              const file = resolve(directory, name);
-              if (statSync(file).isDirectory()) {
-                visit(file);
-                continue;
-              }
-              if (!name.endsWith(".html")) continue;
-              const source = readFileSync(file, "utf8").replaceAll(
-                '<meta name="robots" content="index,follow">',
-                '<meta name="robots" content="noindex,nofollow">',
-              );
-              writeFileSync(file, source);
-            }
-          };
-          visit(resolve("dist"));
-          NODE
-
-      - name: Attach legacy preview to MiraDocs artifact
-        if: github.event_name == 'pull_request'
-        run: |
-          rm -rf apps/site/dist/legacy-preview
-          mkdir -p apps/site/dist/legacy-preview
-          cp -a legacy-preview-source/dist/. apps/site/dist/legacy-preview/
-
-      - uses: actions/configure-pages@v5
+      - name: Configure GitHub Pages
+        if: github.ref == 'refs/heads/prod' && github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
         with:
           enablement: true
 
-      - uses: actions/upload-pages-artifact@v4
+      - name: Upload production Pages artifact
+        if: github.ref == 'refs/heads/prod' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
         with:
           path: apps/site/dist
 
   deploy:
+    if: github.ref == 'refs/heads/prod' && github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
     runs-on: ubuntu-latest
     needs: build
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: Smoke-test legacy preview
-        if: github.event_name == 'pull_request'
-        env:
-          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
-        run: |
-          PREVIEW_URL="${PAGE_URL%/}/legacy-preview/"
-          for attempt in 1 2 3 4 5 6; do
-            if curl --fail --silent --show-error --location "$PREVIEW_URL" \
-              | grep --quiet 'id="root"'; then
-              echo "Legacy preview is reachable: $PREVIEW_URL"
-              exit 0
-            fi
-            sleep 10
-          done
-          echo "Legacy preview did not become reachable: $PREVIEW_URL" >&2
-          exit 1

@@ -4,11 +4,6 @@ on:
   release:
     types:
       - published
-  push:
-    branches:
-      - main
-    paths:
-      - packages/mira-docs/package.json
 
 permissions:
   contents: read
@@ -19,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v6
         with:
@@ -35,14 +32,19 @@ jobs:
       - name: Verify release package
         run: npm run release:check
 
-      - name: Resolve package version
+      - name: Verify release tag and production lineage
         id: package
         shell: bash
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
           VERSION=$(node -p "require('./packages/mira-docs/package.json').version")
-          if [ "${GITHUB_EVENT_NAME}" = "release" ]; then
-            test "${GITHUB_REF_NAME}" = "v${VERSION}"
-          fi
+          test "${RELEASE_TAG}" = "v${VERSION}"
+
+          git fetch origin prod --no-tags
+          TAG_COMMIT=$(git rev-list -n 1 "${RELEASE_TAG}")
+          git merge-base --is-ancestor "${TAG_COMMIT}" origin/prod
+
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Check whether this version already exists
@@ -50,8 +52,7 @@ jobs:
         shell: bash
         run: |
           VERSION="${{ steps.package.outputs.version }}"
-          if npm view "@uichat-mira/docs@${VERSION}" version \
-            --registry=https://registry.npmjs.org >/dev/null 2>&1; then
+          if npm view "@uichat-mira/docs@${VERSION}" version --registry=https://registry.npmjs.org >/dev/null 2>&1; then
             echo "published=true" >> "$GITHUB_OUTPUT"
             echo "@uichat-mira/docs@${VERSION} is already published; skipping npm publish."
           else
@@ -72,5 +73,5 @@ jobs:
             echo "The version already existed on npm, so publishing was safely skipped." >> "$GITHUB_STEP_SUMMARY"
           else
             echo "### @uichat-mira/docs@${VERSION}" >> "$GITHUB_STEP_SUMMARY"
-            echo "Published through npm Trusted Publishing (OIDC)." >> "$GITHUB_STEP_SUMMARY"
+            echo "Published from the prod release lineage through npm Trusted Publishing (OIDC)." >> "$GITHUB_STEP_SUMMARY"
           fi

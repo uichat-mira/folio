@@ -68,12 +68,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dangjingtao/mira-docs.git",
+    "url": "https://github.com/uichat-mira/folio.git",
     "directory": "packages/mira-docs"
   },
-  "homepage": "https://dangjingtao.github.io/mira-docs/",
+  "homepage": "https://uichat-mira.github.io/folio/",
   "bugs": {
-    "url": "https://github.com/dangjingtao/mira-docs/issues"
+    "url": "https://github.com/uichat-mira/folio/issues"
   },
   "publishConfig": {
     "access": "public",
