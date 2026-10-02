@@ -30,7 +30,7 @@ body {
 }
 
 .folio-header {
-  height: 72px;
+  height: 62px;
   padding: 0 clamp(20px, 4vw, 58px);
   border-bottom-color: var(--site-line);
   background: rgba(243, 239, 230, 0.88);
@@ -98,9 +98,9 @@ body {
 }
 
 .folio-sidebar {
-  top: 72px;
-  height: calc(100vh - 72px);
-  padding: 32px 22px;
+  top: 62px;
+  height: calc(100vh - 62px);
+  padding: 30px 24px;
   border-right-color: var(--site-line);
   background: rgba(247, 243, 234, 0.56);
 }
@@ -124,8 +124,8 @@ body {
 }
 
 .folio-doc-page {
-  width: min(800px, calc(100% - 64px));
-  padding: 88px 0 110px;
+  width: min(820px, calc(100% - 56px));
+  padding: 64px 0 104px;
 }
 
 .folio-eyebrow {
@@ -137,27 +137,32 @@ body {
 
 .folio-doc-page > h1 {
   max-width: 760px;
-  font-family: var(--site-serif);
-  font-size: clamp(42px, 6vw, 66px);
-  letter-spacing: -0.045em;
+  font-family: inherit;
+  font-size: clamp(36px, 4.6vw, 52px);
+  line-height: 1.12;
+  font-weight: 650;
+  letter-spacing: -0.035em;
 }
 
 .folio-lede {
-  max-width: 680px;
+  max-width: 700px;
   color: var(--site-muted);
-  font-size: 18px;
+  font-size: 17px;
+  line-height: 1.7;
 }
 
 .folio-markdown {
   color: #36312c;
   font-size: 16px;
+  line-height: 1.78;
 }
 
 .folio-markdown h2 {
   color: var(--site-ink);
-  font-family: var(--site-serif);
-  font-size: 31px;
-  letter-spacing: -0.03em;
+  font-family: inherit;
+  font-size: 26px;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
 }
 
 .folio-markdown h3 {
@@ -240,7 +245,7 @@ body {
 
 .showcase-hero {
   display: grid;
-  min-height: calc(100vh - 72px);
+  min-height: calc(100vh - 62px);
   grid-template-columns: minmax(0, 1.08fr) minmax(380px, 0.92fr);
   gap: clamp(48px, 7vw, 120px);
   align-items: center;

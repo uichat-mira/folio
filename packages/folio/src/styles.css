@@ -16,11 +16,11 @@ a { color: inherit; text-decoration: none; }
   position: sticky;
   top: 0;
   z-index: 10;
-  height: 64px;
+  height: 62px;
   display: flex;
   align-items: center;
-  gap: 32px;
-  padding: 0 28px;
+  gap: 28px;
+  padding: 0 24px;
   border-bottom: 1px solid #ded9d1;
   background: rgba(247, 245, 241, 0.94);
   backdrop-filter: blur(14px);
@@ -49,15 +49,15 @@ a { color: inherit; text-decoration: none; }
 
 .folio-layout {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
+  grid-template-columns: 272px minmax(0, 1fr);
 }
 
 .folio-sidebar {
   position: sticky;
-  top: 64px;
-  height: calc(100vh - 64px);
+  top: 62px;
+  height: calc(100vh - 62px);
   overflow: auto;
-  padding: 28px 22px;
+  padding: 30px 24px;
   border-right: 1px solid #ded9d1;
 }
 
@@ -89,9 +89,9 @@ a { color: inherit; text-decoration: none; }
 
 .folio-doc-page,
 .folio-home {
-  width: min(900px, calc(100% - 48px));
+  width: min(820px, calc(100% - 56px));
   margin: 0 auto;
-  padding: 76px 0 96px;
+  padding: 64px 0 96px;
 }
 
 .folio-eyebrow {
@@ -106,17 +106,18 @@ a { color: inherit; text-decoration: none; }
 .folio-doc-page > h1,
 .folio-hero h1 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(42px, 7vw, 72px);
-  line-height: 1.02;
-  font-weight: 500;
+  font-family: inherit;
+  font-size: clamp(36px, 4.6vw, 52px);
+  line-height: 1.12;
+  font-weight: 650;
+  letter-spacing: -0.035em;
 }
 
 .folio-lede,
 .folio-hero p {
   max-width: 720px;
   color: #6b625a;
-  font-size: 19px;
+  font-size: 17px;
   line-height: 1.7;
 }
 
@@ -159,21 +160,23 @@ a { color: inherit; text-decoration: none; }
 }
 
 .folio-markdown {
-  margin-top: 48px;
+  margin-top: 42px;
   color: #3d3834;
-  font-size: 17px;
-  line-height: 1.82;
+  font-size: 16px;
+  line-height: 1.78;
 }
 
 .folio-markdown h2 {
-  margin-top: 52px;
-  font-family: Georgia, serif;
-  font-size: 32px;
+  margin-top: 46px;
+  font-family: inherit;
+  font-size: 26px;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
 }
 
 .folio-markdown h3 {
-  margin-top: 34px;
-  font-size: 22px;
+  margin-top: 30px;
+  font-size: 20px;
 }
 
 .folio-markdown pre {
