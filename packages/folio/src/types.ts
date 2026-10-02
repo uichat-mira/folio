@@ -54,6 +54,8 @@ export type FolioUiOptions = {
   search?: boolean;
   theme?: boolean;
   share?: boolean;
+  toc?: boolean;
+  pagination?: boolean;
   defaultTheme?: FolioThemePreference;
 };
 

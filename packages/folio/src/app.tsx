@@ -17,6 +17,7 @@ import {
 import { normalizeBasePath } from "./config";
 import { FolioMarkdown } from "./markdown-react";
 import { searchFolioDocs } from "./search";
+import { getFolioDocNeighbors } from "./navigation";
 import type {
   FolioAppProps,
   FolioDoc,
@@ -132,22 +133,117 @@ function DocumentPage({
   doc,
   footer,
   share,
+  toc,
+  pagination,
+  previous,
+  next,
 }: {
   doc: FolioDoc;
   footer?: ReactNode;
   share: boolean;
+  toc: boolean;
+  pagination: boolean;
+  previous?: FolioDoc;
+  next?: FolioDoc;
 }) {
+  const [activeHeading, setActiveHeading] = useState("");
+  const [mobileTocOpen, setMobileTocOpen] = useState(false);
+  const hasToc = toc && doc.headings.length > 0;
+
+  useEffect(() => {
+    setMobileTocOpen(false);
+    if (!hasToc) {
+      setActiveHeading("");
+      return;
+    }
+    const nodes = doc.headings
+      .map((heading) => document.getElementById(heading.id))
+      .filter(Boolean) as HTMLElement[];
+    if (!nodes.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((left, right) => left.boundingClientRect.top - right.boundingClientRect.top);
+        if (visible[0]) setActiveHeading(visible[0].target.id);
+      },
+      { rootMargin: "-90px 0px -65% 0px", threshold: [0, 1] },
+    );
+    nodes.forEach((node) => observer.observe(node));
+    return () => observer.disconnect();
+  }, [doc.path, hasToc]);
+
+  const tocList = hasToc ? (
+    <ul>
+      {doc.headings.map((heading) => (
+        <li className={"depth-" + heading.depth} key={heading.id}>
+          <a
+            className={activeHeading === heading.id ? "active" : ""}
+            href={"#" + heading.id}
+            onClick={() => setMobileTocOpen(false)}
+          >
+            {heading.text}
+          </a>
+        </li>
+      ))}
+    </ul>
+  ) : null;
+
   return (
-    <main className="folio-doc-page">
-      <div className="folio-doc-toolbar">
-        <div className="folio-eyebrow">{doc.group}</div>
-        {share ? <ShareButton doc={doc} /> : null}
-      </div>
-      <h1>{doc.title}</h1>
-      {doc.description && <p className="folio-lede">{doc.description}</p>}
-      <FolioMarkdown source={doc.body} options={{ removeH1: true }} />
-      {footer}
-    </main>
+    <div className="folio-document-shell">
+      <main className="folio-doc-page">
+        <div className="folio-doc-toolbar">
+          <div className="folio-eyebrow">{doc.group}</div>
+          <div className="folio-doc-toolbar-actions">
+            {hasToc ? (
+              <button
+                type="button"
+                className="folio-mobile-toc-button"
+                aria-expanded={mobileTocOpen}
+                aria-controls="folio-mobile-toc"
+                onClick={() => setMobileTocOpen((value) => !value)}
+              >
+                页面导航
+              </button>
+            ) : null}
+            {share ? <ShareButton doc={doc} /> : null}
+          </div>
+        </div>
+        {mobileTocOpen && hasToc ? (
+          <aside className="folio-mobile-toc" id="folio-mobile-toc">
+            <strong>本页目录</strong>
+            {tocList}
+          </aside>
+        ) : null}
+        <h1>{doc.title}</h1>
+        {doc.description && <p className="folio-lede">{doc.description}</p>}
+        <FolioMarkdown source={doc.body} options={{ removeH1: true }} />
+        {footer}
+        {pagination && (previous || next) ? (
+          <nav className="folio-page-nav" aria-label="文档前后导航">
+            {previous ? (
+              <Link to={href(previous.path)}>
+                <span>上一篇</span>
+                <strong>{"← " + previous.title}</strong>
+              </Link>
+            ) : <span />}
+            {next ? (
+              <Link className="next" to={href(next.path)}>
+                <span>下一篇</span>
+                <strong>{next.title + " →"}</strong>
+              </Link>
+            ) : null}
+          </nav>
+        ) : null}
+      </main>
+      {hasToc ? (
+        <aside className="folio-toc">
+          <h2>本页目录</h2>
+          {tocList}
+        </aside>
+      ) : null}
+    </div>
   );
 }
 
@@ -302,6 +398,8 @@ function Shell({
   const searchEnabled = ui?.search !== false;
   const themeEnabled = ui?.theme !== false;
   const shareEnabled = ui?.share !== false;
+  const tocEnabled = ui?.toc !== false;
+  const paginationEnabled = ui?.pagination !== false;
   const themePreference = ui?.defaultTheme ?? "system";
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -426,13 +524,26 @@ function Shell({
               path="/"
               element={<Home docs={docs} title={config.title} description={config.description} custom={slots?.home} />}
             />
-            {docs.map((doc) => (
-              <Route
-                key={doc.path}
-                path={href(doc.path)}
-                element={<DocumentPage doc={doc} footer={slots?.articleFooter} share={shareEnabled} />}
-              />
-            ))}
+            {docs.map((doc) => {
+              const neighbors = getFolioDocNeighbors(docs, doc);
+              return (
+                <Route
+                  key={doc.path}
+                  path={href(doc.path)}
+                  element={
+                    <DocumentPage
+                      doc={doc}
+                      footer={slots?.articleFooter}
+                      share={shareEnabled}
+                      toc={tocEnabled}
+                      pagination={paginationEnabled}
+                      previous={neighbors.previous}
+                      next={neighbors.next}
+                    />
+                  }
+                />
+              );
+            })}
             <Route path="*" element={<NotFound searchEnabled={searchEnabled} onSearch={() => setSearchOpen(true)} />} />
           </Routes>
           <footer className="folio-footer">{config.footer ?? "Built with Folio."}</footer>
