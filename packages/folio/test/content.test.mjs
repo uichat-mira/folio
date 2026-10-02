@@ -59,3 +59,18 @@ test("plain markdown remains valid content", () => {
     body: "# Hello",
   });
 });
+
+
+test("explicit HTML heading ids and duplicate headings stay deterministic", () => {
+  assert.deepEqual(
+    extractHeadings(
+      '## Same\n## Same\n#### Fourth\n<h2 id="custom-anchor">Custom</h2>',
+    ),
+    [
+      { depth: 2, text: "Same", id: "same" },
+      { depth: 2, text: "Same", id: "same-2" },
+      { depth: 4, text: "Fourth", id: "fourth" },
+      { depth: 2, text: "Custom", id: "custom-anchor" },
+    ],
+  );
+});
