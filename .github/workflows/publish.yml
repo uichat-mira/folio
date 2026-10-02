@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           VERSION="${{ steps.package.outputs.version }}"
-          if npm view "@uichat-mira/docs@${VERSION}" version             --registry=https://registry.npmjs.org >/dev/null 2>&1; then
+          if npm view "@uichat-mira/docs@${VERSION}" version --registry=https://registry.npmjs.org >/dev/null 2>&1; then
             echo "published=true" >> "$GITHUB_OUTPUT"
             echo "@uichat-mira/docs@${VERSION} is already published; skipping npm publish."
           else
