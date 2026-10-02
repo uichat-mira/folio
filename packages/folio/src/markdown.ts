@@ -1,7 +1,7 @@
 import { marked } from "marked";
 import { slugify } from "./content";
 
-export type MiraMarkdownRenderOptions = {
+export type FolioMarkdownRenderOptions = {
   removeH1?: boolean;
   headingAnchors?: boolean;
 };
@@ -34,9 +34,9 @@ function removeMarkdownH1(source: string): string {
     .join("\n");
 }
 
-export function renderMiraMarkdown(
+export function renderFolioMarkdown(
   source: string,
-  options: MiraMarkdownRenderOptions = {},
+  options: FolioMarkdownRenderOptions = {},
 ): string {
   const htmlBlocks: string[] = [];
   const input = options.removeH1 ? removeMarkdownH1(source) : source;
@@ -47,7 +47,7 @@ export function renderMiraMarkdown(
     )
     .replace(/::: html\s*([\s\S]*?):::/g, (_, html: string) => {
       const index = htmlBlocks.push(html.trim()) - 1;
-      return `MIRA_HTML_BLOCK_${index}`;
+      return `FOLIO_HTML_BLOCK_${index}`;
     });
 
   const renderer = new marked.Renderer();
@@ -65,7 +65,7 @@ export function renderMiraMarkdown(
 
   let html = marked.parse(prepared, { gfm: true, renderer }) as string;
   htmlBlocks.forEach((block, index) => {
-    const placeholder = `MIRA_HTML_BLOCK_${index}`;
+    const placeholder = `FOLIO_HTML_BLOCK_${index}`;
     html = html.replace(new RegExp(`<p>${placeholder}<\\/p>|${placeholder}`, "g"), block);
   });
 

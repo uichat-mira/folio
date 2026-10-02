@@ -4,16 +4,23 @@ This repository is owned by the `uichat-mira` GitHub Organization and follows th
 
 ## Repository identity
 
-The repository is named **Folio**. During the current migration stage, the published runtime and package still use the **MiraDocs** identity and the package name `@uichat-mira/docs`.
+This repository is **Folio**.
 
-Do not rename the public package, package directory, exported API, or consumer-facing compatibility contracts merely because the repository has been renamed. A Folio brand/package migration is a separate work item and must be explicit.
+Canonical runtime/package identity:
+
+- repository: `uichat-mira/folio`
+- npm package: `@uichat-mira/folio`
+- reusable package directory: `packages/folio`
+- Vite virtual module: `virtual:folio/content`
+
+The predecessor package `@uichat-mira/docs` belongs to the pre-Folio MiraDocs line. Do not reintroduce compatibility aliases or old public API names into Folio unless a future task explicitly demonstrates a required consumer.
 
 ## Ownership boundaries
 
-- `packages/mira-docs` owns the reusable package currently published as `@uichat-mira/docs`.
-- `apps/site` owns the repository's official self-hosted site/demo.
+- `packages/folio` owns the reusable Folio package.
+- `apps/site` owns the official self-hosted Folio site/demo.
 - `schemas` owns repository-local content schemas.
-- `skill-backup` is a reference copy only. Canonical Organization Skills live in `uichat-mira/.github`.
+- Canonical Organization Skills live in `uichat-mira/.github`; this repository does not keep a second Skill copy.
 - Downstream consumer sites, including the Mira website, own their own branding and page composition.
 
 ## Verification
@@ -43,11 +50,11 @@ Production publication is allowed only from the `prod` lineage:
 
 - GitHub Pages deploys only from `prod`.
 - npm publication is triggered by a GitHub Release whose tag commit is contained in `prod`.
-- npm Trusted Publishing must identify the current repository, `uichat-mira/folio`, before the next real publish.
+- npm Trusted Publishing must identify `uichat-mira/folio` and `publish.yml`.
 
 ## Change boundaries
 
-- Preserve the current public API unless the active task explicitly changes it.
+- Preserve Folio's public API unless the active task explicitly changes it.
 - Do not silently weaken package verification, release checks, or static-site build checks to make CI green.
-- Remove migration-only compatibility paths once they no longer have a verified consumer.
+- Remove verified-obsolete migration paths instead of maintaining duplicate contracts.
 - Keep repository-specific rules here; do not copy Organization policy into this repository.

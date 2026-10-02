@@ -5,26 +5,26 @@ import {
 } from "node:fs";
 import { relative, resolve } from "node:path";
 import type { Plugin } from "vite";
-import { compareMiraDocs, parseMiraDoc } from "./content";
+import { compareFolioDocs, parseFolioDoc } from "./content";
 import {
-  writeMiraDocsStaticSite,
-  type MiraDocsStaticBuildOptions,
+  writeFolioStaticSite,
+  type FolioStaticBuildOptions,
 } from "./static";
-import type { MiraDoc, MiraDocsConfig } from "./types";
+import type { FolioDoc, FolioConfig } from "./types";
 
-const VIRTUAL_ID = "virtual:mira-docs/content";
+const VIRTUAL_ID = "virtual:folio/content";
 const RESOLVED_VIRTUAL_ID = `\0${VIRTUAL_ID}`;
 
-export type MiraDocsPluginOptions = {
+export type FolioPluginOptions = {
   contentDir?: string;
-  config: MiraDocsConfig;
-  staticRoutes?: boolean | MiraDocsStaticBuildOptions;
+  config: FolioConfig;
+  staticRoutes?: boolean | FolioStaticBuildOptions;
   exclude?: (sourcePath: string) => boolean;
-  route?: (sourcePath: string, doc: MiraDoc) => string;
+  route?: (sourcePath: string, doc: FolioDoc) => string;
 };
 
-export type MiraDocsContentManifest = {
-  docs: MiraDoc[];
+export type FolioContentManifest = {
+  docs: FolioDoc[];
   roots: string[];
 };
 
@@ -45,19 +45,19 @@ function normalizeRoute(path: string): string {
 
 function readManifest(
   contentDir: string,
-  options: MiraDocsPluginOptions,
-): MiraDocsContentManifest {
+  options: FolioPluginOptions,
+): FolioContentManifest {
   const docs = markdownFiles(contentDir)
     .map((file) => {
       const sourcePath = relative(contentDir, file).replace(/\\/g, "/");
       if (options.exclude?.(sourcePath)) return undefined;
 
-      const doc = parseMiraDoc(sourcePath, readFileSync(file, "utf8"));
+      const doc = parseFolioDoc(sourcePath, readFileSync(file, "utf8"));
       const path = options.route?.(sourcePath, doc) ?? doc.path;
       return { ...doc, path: normalizeRoute(path) };
     })
-    .filter((doc): doc is MiraDoc => Boolean(doc))
-    .sort(compareMiraDocs);
+    .filter((doc): doc is FolioDoc => Boolean(doc))
+    .sort(compareFolioDocs);
 
   const roots = [
     ...new Set(
@@ -70,14 +70,14 @@ function readManifest(
   return { docs, roots };
 }
 
-export function miraDocs(options: MiraDocsPluginOptions): Plugin {
+export function folio(options: FolioPluginOptions): Plugin {
   const root = process.cwd();
   const contentDir = resolve(root, options.contentDir ?? "content");
   let base = "/";
   let outDir = resolve(root, "dist");
 
   return {
-    name: "mira-docs",
+    name: "folio",
     enforce: "pre",
 
     configResolved(config) {
@@ -117,7 +117,7 @@ export function miraDocs(options: MiraDocsPluginOptions): Plugin {
       const manifest = readManifest(contentDir, options);
       const staticOptions =
         typeof options.staticRoutes === "object" ? options.staticRoutes : {};
-      writeMiraDocsStaticSite(
+      writeFolioStaticSite(
         {
           config: options.config,
           docs: manifest.docs,
@@ -132,17 +132,17 @@ export function miraDocs(options: MiraDocsPluginOptions): Plugin {
 }
 
 export type {
-  MiraDocsStaticBuildContext,
-  MiraDocsStaticBuildOptions,
-  MiraDocsStaticImageMetadata,
-  MiraDocsStaticRoute,
+  FolioStaticBuildContext,
+  FolioStaticBuildOptions,
+  FolioStaticImageMetadata,
+  FolioStaticRoute,
 } from "./static";
 export {
-  miraDocsAbsoluteAssetUrl,
-  miraDocsAbsoluteRouteUrl,
-  miraDocsEscapeHtml,
-  renderMiraDocsStaticHtml,
-  writeMiraDocsStaticSite,
+  folioAbsoluteAssetUrl,
+  folioAbsoluteRouteUrl,
+  folioEscapeHtml,
+  renderFolioStaticHtml,
+  writeFolioStaticSite,
 } from "./static";
 
-export const miraDocsVirtualModule = VIRTUAL_ID;
+export const folioVirtualModule = VIRTUAL_ID;

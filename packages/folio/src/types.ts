@@ -1,18 +1,18 @@
 import type { ReactNode } from "react";
 
-export type MiraEntryType = "doc" | "article" | "project" | "page" | string;
+export type FolioEntryType = "doc" | "article" | "project" | "page" | string;
 
-export type MiraHeading = {
+export type FolioHeading = {
   depth: number;
   text: string;
   id: string;
 };
 
-export type MiraDoc = {
+export type FolioDoc = {
   id: string;
   path: string;
   sourcePath: string;
-  type: MiraEntryType;
+  type: FolioEntryType;
   title: string;
   description: string;
   group: string;
@@ -22,35 +22,35 @@ export type MiraDoc = {
   status?: string;
   cover?: string;
   body: string;
-  headings: MiraHeading[];
+  headings: FolioHeading[];
   data: Record<string, unknown>;
 };
 
-export type MiraDocsNavigationItem = {
+export type FolioNavigationItem = {
   label: string;
   href: string;
 };
 
-export type MiraDocsConfig = {
+export type FolioConfig = {
   title: string;
   description: string;
   logo?: string;
   siteUrl?: string;
   base?: string;
-  navigation?: MiraDocsNavigationItem[];
+  navigation?: FolioNavigationItem[];
   footer?: string;
   github?: string;
 };
 
-export type MiraDocsSlots = {
+export type FolioSlots = {
   home?: ReactNode;
   headerActions?: ReactNode;
   articleFooter?: ReactNode;
 };
 
-export type MiraDocsAppProps = {
-  config: MiraDocsConfig;
-  docs: MiraDoc[];
+export type FolioAppProps = {
+  config: FolioConfig;
+  docs: FolioDoc[];
   basePath?: string;
-  slots?: MiraDocsSlots;
+  slots?: FolioSlots;
 };

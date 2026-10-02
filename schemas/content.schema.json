@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mira-docs.dev/schemas/content.schema.json",
-  "title": "MiraDocs Content Frontmatter",
+  "$id": "https://uichat-mira.github.io/folio/schemas/content.schema.json",
+  "title": "Folio Content Frontmatter",
   "type": "object",
   "required": ["title"],
   "properties": {

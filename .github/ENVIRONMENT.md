@@ -24,26 +24,25 @@ There are no dedicated hosted `dev` or `test` sites. Instead:
 - Pull requests into `dev`, `test`, and `prod` run validation.
 - Only `prod` may deploy the GitHub Pages production artifact.
 
-This is the repository-specific replacement for lower-environment site deployment until dedicated preview environments have a demonstrated need.
-
 ## npm release semantics
 
-The package currently remains `@uichat-mira/docs`.
+The canonical package is `@uichat-mira/folio`.
 
+- Folio begins its npm version line at `0.1.0`.
 - Publishing is triggered by a published GitHub Release.
 - The release tag must match the package version.
 - The tagged commit must be contained in `prod`.
-- Publishing uses npm Trusted Publishing / GitHub OIDC.
-- The npm Trusted Publisher must be configured for `uichat-mira/folio` and the current publish workflow before the next real release.
+- Publishing uses npm Trusted Publishing / GitHub OIDC after the package bootstrap is complete.
+- The Trusted Publisher must target GitHub owner `uichat-mira`, repository `folio`, and workflow `publish.yml`.
 
-A future rename to a Folio npm package is a separate product/package migration and must not be mixed into ordinary repository governance work.
+The predecessor `@uichat-mira/docs` package is not published from this repository after the Folio migration.
 
-## Migration / rollback anchor
+## Brand-migration rollback anchor
 
-Organization alignment starts from imported source commit:
+The last organization-aligned pre-Folio source commit is:
 
 ```text
-6ea6dd4023ed3fad32f1eb309ce7a4e75c1cbdb4
+b75b1ebeb9800788041162436486159359b17794
 ```
 
-That commit corresponds to the MiraDocs `0.1.1` source state and remains the first-round rollback anchor while the new Organization branch model is being established.
+Use that commit as the rollback anchor for the Folio brand/package migration.

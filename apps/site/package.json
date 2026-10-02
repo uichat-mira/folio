@@ -1,5 +1,5 @@
 {
-  "name": "@uichat-mira/docs-site",
+  "name": "@uichat-mira/folio-site",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@uichat-mira/docs": "0.1.1",
+    "@uichat-mira/folio": "0.1.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.18.1"
