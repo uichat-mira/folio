@@ -1,5 +1,5 @@
 import { marked } from "marked";
-import { slugify } from "./content";
+import { createHeadingIdGenerator } from "./content";
 
 export type FolioMarkdownRenderOptions = {
   removeH1?: boolean;
@@ -111,18 +111,21 @@ export function renderFolioMarkdown(
 
   if (options.headingAnchors === false) return html;
 
+  const nextId = createHeadingIdGenerator();
   return html.replace(
-    /<h([23])((?:\s[^>]*)?)>([\s\S]*?)<\/h\1>/g,
+    /<h([2-4])((?:\s[^>]*)?)>([\s\S]*?)<\/h\1>/g,
     (_, level: string, attributes: string, text: string) => {
-      if (/\bid\s*=\s*["'][^"']+["']/i.test(attributes)) {
-        return "<h" + level + attributes + ">" + text + "</h" + level + ">";
-      }
-      const id = slugify(text);
-      return id
-        ? '<h' + level + attributes + ' id="' + id + '">' + text +
-            '<a class="md-anchor" href="#' + id + '" aria-label="链接到 ' +
-            escapeHtml(text) + '">#</a></h' + level + ">"
-        : "<h" + level + attributes + ">" + text + "</h" + level + ">";
+      const explicitId = attributes.match(/\bid\s*=\s*["']([^"']+)["']/i)?.[1];
+      const id = nextId(text, explicitId);
+      const nextAttributes = explicitId
+        ? attributes.replace(
+            /\bid\s*=\s*["'][^"']+["']/i,
+            'id="' + id + '"',
+          )
+        : attributes + ' id="' + id + '"';
+      return "<h" + level + nextAttributes + ">" + text +
+        '<a class="md-anchor" href="#' + id + '" aria-label="链接到 ' +
+        escapeHtml(text) + '">#</a></h' + level + ">";
     },
   );
 }
