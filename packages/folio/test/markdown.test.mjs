@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { renderFolioMarkdown } from "../dist/index.js";
 
-test("compatibility renderer preserves custom HTML and removes duplicate H1", () => {
+test("renderer preserves custom HTML and removes duplicate H1", () => {
   const html = renderFolioMarkdown(
     `# Duplicate title
 
@@ -20,9 +20,38 @@ test("compatibility renderer preserves custom HTML and removes duplicate H1", ()
   assert.equal(html.includes("Duplicate title"), false);
   assert.equal(html.includes("::: html"), false);
   assert.equal(html.includes('class="claude-visual"'), true);
-  assert.equal(html.includes('class="md-custom-block"'), true);
+  assert.equal(html.includes('md-custom-block--tip'), true);
   assert.equal(html.includes('<h2 id="section">'), true);
   assert.equal(html.includes('href="#section"'), true);
+});
+
+test("renderer supports design-system callout variants", () => {
+  const html = renderFolioMarkdown(
+    `::: info Information :::
+
+::: warning Watch this :::
+
+::: danger Stop here :::`,
+  );
+
+  assert.match(html, /md-custom-block--info/);
+  assert.match(html, /md-custom-block--warning/);
+  assert.match(html, /md-custom-block--danger/);
+  assert.match(html, />信息</);
+  assert.match(html, />注意</);
+  assert.match(html, />警告</);
+});
+
+test("GFM tables render with semantic table markup", () => {
+  const html = renderFolioMarkdown(
+    `| Name | State |
+| --- | --- |
+| Folio | active |`,
+  );
+
+  assert.match(html, /<table>/);
+  assert.match(html, /<th>Name<\/th>/);
+  assert.match(html, /<td>active<\/td>/);
 });
 
 test("code and Mermaid source are safely escaped", () => {
@@ -32,6 +61,7 @@ test("code and Mermaid source are safely escaped", () => {
 
   assert.equal(html.includes("<script>alert(1)</script>"), false);
   assert.equal(html.includes("&lt;script&gt;alert(1)&lt;/script&gt;"), true);
-  assert.equal(html.includes('class="markdown-mermaid-source"'), true);
+  assert.equal(html.includes('class="markdown-mermaid"'), true);
+  assert.equal(html.includes('data-mermaid-source='), true);
   assert.equal(html.includes("graph TD"), true);
 });

@@ -48,9 +48,19 @@ export type FolioSlots = {
   articleFooter?: ReactNode;
 };
 
+export type FolioThemePreference = "light" | "dark" | "system";
+
+export type FolioUiOptions = {
+  search?: boolean;
+  theme?: boolean;
+  share?: boolean;
+  defaultTheme?: FolioThemePreference;
+};
+
 export type FolioAppProps = {
   config: FolioConfig;
   docs: FolioDoc[];
   basePath?: string;
   slots?: FolioSlots;
+  ui?: FolioUiOptions;
 };
