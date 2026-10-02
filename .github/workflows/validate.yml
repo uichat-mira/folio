@@ -2,9 +2,17 @@ name: Validate
 
 on:
   pull_request:
+    branches:
+      - dev
+      - test
+      - prod
   push:
-    branches-ignore:
-      - main
+    branches:
+      - "feat/**"
+      - dev
+      - test
+      - prod
+  workflow_dispatch:
 
 jobs:
   validate:
@@ -27,5 +35,5 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --no-audit --no-fund
-      - run: npm run build -w @uichat-mira/docs
-      - run: npm run pack:verify -w @uichat-mira/docs
+      - run: npm run build -w @uichat-mira/folio
+      - run: npm run pack:verify -w @uichat-mira/folio

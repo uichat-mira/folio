@@ -1,6 +1,6 @@
 {
-  "name": "@uichat-mira/docs",
-  "version": "0.1.1",
+  "name": "@uichat-mira/folio",
+  "version": "0.1.0",
   "description": "Git-native documentation, publishing, and project portal runtime",
   "keywords": [
     "documentation",
@@ -68,12 +68,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dangjingtao/mira-docs.git",
-    "directory": "packages/mira-docs"
+    "url": "https://github.com/uichat-mira/folio.git",
+    "directory": "packages/folio"
   },
-  "homepage": "https://dangjingtao.github.io/mira-docs/",
+  "homepage": "https://uichat-mira.github.io/folio/",
   "bugs": {
-    "url": "https://github.com/dangjingtao/mira-docs/issues"
+    "url": "https://github.com/uichat-mira/folio/issues"
   },
   "publishConfig": {
     "access": "public",

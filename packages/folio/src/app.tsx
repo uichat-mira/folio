@@ -9,14 +9,14 @@ import {
   useLocation,
 } from "react-router-dom";
 import { normalizeBasePath } from "./config";
-import type { MiraDoc, MiraDocsAppProps } from "./types";
+import type { FolioDoc, FolioAppProps } from "./types";
 
 function href(path: string): string {
   return path === "/" ? "/" : path.replace(/\/$/, "");
 }
 
-function groupDocs(docs: MiraDoc[]): Array<[string, MiraDoc[]]> {
-  const groups = new Map<string, MiraDoc[]>();
+function groupDocs(docs: FolioDoc[]): Array<[string, FolioDoc[]]> {
+  const groups = new Map<string, FolioDoc[]>();
   for (const doc of docs) {
     const current = groups.get(doc.group) ?? [];
     current.push(doc);
@@ -25,11 +25,11 @@ function groupDocs(docs: MiraDoc[]): Array<[string, MiraDoc[]]> {
   return [...groups.entries()];
 }
 
-function Markdown({ doc }: { doc: MiraDoc }) {
+function Markdown({ doc }: { doc: FolioDoc }) {
   const html = useMemo(() => marked.parse(doc.body) as string, [doc.body]);
   return (
     <article
-      className="mira-markdown"
+      className="folio-markdown"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
@@ -39,14 +39,14 @@ function DocumentPage({
   doc,
   footer,
 }: {
-  doc: MiraDoc;
+  doc: FolioDoc;
   footer?: ReactNode;
 }) {
   return (
-    <main className="mira-doc-page">
-      <div className="mira-eyebrow">{doc.group}</div>
+    <main className="folio-doc-page">
+      <div className="folio-eyebrow">{doc.group}</div>
       <h1>{doc.title}</h1>
-      {doc.description && <p className="mira-lede">{doc.description}</p>}
+      {doc.description && <p className="folio-lede">{doc.description}</p>}
       <Markdown doc={doc} />
       {footer}
     </main>
@@ -59,7 +59,7 @@ function Home({
   description,
   custom,
 }: {
-  docs: MiraDoc[];
+  docs: FolioDoc[];
   title: string;
   description: string;
   custom?: ReactNode;
@@ -68,15 +68,15 @@ function Home({
   const featured = docs.filter((doc) => doc.path !== "/").slice(0, 8);
 
   return (
-    <main className="mira-home">
-      <section className="mira-hero">
-        <div className="mira-eyebrow">MIRADOCS</div>
+    <main className="folio-home">
+      <section className="folio-hero">
+        <div className="folio-eyebrow">FOLIO</div>
         <h1>{title}</h1>
         <p>{description}</p>
       </section>
-      <section className="mira-card-grid">
+      <section className="folio-card-grid">
         {featured.map((doc) => (
-          <Link key={doc.path} to={href(doc.path)} className="mira-card">
+          <Link key={doc.path} to={href(doc.path)} className="folio-card">
             <span>{doc.group}</span>
             <h2>{doc.title}</h2>
             <p>{doc.description}</p>
@@ -91,7 +91,7 @@ function Shell({
   config,
   docs,
   slots,
-}: Omit<MiraDocsAppProps, "basePath">) {
+}: Omit<FolioAppProps, "basePath">) {
   const location = useLocation();
   const groups = groupDocs(docs);
   const current = docs.find(
@@ -99,9 +99,9 @@ function Shell({
   );
 
   return (
-    <div className="mira-shell">
-      <header className="mira-header">
-        <Link to="/" className="mira-brand">
+    <div className="folio-shell">
+      <header className="folio-header">
+        <Link to="/" className="folio-brand">
           {config.logo && <img src={config.logo} alt="" />}
           <span>{config.title}</span>
         </Link>
@@ -116,11 +116,11 @@ function Shell({
             </Link>
           ))}
         </nav>
-        <div className="mira-header-actions">{slots?.headerActions}</div>
+        <div className="folio-header-actions">{slots?.headerActions}</div>
       </header>
 
-      <div className="mira-layout">
-        <aside className="mira-sidebar">
+      <div className="folio-layout">
+        <aside className="folio-sidebar">
           {groups.map(([group, items]) => (
             <section key={group}>
               <h2>{group}</h2>
@@ -137,7 +137,7 @@ function Shell({
           ))}
         </aside>
 
-        <div className="mira-content">
+        <div className="folio-content">
           <Routes>
             <Route
               path="/"
@@ -164,8 +164,8 @@ function Shell({
             ))}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-          <footer className="mira-footer">
-            {config.footer ?? "Built with MiraDocs."}
+          <footer className="folio-footer">
+            {config.footer ?? "Built with Folio."}
           </footer>
         </div>
       </div>
@@ -173,12 +173,12 @@ function Shell({
   );
 }
 
-export function MiraDocsApp({
+export function FolioApp({
   config,
   docs,
   basePath = "/",
   slots,
-}: MiraDocsAppProps) {
+}: FolioAppProps) {
   const basename = normalizeBasePath(basePath);
 
   return (

@@ -10,16 +10,16 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import test from "node:test";
 import {
-  renderMiraDocsStaticHtml,
-  writeMiraDocsStaticSite,
+  renderFolioStaticHtml,
+  writeFolioStaticSite,
 } from "../dist/vite.js";
 
 const template = `<!doctype html><html><head><title>Old</title><meta name="description" content="old"></head><body><div id="root"></div></body></html>`;
 
-function context(outDir = "/tmp/mira-docs") {
+function context(outDir = "/tmp/folio") {
   return {
     config: {
-      title: "MiraDocs",
+      title: "Folio",
       description: "Docs runtime",
       siteUrl: "https://example.com",
     },
@@ -31,7 +31,7 @@ function context(outDir = "/tmp/mira-docs") {
 }
 
 test("static HTML includes canonical, social metadata, JSON-LD, and body", () => {
-  const html = renderMiraDocsStaticHtml(
+  const html = renderFolioStaticHtml(
     template,
     {
       path: "/intro",
@@ -54,7 +54,7 @@ test("static HTML includes canonical, social metadata, JSON-LD, and body", () =>
     },
   );
 
-  assert.match(html, /<title>Introduction · MiraDocs<\/title>/);
+  assert.match(html, /<title>Introduction · Folio<\/title>/);
   assert.match(html, /https:\/\/example\.com\/guide\/intro\//);
   assert.match(html, /https:\/\/example\.com\/guide\/logo\.png/);
   assert.match(html, /property="og:locale" content="zh_CN"/);
@@ -64,12 +64,12 @@ test("static HTML includes canonical, social metadata, JSON-LD, and body", () =>
 });
 
 test("static site writer creates routes, 404, sitemap, and robots", () => {
-  const outDir = mkdtempSync(resolve(tmpdir(), "mira-docs-static-"));
+  const outDir = mkdtempSync(resolve(tmpdir(), "folio-static-"));
   try {
     mkdirSync(outDir, { recursive: true });
     writeFileSync(resolve(outDir, "index.html"), template, "utf8");
 
-    const result = writeMiraDocsStaticSite(context(outDir), {
+    const result = writeFolioStaticSite(context(outDir), {
       routes: () => [
         {
           path: "/",

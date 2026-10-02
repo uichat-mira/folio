@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   extractHeadings,
   parseFrontmatter,
-  parseMiraDoc,
+  parseFolioDoc,
   sourcePathToRoute,
 } from "../dist/index.js";
 
@@ -16,10 +16,10 @@ test("source paths become stable routes", () => {
 });
 
 test("frontmatter and custom fields are preserved", () => {
-  const doc = parseMiraDoc(
-    "projects/mira-docs.md",
+  const doc = parseFolioDoc(
+    "projects/folio.md",
     `---
-title: MiraDocs
+title: Folio
 type: project
 status: active
 owners:

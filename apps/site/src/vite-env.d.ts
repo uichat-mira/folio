@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
-declare module "virtual:mira-docs/content" {
-  import type { MiraDoc } from "@uichat-mira/docs";
-  const docs: MiraDoc[];
+declare module "virtual:folio/content" {
+  import type { FolioDoc } from "@uichat-mira/folio";
+  const docs: FolioDoc[];
   export default docs;
 }

@@ -1,6 +1,6 @@
 # GitHub Pages deployment
 
-The official site is deployed by `.github/workflows/pages.yml`.
+The official Folio site is deployed by `.github/workflows/pages.yml`.
 
 The Vite base path is derived from `GITHUB_REPOSITORY`:
 
@@ -8,4 +8,6 @@ The Vite base path is derived from `GITHUB_REPOSITORY`:
 - `<owner>.github.io`: `/`
 - local development: `/`
 
-During production builds, the MiraDocs Vite plugin also emits route-level `index.html` files, `404.html`, and `sitemap.xml`.
+During production builds, the Folio Vite plugin also emits route-level `index.html` files, `404.html`, `sitemap.xml`, and `robots.txt`.
+
+Only the `prod` branch may deploy the production Pages artifact.

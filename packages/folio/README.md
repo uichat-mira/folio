@@ -1,26 +1,26 @@
-# @uichat-mira/docs
+# @uichat-mira/folio
 
-MiraDocs is a Git-native documentation, publishing, and project portal runtime for Vite and React.
+Folio is a Git-native documentation, publishing, and project portal runtime for Vite and React.
 
 It keeps Markdown, navigation, routing, SEO, and static deployment inside a stable package contract while allowing every consumer to keep its own UI, branding, and product-specific behavior.
 
 ## Install
 
 ```bash
-npm install @uichat-mira/docs
+npm install @uichat-mira/folio
 ```
 
-The current public release is `0.1.1`. The UIChat Mira documentation site is the first production consumer and installs the package from npm.
+The first Folio package release is `0.1.0`. The UIChat Mira documentation site is the first production consumer and installs the package from npm.
 
 ## Vite integration
 
 ```ts
 import { defineConfig } from "vite";
-import { miraDocs } from "@uichat-mira/docs/vite";
+import { folio } from "@uichat-mira/folio/vite";
 
 export default defineConfig({
   plugins: [
-    miraDocs({
+    folio({
       contentDir: "content",
       config: {
         title: "My docs",
@@ -33,27 +33,27 @@ export default defineConfig({
 });
 ```
 
-The plugin discovers Markdown, parses YAML Frontmatter, and exposes content through `virtual:mira-docs/content`. It can also generate route-level HTML, canonical and social metadata, JSON-LD, `404.html`, `sitemap.xml`, and `robots.txt`.
+The plugin discovers Markdown, parses YAML Frontmatter, and exposes content through `virtual:folio/content`. It can also generate route-level HTML, canonical and social metadata, JSON-LD, `404.html`, `sitemap.xml`, and `robots.txt`.
 
 ## React runtime
 
 Use the default lightweight runtime:
 
 ```tsx
-import { MiraDocsApp } from "@uichat-mira/docs";
-import "@uichat-mira/docs/styles.css";
+import { FolioApp } from "@uichat-mira/folio";
+import "@uichat-mira/folio/styles.css";
 ```
 
 Or consume the content model and virtual manifest from an existing React application while preserving its current pages and visual system.
 
 ## Markdown compatibility rendering
 
-Consumers with custom page shells can reuse MiraDocs' compatibility renderer instead of maintaining a second static Markdown pipeline:
+Consumers with custom page shells can reuse Folio' compatibility renderer instead of maintaining a second static Markdown pipeline:
 
 ```ts
-import { renderMiraMarkdown } from "@uichat-mira/docs";
+import { renderFolioMarkdown } from "@uichat-mira/folio";
 
-const html = renderMiraMarkdown(source, {
+const html = renderFolioMarkdown(source, {
   removeH1: true,
 });
 ```
@@ -74,10 +74,10 @@ Consumer applications remain responsible for branding, page composition, custom 
 
 ## Exports
 
-- `@uichat-mira/docs` — content model, React runtime, Markdown rendering, and configuration helpers
-- `@uichat-mira/docs/vite` — Markdown discovery, virtual manifests, and static output
-- `@uichat-mira/docs/styles.css` — default lightweight styles
+- `@uichat-mira/folio` — content model, React runtime, Markdown rendering, and configuration helpers
+- `@uichat-mira/folio/vite` — Markdown discovery, virtual manifests, and static output
+- `@uichat-mira/folio/styles.css` — default lightweight styles
 
 ## Project status
 
-MiraDocs is in its early public-contract stage. Version `0.1.1` adds the shared Markdown compatibility renderer used by the production pilot site and remains protected by npm Trusted Publishing.
+Folio starts a new package line at `0.1.0`; the predecessor `@uichat-mira/docs` package remains available only for existing consumers during migration.
