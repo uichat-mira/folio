@@ -1,5 +1,5 @@
 {
-  "name": "mira-docs-workspace",
+  "name": "folio-workspace",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -8,12 +8,12 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run build -w @uichat-mira/docs && npm run build -w @uichat-mira/docs-site",
-    "dev": "npm run build -w @uichat-mira/docs && npm run dev -w @uichat-mira/docs-site",
-    "typecheck": "npm run typecheck -w @uichat-mira/docs && npm run build -w @uichat-mira/docs && npm run typecheck -w @uichat-mira/docs-site",
-    "validate": "npm run typecheck && npm run test -w @uichat-mira/docs && npm run build -w @uichat-mira/docs-site",
-    "test": "npm run build -w @uichat-mira/docs && npm run test -w @uichat-mira/docs",
-    "release:check": "npm run validate && npm run pack:verify -w @uichat-mira/docs"
+    "build": "npm run build -w @uichat-mira/folio && npm run build -w @uichat-mira/folio-site",
+    "dev": "npm run build -w @uichat-mira/folio && npm run dev -w @uichat-mira/folio-site",
+    "typecheck": "npm run typecheck -w @uichat-mira/folio && npm run build -w @uichat-mira/folio && npm run typecheck -w @uichat-mira/folio-site",
+    "validate": "npm run typecheck && npm run test -w @uichat-mira/folio && npm run build -w @uichat-mira/folio-site",
+    "test": "npm run build -w @uichat-mira/folio && npm run test -w @uichat-mira/folio",
+    "release:check": "npm run validate && npm run pack:verify -w @uichat-mira/folio"
   },
   "engines": {
     "node": ">=20"

@@ -1,6 +1,6 @@
 {
-  "name": "@uichat-mira/docs",
-  "version": "0.1.1",
+  "name": "@uichat-mira/folio",
+  "version": "0.1.0",
   "description": "Git-native documentation, publishing, and project portal runtime",
   "keywords": [
     "documentation",
@@ -69,7 +69,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/uichat-mira/folio.git",
-    "directory": "packages/mira-docs"
+    "directory": "packages/folio"
   },
   "homepage": "https://uichat-mira.github.io/folio/",
   "bugs": {

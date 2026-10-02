@@ -1,5 +1,5 @@
 import { parse as parseYaml } from "yaml";
-import type { MiraDoc, MiraHeading } from "./types";
+import type { FolioDoc, FolioHeading } from "./types";
 
 const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/;
 
@@ -79,7 +79,7 @@ function cleanHeadingText(value: string): string {
   return value.replace(/<[^>]+>/g, "").replace(/[*_`]/g, "").trim();
 }
 
-export function extractHeadings(body: string): MiraHeading[] {
+export function extractHeadings(body: string): FolioHeading[] {
   const candidates: HeadingCandidate[] = [];
 
   for (const match of body.matchAll(/^(#{2,4})\s+(.+)$/gm)) {
@@ -136,7 +136,7 @@ export function sourcePathToRoute(sourcePath: string): string {
   return `/${withoutIndex}`.replace(/\/{2,}/g, "/") || "/";
 }
 
-export function parseMiraDoc(sourcePath: string, raw: string): MiraDoc {
+export function parseFolioDoc(sourcePath: string, raw: string): FolioDoc {
   const { data, body } = parseFrontmatter(raw);
   const path = text(data.path) || sourcePathToRoute(sourcePath);
   const root = sourcePath.split(/[\\/]/)[0];
@@ -169,7 +169,7 @@ export function parseMiraDoc(sourcePath: string, raw: string): MiraDoc {
   };
 }
 
-export function compareMiraDocs(a: MiraDoc, b: MiraDoc): number {
+export function compareFolioDocs(a: FolioDoc, b: FolioDoc): number {
   if (a.type === "article" && b.type === "article") {
     return (
       String(b.date ?? "").localeCompare(String(a.date ?? "")) ||

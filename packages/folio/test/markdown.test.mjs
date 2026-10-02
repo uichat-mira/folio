@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { renderMiraMarkdown } from "../dist/index.js";
+import { renderFolioMarkdown } from "../dist/index.js";
 
 test("compatibility renderer preserves custom HTML and removes duplicate H1", () => {
-  const html = renderMiraMarkdown(
+  const html = renderFolioMarkdown(
     `# Duplicate title
 
 ::: html
@@ -26,7 +26,7 @@ test("compatibility renderer preserves custom HTML and removes duplicate H1", ()
 });
 
 test("code and Mermaid source are safely escaped", () => {
-  const html = renderMiraMarkdown(
+  const html = renderFolioMarkdown(
     "```html\n<script>alert(1)</script>\n```\n\n```mermaid\ngraph TD\nA-->B\n```",
   );
 

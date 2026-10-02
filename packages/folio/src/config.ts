@@ -1,6 +1,6 @@
-import type { MiraDocsConfig } from "./types";
+import type { FolioConfig } from "./types";
 
-export function defineMiraDocsConfig<T extends MiraDocsConfig>(config: T): T {
+export function defineFolioConfig<T extends FolioConfig>(config: T): T {
   return config;
 }
 
