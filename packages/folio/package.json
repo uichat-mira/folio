@@ -44,7 +44,9 @@
   },
   "dependencies": {
     "marked": "^15.0.12",
-    "yaml": "^2.8.1"
+    "yaml": "^2.8.1",
+    "highlight.js": "^11.11.1",
+    "mermaid": "^11.16.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",
