@@ -1,4 +1,5 @@
 import { marked } from "marked";
+import hljs from "highlight.js/lib/common";
 import { slugify } from "./content";
 
 export type FolioMarkdownRenderOptions = {
@@ -126,11 +127,15 @@ export function renderFolioMarkdown(
         escaped +
         "</code></pre></div>";
     }
+    const highlighted =
+      language && hljs.getLanguage(language)
+        ? hljs.highlight(text, { language, ignoreIllegals: true }).value
+        : hljs.highlightAuto(text).value;
     const languageClass =
       language && /^[a-z0-9-]+$/.test(language)
-        ? ' class="language-' + language + '"'
+        ? " language-" + language
         : "";
-    return "<pre><code" + languageClass + ">" + escapeHtml(text) + "</code></pre>";
+    return '<pre><code class="hljs' + languageClass + '">' + highlighted + "</code></pre>";
   };
 
   let html = marked.parse(prepared, { gfm: true, renderer }) as string;
