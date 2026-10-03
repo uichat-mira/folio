@@ -59,3 +59,21 @@ test("plain markdown remains valid content", () => {
     body: "# Hello",
   });
 });
+
+
+test("collection and section frontmatter are part of the document contract", () => {
+  const doc = parseFolioDoc(
+    "docs/runtime.md",
+    `---
+title: Runtime
+collection: Core docs
+section: Runtime
+group: Guide
+---
+## Shell
+`,
+  );
+
+  assert.equal(doc.collection, "Core docs");
+  assert.equal(doc.section, "Runtime");
+});

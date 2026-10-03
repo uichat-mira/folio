@@ -116,3 +116,63 @@ test("static site writer creates routes, 404, sitemap, and robots", () => {
     rmSync(outDir, { recursive: true, force: true });
   }
 });
+
+
+test("default document routes use the documentation structure shell", () => {
+  const outDir = mkdtempSync(resolve(tmpdir(), "folio-doc-shell-"));
+  try {
+    mkdirSync(outDir, { recursive: true });
+    writeFileSync(resolve(outDir, "index.html"), template, "utf8");
+
+    const docs = [
+      {
+        id: "intro",
+        path: "/docs/intro",
+        sourcePath: "docs/intro.md",
+        type: "doc",
+        title: "Introduction",
+        description: "Start here",
+        group: "Guide",
+        collection: "Core",
+        section: "Getting started",
+        order: 1,
+        tags: [],
+        body: "## First section\nHello",
+        headings: [{ depth: 2, text: "First section", id: "first-section" }],
+        data: {},
+      },
+      {
+        id: "runtime",
+        path: "/docs/runtime",
+        sourcePath: "docs/runtime.md",
+        type: "doc",
+        title: "Runtime",
+        description: "Runtime docs",
+        group: "Guide",
+        collection: "Core",
+        section: "Runtime",
+        order: 2,
+        tags: [],
+        body: "## Runtime section\nBody",
+        headings: [{ depth: 2, text: "Runtime section", id: "runtime-section" }],
+        data: {},
+      },
+    ];
+
+    writeFolioStaticSite({ ...context(outDir), docs });
+
+    const html = readFileSync(
+      resolve(outDir, "docs/intro/index.html"),
+      "utf8",
+    );
+
+    assert.match(html, /class="folio-docs-shell"/);
+    assert.match(html, /class="folio-docnav"/);
+    assert.match(html, /class="folio-toc"/);
+    assert.match(html, /class="folio-page-nav"/);
+    assert.match(html, /href="\/guide\/docs\/runtime\/"/);
+    assert.match(html, /href="#first-section"/);
+  } finally {
+    rmSync(outDir, { recursive: true, force: true });
+  }
+});

@@ -158,6 +158,8 @@ export function parseFolioDoc(sourcePath: string, raw: string): FolioDoc {
           ? "项目"
           : "文档",
     ),
+    collection: data.collection ? text(data.collection) : undefined,
+    section: data.section ? text(data.section) : undefined,
     order: Number(data.order ?? 99),
     date: data.date ? text(data.date) : undefined,
     tags: list(data.tags),

@@ -168,13 +168,18 @@ export function renderFolioMarkdown(
 
   if (options.headingAnchors === false) return html;
 
+  const headingIds = new Map<string, number>();
+
   return html.replace(
     /<h([23])((?:\s[^>]*)?)>([\s\S]*?)<\/h\1>/g,
     (_, level: string, attributes: string, text: string) => {
       if (/\bid\s*=\s*["'][^"']+["']/i.test(attributes)) {
         return "<h" + level + attributes + ">" + text + "</h" + level + ">";
       }
-      const id = slugify(text);
+      const base = slugify(text);
+      const count = headingIds.get(base) ?? 0;
+      headingIds.set(base, count + 1);
+      const id = count === 0 ? base : base + "-" + (count + 1);
       return id
         ? '<h' + level + attributes + ' id="' + id + '">' + text +
             '<a class="md-anchor" href="#' + id + '" aria-label="链接到 ' +
