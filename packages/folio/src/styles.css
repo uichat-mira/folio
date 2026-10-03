@@ -76,13 +76,19 @@ button, input { font: inherit; }
   top: 0;
   z-index: 40;
   height: 64px;
-  display: flex;
-  align-items: center;
-  gap: 28px;
-  padding: 0 24px;
   border-bottom: 1px solid var(--folio-hairline);
   background: color-mix(in srgb, var(--folio-canvas) 94%, transparent);
   backdrop-filter: blur(14px);
+}
+
+.folio-header__wrap {
+  display: flex;
+  width: min(1440px, 100%);
+  height: 64px;
+  margin: 0 auto;
+  align-items: center;
+  gap: 28px;
+  padding: 0 24px;
 }
 
 .folio-brand {
@@ -125,13 +131,21 @@ button, input { font: inherit; }
   background: color-mix(in srgb, var(--folio-primary) 9%, transparent);
 }
 
-.folio-header-actions { margin-left: auto; min-width: 0; }
+.folio-header-actions {
+  display: flex;
+  min-width: 0;
+  margin-left: auto;
+  align-items: center;
+  gap: 8px;
+}
 
-.folio-runtime-actions {
+.folio-consumer-header-actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+
+.folio-mobile-doc-share { display: none; }
 
 .folio-search-trigger,
 .folio-icon-button,
@@ -180,6 +194,11 @@ button, input { font: inherit; }
 .folio-share-button:hover {
   border-color: var(--folio-primary);
   color: var(--folio-ink);
+}
+
+.folio-github-link svg {
+  fill: currentColor;
+  stroke: none;
 }
 
 .folio-icon-button,
@@ -231,10 +250,23 @@ button, input { font: inherit; }
   border-top: 1px solid var(--folio-hairline);
 }
 
-.folio-mobile-panel button {
+.folio-mobile-panel button,
+.folio-mobile-panel > div > a {
+  display: inline-flex;
   min-height: 36px;
   flex: 1;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--folio-hairline);
   border-radius: var(--folio-radius-md);
+  background: var(--folio-canvas);
+  color: var(--folio-muted);
+  font-size: 13px;
+}
+
+.folio-mobile-panel nav a.active {
+  color: var(--folio-primary-active);
+  font-weight: 600;
 }
 
 .folio-layout {
@@ -645,12 +677,13 @@ button, input { font: inherit; }
 }
 
 @media (max-width: 780px) {
-  .folio-header { padding: 0 16px; gap: 12px; }
+  .folio-header__wrap { padding: 0 16px; gap: 12px; }
   .folio-desktop-nav,
   .folio-search-trigger,
-  .folio-runtime-actions > .folio-icon-button,
-  .folio-runtime-actions > .folio-header-action,
-  .folio-runtime-actions > a { display: none; }
+  .folio-theme-toggle,
+  .folio-github-link,
+  .folio-consumer-header-actions { display: none; }
+  .folio-mobile-doc-share { display: block; }
   .folio-mobile-menu-button { display: inline-flex; }
   .folio-mobile-panel { display: block; }
   .folio-layout { display: block; }
