@@ -16,6 +16,7 @@ import {
 } from "react-router-dom";
 import { normalizeBasePath } from "./config";
 import { FolioHeader } from "./header";
+import { SearchIcon } from "./icons";
 import { FolioShareButton } from "./share";
 import { FolioMarkdown } from "./markdown-react";
 import { searchFolioDocs } from "./search";
