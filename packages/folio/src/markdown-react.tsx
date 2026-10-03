@@ -30,8 +30,7 @@ export function FolioMarkdown({
   );
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    if (!containerRef.current) return;
 
     let cancelled = false;
     let rendering = false;
@@ -42,6 +41,9 @@ export function FolioMarkdown({
         queued = true;
         return;
       }
+
+      const container = containerRef.current;
+      if (!container) return;
 
       const nodes = Array.from(
         container.querySelectorAll<HTMLElement>("[data-mermaid]"),
