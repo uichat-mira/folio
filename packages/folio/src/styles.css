@@ -755,3 +755,304 @@ button, input { font: inherit; }
   height: auto;
   margin: 0 auto;
 }
+
+
+/* Documentation structure shell */
+.folio-docs-runtime {
+  min-width: 0;
+}
+
+.folio-docs-shell {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr) 210px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.folio-docnav {
+  position: sticky;
+  top: 64px;
+  align-self: start;
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+  padding: 32px 20px 48px;
+  border-right: 1px solid var(--folio-hairline);
+}
+
+.folio-docnav__collection,
+.folio-docnav h2,
+.folio-toc h2 {
+  margin: 0 0 8px;
+  color: var(--folio-muted-soft);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.folio-docnav__collection {
+  color: var(--folio-primary-active);
+  font-family: var(--folio-font-mono);
+}
+
+.folio-docnav section + section {
+  margin-top: 24px;
+}
+
+.folio-docnav ul,
+.folio-toc ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.folio-docnav li a {
+  display: block;
+  padding: 6px 10px;
+  border-radius: var(--folio-radius-sm);
+  color: var(--folio-body);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.folio-docnav li a:hover {
+  background: var(--folio-surface-soft);
+  color: var(--folio-ink);
+}
+
+.folio-docnav li a.active {
+  background: var(--folio-surface-card);
+  color: var(--folio-ink);
+  font-weight: 600;
+}
+
+.folio-doc-main {
+  min-width: 0;
+  padding: 48px 48px 96px;
+}
+
+.folio-doc-main > h1 {
+  margin: 0;
+  font-family: var(--folio-font-display);
+  font-size: clamp(36px, 4.4vw, 44px);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -.025em;
+}
+
+.folio-doc-main .folio-markdown h2,
+.folio-doc-main .folio-markdown h3 {
+  scroll-margin-top: 84px;
+}
+
+.folio-toc {
+  position: sticky;
+  top: 88px;
+  align-self: start;
+  height: max-content;
+  padding: 32px 20px;
+}
+
+.folio-toc li a {
+  display: block;
+  padding: 4px 0 4px 10px;
+  border-left: 2px solid transparent;
+  color: var(--folio-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.folio-toc li a:hover,
+.folio-toc li a.active {
+  border-left-color: var(--folio-primary);
+  color: var(--folio-ink);
+}
+
+.folio-toc-depth-3 a {
+  padding-left: 18px !important;
+  font-size: 12.5px !important;
+}
+
+.folio-toc-depth-4 a {
+  padding-left: 26px !important;
+  font-size: 12px !important;
+}
+
+.folio-page-nav {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 56px;
+  padding-top: 24px;
+  border-top: 1px solid var(--folio-hairline);
+}
+
+.folio-page-nav > a {
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--folio-radius-md);
+}
+
+.folio-page-nav > a:hover {
+  border-color: var(--folio-hairline);
+  background: var(--folio-surface-soft);
+}
+
+.folio-page-nav span {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--folio-muted-soft);
+  font: 10.5px var(--folio-font-mono);
+  text-transform: uppercase;
+}
+
+.folio-page-nav strong {
+  display: block;
+  overflow: hidden;
+  color: var(--folio-ink);
+  font: 600 17px/1.35 var(--folio-font-display);
+  text-overflow: ellipsis;
+}
+
+.folio-page-nav__next {
+  text-align: right;
+}
+
+.folio-docs-mobile-bar,
+.folio-docs-overlay,
+.folio-mobile-toc {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .folio-docs-shell {
+    grid-template-columns: 230px minmax(0, 1fr);
+  }
+
+  .folio-docs-shell > .folio-toc {
+    display: none;
+  }
+}
+
+@media (max-width: 780px) {
+  .folio-docs-mobile-bar {
+    position: sticky;
+    top: 64px;
+    z-index: 34;
+    display: flex;
+    height: 42px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--folio-hairline);
+    background: color-mix(in srgb, var(--folio-canvas) 96%, transparent);
+    backdrop-filter: blur(10px);
+  }
+
+  .folio-docs-mobile-bar button {
+    border: 0;
+    background: transparent;
+    color: var(--folio-muted);
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .folio-docs-mobile-bar button:disabled {
+    opacity: .4;
+    cursor: default;
+  }
+
+  .folio-docs-shell {
+    display: block;
+  }
+
+  .folio-docs-shell > .folio-docnav {
+    display: none;
+  }
+
+  .folio-doc-main {
+    width: min(100% - 32px, 760px);
+    margin: 0 auto;
+    padding: 36px 0 64px;
+  }
+
+  .folio-docs-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: block;
+    background: rgba(15, 14, 13, .42);
+    backdrop-filter: blur(4px);
+  }
+
+  .folio-docs-drawer {
+    width: min(86vw, 340px);
+    height: 100%;
+    overflow-y: auto;
+    background: var(--folio-canvas);
+    box-shadow: 14px 0 38px rgba(0, 0, 0, .16);
+  }
+
+  .folio-docs-drawer__head,
+  .folio-mobile-toc__head {
+    display: flex;
+    height: 48px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--folio-hairline);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .folio-docs-drawer__head button,
+  .folio-mobile-toc__head button {
+    border: 0;
+    background: transparent;
+    color: var(--folio-muted);
+    cursor: pointer;
+  }
+
+  .folio-docs-drawer .folio-docnav {
+    position: static;
+    display: block;
+    height: auto;
+    padding: 22px 18px 36px;
+    border-right: 0;
+  }
+
+  .folio-mobile-toc {
+    position: fixed;
+    top: 106px;
+    right: 12px;
+    left: 12px;
+    z-index: 80;
+    display: block;
+    overflow: hidden;
+    border: 1px solid var(--folio-hairline);
+    border-radius: var(--folio-radius-lg);
+    background: var(--folio-canvas);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, .14);
+  }
+
+  .folio-mobile-toc .folio-toc {
+    position: static;
+    display: block;
+    max-height: 58vh;
+    overflow-y: auto;
+    padding: 16px 18px 20px;
+  }
+
+  .folio-page-nav {
+    gap: 8px;
+  }
+
+  .folio-page-nav > a {
+    padding: 10px;
+  }
+
+  .folio-page-nav strong {
+    font-size: 15px;
+  }
+}
