@@ -45,12 +45,17 @@ export function buildFolioDocStructure(docs: FolioDoc[]): FolioDocStructure {
     const cTitle = collectionTitle(doc);
     const sTitle = sectionTitle(doc);
     const sId = slugify(sTitle) || "docs";
-    const collection =
-      collections.get(cId) ?? {
-        title: cTitle,
-        docs: [],
-        sections: new Map(),
-      };
+    const collection:
+      | {
+          title: string;
+          docs: FolioDoc[];
+          sections: Map<string, { title: string; docs: FolioDoc[] }>;
+        }
+      = collections.get(cId) ?? {
+          title: cTitle,
+          docs: [],
+          sections: new Map(),
+        };
     collection.docs.push(doc);
 
     const section =
