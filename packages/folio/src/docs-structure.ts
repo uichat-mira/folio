@@ -56,7 +56,7 @@ export function buildFolioDocStructure(docs: FolioDoc[]): FolioDocStructure {
     const section =
       collection.sections.get(sId) ?? {
         title: sTitle,
-        docs: [],
+        docs: [] as FolioDoc[],
       };
     section.docs.push(doc);
     collection.sections.set(sId, section);
