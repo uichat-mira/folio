@@ -666,3 +666,59 @@ button, input { font: inherit; }
   .folio-search-overlay { padding-top: 18px; }
   .folio-search-footer { display: none; }
 }
+
+
+/* Syntax highlighting and diagram enhancement */
+.folio-markdown pre code.hljs {
+  display: block;
+  padding: 0;
+  background: transparent;
+  color: #e8e4dc;
+}
+
+.folio-markdown pre .hljs-comment,
+.folio-markdown pre .hljs-quote {
+  color: #7f8b86;
+  font-style: italic;
+}
+
+.folio-markdown pre .hljs-keyword,
+.folio-markdown pre .hljs-selector-tag,
+.folio-markdown pre .hljs-literal {
+  color: #72d8c1;
+}
+
+.folio-markdown pre .hljs-title,
+.folio-markdown pre .hljs-title.function_,
+.folio-markdown pre .hljs-section {
+  color: #f0b58a;
+}
+
+.folio-markdown pre .hljs-string,
+.folio-markdown pre .hljs-attr,
+.folio-markdown pre .hljs-template-variable {
+  color: #e7c27d;
+}
+
+.folio-markdown pre .hljs-number,
+.folio-markdown pre .hljs-variable,
+.folio-markdown pre .hljs-symbol {
+  color: #9fc4f2;
+}
+
+.folio-markdown pre .hljs-built_in,
+.folio-markdown pre .hljs-type {
+  color: #d8a8e8;
+}
+
+.folio-markdown pre .hljs-meta,
+.folio-markdown pre .hljs-punctuation {
+  color: #a9aaa5;
+}
+
+.markdown-mermaid svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}

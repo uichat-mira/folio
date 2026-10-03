@@ -60,7 +60,12 @@ test("code and Mermaid source are safely escaped", () => {
   );
 
   assert.equal(html.includes("<script>alert(1)</script>"), false);
-  assert.equal(html.includes("&lt;script&gt;alert(1)&lt;/script&gt;"), true);
+  assert.equal(html.includes("<script>alert(1)</script>"), false);
+  assert.equal(html.includes('class="hljs language-html"'), true);
+  assert.match(html, /&lt;.*script.*&gt;/s);
+  assert.match(html, />alert<\/span>/);
+  assert.match(html, /hljs-number">1<\/span>/);
+  assert.match(html, /hljs-tag|hljs-name/);
   assert.equal(html.includes('class="markdown-mermaid"'), true);
   assert.equal(html.includes('data-mermaid-source='), true);
   assert.equal(html.includes("graph TD"), true);
