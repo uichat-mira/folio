@@ -327,6 +327,7 @@ function Shell({
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
+        setMobileOpen(false);
         setSearchOpen(true);
       }
       if (event.key === "Escape") setSearchOpen(false);
@@ -334,6 +335,11 @@ function Shell({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [searchEnabled]);
+
+  function openSearch() {
+    setMobileOpen(false);
+    setSearchOpen(true);
+  }
 
   function toggleTheme() {
     setTheme((value) => value === "dark" ? "light" : "dark");
@@ -360,7 +366,7 @@ function Shell({
         <div className="folio-header-actions">
           <div className="folio-runtime-actions">
             {searchEnabled ? (
-              <button type="button" className="folio-search-trigger" onClick={() => setSearchOpen(true)}>
+              <button type="button" className="folio-search-trigger" onClick={openSearch}>
                 <SearchIcon /><span>搜索</span><kbd>⌘K</kbd>
               </button>
             ) : null}
@@ -395,7 +401,7 @@ function Shell({
               ))}
             </nav>
             <div>
-              {searchEnabled ? <button type="button" onClick={() => setSearchOpen(true)}>搜索</button> : null}
+              {searchEnabled ? <button type="button" onClick={openSearch}>搜索</button> : null}
               {themeEnabled ? <button type="button" onClick={toggleTheme}>{theme === "dark" ? "浅色模式" : "暗色模式"}</button> : null}
             </div>
           </div>
@@ -433,7 +439,7 @@ function Shell({
                 element={<DocumentPage doc={doc} footer={slots?.articleFooter} share={shareEnabled} />}
               />
             ))}
-            <Route path="*" element={<NotFound searchEnabled={searchEnabled} onSearch={() => setSearchOpen(true)} />} />
+            <Route path="*" element={<NotFound searchEnabled={searchEnabled} onSearch={openSearch} />} />
           </Routes>
           <footer className="folio-footer">{config.footer ?? "Built with Folio."}</footer>
         </div>

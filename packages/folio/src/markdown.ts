@@ -42,6 +42,53 @@ function removeMarkdownH1(source: string): string {
     .join("\n");
 }
 
+function protectFencedCode(source: string): {
+  source: string;
+  blocks: string[];
+} {
+  const output: string[] = [];
+  const blocks: string[] = [];
+  let current: string[] | undefined;
+  let fenceCharacter = "";
+  let fenceLength = 0;
+
+  for (const line of source.split(/\r?\n/)) {
+    if (!current) {
+      const opening = line.match(/^\s*(`{3,}|~{3,})/);
+      if (!opening) {
+        output.push(line);
+        continue;
+      }
+
+      current = [line];
+      fenceCharacter = opening[1][0];
+      fenceLength = opening[1].length;
+      continue;
+    }
+
+    current.push(line);
+    const closing = line.match(/^\s*(`+|~+)\s*$/);
+    if (
+      closing &&
+      closing[1][0] === fenceCharacter &&
+      closing[1].length >= fenceLength
+    ) {
+      const index = blocks.push(current.join("\n")) - 1;
+      output.push("FOLIO_FENCE_BLOCK_" + index);
+      current = undefined;
+      fenceCharacter = "";
+      fenceLength = 0;
+    }
+  }
+
+  if (current) {
+    const index = blocks.push(current.join("\n")) - 1;
+    output.push("FOLIO_FENCE_BLOCK_" + index);
+  }
+
+  return { source: output.join("\n"), blocks };
+}
+
 export function renderFolioMarkdown(
   source: string,
   options: FolioMarkdownRenderOptions = {},
@@ -49,8 +96,9 @@ export function renderFolioMarkdown(
   const htmlBlocks: string[] = [];
   const callouts: Array<{ kind: string; body: string }> = [];
   const input = options.removeH1 ? removeMarkdownH1(source) : source;
+  const fenced = protectFencedCode(input);
 
-  const prepared = input
+  let prepared = fenced.source
     .replace(/::: html\s*([\s\S]*?):::/g, (_, html: string) => {
       const index = htmlBlocks.push(html.trim()) - 1;
       return "FOLIO_HTML_BLOCK_" + index;
@@ -62,6 +110,10 @@ export function renderFolioMarkdown(
         return "FOLIO_CALLOUT_BLOCK_" + index;
       },
     );
+
+  fenced.blocks.forEach((block, index) => {
+    prepared = prepared.replace("FOLIO_FENCE_BLOCK_" + index, block);
+  });
 
   const renderer = new marked.Renderer();
   renderer.code = ({ text, lang }) => {
