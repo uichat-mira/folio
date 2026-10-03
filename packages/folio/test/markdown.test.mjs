@@ -65,3 +65,16 @@ test("code and Mermaid source are safely escaped", () => {
   assert.equal(html.includes('data-mermaid-source='), true);
   assert.equal(html.includes("graph TD"), true);
 });
+
+
+test("callout syntax inside fenced code remains verbatim", () => {
+  const html = renderFolioMarkdown(
+    "```md\n::: warning This is documentation, not a live callout :::\n```",
+  );
+
+  assert.equal(html.includes("md-custom-block--warning"), false);
+  assert.match(
+    html,
+    /::: warning This is documentation, not a live callout :::/,
+  );
+});
