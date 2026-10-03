@@ -5,7 +5,8 @@ import {
   writeFileSync,
 } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { marked } from "marked";
+import { findFolioDocCollection, getFolioDocNeighbors } from "./docs-structure";
+import { renderFolioMarkdown } from "./markdown";
 import type { FolioDoc, FolioConfig } from "./types";
 
 export type FolioStaticRoute = {
@@ -228,6 +229,73 @@ export function renderFolioStaticHtml(
     .replace(rootPlaceholder, `<div id="root">${route.body}</div>`);
 }
 
+
+function staticRouteHref(
+  context: FolioStaticBuildContext,
+  path: string,
+): string {
+  const route = normalizeRoute(path);
+  const base = normalizeBase(context.base);
+  return `${base}${route === "/" ? "/" : `${route}/`}`;
+}
+
+function renderStaticDocNav(
+  context: FolioStaticBuildContext,
+  doc: FolioDoc,
+): string {
+  const collection = findFolioDocCollection(context.docs, doc);
+  if (!collection) return "";
+
+  const sections = collection.sections
+    .map(
+      (section) =>
+        `<section><h2>${folioEscapeHtml(section.title)}</h2><ul>${section.docs
+          .map(
+            (item) =>
+              `<li><a${item.path === doc.path ? ' class="active" aria-current="page"' : ""} href="${folioEscapeHtml(staticRouteHref(context, item.path))}">${folioEscapeHtml(item.title)}</a></li>`,
+          )
+          .join("")}</ul></section>`,
+    )
+    .join("");
+
+  return `<nav class="folio-docnav" aria-label="文档目录"><div class="folio-docnav__collection">${folioEscapeHtml(collection.title)}</div>${sections}</nav>`;
+}
+
+function renderStaticToc(doc: FolioDoc): string {
+  if (!doc.headings.length) return "";
+
+  return `<aside class="folio-toc" aria-label="本页目录"><h2>本页目录</h2><ul>${doc.headings
+    .map(
+      (heading) =>
+        `<li class="folio-toc-depth-${heading.depth}"><a href="#${folioEscapeHtml(heading.id)}">${folioEscapeHtml(heading.text)}</a></li>`,
+    )
+    .join("")}</ul></aside>`;
+}
+
+function renderStaticPager(
+  context: FolioStaticBuildContext,
+  doc: FolioDoc,
+): string {
+  const { previous, next } = getFolioDocNeighbors(context.docs, doc);
+  if (!previous && !next) return "";
+
+  const previousHtml = previous
+    ? `<a class="folio-page-nav__previous" href="${folioEscapeHtml(staticRouteHref(context, previous.path))}"><span>上一篇</span><strong>${folioEscapeHtml(previous.title)}</strong></a>`
+    : "<span></span>";
+  const nextHtml = next
+    ? `<a class="folio-page-nav__next" href="${folioEscapeHtml(staticRouteHref(context, next.path))}"><span>下一篇</span><strong>${folioEscapeHtml(next.title)}</strong></a>`
+    : "<span></span>";
+
+  return `<nav class="folio-page-nav" aria-label="文档分页">${previousHtml}${nextHtml}</nav>`;
+}
+
+function renderStaticDocShell(
+  context: FolioStaticBuildContext,
+  doc: FolioDoc,
+): string {
+  return `<div class="folio-docs-runtime folio-docs-runtime--static"><div class="folio-docs-shell">${renderStaticDocNav(context, doc)}<main class="folio-doc-main"><div class="folio-doc-toolbar"><div class="folio-eyebrow">${folioEscapeHtml(doc.group)}</div></div><h1>${folioEscapeHtml(doc.title)}</h1>${doc.description ? `<p class="folio-lede">${folioEscapeHtml(doc.description)}</p>` : ""}<article class="folio-markdown">${renderFolioMarkdown(doc.body, { removeH1: true })}</article>${renderStaticPager(context, doc)}</main>${renderStaticToc(doc)}</div></div>`;
+}
+
 function defaultRoutes(context: FolioStaticBuildContext): FolioStaticRoute[] {
   return [
     {
@@ -241,7 +309,10 @@ function defaultRoutes(context: FolioStaticBuildContext): FolioStaticRoute[] {
       path: doc.path,
       title: doc.title,
       description: doc.description || context.config.description,
-      body: `<main class="folio-prerender"><p>${folioEscapeHtml(doc.group)}</p><h1>${folioEscapeHtml(doc.title)}</h1><p>${folioEscapeHtml(doc.description)}</p><article>${marked.parse(doc.body) as string}</article></main>`,
+      body:
+        doc.type === "doc"
+          ? renderStaticDocShell(context, doc)
+          : `<main class="folio-prerender"><p>${folioEscapeHtml(doc.group)}</p><h1>${folioEscapeHtml(doc.title)}</h1><p>${folioEscapeHtml(doc.description)}</p><article class="folio-markdown">${renderFolioMarkdown(doc.body, { removeH1: true })}</article></main>`,
       type: doc.type === "article" ? "article" : "website",
       image: doc.cover,
       doc,

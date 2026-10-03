@@ -16,6 +16,8 @@ export type FolioDoc = {
   title: string;
   description: string;
   group: string;
+  collection?: string;
+  section?: string;
   order: number;
   date?: string;
   tags: string[];
@@ -54,6 +56,7 @@ export type FolioUiOptions = {
   search?: boolean;
   theme?: boolean;
   share?: boolean;
+  docsShell?: boolean;
   defaultTheme?: FolioThemePreference;
 };
 

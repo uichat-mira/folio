@@ -16,6 +16,7 @@ import {
 } from "react-router-dom";
 import { normalizeBasePath } from "./config";
 import { FolioHeader } from "./header";
+import { FolioDocsShell } from "./docs-shell";
 import { SearchIcon } from "./icons";
 import { FolioShareButton } from "./share";
 import { FolioMarkdown } from "./markdown-react";
@@ -29,16 +30,6 @@ import type {
 
 function href(path: string): string {
   return path === "/" ? "/" : path.replace(/\/$/, "");
-}
-
-function groupDocs(docs: FolioDoc[]): Array<[string, FolioDoc[]]> {
-  const groups = new Map<string, FolioDoc[]>();
-  for (const doc of docs) {
-    const current = groups.get(doc.group) ?? [];
-    current.push(doc);
-    groups.set(doc.group, current);
-  }
-  return [...groups.entries()];
 }
 
 function resolveInitialTheme(preference: FolioThemePreference): "light" | "dark" {
@@ -213,7 +204,6 @@ function Shell({
   ui,
 }: Omit<FolioAppProps, "basePath">) {
   const location = useLocation();
-  const groups = groupDocs(docs);
   const current = docs.find((doc) => href(doc.path) === href(location.pathname));
   const navigation = config.navigation ?? [
     { label: "文档", href: "/docs" },
@@ -223,6 +213,7 @@ function Shell({
   const searchEnabled = ui?.search !== false;
   const themeEnabled = ui?.theme !== false;
   const shareEnabled = ui?.share !== false;
+  const docsShellEnabled = ui?.docsShell !== false;
   const themePreference = ui?.defaultTheme ?? "system";
   const [searchOpen, setSearchOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">(
@@ -277,41 +268,54 @@ function Shell({
         actions={slots?.headerActions}
       />
 
-      <div className="folio-layout">
-        <aside className="folio-sidebar">
-          {groups.map(([group, items]) => (
-            <section key={group}>
-              <h2>{group}</h2>
-              {items.map((doc) => (
-                <Link
-                  key={doc.path}
-                  className={current?.path === doc.path ? "active" : ""}
-                  to={href(doc.path)}
-                >
-                  {doc.title}
-                </Link>
-              ))}
-            </section>
-          ))}
-        </aside>
-
-        <div className="folio-content">
-          <Routes>
-            <Route
-              path="/"
-              element={<Home docs={docs} title={config.title} description={config.description} custom={slots?.home} />}
-            />
-            {docs.map((doc) => (
-              <Route
-                key={doc.path}
-                path={href(doc.path)}
-                element={<DocumentPage doc={doc} footer={slots?.articleFooter} share={shareEnabled} />}
+      <div className="folio-content">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Home
+                docs={docs}
+                title={config.title}
+                description={config.description}
+                custom={slots?.home}
               />
-            ))}
-            <Route path="*" element={<NotFound searchEnabled={searchEnabled} onSearch={openSearch} />} />
-          </Routes>
-          <footer className="folio-footer">{config.footer ?? "Built with Folio."}</footer>
-        </div>
+            }
+          />
+          {docs.map((doc) => (
+            <Route
+              key={doc.path}
+              path={href(doc.path)}
+              element={
+                docsShellEnabled && doc.type === "doc" ? (
+                  <FolioDocsShell
+                    doc={doc}
+                    docs={docs}
+                    footer={slots?.articleFooter}
+                    share={shareEnabled}
+                  />
+                ) : (
+                  <DocumentPage
+                    doc={doc}
+                    footer={slots?.articleFooter}
+                    share={shareEnabled}
+                  />
+                )
+              }
+            />
+          ))}
+          <Route
+            path="*"
+            element={
+              <NotFound
+                searchEnabled={searchEnabled}
+                onSearch={openSearch}
+              />
+            }
+          />
+        </Routes>
+        <footer className="folio-footer">
+          {config.footer ?? "Built with Folio."}
+        </footer>
       </div>
 
       {searchOpen ? <SearchOverlay docs={docs} onClose={() => setSearchOpen(false)} /> : null}
