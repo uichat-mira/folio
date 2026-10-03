@@ -15,6 +15,9 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { normalizeBasePath } from "./config";
+import { FolioHeader } from "./header";
+import { SearchIcon } from "./icons";
+import { FolioShareButton } from "./share";
 import { FolioMarkdown } from "./markdown-react";
 import { searchFolioDocs } from "./search";
 import type {
@@ -46,88 +49,6 @@ function resolveInitialTheme(preference: FolioThemePreference): "light" | "dark"
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-function SearchIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="11" cy="11" r="6.5" />
-      <path d="m16 16 4 4" />
-    </svg>
-  );
-}
-
-function ThemeIcon({ dark }: { dark: boolean }) {
-  return dark ? (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" />
-    </svg>
-  ) : (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M20 15.4A8.5 8.5 0 0 1 8.6 4 8.5 8.5 0 1 0 20 15.4Z" />
-    </svg>
-  );
-}
-
-function MenuIcon({ open }: { open: boolean }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      {open ? (
-        <>
-          <path d="M6 6l12 12" />
-          <path d="M18 6 6 18" />
-        </>
-      ) : (
-        <>
-          <path d="M4 7h16" />
-          <path d="M4 12h16" />
-          <path d="M4 17h16" />
-        </>
-      )}
-    </svg>
-  );
-}
-
-function ShareButton({ doc }: { doc: FolioDoc }) {
-  const [label, setLabel] = useState("分享");
-
-  async function share() {
-    const url = window.location.href;
-    try {
-      if (typeof navigator.share === "function") {
-        await navigator.share({
-          title: doc.title,
-          text: doc.description || doc.title,
-          url,
-        });
-        setLabel("已分享");
-      } else if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(url);
-        setLabel("链接已复制");
-      } else {
-        const input = document.createElement("textarea");
-        input.value = url;
-        input.style.position = "fixed";
-        input.style.opacity = "0";
-        document.body.appendChild(input);
-        input.select();
-        document.execCommand("copy");
-        input.remove();
-        setLabel("链接已复制");
-      }
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") return;
-      setLabel("分享失败");
-    }
-    window.setTimeout(() => setLabel("分享"), 1800);
-  }
-
-  return (
-    <button type="button" className="folio-share-button" onClick={() => void share()}>
-      {label}
-    </button>
-  );
-}
-
 function DocumentPage({
   doc,
   footer,
@@ -141,7 +62,7 @@ function DocumentPage({
     <main className="folio-doc-page">
       <div className="folio-doc-toolbar">
         <div className="folio-eyebrow">{doc.group}</div>
-        {share ? <ShareButton doc={doc} /> : null}
+        {share ? <FolioShareButton title={doc.title} text={doc.description} /> : null}
       </div>
       <h1>{doc.title}</h1>
       {doc.description && <p className="folio-lede">{doc.description}</p>}
@@ -304,13 +225,11 @@ function Shell({
   const shareEnabled = ui?.share !== false;
   const themePreference = ui?.defaultTheme ?? "system";
   const [searchOpen, setSearchOpen] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">(
     () => resolveInitialTheme(themePreference),
   );
 
   useEffect(() => {
-    setMobileOpen(false);
     setSearchOpen(false);
     window.scrollTo(0, 0);
   }, [location.pathname]);
@@ -327,7 +246,6 @@ function Shell({
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        setMobileOpen(false);
         setSearchOpen(true);
       }
       if (event.key === "Escape") setSearchOpen(false);
@@ -337,7 +255,6 @@ function Shell({
   }, [searchEnabled]);
 
   function openSearch() {
-    setMobileOpen(false);
     setSearchOpen(true);
   }
 
@@ -347,66 +264,18 @@ function Shell({
 
   return (
     <div className="folio-shell">
-      <header className="folio-header">
-        <Link to="/" className="folio-brand">
-          {config.logo && <img src={config.logo} alt="" />}
-          <span>{config.title}</span>
-        </Link>
-        <nav className="folio-desktop-nav">
-          {navigation.map((item) => (
-            <Link
-              key={item.href}
-              className={location.pathname === href(item.href) || location.pathname.startsWith(href(item.href) + "/") ? "active" : ""}
-              to={item.href}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="folio-header-actions">
-          <div className="folio-runtime-actions">
-            {searchEnabled ? (
-              <button type="button" className="folio-search-trigger" onClick={openSearch}>
-                <SearchIcon /><span>搜索</span><kbd>⌘K</kbd>
-              </button>
-            ) : null}
-            {themeEnabled ? (
-              <button
-                type="button"
-                className="folio-icon-button"
-                onClick={toggleTheme}
-                aria-label={theme === "dark" ? "切换到浅色模式" : "切换到暗色模式"}
-                title={theme === "dark" ? "浅色模式" : "暗色模式"}
-              >
-                <ThemeIcon dark={theme === "dark"} />
-              </button>
-            ) : null}
-            {slots?.headerActions}
-            <button
-              type="button"
-              className="folio-mobile-menu-button"
-              aria-label={mobileOpen ? "关闭导航" : "打开导航"}
-              aria-expanded={mobileOpen}
-              onClick={() => setMobileOpen((value) => !value)}
-            >
-              <MenuIcon open={mobileOpen} />
-            </button>
-          </div>
-        </div>
-        {mobileOpen ? (
-          <div className="folio-mobile-panel">
-            <nav>
-              {navigation.map((item) => (
-                <Link key={item.href} to={item.href}>{item.label}</Link>
-              ))}
-            </nav>
-            <div>
-              {searchEnabled ? <button type="button" onClick={openSearch}>搜索</button> : null}
-              {themeEnabled ? <button type="button" onClick={toggleTheme}>{theme === "dark" ? "浅色模式" : "暗色模式"}</button> : null}
-            </div>
-          </div>
-        ) : null}
-      </header>
+      <FolioHeader
+        config={config}
+        navigation={navigation}
+        currentDoc={current}
+        searchEnabled={searchEnabled}
+        themeEnabled={themeEnabled}
+        shareEnabled={shareEnabled}
+        darkMode={theme === "dark"}
+        onSearch={openSearch}
+        onToggleTheme={toggleTheme}
+        actions={slots?.headerActions}
+      />
 
       <div className="folio-layout">
         <aside className="folio-sidebar">

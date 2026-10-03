@@ -11,15 +11,6 @@ import "./legacy-claude-visual.css";
 const content = docs as FolioDoc[];
 const basePath = import.meta.env.BASE_URL;
 
-const headerActions = (
-  <a
-    className="site-header-action"
-    href="https://github.com/uichat-mira/folio"
-  >
-    GitHub <span aria-hidden="true">↗</span>
-  </a>
-);
-
 const articleFooter = (
   <aside className="site-article-proof">
     <span>Rendered by Folio</span>
@@ -37,7 +28,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       basePath={basePath}
       slots={{
         home: <HomePage docs={content} basePath={basePath} />,
-        headerActions,
         articleFooter,
       }}
     />
