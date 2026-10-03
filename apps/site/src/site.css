@@ -31,9 +31,13 @@ body {
 
 .folio-header {
   height: 64px;
-  padding: 0 28px;
+  padding: 0;
   border-bottom-color: var(--site-hairline);
-  background: rgba(250, 249, 245, 0.94);
+  background: color-mix(in srgb, var(--site-canvas) 94%, transparent);
+}
+
+.folio-header__wrap {
+  padding: 0 28px;
 }
 
 .folio-brand {
