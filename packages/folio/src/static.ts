@@ -272,6 +272,16 @@ function renderStaticToc(doc: FolioDoc): string {
     .join("")}</ul></aside>`;
 }
 
+function renderStaticMobileDocs(
+  context: FolioStaticBuildContext,
+  doc: FolioDoc,
+): string {
+  const nav = renderStaticDocNav(context, doc);
+  const toc = renderStaticToc(doc);
+
+  return `<div class="folio-docs-mobile-bar folio-docs-mobile-bar--static"><details class="folio-static-doc-menu"><summary>菜单</summary><div class="folio-static-doc-menu__panel">${nav}</div></details>${toc ? `<details class="folio-static-doc-menu folio-static-doc-menu--toc"><summary>页面导航</summary><div class="folio-static-doc-menu__panel">${toc}</div></details>` : ""}</div>`;
+}
+
 function renderStaticPager(
   context: FolioStaticBuildContext,
   doc: FolioDoc,
@@ -293,7 +303,7 @@ function renderStaticDocShell(
   context: FolioStaticBuildContext,
   doc: FolioDoc,
 ): string {
-  return `<div class="folio-docs-runtime folio-docs-runtime--static"><div class="folio-docs-shell">${renderStaticDocNav(context, doc)}<main class="folio-doc-main"><div class="folio-doc-toolbar"><div class="folio-eyebrow">${folioEscapeHtml(doc.group)}</div></div><h1>${folioEscapeHtml(doc.title)}</h1>${doc.description ? `<p class="folio-lede">${folioEscapeHtml(doc.description)}</p>` : ""}<article class="folio-markdown">${renderFolioMarkdown(doc.body, { removeH1: true })}</article>${renderStaticPager(context, doc)}</main>${renderStaticToc(doc)}</div></div>`;
+  return `<div class="folio-docs-runtime folio-docs-runtime--static">${renderStaticMobileDocs(context, doc)}<div class="folio-docs-shell">${renderStaticDocNav(context, doc)}<main class="folio-doc-main"><div class="folio-doc-toolbar"><div class="folio-eyebrow">${folioEscapeHtml(doc.group)}</div></div><h1>${folioEscapeHtml(doc.title)}</h1>${doc.description ? `<p class="folio-lede">${folioEscapeHtml(doc.description)}</p>` : ""}<article class="folio-markdown">${renderFolioMarkdown(doc.body, { removeH1: true })}</article>${renderStaticPager(context, doc)}</main>${renderStaticToc(doc)}</div></div>`;
 }
 
 function defaultRoutes(context: FolioStaticBuildContext): FolioStaticRoute[] {
