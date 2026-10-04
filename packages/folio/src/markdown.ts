@@ -1,6 +1,7 @@
 import { marked } from "marked";
 import hljs from "highlight.js/lib/common";
 import { slugify } from "./content";
+import { createHeadingIdAllocator } from "./heading-ids";
 
 export type FolioMarkdownRenderOptions = {
   removeH1?: boolean;
@@ -168,21 +169,21 @@ export function renderFolioMarkdown(
 
   if (options.headingAnchors === false) return html;
 
-  const headingIds = new Map<string, number>();
+  const explicitIds = Array.from(html.matchAll(/<h[2-4]\b([^>]*)>/g))
+    .map((match) => match[1].match(/\bid\s*=\s*["']([^"']+)["']/i)?.[1])
+    .filter((id): id is string => Boolean(id));
+  const headingIds = createHeadingIdAllocator(explicitIds);
 
   return html.replace(
     /<h([2-4])((?:\s[^>]*)?)>([\s\S]*?)<\/h\1>/g,
     (_, level: string, attributes: string, text: string) => {
       const explicitId = attributes.match(/\bid\s*=\s*["']([^"']+)["']/i)?.[1];
       if (explicitId) {
-        const count = headingIds.get(explicitId) ?? 0;
-        headingIds.set(explicitId, count + 1);
+        headingIds.useExplicit(explicitId);
         return "<h" + level + attributes + ">" + text + "</h" + level + ">";
       }
       const base = slugify(text);
-      const count = headingIds.get(base) ?? 0;
-      headingIds.set(base, count + 1);
-      const id = count === 0 ? base : base + "-" + (count + 1);
+      const id = base ? headingIds.allocate(base) : "";
       return id
         ? '<h' + level + attributes + ' id="' + id + '">' + text +
             '<a class="md-anchor" href="#' + id + '" aria-label="链接到 ' +
