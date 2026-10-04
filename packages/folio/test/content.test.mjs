@@ -109,3 +109,22 @@ test("explicit IDs participate in generated heading collision tracking", () => {
     ],
   );
 });
+
+
+test("generated heading IDs reserve later explicit IDs", () => {
+  assert.deepEqual(
+    extractHeadings('## Same\n\n<h2 id="same">Explicit</h2>').map(
+      (heading) => heading.id,
+    ),
+    ["same-2", "same"],
+  );
+});
+
+test("generated suffixes skip IDs reserved by later explicit headings", () => {
+  assert.deepEqual(
+    extractHeadings(
+      '## Foo\n\n## Foo\n\n<h2 id="foo-2">Explicit suffix</h2>',
+    ).map((heading) => heading.id),
+    ["foo", "foo-3", "foo-2"],
+  );
+});
