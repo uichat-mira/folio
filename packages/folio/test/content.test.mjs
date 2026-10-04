@@ -77,3 +77,35 @@ group: Guide
   assert.equal(doc.collection, "Core docs");
   assert.equal(doc.section, "Runtime");
 });
+
+
+test("fenced code headings are excluded from the document outline", () => {
+  assert.deepEqual(
+    extractHeadings(
+      "```md\n## Fake heading\n```\n\n## Real heading",
+    ),
+    [{ depth: 2, text: "Real heading", id: "real-heading" }],
+  );
+});
+
+test("explicit HTML heading IDs are preserved in the document outline", () => {
+  assert.deepEqual(
+    extractHeadings(
+      '<h2 id="custom-anchor">Custom heading</h2>\n\n## Next heading',
+    ),
+    [
+      { depth: 2, text: "Custom heading", id: "custom-anchor" },
+      { depth: 2, text: "Next heading", id: "next-heading" },
+    ],
+  );
+});
+
+test("explicit IDs participate in generated heading collision tracking", () => {
+  assert.deepEqual(
+    extractHeadings('<h2 id="same">Explicit</h2>\n\n## Same'),
+    [
+      { depth: 2, text: "Explicit", id: "same" },
+      { depth: 2, text: "Same", id: "same-2" },
+    ],
+  );
+});

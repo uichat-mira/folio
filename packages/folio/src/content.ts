@@ -73,16 +73,47 @@ type HeadingCandidate = {
   index: number;
   depth: number;
   text: string;
+  explicitId?: string;
 };
 
 function cleanHeadingText(value: string): string {
   return value.replace(/<[^>]+>/g, "").replace(/[*_`]/g, "").trim();
 }
 
+function withoutFencedCode(source: string): string {
+  let fenceCharacter = "";
+  let fenceLength = 0;
+
+  return source
+    .split(/\r?\n/)
+    .map((line) => {
+      if (!fenceCharacter) {
+        const opening = line.match(/^\s*(`{3,}|~{3,})/);
+        if (!opening) return line;
+        fenceCharacter = opening[1][0];
+        fenceLength = opening[1].length;
+        return "";
+      }
+
+      const closing = line.match(/^\s*(`+|~+)\s*$/);
+      if (
+        closing &&
+        closing[1][0] === fenceCharacter &&
+        closing[1].length >= fenceLength
+      ) {
+        fenceCharacter = "";
+        fenceLength = 0;
+      }
+      return "";
+    })
+    .join("\n");
+}
+
 export function extractHeadings(body: string): FolioHeading[] {
   const candidates: HeadingCandidate[] = [];
+  const source = withoutFencedCode(body);
 
-  for (const match of body.matchAll(/^(#{2,4})\s+(.+)$/gm)) {
+  for (const match of source.matchAll(/^(#{2,4})\s+(.+)$/gm)) {
     candidates.push({
       index: match.index ?? 0,
       depth: match[1].length,
@@ -90,11 +121,15 @@ export function extractHeadings(body: string): FolioHeading[] {
     });
   }
 
-  for (const match of body.matchAll(/<h([2-4])\b[^>]*>([\s\S]*?)<\/h\1>/gi)) {
+  for (const match of source.matchAll(
+    /<h([2-4])\b([^>]*)>([\s\S]*?)<\/h\1>/gi,
+  )) {
+    const idMatch = match[2].match(/\bid\s*=\s*["']([^"']+)["']/i);
     candidates.push({
       index: match.index ?? 0,
       depth: Number(match[1]),
-      text: cleanHeadingText(match[2]),
+      text: cleanHeadingText(match[3]),
+      explicitId: idMatch?.[1],
     });
   }
 
@@ -103,6 +138,16 @@ export function extractHeadings(body: string): FolioHeading[] {
     .filter((candidate) => candidate.text)
     .sort((left, right) => left.index - right.index)
     .map((candidate) => {
+      if (candidate.explicitId) {
+        const count = seen.get(candidate.explicitId) ?? 0;
+        seen.set(candidate.explicitId, count + 1);
+        return {
+          depth: candidate.depth,
+          text: candidate.text,
+          id: candidate.explicitId,
+        };
+      }
+
       const base = slugify(candidate.text) || "section";
       const count = seen.get(base) ?? 0;
       seen.set(base, count + 1);

@@ -171,9 +171,12 @@ export function renderFolioMarkdown(
   const headingIds = new Map<string, number>();
 
   return html.replace(
-    /<h([23])((?:\s[^>]*)?)>([\s\S]*?)<\/h\1>/g,
+    /<h([2-4])((?:\s[^>]*)?)>([\s\S]*?)<\/h\1>/g,
     (_, level: string, attributes: string, text: string) => {
-      if (/\bid\s*=\s*["'][^"']+["']/i.test(attributes)) {
+      const explicitId = attributes.match(/\bid\s*=\s*["']([^"']+)["']/i)?.[1];
+      if (explicitId) {
+        const count = headingIds.get(explicitId) ?? 0;
+        headingIds.set(explicitId, count + 1);
         return "<h" + level + attributes + ">" + text + "</h" + level + ">";
       }
       const base = slugify(text);

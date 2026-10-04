@@ -83,3 +83,14 @@ test("callout syntax inside fenced code remains verbatim", () => {
     /::: warning This is documentation, not a live callout :::/,
   );
 });
+
+
+test("renderer preserves explicit heading IDs and keeps generated IDs aligned", () => {
+  const html = renderFolioMarkdown(
+    '<h2 id="same">Explicit</h2>\n\n## Same\n\n#### Fourth level',
+  );
+
+  assert.match(html, /<h2 id="same">Explicit<\/h2>/);
+  assert.match(html, /<h2 id="same-2">Same/);
+  assert.match(html, /<h4 id="fourth-level">Fourth level/);
+});
