@@ -107,3 +107,13 @@ test("renderer reserves later explicit IDs before allocating generated IDs", () 
   assert.match(html, /<h2 id="foo-3">Foo/);
   assert.match(html, /<h2 id="foo-2">Explicit suffix<\/h2>/);
 });
+
+
+test("renderer reserves explicit IDs on case-insensitive HTML heading tags", () => {
+  const html = renderFolioMarkdown(
+    '<H2 id="caps">Explicit caps</H2>\n\n## Caps',
+  );
+
+  assert.match(html, /<h2 id="caps">Explicit caps<\/h2>/);
+  assert.match(html, /<h2 id="caps-2">Caps/);
+});

@@ -169,13 +169,13 @@ export function renderFolioMarkdown(
 
   if (options.headingAnchors === false) return html;
 
-  const explicitIds = Array.from(html.matchAll(/<h[2-4]\b([^>]*)>/g))
+  const explicitIds = Array.from(html.matchAll(/<h[2-4]\b([^>]*)>/gi))
     .map((match) => match[1].match(/\bid\s*=\s*["']([^"']+)["']/i)?.[1])
     .filter((id): id is string => Boolean(id));
   const headingIds = createHeadingIdAllocator(explicitIds);
 
   return html.replace(
-    /<h([2-4])((?:\s[^>]*)?)>([\s\S]*?)<\/h\1>/g,
+    /<h([2-4])((?:\s[^>]*)?)>([\s\S]*?)<\/h\1>/gi,
     (_, level: string, attributes: string, text: string) => {
       const explicitId = attributes.match(/\bid\s*=\s*["']([^"']+)["']/i)?.[1];
       if (explicitId) {
