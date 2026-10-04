@@ -1,5 +1,6 @@
 import { parse as parseYaml } from "yaml";
 import type { FolioDoc, FolioHeading } from "./types";
+import { createHeadingIdAllocator } from "./heading-ids";
 
 const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/;
 
@@ -133,30 +134,31 @@ export function extractHeadings(body: string): FolioHeading[] {
     });
   }
 
-  const seen = new Map<string, number>();
-  return candidates
+  const orderedCandidates = candidates
     .filter((candidate) => candidate.text)
-    .sort((left, right) => left.index - right.index)
-    .map((candidate) => {
-      if (candidate.explicitId) {
-        const count = seen.get(candidate.explicitId) ?? 0;
-        seen.set(candidate.explicitId, count + 1);
-        return {
-          depth: candidate.depth,
-          text: candidate.text,
-          id: candidate.explicitId,
-        };
-      }
+    .sort((left, right) => left.index - right.index);
+  const headingIds = createHeadingIdAllocator(
+    orderedCandidates.flatMap((candidate) =>
+      candidate.explicitId ? [candidate.explicitId] : [],
+    ),
+  );
 
-      const base = slugify(candidate.text) || "section";
-      const count = seen.get(base) ?? 0;
-      seen.set(base, count + 1);
+  return orderedCandidates.map((candidate) => {
+    if (candidate.explicitId) {
       return {
         depth: candidate.depth,
         text: candidate.text,
-        id: count === 0 ? base : `${base}-${count + 1}`,
+        id: headingIds.useExplicit(candidate.explicitId),
       };
-    });
+    }
+
+    const base = slugify(candidate.text) || "section";
+    return {
+      depth: candidate.depth,
+      text: candidate.text,
+      id: headingIds.allocate(base),
+    };
+  });
 }
 
 function list(value: unknown): string[] {
