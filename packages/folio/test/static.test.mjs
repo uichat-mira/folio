@@ -176,3 +176,45 @@ test("default document routes use the documentation structure shell", () => {
     rmSync(outDir, { recursive: true, force: true });
   }
 });
+
+
+test("static document shell keeps mobile navigation without JavaScript", () => {
+  const outDir = mkdtempSync(resolve(tmpdir(), "folio-static-mobile-docs-"));
+  try {
+    mkdirSync(outDir, { recursive: true });
+    writeFileSync(resolve(outDir, "index.html"), template, "utf8");
+
+    const docs = [
+      {
+        id: "intro",
+        path: "/docs/intro",
+        sourcePath: "docs/intro.md",
+        type: "doc",
+        title: "Introduction",
+        description: "Start here",
+        group: "Guide",
+        collection: "Core",
+        section: "Start",
+        order: 1,
+        tags: [],
+        body: "## First section\nHello",
+        headings: [{ depth: 2, text: "First section", id: "first-section" }],
+        data: {},
+      },
+    ];
+
+    writeFolioStaticSite({ ...context(outDir), docs });
+
+    const html = readFileSync(
+      resolve(outDir, "docs/intro/index.html"),
+      "utf8",
+    );
+
+    assert.match(html, /folio-docs-mobile-bar--static/);
+    assert.match(html, /<details class="folio-static-doc-menu">/);
+    assert.match(html, /<summary>菜单<\/summary>/);
+    assert.match(html, /<summary>页面导航<\/summary>/);
+  } finally {
+    rmSync(outDir, { recursive: true, force: true });
+  }
+});
