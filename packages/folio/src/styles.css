@@ -963,6 +963,46 @@ button, input { font: inherit; }
     cursor: default;
   }
 
+  .folio-static-doc-menu {
+    position: relative;
+  }
+
+  .folio-static-doc-menu summary {
+    color: var(--folio-muted);
+    font-size: 13px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .folio-static-doc-menu summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .folio-static-doc-menu__panel {
+    position: fixed;
+    top: 106px;
+    right: 12px;
+    left: 12px;
+    z-index: 79;
+    max-height: calc(100vh - 124px);
+    overflow-y: auto;
+    border: 1px solid var(--folio-hairline);
+    border-radius: var(--folio-radius-lg);
+    background: var(--folio-canvas);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, .14);
+  }
+
+  .folio-static-doc-menu__panel .folio-docnav,
+  .folio-static-doc-menu__panel .folio-toc {
+    position: static;
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: none;
+    padding: 18px;
+    border: 0;
+  }
+
   .folio-docs-shell {
     display: block;
   }
