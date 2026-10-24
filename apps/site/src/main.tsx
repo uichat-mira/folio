@@ -6,6 +6,7 @@ import docs from "virtual:folio/content";
 import config from "../folio.config";
 import { HomePage } from "./HomePage";
 import "./site.css";
+import "./showcase.css";
 import "./legacy-claude-visual.css";
 
 const content = docs as FolioDoc[];
