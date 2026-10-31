@@ -1,0 +1,2105 @@
+{
+  "label": "pages",
+  "base": "/folio/",
+  "outDir": "D:\\folio-worktrees\\fol-008\\docs\\research\\fol-008\\fixture\\dist-pages",
+  "dumpDir": "D:\\folio-worktrees\\fol-008\\docs\\research\\fol-008\\fixture\\dumps-pages",
+  "generatedAt": "2026-10-31T18:47:14.233Z",
+  "pages": [
+    {
+      "route": "/",
+      "id": "home",
+      "staticHtml": "D:\\folio-worktrees\\fol-008\\docs\\research\\fol-008\\fixture\\dist-pages\\index.html",
+      "reactDump": "D:\\folio-worktrees\\fol-008\\docs\\research\\fol-008\\fixture\\dumps-pages\\index.html",
+      "static": {
+        "docnav": [],
+        "toc": [],
+        "pager": [],
+        "headings": [],
+        "allAnchors": [],
+        "hasDocnav": false,
+        "hasToc": false,
+        "hasPager": false,
+        "headingsMenu": false
+      },
+      "react": {
+        "docnav": [],
+        "toc": [],
+        "pager": [],
+        "headings": [],
+        "allAnchors": [
+          {
+            "class": "folio-brand",
+            "href": "/folio",
+            "data-discover": "true",
+            "text": "FOL-008 Navigation Fixture"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/intro",
+            "data-discover": "true",
+            "text": "入门"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/second",
+            "data-discover": "true",
+            "text": "运行时"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/third",
+            "data-discover": "true",
+            "text": "静态发布"
+          },
+          {
+            "class": "folio-card",
+            "href": "/folio/docs/guide/intro",
+            "data-discover": "true",
+            "text": "指南入门：导航对照FOL-008 对照语料第一篇，含多级标题、重复标题与显式锚点。"
+          },
+          {
+            "class": "folio-card",
+            "href": "/folio/docs/guide/second",
+            "data-discover": "true",
+            "text": "指南运行时组合FOL-008 对照语料第二篇，用于核对同一分组内的上一篇与下一篇。"
+          },
+          {
+            "class": "folio-card",
+            "href": "/folio/docs/guide/third",
+            "data-discover": "true",
+            "text": "指南静态发布FOL-008 对照语料第三篇，位于同一 collection 的第二个 section。"
+          }
+        ],
+        "hasDocnav": false,
+        "hasToc": false,
+        "hasPager": false,
+        "headingsMenu": false,
+        "hydrated": true
+      },
+      "staticTargets": [],
+      "tocResolution": [],
+      "reactTocResolution": [],
+      "duplicateIds": {
+        "static": [],
+        "react": []
+      }
+    },
+    {
+      "route": "/docs/guide/intro",
+      "id": "intro",
+      "staticHtml": "D:\\folio-worktrees\\fol-008\\docs\\research\\fol-008\\fixture\\dist-pages\\docs\\guide\\intro\\index.html",
+      "reactDump": "D:\\folio-worktrees\\fol-008\\docs\\research\\fol-008\\fixture\\dumps-pages\\docs-guide-intro.html",
+      "static": {
+        "docnav": [
+          {
+            "href": "/folio/docs/guide/intro/",
+            "text": "入门：导航对照",
+            "active": true
+          },
+          {
+            "href": "/folio/docs/guide/second/",
+            "text": "运行时组合",
+            "active": false
+          },
+          {
+            "href": "/folio/docs/guide/third/",
+            "text": "静态发布",
+            "active": false
+          }
+        ],
+        "toc": [
+          {
+            "href": "#安装与配置",
+            "text": "安装与配置"
+          },
+          {
+            "href": "#vite-配置",
+            "text": "Vite 配置"
+          },
+          {
+            "href": "#部署子路径",
+            "text": "部署子路径"
+          },
+          {
+            "href": "#构建产物",
+            "text": "构建产物"
+          },
+          {
+            "href": "#重复标题",
+            "text": "重复标题"
+          },
+          {
+            "href": "#重复标题-2",
+            "text": "重复标题"
+          },
+          {
+            "href": "#安装-uichat-mira-folio",
+            "text": "安装 @uichat-mira/folio"
+          },
+          {
+            "href": "#explicit-readable-id",
+            "text": "显式 ID 标题"
+          }
+        ],
+        "pager": [
+          {
+            "href": "/folio/docs/guide/second/",
+            "text": "下一篇运行时组合",
+            "direction": "next"
+          }
+        ],
+        "headings": [
+          {
+            "depth": 2,
+            "id": "安装与配置",
+            "text": "安装与配置#"
+          },
+          {
+            "depth": 3,
+            "id": "vite-配置",
+            "text": "Vite 配置#"
+          },
+          {
+            "depth": 4,
+            "id": "部署子路径",
+            "text": "部署子路径#"
+          },
+          {
+            "depth": 4,
+            "id": "构建产物",
+            "text": "构建产物#"
+          },
+          {
+            "depth": 2,
+            "id": "重复标题",
+            "text": "重复标题#"
+          },
+          {
+            "depth": 2,
+            "id": "重复标题-2",
+            "text": "重复标题#"
+          },
+          {
+            "depth": 2,
+            "id": "安装-uichat-mira-folio",
+            "text": "安装 @uichat-mira/folio#"
+          },
+          {
+            "depth": 2,
+            "id": "explicit-readable-id",
+            "text": "显式 ID 标题"
+          }
+        ],
+        "allAnchors": [
+          {
+            "class": "active",
+            "aria-current": "page",
+            "href": "/folio/docs/guide/intro/",
+            "text": "入门：导航对照"
+          },
+          {
+            "href": "/folio/docs/guide/second/",
+            "text": "运行时组合"
+          },
+          {
+            "href": "/folio/docs/guide/third/",
+            "text": "静态发布"
+          },
+          {
+            "href": "#安装与配置",
+            "text": "安装与配置"
+          },
+          {
+            "href": "#vite-配置",
+            "text": "Vite 配置"
+          },
+          {
+            "href": "#部署子路径",
+            "text": "部署子路径"
+          },
+          {
+            "href": "#构建产物",
+            "text": "构建产物"
+          },
+          {
+            "href": "#重复标题",
+            "text": "重复标题"
+          },
+          {
+            "href": "#重复标题-2",
+            "text": "重复标题"
+          },
+          {
+            "href": "#安装-uichat-mira-folio",
+            "text": "安装 @uichat-mira/folio"
+          },
+          {
+            "href": "#explicit-readable-id",
+            "text": "显式 ID 标题"
+          },
+          {
+            "class": "active",
+            "aria-current": "page",
+            "href": "/folio/docs/guide/intro/",
+            "text": "入门：导航对照"
+          },
+          {
+            "href": "/folio/docs/guide/second/",
+            "text": "运行时组合"
+          },
+          {
+            "href": "/folio/docs/guide/third/",
+            "text": "静态发布"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#安装与配置",
+            "aria-label": "链接到 安装与配置",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#vite-配置",
+            "aria-label": "链接到 Vite 配置",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#部署子路径",
+            "aria-label": "链接到 部署子路径",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#构建产物",
+            "aria-label": "链接到 构建产物",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#重复标题",
+            "aria-label": "链接到 重复标题",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#重复标题-2",
+            "aria-label": "链接到 重复标题",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#安装-uichat-mira-folio",
+            "aria-label": "链接到 安装 <code>@uichat-mira/folio</code>",
+            "text": "#"
+          },
+          {
+            "class": "folio-page-nav__next",
+            "href": "/folio/docs/guide/second/",
+            "text": "下一篇运行时组合"
+          },
+          {
+            "href": "#安装与配置",
+            "text": "安装与配置"
+          },
+          {
+            "href": "#vite-配置",
+            "text": "Vite 配置"
+          },
+          {
+            "href": "#部署子路径",
+            "text": "部署子路径"
+          },
+          {
+            "href": "#构建产物",
+            "text": "构建产物"
+          },
+          {
+            "href": "#重复标题",
+            "text": "重复标题"
+          },
+          {
+            "href": "#重复标题-2",
+            "text": "重复标题"
+          },
+          {
+            "href": "#安装-uichat-mira-folio",
+            "text": "安装 @uichat-mira/folio"
+          },
+          {
+            "href": "#explicit-readable-id",
+            "text": "显式 ID 标题"
+          }
+        ],
+        "hasDocnav": true,
+        "hasToc": true,
+        "hasPager": true,
+        "headingsMenu": true
+      },
+      "react": {
+        "docnav": [
+          {
+            "href": "/folio/docs/guide/intro",
+            "text": "入门：导航对照",
+            "active": true
+          },
+          {
+            "href": "/folio/docs/guide/second",
+            "text": "运行时组合",
+            "active": false
+          },
+          {
+            "href": "/folio/docs/guide/third",
+            "text": "静态发布",
+            "active": false
+          }
+        ],
+        "toc": [
+          {
+            "href": "#安装与配置",
+            "text": "安装与配置"
+          },
+          {
+            "href": "#vite-配置",
+            "text": "Vite 配置"
+          },
+          {
+            "href": "#部署子路径",
+            "text": "部署子路径"
+          },
+          {
+            "href": "#构建产物",
+            "text": "构建产物"
+          },
+          {
+            "href": "#重复标题",
+            "text": "重复标题"
+          },
+          {
+            "href": "#重复标题-2",
+            "text": "重复标题"
+          },
+          {
+            "href": "#安装-uichat-mira-folio",
+            "text": "安装 @uichat-mira/folio"
+          },
+          {
+            "href": "#explicit-readable-id",
+            "text": "显式 ID 标题"
+          }
+        ],
+        "pager": [
+          {
+            "href": "/folio/docs/guide/second",
+            "text": "下一篇运行时组合",
+            "direction": "next"
+          }
+        ],
+        "headings": [
+          {
+            "depth": 2,
+            "id": "安装与配置",
+            "text": "安装与配置#"
+          },
+          {
+            "depth": 3,
+            "id": "vite-配置",
+            "text": "Vite 配置#"
+          },
+          {
+            "depth": 4,
+            "id": "部署子路径",
+            "text": "部署子路径#"
+          },
+          {
+            "depth": 4,
+            "id": "构建产物",
+            "text": "构建产物#"
+          },
+          {
+            "depth": 2,
+            "id": "重复标题",
+            "text": "重复标题#"
+          },
+          {
+            "depth": 2,
+            "id": "重复标题-2",
+            "text": "重复标题#"
+          },
+          {
+            "depth": 2,
+            "id": "安装-uichat-mira-folio",
+            "text": "安装 @uichat-mira/folio#"
+          },
+          {
+            "depth": 2,
+            "id": "explicit-readable-id",
+            "text": "显式 ID 标题"
+          }
+        ],
+        "allAnchors": [
+          {
+            "class": "folio-brand",
+            "href": "/folio",
+            "data-discover": "true",
+            "text": "FOL-008 Navigation Fixture"
+          },
+          {
+            "class": "active",
+            "aria-current": "page",
+            "href": "/folio/docs/guide/intro",
+            "data-discover": "true",
+            "text": "入门"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/second",
+            "data-discover": "true",
+            "text": "运行时"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/third",
+            "data-discover": "true",
+            "text": "静态发布"
+          },
+          {
+            "class": "active",
+            "aria-current": "page",
+            "href": "/folio/docs/guide/intro",
+            "data-discover": "true",
+            "text": "入门：导航对照"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/second",
+            "data-discover": "true",
+            "text": "运行时组合"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/third",
+            "data-discover": "true",
+            "text": "静态发布"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#安装与配置",
+            "aria-label": "链接到 安装与配置",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#vite-配置",
+            "aria-label": "链接到 Vite 配置",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#部署子路径",
+            "aria-label": "链接到 部署子路径",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#构建产物",
+            "aria-label": "链接到 构建产物",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#重复标题",
+            "aria-label": "链接到 重复标题",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#重复标题-2",
+            "aria-label": "链接到 重复标题",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#安装-uichat-mira-folio",
+            "aria-label": "链接到 安装 <code>@uichat-mira/folio</code>",
+            "text": "#"
+          },
+          {
+            "class": "folio-page-nav__next",
+            "href": "/folio/docs/guide/second",
+            "data-discover": "true",
+            "text": "下一篇运行时组合"
+          },
+          {
+            "class": "",
+            "href": "#安装与配置",
+            "text": "安装与配置"
+          },
+          {
+            "class": "",
+            "href": "#vite-配置",
+            "text": "Vite 配置"
+          },
+          {
+            "class": "",
+            "href": "#部署子路径",
+            "text": "部署子路径"
+          },
+          {
+            "class": "",
+            "href": "#构建产物",
+            "text": "构建产物"
+          },
+          {
+            "class": "",
+            "href": "#重复标题",
+            "text": "重复标题"
+          },
+          {
+            "class": "",
+            "href": "#重复标题-2",
+            "text": "重复标题"
+          },
+          {
+            "class": "",
+            "href": "#安装-uichat-mira-folio",
+            "text": "安装 @uichat-mira/folio"
+          },
+          {
+            "class": "",
+            "href": "#explicit-readable-id",
+            "text": "显式 ID 标题"
+          }
+        ],
+        "hasDocnav": true,
+        "hasToc": true,
+        "hasPager": true,
+        "headingsMenu": true,
+        "hydrated": true
+      },
+      "staticTargets": [
+        {
+          "href": "/folio/docs/guide/intro/",
+          "ok": true,
+          "file": "docs/guide/intro/index.html"
+        },
+        {
+          "href": "/folio/docs/guide/second/",
+          "ok": true,
+          "file": "docs/guide/second/index.html"
+        },
+        {
+          "href": "/folio/docs/guide/third/",
+          "ok": true,
+          "file": "docs/guide/third/index.html"
+        },
+        {
+          "href": "/folio/docs/guide/second/",
+          "ok": true,
+          "file": "docs/guide/second/index.html"
+        }
+      ],
+      "tocResolution": [
+        {
+          "href": "#安装与配置",
+          "id": "安装与配置",
+          "existsInBody": true
+        },
+        {
+          "href": "#vite-配置",
+          "id": "vite-配置",
+          "existsInBody": true
+        },
+        {
+          "href": "#部署子路径",
+          "id": "部署子路径",
+          "existsInBody": true
+        },
+        {
+          "href": "#构建产物",
+          "id": "构建产物",
+          "existsInBody": true
+        },
+        {
+          "href": "#重复标题",
+          "id": "重复标题",
+          "existsInBody": true
+        },
+        {
+          "href": "#重复标题-2",
+          "id": "重复标题-2",
+          "existsInBody": true
+        },
+        {
+          "href": "#安装-uichat-mira-folio",
+          "id": "安装-uichat-mira-folio",
+          "existsInBody": true
+        },
+        {
+          "href": "#explicit-readable-id",
+          "id": "explicit-readable-id",
+          "existsInBody": true
+        }
+      ],
+      "reactTocResolution": [
+        {
+          "href": "#安装与配置",
+          "id": "安装与配置",
+          "existsInBody": true
+        },
+        {
+          "href": "#vite-配置",
+          "id": "vite-配置",
+          "existsInBody": true
+        },
+        {
+          "href": "#部署子路径",
+          "id": "部署子路径",
+          "existsInBody": true
+        },
+        {
+          "href": "#构建产物",
+          "id": "构建产物",
+          "existsInBody": true
+        },
+        {
+          "href": "#重复标题",
+          "id": "重复标题",
+          "existsInBody": true
+        },
+        {
+          "href": "#重复标题-2",
+          "id": "重复标题-2",
+          "existsInBody": true
+        },
+        {
+          "href": "#安装-uichat-mira-folio",
+          "id": "安装-uichat-mira-folio",
+          "existsInBody": true
+        },
+        {
+          "href": "#explicit-readable-id",
+          "id": "explicit-readable-id",
+          "existsInBody": true
+        }
+      ],
+      "duplicateIds": {
+        "static": [],
+        "react": []
+      }
+    },
+    {
+      "route": "/docs/guide/second",
+      "id": "second",
+      "staticHtml": "D:\\folio-worktrees\\fol-008\\docs\\research\\fol-008\\fixture\\dist-pages\\docs\\guide\\second\\index.html",
+      "reactDump": "D:\\folio-worktrees\\fol-008\\docs\\research\\fol-008\\fixture\\dumps-pages\\docs-guide-second.html",
+      "static": {
+        "docnav": [
+          {
+            "href": "/folio/docs/guide/intro/",
+            "text": "入门：导航对照",
+            "active": false
+          },
+          {
+            "href": "/folio/docs/guide/second/",
+            "text": "运行时组合",
+            "active": true
+          },
+          {
+            "href": "/folio/docs/guide/third/",
+            "text": "静态发布",
+            "active": false
+          }
+        ],
+        "toc": [
+          {
+            "href": "#组合顺序",
+            "text": "组合顺序"
+          },
+          {
+            "href": "#数据流",
+            "text": "数据流"
+          },
+          {
+            "href": "#组合顺序-2",
+            "text": "组合顺序"
+          }
+        ],
+        "pager": [
+          {
+            "href": "/folio/docs/guide/intro/",
+            "text": "上一篇入门：导航对照",
+            "direction": "previous"
+          },
+          {
+            "href": "/folio/docs/guide/third/",
+            "text": "下一篇静态发布",
+            "direction": "next"
+          }
+        ],
+        "headings": [
+          {
+            "depth": 2,
+            "id": "组合顺序",
+            "text": "组合顺序#"
+          },
+          {
+            "depth": 3,
+            "id": "数据流",
+            "text": "数据流#"
+          },
+          {
+            "depth": 2,
+            "id": "组合顺序-2",
+            "text": "组合顺序#"
+          }
+        ],
+        "allAnchors": [
+          {
+            "href": "/folio/docs/guide/intro/",
+            "text": "入门：导航对照"
+          },
+          {
+            "class": "active",
+            "aria-current": "page",
+            "href": "/folio/docs/guide/second/",
+            "text": "运行时组合"
+          },
+          {
+            "href": "/folio/docs/guide/third/",
+            "text": "静态发布"
+          },
+          {
+            "href": "#组合顺序",
+            "text": "组合顺序"
+          },
+          {
+            "href": "#数据流",
+            "text": "数据流"
+          },
+          {
+            "href": "#组合顺序-2",
+            "text": "组合顺序"
+          },
+          {
+            "href": "/folio/docs/guide/intro/",
+            "text": "入门：导航对照"
+          },
+          {
+            "class": "active",
+            "aria-current": "page",
+            "href": "/folio/docs/guide/second/",
+            "text": "运行时组合"
+          },
+          {
+            "href": "/folio/docs/guide/third/",
+            "text": "静态发布"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#组合顺序",
+            "aria-label": "链接到 组合顺序",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#数据流",
+            "aria-label": "链接到 数据流",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#组合顺序-2",
+            "aria-label": "链接到 组合顺序",
+            "text": "#"
+          },
+          {
+            "class": "folio-page-nav__previous",
+            "href": "/folio/docs/guide/intro/",
+            "text": "上一篇入门：导航对照"
+          },
+          {
+            "class": "folio-page-nav__next",
+            "href": "/folio/docs/guide/third/",
+            "text": "下一篇静态发布"
+          },
+          {
+            "href": "#组合顺序",
+            "text": "组合顺序"
+          },
+          {
+            "href": "#数据流",
+            "text": "数据流"
+          },
+          {
+            "href": "#组合顺序-2",
+            "text": "组合顺序"
+          }
+        ],
+        "hasDocnav": true,
+        "hasToc": true,
+        "hasPager": true,
+        "headingsMenu": true
+      },
+      "react": {
+        "docnav": [
+          {
+            "href": "/folio/docs/guide/intro",
+            "text": "入门：导航对照",
+            "active": false
+          },
+          {
+            "href": "/folio/docs/guide/second",
+            "text": "运行时组合",
+            "active": true
+          },
+          {
+            "href": "/folio/docs/guide/third",
+            "text": "静态发布",
+            "active": false
+          }
+        ],
+        "toc": [
+          {
+            "href": "#组合顺序",
+            "text": "组合顺序"
+          },
+          {
+            "href": "#数据流",
+            "text": "数据流"
+          },
+          {
+            "href": "#组合顺序-2",
+            "text": "组合顺序"
+          }
+        ],
+        "pager": [
+          {
+            "href": "/folio/docs/guide/intro",
+            "text": "上一篇入门：导航对照",
+            "direction": "previous"
+          },
+          {
+            "href": "/folio/docs/guide/third",
+            "text": "下一篇静态发布",
+            "direction": "next"
+          }
+        ],
+        "headings": [
+          {
+            "depth": 2,
+            "id": "组合顺序",
+            "text": "组合顺序#"
+          },
+          {
+            "depth": 3,
+            "id": "数据流",
+            "text": "数据流#"
+          },
+          {
+            "depth": 2,
+            "id": "组合顺序-2",
+            "text": "组合顺序#"
+          }
+        ],
+        "allAnchors": [
+          {
+            "class": "folio-brand",
+            "href": "/folio",
+            "data-discover": "true",
+            "text": "FOL-008 Navigation Fixture"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/intro",
+            "data-discover": "true",
+            "text": "入门"
+          },
+          {
+            "class": "active",
+            "aria-current": "page",
+            "href": "/folio/docs/guide/second",
+            "data-discover": "true",
+            "text": "运行时"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/third",
+            "data-discover": "true",
+            "text": "静态发布"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/intro",
+            "data-discover": "true",
+            "text": "入门：导航对照"
+          },
+          {
+            "class": "active",
+            "aria-current": "page",
+            "href": "/folio/docs/guide/second",
+            "data-discover": "true",
+            "text": "运行时组合"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/third",
+            "data-discover": "true",
+            "text": "静态发布"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#组合顺序",
+            "aria-label": "链接到 组合顺序",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#数据流",
+            "aria-label": "链接到 数据流",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#组合顺序-2",
+            "aria-label": "链接到 组合顺序",
+            "text": "#"
+          },
+          {
+            "class": "folio-page-nav__previous",
+            "href": "/folio/docs/guide/intro",
+            "data-discover": "true",
+            "text": "上一篇入门：导航对照"
+          },
+          {
+            "class": "folio-page-nav__next",
+            "href": "/folio/docs/guide/third",
+            "data-discover": "true",
+            "text": "下一篇静态发布"
+          },
+          {
+            "class": "",
+            "href": "#组合顺序",
+            "text": "组合顺序"
+          },
+          {
+            "class": "",
+            "href": "#数据流",
+            "text": "数据流"
+          },
+          {
+            "class": "",
+            "href": "#组合顺序-2",
+            "text": "组合顺序"
+          }
+        ],
+        "hasDocnav": true,
+        "hasToc": true,
+        "hasPager": true,
+        "headingsMenu": true,
+        "hydrated": true
+      },
+      "staticTargets": [
+        {
+          "href": "/folio/docs/guide/intro/",
+          "ok": true,
+          "file": "docs/guide/intro/index.html"
+        },
+        {
+          "href": "/folio/docs/guide/second/",
+          "ok": true,
+          "file": "docs/guide/second/index.html"
+        },
+        {
+          "href": "/folio/docs/guide/third/",
+          "ok": true,
+          "file": "docs/guide/third/index.html"
+        },
+        {
+          "href": "/folio/docs/guide/intro/",
+          "ok": true,
+          "file": "docs/guide/intro/index.html"
+        },
+        {
+          "href": "/folio/docs/guide/third/",
+          "ok": true,
+          "file": "docs/guide/third/index.html"
+        }
+      ],
+      "tocResolution": [
+        {
+          "href": "#组合顺序",
+          "id": "组合顺序",
+          "existsInBody": true
+        },
+        {
+          "href": "#数据流",
+          "id": "数据流",
+          "existsInBody": true
+        },
+        {
+          "href": "#组合顺序-2",
+          "id": "组合顺序-2",
+          "existsInBody": true
+        }
+      ],
+      "reactTocResolution": [
+        {
+          "href": "#组合顺序",
+          "id": "组合顺序",
+          "existsInBody": true
+        },
+        {
+          "href": "#数据流",
+          "id": "数据流",
+          "existsInBody": true
+        },
+        {
+          "href": "#组合顺序-2",
+          "id": "组合顺序-2",
+          "existsInBody": true
+        }
+      ],
+      "duplicateIds": {
+        "static": [],
+        "react": []
+      }
+    },
+    {
+      "route": "/docs/guide/third",
+      "id": "third",
+      "staticHtml": "D:\\folio-worktrees\\fol-008\\docs\\research\\fol-008\\fixture\\dist-pages\\docs\\guide\\third\\index.html",
+      "reactDump": "D:\\folio-worktrees\\fol-008\\docs\\research\\fol-008\\fixture\\dumps-pages\\docs-guide-third.html",
+      "static": {
+        "docnav": [
+          {
+            "href": "/folio/docs/guide/intro/",
+            "text": "入门：导航对照",
+            "active": false
+          },
+          {
+            "href": "/folio/docs/guide/second/",
+            "text": "运行时组合",
+            "active": false
+          },
+          {
+            "href": "/folio/docs/guide/third/",
+            "text": "静态发布",
+            "active": true
+          }
+        ],
+        "toc": [
+          {
+            "href": "#pages-子路径",
+            "text": "Pages 子路径"
+          },
+          {
+            "href": "#资源路径",
+            "text": "资源路径"
+          },
+          {
+            "href": "#缓存与-404",
+            "text": "缓存与 404"
+          }
+        ],
+        "pager": [
+          {
+            "href": "/folio/docs/guide/second/",
+            "text": "上一篇运行时组合",
+            "direction": "previous"
+          }
+        ],
+        "headings": [
+          {
+            "depth": 2,
+            "id": "pages-子路径",
+            "text": "Pages 子路径#"
+          },
+          {
+            "depth": 3,
+            "id": "资源路径",
+            "text": "资源路径#"
+          },
+          {
+            "depth": 2,
+            "id": "缓存与-404",
+            "text": "缓存与 404#"
+          }
+        ],
+        "allAnchors": [
+          {
+            "href": "/folio/docs/guide/intro/",
+            "text": "入门：导航对照"
+          },
+          {
+            "href": "/folio/docs/guide/second/",
+            "text": "运行时组合"
+          },
+          {
+            "class": "active",
+            "aria-current": "page",
+            "href": "/folio/docs/guide/third/",
+            "text": "静态发布"
+          },
+          {
+            "href": "#pages-子路径",
+            "text": "Pages 子路径"
+          },
+          {
+            "href": "#资源路径",
+            "text": "资源路径"
+          },
+          {
+            "href": "#缓存与-404",
+            "text": "缓存与 404"
+          },
+          {
+            "href": "/folio/docs/guide/intro/",
+            "text": "入门：导航对照"
+          },
+          {
+            "href": "/folio/docs/guide/second/",
+            "text": "运行时组合"
+          },
+          {
+            "class": "active",
+            "aria-current": "page",
+            "href": "/folio/docs/guide/third/",
+            "text": "静态发布"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#pages-子路径",
+            "aria-label": "链接到 Pages 子路径",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#资源路径",
+            "aria-label": "链接到 资源路径",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#缓存与-404",
+            "aria-label": "链接到 缓存与 404",
+            "text": "#"
+          },
+          {
+            "class": "folio-page-nav__previous",
+            "href": "/folio/docs/guide/second/",
+            "text": "上一篇运行时组合"
+          },
+          {
+            "href": "#pages-子路径",
+            "text": "Pages 子路径"
+          },
+          {
+            "href": "#资源路径",
+            "text": "资源路径"
+          },
+          {
+            "href": "#缓存与-404",
+            "text": "缓存与 404"
+          }
+        ],
+        "hasDocnav": true,
+        "hasToc": true,
+        "hasPager": true,
+        "headingsMenu": true
+      },
+      "react": {
+        "docnav": [
+          {
+            "href": "/folio/docs/guide/intro",
+            "text": "入门：导航对照",
+            "active": false
+          },
+          {
+            "href": "/folio/docs/guide/second",
+            "text": "运行时组合",
+            "active": false
+          },
+          {
+            "href": "/folio/docs/guide/third",
+            "text": "静态发布",
+            "active": true
+          }
+        ],
+        "toc": [
+          {
+            "href": "#pages-子路径",
+            "text": "Pages 子路径"
+          },
+          {
+            "href": "#资源路径",
+            "text": "资源路径"
+          },
+          {
+            "href": "#缓存与-404",
+            "text": "缓存与 404"
+          }
+        ],
+        "pager": [
+          {
+            "href": "/folio/docs/guide/second",
+            "text": "上一篇运行时组合",
+            "direction": "previous"
+          }
+        ],
+        "headings": [
+          {
+            "depth": 2,
+            "id": "pages-子路径",
+            "text": "Pages 子路径#"
+          },
+          {
+            "depth": 3,
+            "id": "资源路径",
+            "text": "资源路径#"
+          },
+          {
+            "depth": 2,
+            "id": "缓存与-404",
+            "text": "缓存与 404#"
+          }
+        ],
+        "allAnchors": [
+          {
+            "class": "folio-brand",
+            "href": "/folio",
+            "data-discover": "true",
+            "text": "FOL-008 Navigation Fixture"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/intro",
+            "data-discover": "true",
+            "text": "入门"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/second",
+            "data-discover": "true",
+            "text": "运行时"
+          },
+          {
+            "class": "active",
+            "aria-current": "page",
+            "href": "/folio/docs/guide/third",
+            "data-discover": "true",
+            "text": "静态发布"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/intro",
+            "data-discover": "true",
+            "text": "入门：导航对照"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/second",
+            "data-discover": "true",
+            "text": "运行时组合"
+          },
+          {
+            "class": "active",
+            "aria-current": "page",
+            "href": "/folio/docs/guide/third",
+            "data-discover": "true",
+            "text": "静态发布"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#pages-子路径",
+            "aria-label": "链接到 Pages 子路径",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#资源路径",
+            "aria-label": "链接到 资源路径",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#缓存与-404",
+            "aria-label": "链接到 缓存与 404",
+            "text": "#"
+          },
+          {
+            "class": "folio-page-nav__previous",
+            "href": "/folio/docs/guide/second",
+            "data-discover": "true",
+            "text": "上一篇运行时组合"
+          },
+          {
+            "class": "",
+            "href": "#pages-子路径",
+            "text": "Pages 子路径"
+          },
+          {
+            "class": "",
+            "href": "#资源路径",
+            "text": "资源路径"
+          },
+          {
+            "class": "",
+            "href": "#缓存与-404",
+            "text": "缓存与 404"
+          }
+        ],
+        "hasDocnav": true,
+        "hasToc": true,
+        "hasPager": true,
+        "headingsMenu": true,
+        "hydrated": true
+      },
+      "staticTargets": [
+        {
+          "href": "/folio/docs/guide/intro/",
+          "ok": true,
+          "file": "docs/guide/intro/index.html"
+        },
+        {
+          "href": "/folio/docs/guide/second/",
+          "ok": true,
+          "file": "docs/guide/second/index.html"
+        },
+        {
+          "href": "/folio/docs/guide/third/",
+          "ok": true,
+          "file": "docs/guide/third/index.html"
+        },
+        {
+          "href": "/folio/docs/guide/second/",
+          "ok": true,
+          "file": "docs/guide/second/index.html"
+        }
+      ],
+      "tocResolution": [
+        {
+          "href": "#pages-子路径",
+          "id": "pages-子路径",
+          "existsInBody": true
+        },
+        {
+          "href": "#资源路径",
+          "id": "资源路径",
+          "existsInBody": true
+        },
+        {
+          "href": "#缓存与-404",
+          "id": "缓存与-404",
+          "existsInBody": true
+        }
+      ],
+      "reactTocResolution": [
+        {
+          "href": "#pages-子路径",
+          "id": "pages-子路径",
+          "existsInBody": true
+        },
+        {
+          "href": "#资源路径",
+          "id": "资源路径",
+          "existsInBody": true
+        },
+        {
+          "href": "#缓存与-404",
+          "id": "缓存与-404",
+          "existsInBody": true
+        }
+      ],
+      "duplicateIds": {
+        "static": [],
+        "react": []
+      }
+    }
+  ],
+  "checks": {
+    "home": {
+      "route": "/",
+      "id": "home",
+      "staticHtml": "D:\\folio-worktrees\\fol-008\\docs\\research\\fol-008\\fixture\\dist-pages\\index.html",
+      "reactDump": "D:\\folio-worktrees\\fol-008\\docs\\research\\fol-008\\fixture\\dumps-pages\\index.html",
+      "static": {
+        "docnav": [],
+        "toc": [],
+        "pager": [],
+        "headings": [],
+        "allAnchors": [],
+        "hasDocnav": false,
+        "hasToc": false,
+        "hasPager": false,
+        "headingsMenu": false
+      },
+      "react": {
+        "docnav": [],
+        "toc": [],
+        "pager": [],
+        "headings": [],
+        "allAnchors": [
+          {
+            "class": "folio-brand",
+            "href": "/folio",
+            "data-discover": "true",
+            "text": "FOL-008 Navigation Fixture"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/intro",
+            "data-discover": "true",
+            "text": "入门"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/second",
+            "data-discover": "true",
+            "text": "运行时"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/third",
+            "data-discover": "true",
+            "text": "静态发布"
+          },
+          {
+            "class": "folio-card",
+            "href": "/folio/docs/guide/intro",
+            "data-discover": "true",
+            "text": "指南入门：导航对照FOL-008 对照语料第一篇，含多级标题、重复标题与显式锚点。"
+          },
+          {
+            "class": "folio-card",
+            "href": "/folio/docs/guide/second",
+            "data-discover": "true",
+            "text": "指南运行时组合FOL-008 对照语料第二篇，用于核对同一分组内的上一篇与下一篇。"
+          },
+          {
+            "class": "folio-card",
+            "href": "/folio/docs/guide/third",
+            "data-discover": "true",
+            "text": "指南静态发布FOL-008 对照语料第三篇，位于同一 collection 的第二个 section。"
+          }
+        ],
+        "hasDocnav": false,
+        "hasToc": false,
+        "hasPager": false,
+        "headingsMenu": false,
+        "hydrated": true
+      },
+      "staticTargets": [],
+      "tocResolution": [],
+      "reactTocResolution": [],
+      "duplicateIds": {
+        "static": [],
+        "react": []
+      }
+    },
+    "intro": {
+      "route": "/docs/guide/intro",
+      "id": "intro",
+      "staticHtml": "D:\\folio-worktrees\\fol-008\\docs\\research\\fol-008\\fixture\\dist-pages\\docs\\guide\\intro\\index.html",
+      "reactDump": "D:\\folio-worktrees\\fol-008\\docs\\research\\fol-008\\fixture\\dumps-pages\\docs-guide-intro.html",
+      "static": {
+        "docnav": [
+          {
+            "href": "/folio/docs/guide/intro/",
+            "text": "入门：导航对照",
+            "active": true
+          },
+          {
+            "href": "/folio/docs/guide/second/",
+            "text": "运行时组合",
+            "active": false
+          },
+          {
+            "href": "/folio/docs/guide/third/",
+            "text": "静态发布",
+            "active": false
+          }
+        ],
+        "toc": [
+          {
+            "href": "#安装与配置",
+            "text": "安装与配置"
+          },
+          {
+            "href": "#vite-配置",
+            "text": "Vite 配置"
+          },
+          {
+            "href": "#部署子路径",
+            "text": "部署子路径"
+          },
+          {
+            "href": "#构建产物",
+            "text": "构建产物"
+          },
+          {
+            "href": "#重复标题",
+            "text": "重复标题"
+          },
+          {
+            "href": "#重复标题-2",
+            "text": "重复标题"
+          },
+          {
+            "href": "#安装-uichat-mira-folio",
+            "text": "安装 @uichat-mira/folio"
+          },
+          {
+            "href": "#explicit-readable-id",
+            "text": "显式 ID 标题"
+          }
+        ],
+        "pager": [
+          {
+            "href": "/folio/docs/guide/second/",
+            "text": "下一篇运行时组合",
+            "direction": "next"
+          }
+        ],
+        "headings": [
+          {
+            "depth": 2,
+            "id": "安装与配置",
+            "text": "安装与配置#"
+          },
+          {
+            "depth": 3,
+            "id": "vite-配置",
+            "text": "Vite 配置#"
+          },
+          {
+            "depth": 4,
+            "id": "部署子路径",
+            "text": "部署子路径#"
+          },
+          {
+            "depth": 4,
+            "id": "构建产物",
+            "text": "构建产物#"
+          },
+          {
+            "depth": 2,
+            "id": "重复标题",
+            "text": "重复标题#"
+          },
+          {
+            "depth": 2,
+            "id": "重复标题-2",
+            "text": "重复标题#"
+          },
+          {
+            "depth": 2,
+            "id": "安装-uichat-mira-folio",
+            "text": "安装 @uichat-mira/folio#"
+          },
+          {
+            "depth": 2,
+            "id": "explicit-readable-id",
+            "text": "显式 ID 标题"
+          }
+        ],
+        "allAnchors": [
+          {
+            "class": "active",
+            "aria-current": "page",
+            "href": "/folio/docs/guide/intro/",
+            "text": "入门：导航对照"
+          },
+          {
+            "href": "/folio/docs/guide/second/",
+            "text": "运行时组合"
+          },
+          {
+            "href": "/folio/docs/guide/third/",
+            "text": "静态发布"
+          },
+          {
+            "href": "#安装与配置",
+            "text": "安装与配置"
+          },
+          {
+            "href": "#vite-配置",
+            "text": "Vite 配置"
+          },
+          {
+            "href": "#部署子路径",
+            "text": "部署子路径"
+          },
+          {
+            "href": "#构建产物",
+            "text": "构建产物"
+          },
+          {
+            "href": "#重复标题",
+            "text": "重复标题"
+          },
+          {
+            "href": "#重复标题-2",
+            "text": "重复标题"
+          },
+          {
+            "href": "#安装-uichat-mira-folio",
+            "text": "安装 @uichat-mira/folio"
+          },
+          {
+            "href": "#explicit-readable-id",
+            "text": "显式 ID 标题"
+          },
+          {
+            "class": "active",
+            "aria-current": "page",
+            "href": "/folio/docs/guide/intro/",
+            "text": "入门：导航对照"
+          },
+          {
+            "href": "/folio/docs/guide/second/",
+            "text": "运行时组合"
+          },
+          {
+            "href": "/folio/docs/guide/third/",
+            "text": "静态发布"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#安装与配置",
+            "aria-label": "链接到 安装与配置",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#vite-配置",
+            "aria-label": "链接到 Vite 配置",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#部署子路径",
+            "aria-label": "链接到 部署子路径",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#构建产物",
+            "aria-label": "链接到 构建产物",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#重复标题",
+            "aria-label": "链接到 重复标题",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#重复标题-2",
+            "aria-label": "链接到 重复标题",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#安装-uichat-mira-folio",
+            "aria-label": "链接到 安装 <code>@uichat-mira/folio</code>",
+            "text": "#"
+          },
+          {
+            "class": "folio-page-nav__next",
+            "href": "/folio/docs/guide/second/",
+            "text": "下一篇运行时组合"
+          },
+          {
+            "href": "#安装与配置",
+            "text": "安装与配置"
+          },
+          {
+            "href": "#vite-配置",
+            "text": "Vite 配置"
+          },
+          {
+            "href": "#部署子路径",
+            "text": "部署子路径"
+          },
+          {
+            "href": "#构建产物",
+            "text": "构建产物"
+          },
+          {
+            "href": "#重复标题",
+            "text": "重复标题"
+          },
+          {
+            "href": "#重复标题-2",
+            "text": "重复标题"
+          },
+          {
+            "href": "#安装-uichat-mira-folio",
+            "text": "安装 @uichat-mira/folio"
+          },
+          {
+            "href": "#explicit-readable-id",
+            "text": "显式 ID 标题"
+          }
+        ],
+        "hasDocnav": true,
+        "hasToc": true,
+        "hasPager": true,
+        "headingsMenu": true
+      },
+      "react": {
+        "docnav": [
+          {
+            "href": "/folio/docs/guide/intro",
+            "text": "入门：导航对照",
+            "active": true
+          },
+          {
+            "href": "/folio/docs/guide/second",
+            "text": "运行时组合",
+            "active": false
+          },
+          {
+            "href": "/folio/docs/guide/third",
+            "text": "静态发布",
+            "active": false
+          }
+        ],
+        "toc": [
+          {
+            "href": "#安装与配置",
+            "text": "安装与配置"
+          },
+          {
+            "href": "#vite-配置",
+            "text": "Vite 配置"
+          },
+          {
+            "href": "#部署子路径",
+            "text": "部署子路径"
+          },
+          {
+            "href": "#构建产物",
+            "text": "构建产物"
+          },
+          {
+            "href": "#重复标题",
+            "text": "重复标题"
+          },
+          {
+            "href": "#重复标题-2",
+            "text": "重复标题"
+          },
+          {
+            "href": "#安装-uichat-mira-folio",
+            "text": "安装 @uichat-mira/folio"
+          },
+          {
+            "href": "#explicit-readable-id",
+            "text": "显式 ID 标题"
+          }
+        ],
+        "pager": [
+          {
+            "href": "/folio/docs/guide/second",
+            "text": "下一篇运行时组合",
+            "direction": "next"
+          }
+        ],
+        "headings": [
+          {
+            "depth": 2,
+            "id": "安装与配置",
+            "text": "安装与配置#"
+          },
+          {
+            "depth": 3,
+            "id": "vite-配置",
+            "text": "Vite 配置#"
+          },
+          {
+            "depth": 4,
+            "id": "部署子路径",
+            "text": "部署子路径#"
+          },
+          {
+            "depth": 4,
+            "id": "构建产物",
+            "text": "构建产物#"
+          },
+          {
+            "depth": 2,
+            "id": "重复标题",
+            "text": "重复标题#"
+          },
+          {
+            "depth": 2,
+            "id": "重复标题-2",
+            "text": "重复标题#"
+          },
+          {
+            "depth": 2,
+            "id": "安装-uichat-mira-folio",
+            "text": "安装 @uichat-mira/folio#"
+          },
+          {
+            "depth": 2,
+            "id": "explicit-readable-id",
+            "text": "显式 ID 标题"
+          }
+        ],
+        "allAnchors": [
+          {
+            "class": "folio-brand",
+            "href": "/folio",
+            "data-discover": "true",
+            "text": "FOL-008 Navigation Fixture"
+          },
+          {
+            "class": "active",
+            "aria-current": "page",
+            "href": "/folio/docs/guide/intro",
+            "data-discover": "true",
+            "text": "入门"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/second",
+            "data-discover": "true",
+            "text": "运行时"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/third",
+            "data-discover": "true",
+            "text": "静态发布"
+          },
+          {
+            "class": "active",
+            "aria-current": "page",
+            "href": "/folio/docs/guide/intro",
+            "data-discover": "true",
+            "text": "入门：导航对照"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/second",
+            "data-discover": "true",
+            "text": "运行时组合"
+          },
+          {
+            "class": "",
+            "href": "/folio/docs/guide/third",
+            "data-discover": "true",
+            "text": "静态发布"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#安装与配置",
+            "aria-label": "链接到 安装与配置",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#vite-配置",
+            "aria-label": "链接到 Vite 配置",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#部署子路径",
+            "aria-label": "链接到 部署子路径",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#构建产物",
+            "aria-label": "链接到 构建产物",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#重复标题",
+            "aria-label": "链接到 重复标题",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#重复标题-2",
+            "aria-label": "链接到 重复标题",
+            "text": "#"
+          },
+          {
+            "class": "md-anchor",
+            "href": "#安装-uichat-mira-folio",
+            "aria-label": "链接到 安装 <code>@uichat-mira/folio</code>",
+            "text": "#"
+          },
+          {
+            "class": "folio-page-nav__next",
+            "href": "/folio/docs/guide/second",
+            "data-discover": "true",
+            "text": "下一篇运行时组合"
+          },
+          {
+            "class": "",
+            "href": "#安装与配置",
+            "text": "安装与配置"
+          },
+          {
+            "class": "",
+            "href": "#vite-配置",
+            "text": "Vite 配置"
+          },
+          {
+            "class": "",
+            "href": "#部署子路径",
+            "text": "部署子路径"
+          },
+          {
+            "class": "",
+            "href": "#构建产物",
+            "text": "构建产物"
+          },
+          {
+            "class": "",
+            "href": "#重复标题",
+            "text": "重复标题"
+          },
+          {
+            "class": "",
+            "href": "#重复标题-2",
+            "text": "重复标题"
+          },
+          {
+            "class": "",
+            "href": "#安装-uichat-mira-folio",
+            "text": "安装 @uichat-mira/folio"
+          },
+          {
+            "class": "",
+            "href": "#explicit-readable-id",
+            "text": "显式 ID 标题"
+          }
+        ],
+        "hasDocnav": true,
+        "hasToc": true,
+        "hasPager": true,
+        "headingsMenu": true,
+        "hydrated": true
+      },
+      "staticTargets": [
+        {
+          "href": "/folio/docs/guide/intro/",
+          "ok": true,
+          "file": "docs/guide/intro/index.html"
+        },
+        {
+          "href": "/folio/docs/guide/second/",
+          "ok": true,
+          "file": "docs/guide/second/index.html"
+        },
+        {
+          "href": "/folio/docs/guide/third/",
+          "ok": true,
+          "file": "docs/guide/third/index.html"
+        },
+        {
+          "href": "/folio/docs/guide/second/",
+          "ok": true,
+          "file": "docs/guide/second/index.html"
+        }
+      ],
+      "tocResolution": [
+        {
+          "href": "#安装与配置",
+          "id": "安装与配置",
+          "existsInBody": true
+        },
+        {
+          "href": "#vite-配置",
+          "id": "vite-配置",
+          "existsInBody": true
+        },
+        {
+          "href": "#部署子路径",
+          "id": "部署子路径",
+          "existsInBody": true
+        },
+        {
+          "href": "#构建产物",
+          "id": "构建产物",
+          "existsInBody": true
+        },
+        {
+          "href": "#重复标题",
+          "id": "重复标题",
+          "existsInBody": true
+        },
+        {
+          "href": "#重复标题-2",
+          "id": "重复标题-2",
+          "existsInBody": true
+        },
+        {
+          "href": "#安装-uichat-mira-folio",
+          "id": "安装-uichat-mira-folio",
+          "existsInBody": true
+        },
+        {
+          "href": "#explicit-readable-id",
+          "id": "explicit-readable-id",
+          "existsInBody": true
+        }
+      ],
+      "reactTocResolution": [
+        {
+          "href": "#安装与配置",
+          "id": "安装与配置",
+          "existsInBody": true
+        },
+        {
+          "href": "#vite-配置",
+          "id": "vite-配置",
+          "existsInBody": true
+        },
+        {
+          "href": "#部署子路径",
+          "id": "部署子路径",
+          "existsInBody": true
+        },
+        {
+          "href": "#构建产物",
+          "id": "构建产物",
+          "existsInBody": true
+        },
+        {
+          "href": "#重复标题",
+          "id": "重复标题",
+          "existsInBody": true
+        },
+        {
+          "href": "#重复标题-2",
+          "id": "重复标题-2",
+          "existsInBody": true
+        },
+        {
+          "href": "#安装-uichat-mira-folio",
+          "id": "安装-uichat-mira-folio",
+          "existsInBody": true
+        },
+        {
+          "href": "#explicit-readable-id",
+          "id": "explicit-readable-id",
+          "existsInBody": true
+        }
+      ],
+      "duplicateIds": {
+        "static": [],
+        "react": []
+      }
+    }
+  }
+}
