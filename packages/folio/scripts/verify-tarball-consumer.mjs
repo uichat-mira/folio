@@ -181,7 +181,7 @@ try {
         "install",
         "--no-audit",
         "--no-fund",
-        `--registry=${registryUrl}`,
+        ...(registryMode ? [`--registry=${registryUrl}`] : []),
         installSpec,
         "@vitejs/plugin-react@^5",
         "@types/node@^24",
