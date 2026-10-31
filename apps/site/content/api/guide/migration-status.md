@@ -35,7 +35,7 @@ tags:
 
 - npm registry 首次发布：Registry 目前对 `@uichat-mira/folio` 返回 404，即该包尚未发布；
 - GitHub Release：尚未创建任何 Folio Release，因此 `publish.yml` 从未被触发，也还没有 Trusted Publishing 的成功运行记录；
-- 首发 tag：现有 `v0.1.0` 指向 2026-07-25 的历史 MiraDocs 提交 `7cbf4b9`，虽然属于 `prod` 祖先，但**不是 Folio 0.1.0 发布候选**。FOL-015 必须制定不覆盖历史的 tag/version 方案并对应修订发布校验；
+- 首发 tag：历史 `v0.1.0` 仍保留为 MiraDocs 记录；FOL-015 候选约定 Folio 使用 `folio-v0.1.0` 并在发布工作流检验该前缀及 `prod` 祖先。尚未创建新 tag、Release 或 npm 发布；
 - TypeScript：FOL-014 原始 tarball 复现了 `virtual:folio/content` 的 `TS2307`；当前源码候选随包提供声明，并补充无 workaround 的严格 `tsc` 门禁，仍待最终候选与 Registry 复验；
 - 最终 0.1.0 候选仍须在 FOL-013 锚点修复合入后重跑 FOL-014 导航/TOC 浏览器验收；
 - UIChat Mira 官网迁移：`uichat-mira/uichat-mira-docs@prod` 仍依赖 `@uichat-mira/docs@^0.1.1`，尚未成为 Folio consumer；
