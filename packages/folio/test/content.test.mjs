@@ -143,12 +143,12 @@ test("parsed TOC IDs match rendered headings for inline Markdown, entities and f
     '<h2 id="reserved">Explicit</h2>',
     "## !!!",
     "## ???",
-    "~~~md\\n## Inside fence\\n~~~",
+    "~~~md\n## Inside fence\n~~~",
   ].join("\n\n");
 
   const doc = parseFolioDoc("docs/anchors.md", source);
   const rendered = renderFolioMarkdown(doc.body, { removeH1: true });
-  const renderedIds = [...rendered.matchAll(/<h[2-4]\\b[^>]*\\bid="([^"]+)"/gi)]
+  const renderedIds = [...rendered.matchAll(/<h[2-4]\b[^>]*\bid="([^"]+)"/gi)]
     .map((match) => match[1]);
 
   assert.deepEqual(doc.headings.map((heading) => heading.id), [
