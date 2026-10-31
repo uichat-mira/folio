@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { validateReview, buildPrompt, renderComment, MARKER, MODEL } from "./review.mjs";
+import { validateReview, buildPrompt, renderComment, MARKER, MODEL, configureOpencodeRuntimePath } from "./review.mjs";
 
 const context = {
   repository: "uichat-mira/folio",
@@ -68,4 +68,13 @@ test("review workflow contains valid GitHub Actions expressions", async () => {
   assert.match(yaml, /issues: write/);
   assert.doesNotMatch(yaml, /runner\.temp/, "runner context must not be used in job-level env");
   assert.match(yaml, /FOLIO_REVIEW_CONTEXT_PATH=\$RUNNER_TEMP/, "runner path resolved in job step");
+});
+
+test("OpenCode SDK launcher resolves the pinned CLI bin directory", () => {
+  const env = { PATH: "/usr/bin" };
+  const path = configureOpencodeRuntimePath(
+    "/tmp/folio-opencode-runtime/node_modules/@opencode-ai/sdk/dist/index.js", env
+  );
+  assert.equal(path, "/tmp/folio-opencode-runtime/node_modules/.bin");
+  assert.equal(env.PATH, path + ":/usr/bin");
 });
