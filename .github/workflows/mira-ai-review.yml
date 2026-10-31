@@ -11,7 +11,7 @@ permissions:
   pull-requests: read
 
 concurrency:
-  group: folio-opencode-review-${ github.event.pull_request.number }}
+  group: folio-opencode-review-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
@@ -23,15 +23,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      FOLIO_REVIEW_CONTEXT_PATH: ${ runner.temp }}/folio-review-context.json
-      FOLIO_REVIEW_RESULT_PATH: ${ runner.temp }}/folio-review-result.json
+      FOLIO_REVIEW_CONTEXT_PATH: ${{ runner.temp }}/folio-review-context.json
+      FOLIO_REVIEW_RESULT_PATH: ${{ runner.temp }}/folio-review-result.json
 
     steps:
       # pull_request_target runs this trusted workflow from dev, never from PR head.
       - name: Checkout exact trusted base (never PR head)
         uses: actions/checkout@v4
         with:
-          ref: ${ github.event.pull_request.base.sha }}
+          ref: ${{ github.event.pull_request.base.sha }}
           persist-credentials: false
 
       - name: Set up Node for isolated OpenCode SDK
@@ -42,7 +42,7 @@ jobs:
       - name: Fetch exact PR diff and pinned organization review controls
         shell: bash
         env:
-          GH_TOKEN: ${ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
@@ -134,7 +134,7 @@ jobs:
       - name: Review PR with read-only OpenCode Go
         shell: bash
         env:
-          OPENCODE_GO_API_KEY: ${ secrets.AI_PROVIDER_OPENCODE_GO_KEY }}
+          OPENCODE_GO_API_KEY: ${{ secrets.AI_PROVIDER_OPENCODE_GO_KEY }}
         run: |
           set -euo pipefail
           cd "$RUNNER_TEMP/folio-review-workspace"
@@ -148,5 +148,5 @@ jobs:
       - name: Publish exact-SHA advisory PR comment
         shell: bash
         env:
-          GH_TOKEN: ${ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/ai-review/publish.mjs
