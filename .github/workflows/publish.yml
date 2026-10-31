@@ -39,7 +39,8 @@ jobs:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
           VERSION=$(node -p "require('./packages/folio/package.json').version")
-          test "${RELEASE_TAG}" = "v${VERSION}"
+          # Legacy v0.1.0 belongs to MiraDocs; Folio tags use a distinct prefix.
+          test "${RELEASE_TAG}" = "folio-v${VERSION}"
 
           git fetch origin prod --no-tags
           TAG_COMMIT=$(git rev-list -n 1 "${RELEASE_TAG}")

@@ -40,7 +40,8 @@
     "typecheck": "tsc --noEmit",
     "test": "node --test test/*.test.mjs",
     "prepack": "npm run build",
-    "pack:verify": "node scripts/verify-package.mjs"
+    "pack:verify": "node scripts/verify-package.mjs",
+    "pack:consumer": "node scripts/verify-tarball-consumer.mjs"
   },
   "dependencies": {
     "marked": "^15.0.12",

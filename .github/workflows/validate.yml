@@ -25,6 +25,7 @@ jobs:
           cache: npm
       - run: npm ci --no-audit --no-fund
       - run: npm run release:check
+      - run: node --test scripts/ai-review/review.test.mjs
 
   windows-package-check:
     runs-on: windows-latest
@@ -37,3 +38,50 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm run build -w @uichat-mira/folio
       - run: npm run pack:verify -w @uichat-mira/folio
+      - run: npm run pack:consumer -w @uichat-mira/folio
+
+  rc-browser-acceptance:
+    # Avoid paying for a real browser on every feature push. Run the exact
+    # independent Folio consumer on release-candidate and promotion PRs.
+    if: github.event_name == 'pull_request' && (startsWith(github.head_ref, 'feat/fol-015-') || github.base_ref == 'test' || github.base_ref == 'prod')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Clear historical FOL-014 evidence from runner working tree
+        run: |
+          rm -f docs/research/fol-014/results/acceptance.json
+          rm -f docs/research/fol-014/results/screenshots/*.png
+          rm -f docs/research/fol-014/results/dom-*.html
+      - name: Run final-candidate independent Chrome consumer
+        run: node docs/research/fol-014/run.mjs
+      - name: Gate browser findings, navigation and 40px tap targets
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from "node:fs";
+          const result = JSON.parse(readFileSync("docs/research/fol-014/results/acceptance.json", "utf8"));
+          const failures = result.checks.filter((item) => item.status === "FAIL");
+          if (failures.length) throw new Error("FOL-014 acceptance failed: " + failures.map((x) => x.id).join(", "));
+          for (const id of ["mobile-drawer", "mobile-toc", "mobile-tap-target-size", "console-errors", "types-virtual-module"]) {
+            const check = result.checks.find((x) => x.id === id);
+            if (check?.status !== "PASS") throw new Error(id + " is " + (check?.status ?? "missing"));
+          }
+          const mobile = result.browser?.result?.mobile;
+          const buttons = mobile?.light?.layout?.mobileBar?.buttons ?? [];
+          const drawer = mobile?.interactions?.find((x) => x.step.includes("open 菜单"))?.drawer?.closeButton;
+          if (buttons.length < 2 || buttons.some((x) => x.rect.height < 40) || !drawer || drawer.height < 40) {
+            throw new Error("React mobile navigation tap targets do not meet the 40px candidate contract");
+          }
+          console.log("FOL-014 browser candidate gate PASSED", result.summary, result.packageEvidence?.sha256);
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: folio-rc-browser-${{ github.run_id }}
+          path: docs/research/fol-014/results/
+          retention-days: 7
+          if-no-files-found: warn

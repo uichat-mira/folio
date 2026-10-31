@@ -1,7 +1,4 @@
 /// <reference types="vite/client" />
 
-declare module "virtual:folio/content" {
-  import type { FolioDoc } from "@uichat-mira/folio";
-  const docs: FolioDoc[];
-  export default docs;
-}
+// Folio now ships the virtual:folio/content ambient declaration in its
+// public package types; do not redeclare it in this consumer.
