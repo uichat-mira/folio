@@ -22,11 +22,13 @@ jobs:
       startsWith(github.event.pull_request.head.ref, 'feat/')
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    env:
-      FOLIO_REVIEW_CONTEXT_PATH: ${{ runner.temp }}/folio-review-context.json
-      FOLIO_REVIEW_RESULT_PATH: ${{ runner.temp }}/folio-review-result.json
-
     steps:
+      - name: Establish private runner-scoped review paths
+        shell: bash
+        run: |
+          echo "FOLIO_REVIEW_CONTEXT_PATH=$RUNNER_TEMP/folio-review-context.json" >> "$GITHUB_ENV"
+          echo "FOLIO_REVIEW_RESULT_PATH=$RUNNER_TEMP/folio-review-result.json" >> "$GITHUB_ENV"
+
       # pull_request_target runs this trusted workflow from dev, never from PR head.
       - name: Checkout exact trusted base (never PR head)
         uses: actions/checkout@v4
