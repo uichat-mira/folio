@@ -52,3 +52,18 @@ test("the model prompt distinguishes trusted contracts and untrusted diff", () =
   assert.match(text, /diff --git/);
   assert.ok(text.includes(context.headSha));
 });
+
+test("review workflow contains valid GitHub Actions expressions", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const { fileURLToPath } = await import("node:url");
+  const { resolve, dirname } = await import("node:path");
+  const path = resolve(dirname(fileURLToPath(import.meta.url)), "../../.github/workflows/mira-ai-review.yml");
+  const yaml = await readFile(path, "utf8");
+  const expressions = yaml.match(/\$\{\{[^\n{}]+\}\}/g) ?? [];
+  assert.equal(expressions.length, 7, "Every required Actions interpolation must have two opening braces");
+  assert.equal((yaml.match(/\$\{/g) ?? []).length, expressions.length, "No malformed Actions interpolation");
+  assert.match(yaml, /pull_request_target:/);
+  assert.match(yaml, /ready_for_review/);
+  assert.match(yaml, /github\.event\.pull_request\.base\.sha/);
+  assert.match(yaml, /issues: write/);
+});
