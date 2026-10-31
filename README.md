@@ -41,6 +41,10 @@ npm run dev
 
 The official self-hosted site lives in `apps/site`. The reusable package lives in `packages/folio`.
 
+## Engineering governance
+
+The [Folio engineering governance design draft](docs/engineering/folio-governance-design.md) records the proposed Core/UI/Build ownership, component-scoped CSS approach, public API compatibility requirements, npm release workflow improvements, and staged acceptance criteria. It is a **draft for maintainer review**, not an approved implementation or release authorization.
+
 ## Branch and release model
 
 ```text
