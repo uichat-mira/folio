@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import {
   existsSync,
-  mkdtempSync,
+  lstatSync,
   mkdirSync,
+  mkdtempSync,
   readFileSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -385,6 +387,141 @@ test("default document routes are validated before any static output", () => {
     );
     assert.equal(readFileSync(sentinel, "utf8"), "sentinel");
     assert.equal(existsSync(resolve(outDir, "escaped/index.html")), false);
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+// symlink / Windows junction 只能在支持的平台上创建；不支持时用例显式跳过而不是假装通过。
+function supportsLinks(kind) {
+  const base = mkdtempSync(resolve(tmpdir(), "folio-link-probe-"));
+  try {
+    if (kind === "dir") {
+      const target = resolve(base, "target");
+      mkdirSync(target);
+      symlinkSync(
+        target,
+        resolve(base, "link"),
+        process.platform === "win32" ? "junction" : "dir",
+      );
+      return true;
+    }
+    const file = resolve(base, "target.txt");
+    writeFileSync(file, "probe", "utf8");
+    symlinkSync(file, resolve(base, "link.txt"), "file");
+    return true;
+  } catch {
+    return false;
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+}
+
+const directoryLinkType = process.platform === "win32" ? "junction" : "dir";
+
+test("static site writer refuses routes that escape through an existing directory link", (t) => {
+  if (!supportsLinks("dir")) {
+    t.skip("this platform cannot create a directory symlink/junction here");
+    return;
+  }
+
+  const base = mkdtempSync(resolve(tmpdir(), "folio-escape-link-"));
+  const outDir = resolve(base, "out");
+  const outside = resolve(base, "outside");
+  try {
+    mkdirSync(outDir, { recursive: true });
+    mkdirSync(outside, { recursive: true });
+    writeFileSync(resolve(outDir, "index.html"), template, "utf8");
+    const sentinel = resolve(outside, "index.html");
+    writeFileSync(sentinel, "sentinel", "utf8");
+
+    // 词法上 /docs 完全合法；只有真实路径暴露出这是越界链接。
+    symlinkSync(outside, resolve(outDir, "docs"), directoryLinkType);
+    assert.equal(
+      lstatSync(resolve(outDir, "docs")).isSymbolicLink(),
+      true,
+      "fixture precondition: docs must be a directory link",
+    );
+
+    assert.throws(
+      () =>
+        writeFolioStaticSite(context(outDir), {
+          routes: () => [
+            {
+              path: "/docs",
+              title: "Linked",
+              description: "Escape through an existing directory link",
+              body: "<main>Linked</main>",
+            },
+          ],
+        }),
+      (error) => {
+        assert.match(
+          error.message,
+          /resolves outside of the output directory/,
+        );
+        assert.ok(error.message.includes(JSON.stringify(resolve(outDir, "docs"))));
+        return true;
+      },
+    );
+
+    assert.equal(readFileSync(sentinel, "utf8"), "sentinel");
+
+    // 对照：无链接的正常嵌套路由仍然可以写入。
+    writeFolioStaticSite(context(outDir), {
+      routes: () => [
+        {
+          path: "/guide/intro",
+          title: "Intro",
+          description: "Valid route",
+          body: "<main>Guide intro</main>",
+        },
+      ],
+    });
+    assert.match(
+      readFileSync(resolve(outDir, "guide/intro/index.html"), "utf8"),
+      /Guide intro/,
+    );
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test("static site writer refuses an existing symlink at the target file", (t) => {
+  if (!supportsLinks("file")) {
+    t.skip("this platform cannot create a file symlink here");
+    return;
+  }
+
+  const base = mkdtempSync(resolve(tmpdir(), "folio-escape-target-link-"));
+  const outDir = resolve(base, "out");
+  const outside = resolve(base, "outside");
+  try {
+    mkdirSync(outDir, { recursive: true });
+    mkdirSync(outside, { recursive: true });
+    writeFileSync(resolve(outDir, "index.html"), template, "utf8");
+    mkdirSync(resolve(outDir, "docs"), { recursive: true });
+
+    const sentinel = resolve(outside, "index.html");
+    writeFileSync(sentinel, "sentinel", "utf8");
+    symlinkSync(sentinel, resolve(outDir, "docs/index.html"), "file");
+
+    assert.throws(
+      () =>
+        writeFolioStaticSite(context(outDir), {
+          routes: () => [
+            {
+              path: "/docs",
+              title: "Linked file",
+              description: "Escape through an existing target file link",
+              body: "<main>Linked file</main>",
+            },
+          ],
+        }),
+      /existing target .* is a symbolic link/,
+    );
+
+    assert.equal(readFileSync(sentinel, "utf8"), "sentinel");
   } finally {
     rmSync(base, { recursive: true, force: true });
   }
