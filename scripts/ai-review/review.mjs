@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
+import { dirname, resolve, delimiter } from "node:path";
 
 export const MODEL = "opencode-go/deepseek-v4.1-flash";
 export const MARKER = "<!-- folio-opencode-review:v1 -->";
@@ -155,6 +156,14 @@ export function renderComment(ctx, result) {
   return lines.join("\n");
 }
 
+
+export function configureOpencodeRuntimePath(sdkEntry, env = process.env) {
+  if (typeof sdkEntry !== "string" || !sdkEntry.trim()) throw new Error("missing_sdk_entry");
+  const binPath = resolve(dirname(sdkEntry), "../../../.bin");
+  env.PATH = binPath + delimiter + (env.PATH ?? "");
+  return binPath;
+}
+
 async function main() {
   const ctx = JSON.parse(await readFile(process.env.FOLIO_REVIEW_CONTEXT_PATH, "utf8"));
   const outputPath = process.env.FOLIO_REVIEW_RESULT_PATH;
@@ -171,6 +180,8 @@ async function main() {
     delete process.env.OPENCODE_GO_API_KEY;
     let instance;
     try {
+      const binPath = configureOpencodeRuntimePath(process.env.OPENCODE_SDK_ENTRY);
+      console.log("Folio OpenCode executable directory configured:", binPath);
       const sdk = await import(pathToFileURL(process.env.OPENCODE_SDK_ENTRY).href);
       instance = await sdk.createOpencode({
         hostname: "127.0.0.1",
@@ -219,8 +230,25 @@ async function main() {
       result = { state: "COMPLETED", review: validateReview(structured) };
     } catch (error) {
       const known = ["prompt_timeout", "session_creation_failed", "structured_output_failure"];
-      result.reason = known.includes(error?.message) ? error.message : "opencode_execution_failed";
-      console.error("Folio OpenCode review unavailable:", result.reason);
+      const rawMessage = typeof error?.message === "string" ? error.message.toLowerCase() : "";
+      const errorName = typeof error?.name === "string" && /^[A-Za-z][A-Za-z0-9_.]{0,40}$/.test(error.name)
+        ? error.name : "Unknown";
+      const errorCode = typeof error?.code === "string" && /^[A-Z][A-Z0-9_]{0,32}$/.test(error.code)
+        ? error.code : "none";
+      const runtimeStage = rawMessage.includes("enoent") || rawMessage.includes("spawn") || rawMessage.includes("binary")
+        ? "runtime_start_failed"
+        : rawMessage.includes("cannot find") || rawMessage.includes("module not found")
+          ? "sdk_import_failed"
+          : rawMessage.includes("fetch failed") || rawMessage.includes("econn")
+            ? "network_unavailable"
+            : rawMessage.includes("401") || rawMessage.includes("403")
+              ? "provider_auth_or_permission"
+              : "opencode_execution_failed";
+      result.reason = known.includes(error?.message) ? error.message : runtimeStage;
+      // Do not print the original exception message or stack: a provider error could embed credential material.
+      console.error("Folio OpenCode review unavailable:", result.reason,
+        "error_class=" + errorName, "error_code=" + errorCode,
+        "http_status=" + (Number.isInteger(error?.status) ? error.status : "none"));
     } finally {
       try { await Promise.race([
         instance?.client?.instance?.dispose?.() ?? Promise.resolve(),

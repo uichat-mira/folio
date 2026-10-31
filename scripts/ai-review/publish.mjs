@@ -18,7 +18,15 @@ async function main() {
         ...(options.headers || {})
       }
     });
-    if (!response.ok) throw new Error("github_api_error_" + response.status);
+    if (!response.ok) {
+      const method = options.method || "GET";
+      const operation = path.includes("/pulls/") ? "read_pr"
+        : path.includes("/issues/comments/") ? "update_comment"
+          : method === "POST" ? "create_comment"
+            : "list_comments";
+      // Never log response bodies or token values; GitHub permission failures need only operation/status.
+      throw new Error("github_api_" + operation + "_http_" + response.status);
+    }
     return response.json();
   };
 
