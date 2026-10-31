@@ -97,7 +97,7 @@ Consumer applications remain responsible for branding, page composition, custom 
 Verified on 2026-11-01:
 
 - **Done** — `0.1.0` public npm bootstrap, independent Registry consumer verification, public entrypoints, local tarball checks and official site's workspace build.
-- **Pending** — GitHub `folio-v0.1.0` tag/Release record, npm Trusted Publisher/OIDC validation, and downstream Mira Docs migration. Historical MiraDocs `v0.1.0` stays untouched.
-- **Unconfirmed** — whether the Trusted Publisher entry already exists on npmjs.com; that setting is not publicly readable.
+- **Release lineage** — `0.1.0` was bootstrapped manually without a Folio GitHub Release. `0.1.1` is the first planned `folio-v0.1.1` GitHub Release / npm OIDC publish. Check the [GitHub Releases](https://github.com/uichat-mira/folio/releases) and [npm version](https://www.npmjs.com/package/@uichat-mira/folio) for actual publication status; this bundled README is not a live status feed.
+- **Separate work** — migrate downstream Mira Docs consumers from `@uichat-mira/docs`. Historical MiraDocs tag `v0.1.0` remains untouched. npm Trusted Publisher binding and its OIDC publish result must be verified through npm settings and GitHub Actions, not inferred from this README.
 
 The predecessor `@uichat-mira/docs` package stays available for existing consumers during migration.
