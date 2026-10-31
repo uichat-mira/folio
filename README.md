@@ -6,11 +6,25 @@ It turns structured Markdown in a repository into a stable content model, Vite i
 
 ## Install
 
+Folio starts a new npm package line at `0.1.0`. The package is **not published to the npm registry yet**; the command below is the intended installation once that release exists.
+
 ```bash
 npm install @uichat-mira/folio
 ```
 
-Folio starts a new npm package line at `0.1.0`.
+Until then, consumption is verified from the packed tarball rather than the registry:
+
+```bash
+npm run release:check
+```
+
+That builds the package, audits the packed file list, and installs the resulting tarball into an isolated Vite + React consumer.
+
+## Publication status
+
+Package identity, the public API, and isolated tarball verification are complete. The first npm publication, npm Trusted Publishing, and the `uichat-mira-docs` downstream migration are still open.
+
+The [migration status page](https://uichat-mira.github.io/folio/api/guide/migration-status/) records the current state with its evidence.
 
 ## What Folio provides
 
@@ -70,4 +84,4 @@ Folio itself does not carry compatibility aliases for the predecessor API. Exist
 
 - **uichat-mira/.github** — Organization policy, SOP, and canonical reusable Skills
 - **folio** — runtime, schemas, package, official site, and release pipeline
-- **uichat-mira-docs** — Mira website and first downstream migration target
+- **uichat-mira-docs** — Mira website and first downstream migration target; it still depends on `@uichat-mira/docs`
