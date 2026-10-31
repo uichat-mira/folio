@@ -38,3 +38,4 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm run build -w @uichat-mira/folio
       - run: npm run pack:verify -w @uichat-mira/folio
+      - run: npm run pack:consumer -w @uichat-mira/folio
