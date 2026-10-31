@@ -39,7 +39,7 @@ The package is ESM (`"type": "module"` with `import`/`default` export conditions
 | `@uichat-mira/folio/vite` | The `folio()` Vite plugin, `virtual:folio/content`, and the static publishing helpers and types |
 | `@uichat-mira/folio/styles.css` | The default design tokens and stylesheet (CSS only) |
 
-Peer requirements: React `^19`, React DOM `^19`, React Router DOM `^7`, and Vite `^7`. Node.js `>= 20` is required for the Vite/static build.
+Peer requirements: React `^19`, React DOM `^19`, React Router DOM `^7`, and Vite `^7`. Folio's own `engines.node` declares `>=20`, but the Vite 7 peer requires Node.js `20.19+` or `22.12+`; use Node 24 for the tested build and release workflow.
 
 ## Independent consumer verification and virtual module types
 
