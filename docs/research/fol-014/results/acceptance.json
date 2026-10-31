@@ -1,9 +1,9 @@
 {
   "meta": {
-    "generatedAt": "2026-10-31T19:50:27.176Z",
+    "generatedAt": "2026-10-31T19:53:06.178Z",
     "branch": "feat/fol-014-default-ui-acceptance",
-    "commit": "e0475295e1e8609453273c88932955d9d8d1716d",
-    "dirtyWorkingTree": true,
+    "commit": "471c605d8377484867f69607ca6deedd2238a0d6",
+    "dirtyWorkingTree": false,
     "packageSourceDirty": false,
     "node": "v24.9.0",
     "npm": "11.6.0",
@@ -17,7 +17,7 @@
     "tarball": "uichat-mira-folio-0.1.0.tgz",
     "sha256": "ebc5abe101ac9efc8d567ac0397c8e1a29efaba5611adecfaa456e80810ce6fa",
     "bytes": 26134,
-    "sourceCommit": "e0475295e1e8609453273c88932955d9d8d1716d",
+    "sourceCommit": "471c605d8377484867f69607ca6deedd2238a0d6",
     "sourceBranch": "feat/fol-014-default-ui-acceptance",
     "buildCommand": "npm run build -w @uichat-mira/folio",
     "packCommand": "npm pack --ignore-scripts",
@@ -32,7 +32,7 @@
       "typescript": "5.9.3"
     },
     "installedFrom": {
-      "path": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\folio-fol014-JWq1VC\\consumer\\node_modules\\@uichat-mira\\folio",
+      "path": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\folio-fol014-sITUmF\\consumer\\node_modules\\@uichat-mira\\folio",
       "isSymlink": "false"
     }
   },
@@ -191,7 +191,7 @@
           "url": {
             "pathname": "/docs/second",
             "hash": "",
-            "href": "http://127.0.0.1:5915/docs/second"
+            "href": "http://127.0.0.1:1103/docs/second"
           },
           "document": {
             "title": "Folio 默认文档站消费者验收",
@@ -475,7 +475,7 @@
           "url": {
             "pathname": "/docs/second",
             "hash": "",
-            "href": "http://127.0.0.1:5915/docs/second"
+            "href": "http://127.0.0.1:1103/docs/second"
           },
           "document": {
             "title": "Folio 默认文档站消费者验收",
@@ -887,7 +887,7 @@
           "url": {
             "pathname": "/docs/second",
             "hash": "",
-            "href": "http://127.0.0.1:5915/docs/second"
+            "href": "http://127.0.0.1:1103/docs/second"
           },
           "document": {
             "title": "Folio 默认文档站消费者验收",
@@ -1218,7 +1218,7 @@
           "url": {
             "pathname": "/docs/second",
             "hash": "",
-            "href": "http://127.0.0.1:5915/docs/second"
+            "href": "http://127.0.0.1:1103/docs/second"
           },
           "document": {
             "title": "Folio 默认文档站消费者验收",
@@ -1870,7 +1870,7 @@
         "url": {
           "pathname": "/docs/second",
           "hash": "",
-          "href": "http://127.0.0.1:5915/docs/second"
+          "href": "http://127.0.0.1:1103/docs/second"
         },
         "document": {
           "title": "Folio 默认文档站消费者验收",
@@ -2403,8 +2403,8 @@
     }
   ],
   "summary": {
-    "generatedAt": "2026-10-31T19:50:27.176Z",
-    "commit": "e0475295e1e8609453273c88932955d9d8d1716d",
+    "generatedAt": "2026-10-31T19:53:06.178Z",
+    "commit": "471c605d8377484867f69607ca6deedd2238a0d6",
     "passing": 22,
     "failing": 1
   }
