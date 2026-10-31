@@ -61,12 +61,27 @@ const required = [
   "dist/index.d.ts",
   "dist/vite.js",
   "dist/vite.d.ts",
+  "dist/virtual.d.ts",
   "dist/styles.css",
 ];
 
 for (const path of required) {
   assert.ok(files.has(path), `npm package is missing ${path}`);
 }
+
+// The declaration must be reachable from both publicly exported type files,
+// not merely present as an otherwise undiscoverable file in the archive.
+for (const name of ["index.d.ts", "vite.d.ts"]) {
+  const types = readFileSync(resolve(packageRoot, "dist", name), "utf8");
+  assert.ok(
+    types.startsWith('/// <reference path="./virtual.d.ts" />'),
+    `dist/${name} does not reference the packaged virtual module declaration`,
+  );
+}
+assert.match(
+  readFileSync(resolve(packageRoot, "dist/virtual.d.ts"), "utf8"),
+  /declare module "virtual:folio\\/content"/,
+);
 
 for (const path of files) {
   assert.ok(!path.startsWith("src/"), `source file leaked into package: ${path}`);
