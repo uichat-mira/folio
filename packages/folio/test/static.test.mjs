@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  existsSync,
   mkdtempSync,
   mkdirSync,
   readFileSync,
@@ -216,5 +217,175 @@ test("static document shell keeps mobile navigation without JavaScript", () => {
     assert.match(html, /<summary>页面导航<\/summary>/);
   } finally {
     rmSync(outDir, { recursive: true, force: true });
+  }
+});
+
+// 越界回归：(outDir, outside/index.html 哨兵文件)，越界路由恰好指向该哨兵。
+function escapeFixture(prefix) {
+  const base = mkdtempSync(resolve(tmpdir(), prefix));
+  const outDir = resolve(base, "out");
+  const outside = resolve(base, "outside");
+  mkdirSync(outDir, { recursive: true });
+  mkdirSync(outside, { recursive: true });
+  writeFileSync(resolve(outDir, "index.html"), template, "utf8");
+  const sentinel = resolve(outside, "index.html");
+  writeFileSync(sentinel, "sentinel", "utf8");
+  return { base, outDir, sentinel };
+}
+
+test("static site writer keeps valid nested routes inside outDir", () => {
+  const base = mkdtempSync(resolve(tmpdir(), "folio-nested-routes-"));
+  const outDir = resolve(base, "out");
+  try {
+    mkdirSync(outDir, { recursive: true });
+    writeFileSync(resolve(outDir, "index.html"), template, "utf8");
+
+    writeFolioStaticSite(context(outDir), {
+      routes: () => [
+        {
+          path: "/",
+          title: "Home",
+          description: "Home page",
+          body: "<main>Home</main>",
+        },
+        {
+          path: "/docs/guide/intro",
+          title: "Intro",
+          description: "Nested route",
+          body: "<main>Nested</main>",
+        },
+      ],
+    });
+
+    const nested = resolve(outDir, "docs/guide/intro/index.html");
+    assert.equal(existsSync(nested), true);
+    assert.match(readFileSync(nested, "utf8"), /Nested/);
+    assert.equal(existsSync(resolve(base, "docs")), false);
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test("static site writer refuses traversal routes without writing outside outDir", () => {
+  const { base, outDir, sentinel } = escapeFixture("folio-escape-");
+  try {
+    assert.throws(
+      () =>
+        writeFolioStaticSite(context(outDir), {
+          routes: () => [
+            {
+              path: "/docs/ok",
+              title: "Ok",
+              description: "Valid route",
+              body: "<main>Ok</main>",
+            },
+            {
+              path: "/../outside",
+              title: "Escaped",
+              description: "Traversal route",
+              body: "<main>Escaped</main>",
+            },
+          ],
+        }),
+      (error) => {
+        assert.match(error.message, /folio static route "\/\.\.\/outside"/);
+        assert.match(
+          error.message,
+          /path segment "\.\." escapes the output directory/,
+        );
+        assert.ok(error.message.includes(JSON.stringify(outDir)));
+        return true;
+      },
+    );
+
+    assert.equal(readFileSync(sentinel, "utf8"), "sentinel");
+    // 校验先于落盘：合法路由也不会留下半成品输出。
+    assert.equal(existsSync(resolve(outDir, "docs/ok/index.html")), false);
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test("static site writer refuses escapes that only appear after normalization", () => {
+  const { base, outDir, sentinel } = escapeFixture("folio-escape-normalized-");
+  try {
+    assert.throws(
+      () =>
+        writeFolioStaticSite(context(outDir), {
+          routes: () => [
+            {
+              path: "/guide/../../outside",
+              title: "Escaped",
+              description: "Traversal route",
+              body: "<main>Escaped</main>",
+            },
+          ],
+        }),
+      /path segment "\.\." escapes the output directory/,
+    );
+
+    assert.equal(readFileSync(sentinel, "utf8"), "sentinel");
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test("static site writer refuses ambiguous Windows path segments", () => {
+  const { base, outDir, sentinel } = escapeFixture("folio-escape-windows-");
+  try {
+    for (const path of ["/..\\\\outside", "/...", "/.. "]) {
+      assert.throws(
+        () =>
+          writeFolioStaticSite(context(outDir), {
+            routes: () => [
+              {
+                path,
+                title: "Bad",
+                description: "Bad route",
+                body: "<main>Bad</main>",
+              },
+            ],
+          }),
+        /folio static route/,
+        `expected ${JSON.stringify(path)} to be refused`,
+      );
+    }
+
+    assert.equal(readFileSync(sentinel, "utf8"), "sentinel");
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test("default document routes are validated before any static output", () => {
+  const { base, outDir, sentinel } = escapeFixture("folio-escape-default-");
+  try {
+    const docs = [
+      {
+        id: "escaped",
+        path: "/../outside",
+        sourcePath: "docs/escaped.md",
+        type: "doc",
+        title: "Escaped",
+        description: "Traversal doc",
+        group: "Guide",
+        collection: "Core",
+        section: "Start",
+        order: 1,
+        tags: [],
+        body: "## Escaped\nBody",
+        headings: [],
+        data: {},
+      },
+    ];
+
+    assert.throws(
+      () => writeFolioStaticSite({ ...context(outDir), docs }),
+      /path segment "\.\." escapes the output directory/,
+    );
+    assert.equal(readFileSync(sentinel, "utf8"), "sentinel");
+    assert.equal(existsSync(resolve(outDir, "escaped/index.html")), false);
+  } finally {
+    rmSync(base, { recursive: true, force: true });
   }
 });
