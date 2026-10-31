@@ -3,12 +3,14 @@
 // types resolve without any monorepo/workspace resolution. The same isolated
 // installation also builds a minimal Vite + React application, which proves
 // the Folio plugin discovers Markdown and that virtual:folio/content reaches a
-// real client bundle.
+// real client bundle, and then builds it once more with static generation on
+// to prove the plugin writes the published static site (index.html, content
+// page, 404.html, sitemap.xml, robots.txt).
 //
 // The acceptance evidence this produces is tied to one commit: it rebuilds
 // dist, packs the tarball, records its sha256, and installs that exact file
 // into a temporary directory outside the repository. One build, one pack and
-// one dependency installation cover both consumer checks so CI pays for them
+// one dependency installation cover all consumer checks so CI pays for them
 // only once.
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
@@ -26,6 +28,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { verifyStaticConsumer } from "./checks/static-consumer.mjs";
 import { verifyViteConsumer } from "./checks/vite-consumer.mjs";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
@@ -189,9 +192,15 @@ try {
   );
   log(`[types]    ok  tsc --noEmit (NodeNext, skipLibCheck=false) resolved the declarations`);
 
-  verifyViteConsumer({
+  const viteConsumer = verifyViteConsumer({
     consumerDir,
     fixtureDir: join(scriptDir, "fixtures", "vite-consumer"),
+    log,
+  });
+
+  verifyStaticConsumer({
+    consumerDir,
+    appDir: viteConsumer.appDir,
     log,
   });
 
