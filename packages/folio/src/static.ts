@@ -1,7 +1,9 @@
 import {
   existsSync,
+  lstatSync,
   mkdirSync,
   readFileSync,
+  realpathSync,
   writeFileSync,
 } from "node:fs";
 import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
@@ -118,7 +120,11 @@ function isTraversalSegment(segment: string): boolean {
 function routeOutputPath(outDir: string, path: string): string {
   const route = normalizeRoute(path);
   const root = resolve(outDir);
-  if (route === "/") return resolve(root, "index.html");
+  if (route === "/") {
+    const target = resolve(root, "index.html");
+    assertRealTargetInsideOutDir(path, root, target);
+    return target;
+  }
 
   const relativeRoute = route.slice(1);
   for (const segment of relativeRoute.split("/")) {
@@ -152,7 +158,84 @@ function routeOutputPath(outDir: string, path: string): string {
       `resolved output ${JSON.stringify(target)} is outside of the output directory`,
     );
   }
+
+  assertRealTargetInsideOutDir(path, root, target);
   return target;
+}
+
+// Windows 路径大小写不敏感，比较真实路径前先统一大小写，避免误判越界。
+function comparablePath(value: string): string {
+  return process.platform === "win32" ? value.toLowerCase() : value;
+}
+
+function isInsideOutDir(root: string, candidate: string): boolean {
+  const relativeCandidate = relative(
+    comparablePath(root),
+    comparablePath(candidate),
+  );
+  return (
+    relativeCandidate !== "" &&
+    !isAbsolute(relativeCandidate) &&
+    relativeCandidate !== ".." &&
+    !relativeCandidate.startsWith(`..${sep}`)
+  );
+}
+
+// 词法校验只保证字符串不越界；已存在的 symlink / Windows junction 会让后续
+// mkdirSync / writeFileSync 实际写到 outDir 之外，因此再按真实路径校验一次。
+// 尚不存在的层级由随后的写入新建，不会跟随旧链接。
+function assertRealTargetInsideOutDir(
+  path: string,
+  root: string,
+  target: string,
+): void {
+  if (!existsSync(root)) return;
+
+  const realRoot = realpathSync(root);
+  const segments = relative(root, target).split(sep);
+  let current = root;
+
+  for (const [index, segment] of segments.entries()) {
+    current = resolve(current, segment);
+
+    let stats;
+    try {
+      stats = lstatSync(current);
+    } catch {
+      return;
+    }
+
+    if (!stats.isSymbolicLink()) continue;
+
+    if (index === segments.length - 1) {
+      throw staticRoutePathError(
+        path,
+        root,
+        `existing target ${JSON.stringify(current)} is a symbolic link`,
+      );
+    }
+
+    let linked: string;
+    try {
+      linked = realpathSync(current);
+    } catch {
+      throw staticRoutePathError(
+        path,
+        root,
+        `existing path ${JSON.stringify(current)} is a dangling symbolic link`,
+      );
+    }
+
+    if (!isInsideOutDir(realRoot, linked)) {
+      throw staticRoutePathError(
+        path,
+        root,
+        `existing path ${JSON.stringify(current)} resolves outside of the output directory to ${JSON.stringify(linked)}`,
+      );
+    }
+
+    current = linked;
+  }
 }
 
 function dataList(value: unknown): string[] {
