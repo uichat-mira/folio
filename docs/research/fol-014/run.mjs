@@ -7,9 +7,9 @@
 // public entrypoints (root, `/vite`, `virtual:folio/content`).
 //
 // Shape: build package -> npm pack -> install the .tgz into a temporary
-// consumer outside the repository -> run `tsc` four times (app project,
-// entrypoint-only probe, virtual-module baseline, virtual-module with the
-// documented consumer declaration) -> `vite build` -> serve the SPA -> drive
+// consumer outside the repository -> run four strict `tsc` projects (app,
+// root, /vite and virtual module with no local declaration) -> `vite build`
+// -> serve the SPA -> drive
 // headless Chrome over the DevTools protocol at 1440x900 and 375x812 in light
 // and dark mode, clicking the real sidebar / TOC / pager / mobile drawer.
 //
@@ -20,9 +20,8 @@
 //
 // Usage: node docs/research/fol-014/run.mjs [--keep]
 // Requires Chrome/Edge; set FOLIO014_CHROME to override the search.
-// Exits non-zero only on infrastructure failure (install/build/browser). A
-// missing virtual-module declaration or a visual finding is evidence, not an
-// infrastructure failure, and is written into results/acceptance.json.
+// Exits non-zero on infrastructure failure or missing package-owned types.
+// Browser observations remain recorded in results/acceptance.json.
 import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { createServer } from "node:http";
@@ -601,7 +600,7 @@ async function main() {
   log(`[install]  ok  ${Object.entries(installed).map(([k, v]) => `${k}@${v}`).join(", ")}`);
   check("install-independent", "PASS", `tarball installed outside the repository; workspace link=${acceptance.packageEvidence.installedFrom.isSymlink}`);
 
-  // 2. TypeScript consumption, four real tsc runs.
+  // 2. TypeScript consumption: four independent strict tsc projects.
   const tsc = join(consumerDir, "node_modules", "typescript", "bin", "tsc");
   const runTsc = (project) => {
     const command = `node node_modules/typescript/bin/tsc -p ${project} --pretty false`;
@@ -629,7 +628,6 @@ async function main() {
     rootEntry: runTsc("tsconfig.types-root.json"),
     viteEntry: runTsc("tsconfig.types-vite.json"),
     virtualBaseline: runTsc("tsconfig.types-baseline.json"),
-    virtualDeclared: runTsc("tsconfig.types-declared.json"),
   };
   acceptance.types = typeRuns;
 
@@ -663,11 +661,6 @@ async function main() {
           .join(" | ")} (only-virtual-module=${baselineVirtualOnly})`,
   );
   check(
-    "types-virtual-module-with-consumer-declaration",
-    typeRuns.virtualDeclared.exitCode === 0 ? "PASS" : "FAIL",
-    `documented consumer workaround (types/virtual-folio.d.ts): tsc exit ${typeRuns.virtualDeclared.exitCode}`,
-  );
-  check(
     "types-app-project",
     typeRuns.app.exitCode === 0 ? "PASS" : "FAIL",
     `consumer app project (src/main.tsx + vite.config.ts): tsc exit ${typeRuns.app.exitCode}`,
@@ -676,11 +669,18 @@ async function main() {
     rootEntry: typeRuns.rootEntry.exitCode === 0 ? "PASS" : "FAIL",
     viteEntry: typeRuns.viteEntry.exitCode === 0 ? "PASS" : "FAIL",
     virtualModuleDefault: typeRuns.virtualBaseline.exitCode === 0 ? "PASS" : "FAIL",
-    virtualModuleWithDeclaration: typeRuns.virtualDeclared.exitCode === 0 ? "PASS" : "FAIL",
     appProject: typeRuns.app.exitCode === 0 ? "PASS" : "FAIL",
     baselineOnlyVirtualModule: baselineVirtualOnly,
     baselineDiagnosticCodes: [...baselineCodes],
   };
+
+  // A fixed virtual module type contract is a release gate: the harness must
+  // not produce fresh screenshots for a TypeScript-broken candidate.
+  for (const [name, result] of Object.entries(typeRuns)) {
+    if (result.exitCode !== 0) {
+      fail("types", `${name}: ${result.raw || `tsc exited ${result.exitCode}`}`);
+    }
+  }
 
   // 3. Build the default UI and confirm it is the real client bundle.
   const build = runNode(
