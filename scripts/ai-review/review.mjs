@@ -219,8 +219,25 @@ async function main() {
       result = { state: "COMPLETED", review: validateReview(structured) };
     } catch (error) {
       const known = ["prompt_timeout", "session_creation_failed", "structured_output_failure"];
-      result.reason = known.includes(error?.message) ? error.message : "opencode_execution_failed";
-      console.error("Folio OpenCode review unavailable:", result.reason);
+      const rawMessage = typeof error?.message === "string" ? error.message.toLowerCase() : "";
+      const errorName = typeof error?.name === "string" && /^[A-Za-z][A-Za-z0-9_.]{0,40}$/.test(error.name)
+        ? error.name : "Unknown";
+      const errorCode = typeof error?.code === "string" && /^[A-Z][A-Z0-9_]{0,32}$/.test(error.code)
+        ? error.code : "none";
+      const runtimeStage = rawMessage.includes("enoent") || rawMessage.includes("spawn") || rawMessage.includes("binary")
+        ? "runtime_start_failed"
+        : rawMessage.includes("cannot find") || rawMessage.includes("module not found")
+          ? "sdk_import_failed"
+          : rawMessage.includes("fetch failed") || rawMessage.includes("econn")
+            ? "network_unavailable"
+            : rawMessage.includes("401") || rawMessage.includes("403")
+              ? "provider_auth_or_permission"
+              : "opencode_execution_failed";
+      result.reason = known.includes(error?.message) ? error.message : runtimeStage;
+      // Do not print the original exception message or stack: a provider error could embed credential material.
+      console.error("Folio OpenCode review unavailable:", result.reason,
+        "error_class=" + errorName, "error_code=" + errorCode,
+        "http_status=" + (Number.isInteger(error?.status) ? error.status : "none"));
     } finally {
       try { await Promise.race([
         instance?.client?.instance?.dispose?.() ?? Promise.resolve(),
