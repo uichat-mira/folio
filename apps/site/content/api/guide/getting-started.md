@@ -35,15 +35,15 @@ npm run build
 
 ## 在 consumer 项目中接入
 
-package 发布后，consumer 使用：
+现在可从 npm Registry 安装 `0.1.0`：
 
 ```bash
 npm install @uichat-mira/folio
 ```
 
-`npm install` 只适用于首次 Registry 发布之后；当前 Registry 仍返回 404，完整状态见[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)。该契约同时说明可信 Markdown 边界与默认样式用法。
+`0.1.0` 已由维护者从生产提交手动发布，并通过真实 Registry 的独立消费者测试。接口与内容信任边界见[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)。
 
-FOL-014 原始独立 tarball 曾因虚拟模块缺少类型声明出现 `TS2307`。当前源码候选已将声明随包提供，并在独立 tarball 消费者中要求无本地 workaround 的严格类型检查。最终 Registry 版本还需验收，详见[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)。
+FOL-014 原始的虚拟模块 `TS2307` 已修复；正式发布的 npm Registry 包通过 NodeNext/Bundler 严格类型及 Vite/静态构建验收。
 
 React 入口（不再需要消费者自行声明虚拟模块）：
 
