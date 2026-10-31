@@ -27,6 +27,7 @@ tags:
 - 发布工作流已具备基础配置（`.github/workflows/publish.yml` 的 OIDC、版本和 `prod` 祖先校验）；但这不代表首次 Folio Release 已经可安全执行；
 - 独立 tarball 消费者验证已并入 `npm run release:check`，覆盖公开 JavaScript 入口及其类型、Vite 构建与静态产物；
 - FOL-014 [独立消费者验收](https://github.com/uichat-mira/folio/blob/dev/docs/research/fol-014-default-ui-acceptance.md) 已进入 `dev`：默认桌面/移动 UI 在 Chrome 156 下得到独立浏览器与截图证据；同时实测确认虚拟模块 TypeScript 声明缺口（不能把它说成类型全面通过）。
+- FOL-013 修复 Markdown 链接、`&`、HTML 实体标题的 TOC/正文 ID 不一致；保留既有正文锚点，加入跨层回归测试。
 
 ## 待完成
 
@@ -36,7 +37,7 @@ tags:
 - GitHub Release：尚未创建任何 Folio Release，因此 `publish.yml` 从未被触发，也还没有 Trusted Publishing 的成功运行记录；
 - 首发 tag：现有 `v0.1.0` 指向 2026-07-25 的历史 MiraDocs 提交 `7cbf4b9`，虽然属于 `prod` 祖先，但**不是 Folio 0.1.0 发布候选**。FOL-015 必须制定不覆盖历史的 tag/version 方案并对应修订发布校验；
 - TypeScript：独立 tarball 的 `virtual:folio/content` 导入当前报 `TS2307`，须在首次 Registry 发布前由包本身补齐类型并用不含消费者 workaround 的严格 `tsc` 验证；
-- FOL-013 标题锚点 PR #87 尚未合入，当前规范性消费者合同仍反映未修复的锚点行为；最终候选要同步更新合同并复跑 FOL-014 的导航验收；
+- 最终 0.1.0 候选仍须在 FOL-013 锚点修复合入后重跑 FOL-014 导航/TOC 浏览器验收；
 - UIChat Mira 官网迁移：`uichat-mira/uichat-mira-docs@prod` 仍依赖 `@uichat-mira/docs@^0.1.1`，尚未成为 Folio consumer；
 - Organization canonical Skill 的 Folio 化；
 - 下游完成迁移后，再决定 predecessor package 的 deprecation 时点。

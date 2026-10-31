@@ -265,14 +265,13 @@ Static links are directory URLs with a trailing slash (`/docs/guide/intro/`) bec
 
 ### Heading anchors and TOC
 
-`extractHeadings`/`doc.headings` and `renderFolioMarkdown` both build `h2`–`h4` anchors, including for headings written as raw HTML. Known 0.1.0 limitation: when a heading contains a Markdown link (for example `## [Text](https://example.com)`) or a bare `&`, the `doc.headings` id and the rendered heading id can differ, so the TOC link targets a non-existent anchor. Static and React pages show the same mismatch. Avoid those heading forms when an in-page TOC is part of the contract.
+`extractHeadings`/`doc.headings` and `renderFolioMarkdown` both build `h2`–`h4` anchors, including raw HTML headings. FOL-013 aligns TOC IDs with the rendered HTML for Markdown links (for example `## [Text](https://example.com)`), bare `&`, HTML entities, emphasis, and inline code. Duplicate headings and explicit `id` reservations remain supported. Punctuation-only headings receive addressable fallback IDs (`section`, `section-2`, etc.). Existing generated body IDs such as `faq-amp-支持` remain unchanged; the TOC now points to them, avoiding unnecessary breakage of existing anchor links. See FOL-013's cross-layer regression and the historical FOL-008 investigation for the original mismatch. Repeat FOL-014 browser navigation checks against the final release candidate after other pre-release fixes.
 
 ## Known limitations
 
 - Unreviewed Markdown, scraped content, and user submissions are not supported in 0.1.0; the default renderer has no sanitizer.
 - `styles.css` is not an isolated embed stylesheet, and no scoped `embed.css` entry exists in 0.1.0.
 - Custom static route bodies replace the no-JS document shell; the site must provide its own navigation if it needs it.
-- Headings containing Markdown links or a bare `&` can produce a TOC anchor that does not match the rendered heading id.
 
 ## Where this is verified
 
