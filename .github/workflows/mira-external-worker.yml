@@ -133,7 +133,7 @@ jobs:
         NODE_BIN="$(find /opt/hostedtoolcache/node -path '*/22.*/x64/bin/node' -type f -print | sort -V | tail -n 1)"
         test -n "$NODE_BIN"
         export PATH="$(dirname "$NODE_BIN"):$PATH"
-        node --version | grep -E '^v22\\.'
+        node --version | grep -E '^v22\.'
         npm ci --no-audit --no-fund
         npm run typecheck -w @uichat-mira/folio
         npm run build -w @uichat-mira/folio
