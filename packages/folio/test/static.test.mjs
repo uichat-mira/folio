@@ -167,6 +167,48 @@ test("duplicate and slash-equivalent static routes fail before any output", () =
   }
 });
 
+test("static routes with dot-segment aliases cannot overwrite the same output file", () => {
+  for (const [firstPath, secondPath, expectedOutput] of [
+    ["/guide", "/guide/.", "guide/index.html"],
+    ["/guide", "/guide/./", "guide/index.html"],
+    ["/", "/.", "index.html"],
+  ]) {
+    const outDir = mkdtempSync(resolve(tmpdir(), "folio-route-dot-alias-"));
+    try {
+      writeFileSync(resolve(outDir, "index.html"), template, "utf8");
+      assert.throws(
+        () =>
+          writeFolioStaticSite(context(outDir), {
+            routes: () => [
+              { path: firstPath, title: "First page", description: "First", body: "<main>First</main>" },
+              { path: "/valid-before", title: "Valid page", description: "Valid", body: "<main>Must not write</main>" },
+              { path: secondPath, title: "Alias page", description: "Alias", body: "<main>Second</main>" },
+            ],
+          }),
+        (error) => {
+          assert.match(error.message, /folio static route conflict/);
+          assert.ok(error.message.includes(JSON.stringify(firstPath)));
+          assert.ok(error.message.includes(JSON.stringify(secondPath)));
+          assert.ok(error.message.includes('"First page"'));
+          assert.ok(error.message.includes('"Alias page"'));
+          assert.ok(error.message.includes("both write to"));
+          assert.ok(error.message.includes(expectedOutput.replaceAll("/", process.platform === "win32" ? "\\" : "/")));
+          return true;
+        },
+      );
+
+      assert.equal(readFileSync(resolve(outDir, "index.html"), "utf8"), template);
+      assert.equal(existsSync(resolve(outDir, "valid-before/index.html")), false);
+      assert.equal(existsSync(resolve(outDir, "guide/index.html")), false);
+      assert.equal(existsSync(resolve(outDir, "404.html")), false);
+      assert.equal(existsSync(resolve(outDir, "sitemap.xml")), false);
+      assert.equal(existsSync(resolve(outDir, "robots.txt")), false);
+    } finally {
+      rmSync(outDir, { recursive: true, force: true });
+    }
+  }
+});
+
 test("default Markdown content routes also reject normalized collisions", () => {
   const outDir = mkdtempSync(resolve(tmpdir(), "folio-doc-route-collision-"));
   try {
