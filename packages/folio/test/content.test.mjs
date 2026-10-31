@@ -4,6 +4,7 @@ import {
   extractHeadings,
   parseFrontmatter,
   parseFolioDoc,
+  renderFolioMarkdown,
   sourcePathToRoute,
 } from "../dist/index.js";
 
@@ -127,4 +128,44 @@ test("generated suffixes skip IDs reserved by later explicit headings", () => {
     ).map((heading) => heading.id),
     ["foo", "foo-3", "foo-2"],
   );
+});
+
+
+test("parsed TOC IDs match rendered headings for inline Markdown, entities and fallback slugs", () => {
+  const source = [
+    "## [链接标题](https://example.com)",
+    "### FAQ & 支持",
+    "#### API &amp; SDK",
+    "## **强调** 和 `代码`",
+    "## Repeat",
+    "## Repeat",
+    "## Reserved",
+    '<h2 id="reserved">Explicit</h2>',
+    "## !!!",
+    "## ???",
+    "~~~md\\n## Inside fence\\n~~~",
+  ].join("\n\n");
+
+  const doc = parseFolioDoc("docs/anchors.md", source);
+  const rendered = renderFolioMarkdown(doc.body, { removeH1: true });
+  const renderedIds = [...rendered.matchAll(/<h[2-4]\\b[^>]*\\bid="([^"]+)"/gi)]
+    .map((match) => match[1]);
+
+  assert.deepEqual(doc.headings.map((heading) => heading.id), [
+    "链接标题",
+    "faq-amp-支持",
+    "api-amp-sdk",
+    "强调-和-代码",
+    "repeat",
+    "repeat-2",
+    "reserved-2",
+    "reserved",
+    "section",
+    "section-2",
+  ]);
+  assert.deepEqual(renderedIds, doc.headings.map((heading) => heading.id));
+  assert.equal(doc.headings[0].text, "链接标题");
+  assert.equal(doc.headings[1].text, "FAQ & 支持");
+  assert.equal(doc.headings[2].text, "API & SDK");
+  assert.equal(doc.headings.some((heading) => heading.text.includes("Inside fence")), false);
 });
