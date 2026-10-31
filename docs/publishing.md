@@ -2,6 +2,8 @@
 
 The npm package is published from `packages/folio`. The workspace root and official site remain private.
 
+The consumer-facing installation status, trusted-content boundary, and stylesheet scope are summarized in [docs/consumer-contract.md](consumer-contract.md).
+
 ## Release gate
 
 From the repository root:

@@ -68,3 +68,11 @@ const base = resolveGithubPagesBase(process.env.GITHUB_REPOSITORY);
 ```
 
 这也是 reference implementation 必须真实部署，而不能只在 localhost 截图的原因。
+
+## 无 JavaScript 时能做什么
+
+官方站通过 `staticRoutes.routes` 提供自己的静态 body，因此静态文档页在无 JavaScript 时只有正文：能阅读单篇文档，但没有跨文档侧栏、页内目录和上一篇/下一篇。
+
+库默认的 `staticRoutes: true` 不同：默认文档壳会生成侧栏、页内目录与上一篇/下一篇，链接都指向真实生成的文件，所以无 JavaScript 也能导航。
+
+两种模式的完整对比，以及静态目录 URL 与 React 路由尾斜杠的差异，见[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)。

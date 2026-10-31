@@ -4,6 +4,12 @@ Folio is a Git-native documentation, publishing, and project portal runtime for 
 
 It keeps Markdown, navigation, routing, SEO, and static deployment inside a stable package contract while allowing every consumer to keep its own UI, branding, and product-specific behavior.
 
+## 0.1.0 consumer contract
+
+Markdown rendering is trusted-content-only: raw HTML, `::: html`, and Callout bodies are preserved without sanitization. `styles.css` is a whole-site stylesheet, not an isolated embed stylesheet. The default static document shell works without JavaScript, while custom static route bodies are site-owned.
+
+The canonical boundary list, trusted Markdown example, stylesheet caveats, static-mode comparison, and known limitations live in the [Folio consumer contract](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md). That file is the single source of truth for these rules.
+
 ## Install
 
 The first Folio package release is `0.1.0`, and it is **not published to the npm registry yet**. The command below is the intended installation once that release exists:
@@ -50,9 +56,11 @@ import "@uichat-mira/folio/styles.css";
 
 Or consume the content model and virtual manifest from an existing React application while preserving its current pages and visual system.
 
+`@uichat-mira/folio/styles.css` is a whole-site default stylesheet: it targets `:root`, `*`, `body`, `a`, and `button, input`, so it assumes Folio owns the document. Importing it into an existing branded page affects that page globally, and 0.1.0 has no scoped embed entry. The [consumer contract](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md) lists the affected rules and the override guidance.
+
 ## Markdown compatibility rendering
 
-Consumers with custom page shells can reuse Folio' compatibility renderer instead of maintaining a second static Markdown pipeline:
+Consumers with custom page shells can reuse Folio's compatibility renderer instead of maintaining a second static Markdown pipeline:
 
 ```ts
 import { renderFolioMarkdown } from "@uichat-mira/folio";
@@ -62,7 +70,9 @@ const html = renderFolioMarkdown(source, {
 });
 ```
 
-It preserves `::: html` blocks, renders `::: tip` blocks, safely escapes code, provides a readable Mermaid fallback, and adds stable anchors to level-two and level-three headings.
+It preserves `::: html` blocks, renders `::: tip` blocks, escapes fenced code, provides a readable Mermaid fallback, and adds stable anchors to level-two through level-four headings (`h2`–`h4`).
+
+> **Trusted content only.** The renderer preserves raw HTML and does not sanitize event attributes, `javascript:` URLs, or unsafe SVG/MathML content. Pass only Markdown that was reviewed and merged by people you trust to publish on the site. Unreviewed pull requests, user submissions, and scraped pages are not supported input in 0.1.0. See the [consumer contract](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md).
 
 ## What the package owns
 
@@ -80,7 +90,7 @@ Consumer applications remain responsible for branding, page composition, custom 
 
 - `@uichat-mira/folio` — content model, React runtime, Markdown rendering, and configuration helpers
 - `@uichat-mira/folio/vite` — Markdown discovery, virtual manifests, and static output
-- `@uichat-mira/folio/styles.css` — default lightweight styles
+- `@uichat-mira/folio/styles.css` — whole-site default stylesheet (not an isolated embed stylesheet)
 
 ## Project status
 
