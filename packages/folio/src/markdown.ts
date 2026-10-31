@@ -182,13 +182,11 @@ export function renderFolioMarkdown(
         headingIds.useExplicit(explicitId);
         return "<h" + level + attributes + ">" + text + "</h" + level + ">";
       }
-      const base = slugify(text);
-      const id = base ? headingIds.allocate(base) : "";
-      return id
-        ? '<h' + level + attributes + ' id="' + id + '">' + text +
-            '<a class="md-anchor" href="#' + id + '" aria-label="链接到 ' +
-            escapeHtml(text) + '">#</a></h' + level + ">"
-        : "<h" + level + attributes + ">" + text + "</h" + level + ">";
+      // Match extractHeadings for headings whose visible text has no slug chars.
+      const id = headingIds.allocate(slugify(text) || "section");
+      return '<h' + level + attributes + ' id="' + id + '">' + text +
+        '<a class="md-anchor" href="#' + id + '" aria-label="链接到 ' +
+        escapeHtml(text) + '">#</a></h' + level + ">";
     },
   );
 }
