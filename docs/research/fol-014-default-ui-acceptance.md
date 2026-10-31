@@ -18,10 +18,11 @@
 本卡证明的事实分三层，互不替代：
 
 1. **包证据**：tarball `uichat-mira-folio-0.1.0.tgz`，sha256
-   `ebc5abe101ac9efc8d567ac0397c8e1a29efaba5611adecfaa456e80810ce6fa`，由
-   `e0475295e1e8609453273c88932955d9d8d1716d` 构建；消费者目录里
+   `ebc5abe101ac9efc8d567ac0397c8e1a29efaba5611adecfaa456e80810ce6fa`。它在本分支
+   `471c605` 上构建，该提交相对基线 `e047529` 只新增了 `docs/research/fol-014/`，
+   `packages/` 字节未变（`packageSourceDirty=false`、`dirtyWorkingTree=false`），
+   sha256 与 FOL-007 实测的 tarball 完全一致，说明包内容自 FOL-007 起未变。消费者目录里
    `node_modules/@uichat-mira/folio` 不是符号链接（`lstat.isSymbolicLink() === false`）。
-   该 sha256 与 FOL-007 实测的 tarball 完全一致，说明包内容自 FOL-007 起未变。
 2. **浏览器证据**：1440×900 与 375×812 两档视口、亮/暗两种主题共 6 张真实截图，
    外加 `acceptance.json` 里的 DOM 尺寸、computed styles、点击结果与 console 记录。
 3. **类型证据**：5 次真实 `tsc`。根入口与 `/vite` 入口 PASS；`virtual:folio/content`
@@ -35,7 +36,7 @@ styles、对比度数值与真实点击后的状态变化。
 
 | 输入 | 来源 | 校验 |
 | --- | --- | --- |
-| 包 | `npm run build -w @uichat-mira/folio` + `npm pack --ignore-scripts` | sha256 记录在 `results/acceptance.json` 的 `packageEvidence` |
+| 包 | `npm run build -w @uichat-mira/folio` + `npm pack --ignore-scripts` | sha256 记录在 `results/acceptance.json` 的 `packageEvidence`；`packages/` 相对 `e047529` 无改动 |
 | 样式 | tarball 内 `dist/styles.css` | sha256 `58d5e7094187684e633bfd3f83ba32935dd3e3a9f15511b0732804ec32493718`（与 FOL-007 一致） |
 | 默认 UI | `FolioApp`（根入口）、`folio()`（`/vite`）、`virtual:folio/content` | 构建产物内出现三篇文档标题 |
 | 消费页 | [`docs/research/fol-014/consumer/`](fol-014/consumer) | 3 篇 Markdown + 入口文件，无仓库内部路径 |
@@ -291,9 +292,10 @@ declare module "virtual:folio/content" {
    任何“看起来好看/不好看”的结论必须由 Mira 完成。
 2. **只测 headless Chrome**：没有 Firefox/Safari，也没有真机；触屏是被 CDP 的
    `mobile: true` 视口模拟的，不是真实手指。
-3. **绑定提交**：所有结论对应 `e0475295e1e8609453273c88932955d9d8d1716d` 打出的
-   tarball。若之后合并 FOL-013 对 heading ID/锚点规则的调整，导航与 TOC 高亮结果需要在
-   发布候选包上重跑本 harness 复核。
+3. **绑定提交**：所有结论对应本分支 `471c605` 上打出的 tarball（其 `packages/` 与
+   `e0475295e1e8609453273c88932955d9d8d1716d` 一致，sha256 `ebc5abe…`）。若之后合并
+   FOL-013 对 heading ID/锚点规则的调整，导航与 TOC 高亮结果需要在发布候选包上重跑本
+   harness 复核。
 4. **`staticRoutes: false`**：本站验收的是 React 运行时；静态产物的验收由 FOL-009 负责，
    两者不互相代替。
 5. **`release:check` 与 CI 不覆盖本 harness**：本卡没有把浏览器验收加进 CI（headless
