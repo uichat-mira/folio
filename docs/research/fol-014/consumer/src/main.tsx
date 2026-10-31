@@ -3,9 +3,8 @@ import { FolioApp, type FolioDoc } from "@uichat-mira/folio";
 import "@uichat-mira/folio/styles.css";
 import docs, { roots } from "virtual:folio/content";
 
-// No cast, no `any`: the default export is typed by the consumer-side
-// declaration in `types/virtual-folio.d.ts`. `roots` is used as well so the
-// named export of the virtual module is covered by the same type check.
+// No cast, no `any`, no consumer-side ambient declaration: both
+// exports must be typed by Folio's installed tarball.
 const content: FolioDoc[] = docs;
 
 const container = document.getElementById("root");
