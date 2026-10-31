@@ -66,6 +66,7 @@ test("review workflow contains valid GitHub Actions expressions", async () => {
   assert.match(yaml, /ready_for_review/);
   assert.match(yaml, /github\.event\.pull_request\.base\.sha/);
   assert.match(yaml, /issues: write/);
+  assert.match(yaml, /pull-requests: write/, "PR comment publisher requires PR write scope");
   assert.doesNotMatch(yaml, /runner\.temp/, "runner context must not be used in job-level env");
   assert.match(yaml, /FOLIO_REVIEW_CONTEXT_PATH=\$RUNNER_TEMP/, "runner path resolved in job step");
 });
