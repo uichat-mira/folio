@@ -195,6 +195,7 @@ try {
   const viteConsumer = verifyViteConsumer({
     consumerDir,
     fixtureDir: join(scriptDir, "fixtures", "vite-consumer"),
+    typescriptCli: typescriptCli(),
     log,
   });
 
