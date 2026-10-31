@@ -1,0 +1,152 @@
+name: Folio OpenCode Review
+
+on:
+  pull_request_target:
+    branches: [dev]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+concurrency:
+  group: folio-opencode-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    if: >-
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      startsWith(github.event.pull_request.head.ref, 'feat/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      FOLIO_REVIEW_CONTEXT_PATH: ${{ runner.temp }}/folio-review-context.json
+      FOLIO_REVIEW_RESULT_PATH: ${{ runner.temp }}/folio-review-result.json
+
+    steps:
+      # pull_request_target runs this trusted workflow from dev, never from PR head.
+      - name: Checkout exact trusted base (never PR head)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Set up Node for isolated OpenCode SDK
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Fetch exact PR diff and pinned organization review controls
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs';
+
+          const event = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
+          const payload = event.pull_request;
+          const repo = process.env.GITHUB_REPOSITORY;
+          const api = 'https://api.github.com';
+          async function request(path, accept = 'application/vnd.github+json') {
+            const response = await fetch(api + path, {
+              headers: {
+                Authorization: 'Bearer ' + process.env.GH_TOKEN,
+                Accept: accept,
+                'X-GitHub-Api-Version': '2022-11-28'
+              }
+            });
+            if (!response.ok) throw new Error('trusted_review_fetch_http_' + response.status);
+            return response;
+          }
+
+          const pr = await (await request('/repos/' + repo + '/pulls/' + payload.number)).json();
+          if (pr.head.sha !== payload.head.sha || pr.base.sha !== payload.base.sha ||
+              pr.base.ref !== 'dev' || !pr.head.ref.startsWith('feat/') ||
+              pr.head.repo.full_name !== repo || pr.draft) {
+            throw new Error('trusted_pr_identity_changed_or_ineligible');
+          }
+
+          const response = await request('/repos/' + repo + '/pulls/' + payload.number,
+            'application/vnd.github.v3.diff');
+          if ((response.headers.get('content-type') || '').includes('json')) {
+            throw new Error('trusted_review_diff_not_returned');
+          }
+          const rawDiff = await response.text();
+          if (!rawDiff.includes('diff --git ')) throw new Error('trusted_review_diff_empty');
+          const limit = 120000;
+          const policyCommit = await (await request('/repos/uichat-mira/.github/commits/main')).json();
+          const policySha = policyCommit.sha;
+          async function orgFile(path) {
+            const body = await (await request('/repos/uichat-mira/.github/contents/' + path +
+              '?ref=' + policySha)).json();
+            if (body.encoding !== 'base64') throw new Error('unexpected_org_file_encoding');
+            return Buffer.from(body.content.replace(/\s+/g, ''), 'base64').toString('utf8');
+          }
+
+          const context = {
+            repository: repo,
+            number: payload.number,
+            baseSha: payload.base.sha,
+            headSha: payload.head.sha,
+            organizationPolicySha: policySha,
+            organizationPolicy: await orgFile('ai-review/POLICY.md'),
+            outputContract: await orgFile('ai-review/OUTPUT-CONTRACT.md'),
+            profile: readFileSync('.ai/review-profile.md', 'utf8'),
+            agents: readFileSync('AGENTS.md', 'utf8'),
+            diff: rawDiff.slice(0, limit),
+            diffTruncated: rawDiff.length > limit
+          };
+          writeFileSync(process.env.FOLIO_REVIEW_CONTEXT_PATH, JSON.stringify(context), { mode: 0o600 });
+          console.log('Trusted Folio review input:', repo + '#' + payload.number,
+            'base=' + payload.base.sha, 'head=' + payload.head.sha,
+            'orgPolicy=' + policySha, 'diffTruncated=' + context.diffTruncated);
+          NODE
+
+      - name: Install pinned OpenCode runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          runtime="$RUNNER_TEMP/folio-opencode-runtime"
+          mkdir -p "$runtime"
+          npm install --prefix "$runtime" --no-audit --no-fund --package-lock=false \
+            opencode-ai@1.18.34 @opencode-ai/sdk@1.18.34
+          cat > "$runtime/resolve-sdk.mjs" <<'NODE'
+          import { fileURLToPath } from 'node:url';
+          process.stdout.write(fileURLToPath(import.meta.resolve('@opencode-ai/sdk')));
+          NODE
+          echo "OPENCODE_SDK_ENTRY=$(node "$runtime/resolve-sdk.mjs")" >> "$GITHUB_ENV"
+
+      - name: Prepare isolated read-only Folio base
+        shell: bash
+        run: |
+          set -euo pipefail
+          workspace="$RUNNER_TEMP/folio-review-workspace"
+          mkdir -p "$workspace/repository-base" "$RUNNER_TEMP/folio-review-home"
+          cp -a "$GITHUB_WORKSPACE/." "$workspace/repository-base/"
+          rm -rf "$workspace/repository-base/.git"
+          chmod -R a-w "$workspace/repository-base"
+
+      - name: Review PR with read-only OpenCode Go
+        shell: bash
+        env:
+          OPENCODE_GO_API_KEY: ${{ secrets.AI_PROVIDER_OPENCODE_GO_KEY }}
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/folio-review-workspace"
+          HOME="$RUNNER_TEMP/folio-review-home" \
+          XDG_CONFIG_HOME="$RUNNER_TEMP/folio-review-home/.config" \
+          XDG_DATA_HOME="$RUNNER_TEMP/folio-review-home/.local/share" \
+          XDG_CACHE_HOME="$RUNNER_TEMP/folio-review-home/.cache" \
+            node "$GITHUB_WORKSPACE/scripts/ai-review/review.mjs"
+
+      # Token is present ONLY in the publisher process, never in the OpenCode model process.
+      - name: Publish exact-SHA advisory PR comment
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/ai-review/publish.mjs
