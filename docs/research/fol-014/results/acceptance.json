@@ -1,0 +1,2411 @@
+{
+  "meta": {
+    "generatedAt": "2026-10-31T19:53:06.178Z",
+    "branch": "feat/fol-014-default-ui-acceptance",
+    "commit": "471c605d8377484867f69607ca6deedd2238a0d6",
+    "dirtyWorkingTree": false,
+    "packageSourceDirty": false,
+    "node": "v24.9.0",
+    "npm": "11.6.0",
+    "platform": "win32 x64",
+    "package": "@uichat-mira/folio@0.1.0",
+    "chromePath": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+    "fixture": "docs/research/fol-014/consumer",
+    "staticRoutes": false
+  },
+  "packageEvidence": {
+    "tarball": "uichat-mira-folio-0.1.0.tgz",
+    "sha256": "ebc5abe101ac9efc8d567ac0397c8e1a29efaba5611adecfaa456e80810ce6fa",
+    "bytes": 26134,
+    "sourceCommit": "471c605d8377484867f69607ca6deedd2238a0d6",
+    "sourceBranch": "feat/fol-014-default-ui-acceptance",
+    "buildCommand": "npm run build -w @uichat-mira/folio",
+    "packCommand": "npm pack --ignore-scripts",
+    "installCommand": "npm install --no-audit --no-fund ./uichat-mira-folio-0.1.0.tgz @vitejs/plugin-react@^5 typescript@^5.9.3 @types/react@^19 @types/react-dom@^19 @types/node@^24",
+    "buildConsumerCommand": "node node_modules/vite/bin/vite.js build",
+    "installedVersions": {
+      "@uichat-mira/folio": "0.1.0",
+      "react": "19.3.1",
+      "react-dom": "19.3.1",
+      "react-router-dom": "7.18.5",
+      "vite": "7.3.7",
+      "typescript": "5.9.3"
+    },
+    "installedFrom": {
+      "path": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\folio-fol014-sITUmF\\consumer\\node_modules\\@uichat-mira\\folio",
+      "isSymlink": "false"
+    }
+  },
+  "types": {
+    "app": {
+      "project": "tsconfig.json",
+      "command": "node node_modules/typescript/bin/tsc -p tsconfig.json --pretty false",
+      "exitCode": 0,
+      "raw": "",
+      "diagnostics": []
+    },
+    "rootEntry": {
+      "project": "tsconfig.types-root.json",
+      "command": "node node_modules/typescript/bin/tsc -p tsconfig.types-root.json --pretty false",
+      "exitCode": 0,
+      "raw": "",
+      "diagnostics": []
+    },
+    "viteEntry": {
+      "project": "tsconfig.types-vite.json",
+      "command": "node node_modules/typescript/bin/tsc -p tsconfig.types-vite.json --pretty false",
+      "exitCode": 0,
+      "raw": "",
+      "diagnostics": []
+    },
+    "virtualBaseline": {
+      "project": "tsconfig.types-baseline.json",
+      "command": "node node_modules/typescript/bin/tsc -p tsconfig.types-baseline.json --pretty false",
+      "exitCode": 2,
+      "raw": "types/consumer-entry.ts(23,29): error TS2307: Cannot find module 'virtual:folio/content' or its corresponding type declarations.",
+      "diagnostics": [
+        {
+          "file": "types/consumer-entry.ts",
+          "line": 23,
+          "code": "TS2307",
+          "message": "Cannot find module 'virtual:folio/content' or its corresponding type declarations."
+        }
+      ]
+    },
+    "virtualDeclared": {
+      "project": "tsconfig.types-declared.json",
+      "command": "node node_modules/typescript/bin/tsc -p tsconfig.types-declared.json --pretty false",
+      "exitCode": 0,
+      "raw": "",
+      "diagnostics": []
+    },
+    "summary": {
+      "rootEntry": "PASS",
+      "viteEntry": "PASS",
+      "virtualModuleDefault": "FAIL",
+      "virtualModuleWithDeclaration": "PASS",
+      "appProject": "PASS",
+      "baselineOnlyVirtualModule": true,
+      "baselineDiagnosticCodes": [
+        "TS2307"
+      ]
+    }
+  },
+  "build": {
+    "command": "node node_modules/vite/bin/vite.js build",
+    "assets": [
+      "abnfDiagram-VCTEODGH-C9NIJlk2.js",
+      "arc-DTaTgWDB.js",
+      "architectureDiagram-5GKGNRK7-CXicTtnc.js",
+      "blockDiagram-I7D4REHJ-RxjkcPUU.js",
+      "c4Diagram-7LVT6UL2-DhAA5fC8.js",
+      "channel-VjPfBE5A.js",
+      "chunk-2Q5K7J3B-CG8Qn6SN.js",
+      "chunk-5VM5RSS4-dBCkUpKo.js",
+      "chunk-F27PBJKO-4HVLqVhB.js",
+      "chunk-IMKFNOWR-DXRfuoax.js",
+      "chunk-JWPE2WC7-BZh6hRty.js",
+      "chunk-POPQ4Y6H-DS4LvM1P.js",
+      "chunk-SVP7TREG-NwLtWJtb.js",
+      "chunk-TICWLB2K-CN0N7pSb.js",
+      "chunk-XXDRQBXY-B5QN_YAj.js",
+      "classDiagram-v2-VYDZK3BY-BaK3yB_h.js",
+      "classDiagram-ZZMXUADV-BaK3yB_h.js",
+      "cose-bilkent-JH36ORCC-BeD3LPlW.js",
+      "cynefin-OW5HDTMX-D3JLG9XT.js",
+      "cynefinDiagram-5FMLGOSQ-D85Dqbqk.js",
+      "cytoscape.esm-BDkkwuE4.js",
+      "dagre-GXQ25YYZ-BzN1sIkC.js",
+      "defaultLocale-DX6XiGOO.js",
+      "diagram-S7CK7UJ4-BrsChD7Y.js",
+      "diagram-UQ7AKVKN-CiWl2OyN.js",
+      "diagram-VSXAHHWV-bLZpMezG.js",
+      "diagram-VX7I27RA-OYvLLa0n.js",
+      "diagram-Z3DM3KII-CNl1GcBN.js",
+      "ebnfDiagram-PWID7BFC-DiCg93Yb.js",
+      "erDiagram-RLTQ6QDP-i2xJGnh9.js",
+      "flowDiagram-HODETNUW-BwQdQMQ_.js",
+      "ganttDiagram-EL5Y4UJY-BiuCXxfX.js",
+      "gitGraphDiagram-WWUBYQGX-C_9aIjnr.js",
+      "index-ByJZJUCm.js",
+      "index-DqpBTcOP.css",
+      "infoDiagram-27XIBGKW-BLP4d8qI.js",
+      "init-Gi6I4Gst.js",
+      "ishikawaDiagram-5VMMS53U-BrJi84Vo.js",
+      "journeyDiagram-3NMN7TZE-D7hXfG12.js",
+      "kanban-definition-UXKFOSKX-BOvLT5YJ.js",
+      "katex-HP8lGamR.js",
+      "layout-CfxxmK0N.js",
+      "linear-DolVJZ4X.js",
+      "mermaid.core-B0zt_yOp.js",
+      "mindmap-definition-YA3MSWOX-DWqcNUKx.js",
+      "ordinal-Cboi1Yqb.js",
+      "pegDiagram-XKGWAZYB-CkYF7tGL.js",
+      "pieDiagram-E7YTZNPT-DlKNvhOV.js",
+      "quadrantDiagram-AXDQQJYC-CULtW6R1.js",
+      "railroadDiagram-O6MQD6OU-BXwABAC7.js",
+      "requirementDiagram-BXWQKSXE-By46vQR9.js",
+      "sankeyDiagram-P5KCCOFB-DnmqeX-5.js",
+      "sequenceDiagram-WJ2MYXX4-ED-cQ4kv.js",
+      "sizeCapture-INFHLROL-fQjhl1_U.js",
+      "stateDiagram-D77RDMKH-CDTSdVKV.js",
+      "stateDiagram-v2-MP3YSRHH-CfXXSpGK.js",
+      "swimlanes-42K2YHIH-o8X4Xioa.js",
+      "swimlanesDiagram-VR7AAH4N-Dwyt4tS1.js",
+      "timeline-definition-24CTP7MA-D1KQZ_yV.js",
+      "vennDiagram-4TSXK5OY-CncL3D3W.js",
+      "wardleyDiagram-VM6X3IG4-C_3OJGCL.js",
+      "xychartDiagram-S5SC5T6Z-DxWMIUEx.js"
+    ],
+    "distBytes": 3949097,
+    "indexHtml": "<!doctype html>\n<html lang=\"zh-CN\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>Folio 默认文档站消费者验收</title>\n    <script type=\"module\" crossorigin src=\"/assets/index-ByJZJUCm.js\"></script>\n    <link rel=\"stylesheet\" crossorigin href=\"/assets/index-DqpBTcOP.css\">\n  </head>\n  <body>\n    <div id=\"root\"></div>\n  </body>\n</html>\n",
+    "documentTitlesInBundle": [
+      "安装真实 tarball",
+      "默认文档界面",
+      "定制与边界"
+    ],
+    "staticFilesGenerated": [],
+    "css": {
+      "assets": [
+        "index-DqpBTcOP.css"
+      ],
+      "bytes": 18851,
+      "officialSiteCssPresent": false,
+      "tarballStylesheetSha256": "58d5e7094187684e633bfd3f83ba32935dd3e3a9f15511b0732804ec32493718"
+    }
+  },
+  "browser": {
+    "engine": "Chrome/156.0.8078.79",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "protocolVersion": "1.3",
+    "result": {
+      "desktop": {
+        "light": {
+          "viewport": {
+            "width": 1440,
+            "height": 900,
+            "devicePixelRatio": 1,
+            "scrollWidth": 1440,
+            "scrollHeight": 2217
+          },
+          "url": {
+            "pathname": "/docs/second",
+            "hash": "",
+            "href": "http://127.0.0.1:1103/docs/second"
+          },
+          "document": {
+            "title": "Folio 默认文档站消费者验收",
+            "lang": "zh-CN"
+          },
+          "theme": {
+            "attribute": "light",
+            "colorScheme": "light",
+            "stored": "light",
+            "prefersDark": false
+          },
+          "consumer": {
+            "roots": "docs",
+            "rootChildren": 1,
+            "shellPresent": true
+          },
+          "heading": {
+            "text": "默认文档界面",
+            "rect": {
+              "x": 378,
+              "y": 156,
+              "width": 724,
+              "height": 49,
+              "right": 1102,
+              "bottom": 205
+            },
+            "style": {
+              "font-size": "44px",
+              "line-height": "49.28px",
+              "font-weight": "500",
+              "color": "rgb(20, 20, 19)",
+              "font-family": "\"Cormorant Garamond\", Garamond, \"Times New Roman\", serif",
+              "margin-bottom": "0px"
+            }
+          },
+          "paragraph": {
+            "textLength": 83,
+            "style": {
+              "font-size": "16px",
+              "line-height": "28.48px",
+              "color": "rgb(61, 61, 58)",
+              "font-family": "\"Public Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+              "margin-top": "16px"
+            },
+            "contrast": 10.34
+          },
+          "readability": {
+            "h1Contrast": 17.5,
+            "bodyBackground": {
+              "background-color": "rgb(250, 249, 245)",
+              "color": "rgb(20, 20, 19)",
+              "margin-top": "0px",
+              "min-width": "320px"
+            }
+          },
+          "header": {
+            "visible": true,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 64,
+              "right": 1440,
+              "bottom": 64
+            },
+            "position": "sticky"
+          },
+          "layout": {
+            "sidebar": {
+              "visible": true,
+              "rect": {
+                "x": 80,
+                "y": 64,
+                "width": 250,
+                "height": 836,
+                "right": 330,
+                "bottom": 900
+              },
+              "collection": "消费者验收指南",
+              "sections": [
+                "开始",
+                "进阶"
+              ],
+              "links": [
+                {
+                  "text": "安装真实 tarball",
+                  "href": "/docs/intro",
+                  "current": null,
+                  "rect": {
+                    "x": 100,
+                    "y": 141,
+                    "width": 209,
+                    "height": 32,
+                    "right": 309,
+                    "bottom": 173
+                  }
+                },
+                {
+                  "text": "默认文档界面",
+                  "href": "/docs/second",
+                  "current": "page",
+                  "rect": {
+                    "x": 100,
+                    "y": 173,
+                    "width": 209,
+                    "height": 32,
+                    "right": 309,
+                    "bottom": 204
+                  }
+                },
+                {
+                  "text": "定制与边界",
+                  "href": "/docs/third",
+                  "current": null,
+                  "rect": {
+                    "x": 100,
+                    "y": 252,
+                    "width": 209,
+                    "height": 32,
+                    "right": 309,
+                    "bottom": 284
+                  }
+                }
+              ]
+            },
+            "toc": {
+              "visible": true,
+              "rect": {
+                "x": 1150,
+                "y": 88,
+                "width": 210,
+                "height": 248,
+                "right": 1360,
+                "bottom": 336
+              },
+              "items": [
+                {
+                  "text": "页面结构",
+                  "href": "#页面结构",
+                  "current": null
+                },
+                {
+                  "text": "侧栏与目录的分工",
+                  "href": "#侧栏与目录的分工",
+                  "current": null
+                },
+                {
+                  "text": "正文排版",
+                  "href": "#正文排版",
+                  "current": null
+                },
+                {
+                  "text": "明暗两种主题",
+                  "href": "#明暗两种主题",
+                  "current": null
+                },
+                {
+                  "text": "分页与相邻文档",
+                  "href": "#分页与相邻文档",
+                  "current": null
+                },
+                {
+                  "text": "可读性观察点",
+                  "href": "#可读性观察点",
+                  "current": null
+                }
+              ],
+              "activeHref": null
+            },
+            "pager": {
+              "visible": true,
+              "rect": {
+                "x": 378,
+                "y": 1955,
+                "width": 724,
+                "height": 90,
+                "right": 1102,
+                "bottom": 2045
+              },
+              "links": [
+                {
+                  "text": "上一篇安装真实 tarball",
+                  "href": "/docs/intro"
+                },
+                {
+                  "text": "下一篇定制与边界",
+                  "href": "/docs/third"
+                }
+              ]
+            },
+            "mobileBar": {
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "right": 0,
+                "bottom": 0
+              },
+              "buttons": [
+                {
+                  "text": "菜单",
+                  "disabled": false,
+                  "expanded": null,
+                  "rect": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 0,
+                    "height": 0,
+                    "right": 0,
+                    "bottom": 0
+                  }
+                },
+                {
+                  "text": "页面导航",
+                  "disabled": false,
+                  "expanded": "false",
+                  "rect": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 0,
+                    "height": 0,
+                    "right": 0,
+                    "bottom": 0
+                  }
+                }
+              ]
+            },
+            "main": {
+              "rect": {
+                "x": 330,
+                "y": 64,
+                "width": 820,
+                "height": 2077,
+                "right": 1150,
+                "bottom": 2141
+              }
+            },
+            "overflow": {
+              "horizontal": false,
+              "documentScrollWidth": 1440,
+              "bodyScrollWidth": 1440,
+              "offenders": [],
+              "contained": [],
+              "clipped": []
+            },
+            "overlap": {
+              "headerOverlapsH1": false,
+              "sidebarOverlapsMain": false,
+              "tocOverlapsMain": false,
+              "h1BelowHeader": 92
+            }
+          },
+          "content": {
+            "articlePresent": true,
+            "headingCount": 6,
+            "paragraphCount": 11,
+            "listItemCount": 4,
+            "tableCount": 1,
+            "codeBlockCount": 1,
+            "blockquoteCount": 1,
+            "firstHeadingId": "页面结构",
+            "markdownExcerpt": "这一页是 FOL-014 浏览器验收的主场景。页面里的所有结构都来自 @uichat-mira/folio 的默认实现，消费者只写了入口文件与三篇 Markdown。 页面结构# 默认界面把一次文档阅读拆成固定的几块： 顶部是品牌、主导航、主题切换与搜索入口； 左侧是当前文档集合的目录，按 section 分组； 中间"
+          },
+          "mobileMenu": {
+            "panelPresent": false,
+            "drawer": null,
+            "mobileToc": null,
+            "overlay": null
+          }
+        },
+        "dark": {
+          "viewport": {
+            "width": 1440,
+            "height": 900,
+            "devicePixelRatio": 1,
+            "scrollWidth": 1440,
+            "scrollHeight": 2217
+          },
+          "url": {
+            "pathname": "/docs/second",
+            "hash": "",
+            "href": "http://127.0.0.1:1103/docs/second"
+          },
+          "document": {
+            "title": "Folio 默认文档站消费者验收",
+            "lang": "zh-CN"
+          },
+          "theme": {
+            "attribute": "dark",
+            "colorScheme": "dark",
+            "stored": "dark",
+            "prefersDark": false
+          },
+          "consumer": {
+            "roots": "docs",
+            "rootChildren": 1,
+            "shellPresent": true
+          },
+          "heading": {
+            "text": "默认文档界面",
+            "rect": {
+              "x": 378,
+              "y": 156,
+              "width": 724,
+              "height": 49,
+              "right": 1102,
+              "bottom": 205
+            },
+            "style": {
+              "font-size": "44px",
+              "line-height": "49.28px",
+              "font-weight": "500",
+              "color": "rgb(250, 249, 245)",
+              "font-family": "\"Cormorant Garamond\", Garamond, \"Times New Roman\", serif",
+              "margin-bottom": "0px"
+            }
+          },
+          "paragraph": {
+            "textLength": 83,
+            "style": {
+              "font-size": "16px",
+              "line-height": "28.48px",
+              "color": "rgb(235, 230, 223)",
+              "font-family": "\"Public Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+              "margin-top": "16px"
+            },
+            "contrast": 14.43
+          },
+          "readability": {
+            "h1Contrast": 17,
+            "bodyBackground": {
+              "background-color": "rgb(24, 23, 21)",
+              "color": "rgb(250, 249, 245)",
+              "margin-top": "0px",
+              "min-width": "320px"
+            }
+          },
+          "header": {
+            "visible": true,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 64,
+              "right": 1440,
+              "bottom": 64
+            },
+            "position": "sticky"
+          },
+          "layout": {
+            "sidebar": {
+              "visible": true,
+              "rect": {
+                "x": 80,
+                "y": 64,
+                "width": 250,
+                "height": 836,
+                "right": 330,
+                "bottom": 900
+              },
+              "collection": "消费者验收指南",
+              "sections": [
+                "开始",
+                "进阶"
+              ],
+              "links": [
+                {
+                  "text": "安装真实 tarball",
+                  "href": "/docs/intro",
+                  "current": null,
+                  "rect": {
+                    "x": 100,
+                    "y": 141,
+                    "width": 209,
+                    "height": 32,
+                    "right": 309,
+                    "bottom": 173
+                  }
+                },
+                {
+                  "text": "默认文档界面",
+                  "href": "/docs/second",
+                  "current": "page",
+                  "rect": {
+                    "x": 100,
+                    "y": 173,
+                    "width": 209,
+                    "height": 32,
+                    "right": 309,
+                    "bottom": 204
+                  }
+                },
+                {
+                  "text": "定制与边界",
+                  "href": "/docs/third",
+                  "current": null,
+                  "rect": {
+                    "x": 100,
+                    "y": 252,
+                    "width": 209,
+                    "height": 32,
+                    "right": 309,
+                    "bottom": 284
+                  }
+                }
+              ]
+            },
+            "toc": {
+              "visible": true,
+              "rect": {
+                "x": 1150,
+                "y": 88,
+                "width": 210,
+                "height": 248,
+                "right": 1360,
+                "bottom": 336
+              },
+              "items": [
+                {
+                  "text": "页面结构",
+                  "href": "#页面结构",
+                  "current": null
+                },
+                {
+                  "text": "侧栏与目录的分工",
+                  "href": "#侧栏与目录的分工",
+                  "current": null
+                },
+                {
+                  "text": "正文排版",
+                  "href": "#正文排版",
+                  "current": null
+                },
+                {
+                  "text": "明暗两种主题",
+                  "href": "#明暗两种主题",
+                  "current": null
+                },
+                {
+                  "text": "分页与相邻文档",
+                  "href": "#分页与相邻文档",
+                  "current": null
+                },
+                {
+                  "text": "可读性观察点",
+                  "href": "#可读性观察点",
+                  "current": null
+                }
+              ],
+              "activeHref": null
+            },
+            "pager": {
+              "visible": true,
+              "rect": {
+                "x": 378,
+                "y": 1955,
+                "width": 724,
+                "height": 90,
+                "right": 1102,
+                "bottom": 2045
+              },
+              "links": [
+                {
+                  "text": "上一篇安装真实 tarball",
+                  "href": "/docs/intro"
+                },
+                {
+                  "text": "下一篇定制与边界",
+                  "href": "/docs/third"
+                }
+              ]
+            },
+            "mobileBar": {
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "right": 0,
+                "bottom": 0
+              },
+              "buttons": [
+                {
+                  "text": "菜单",
+                  "disabled": false,
+                  "expanded": null,
+                  "rect": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 0,
+                    "height": 0,
+                    "right": 0,
+                    "bottom": 0
+                  }
+                },
+                {
+                  "text": "页面导航",
+                  "disabled": false,
+                  "expanded": "false",
+                  "rect": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 0,
+                    "height": 0,
+                    "right": 0,
+                    "bottom": 0
+                  }
+                }
+              ]
+            },
+            "main": {
+              "rect": {
+                "x": 330,
+                "y": 64,
+                "width": 820,
+                "height": 2077,
+                "right": 1150,
+                "bottom": 2141
+              }
+            },
+            "overflow": {
+              "horizontal": false,
+              "documentScrollWidth": 1440,
+              "bodyScrollWidth": 1440,
+              "offenders": [],
+              "contained": [],
+              "clipped": []
+            },
+            "overlap": {
+              "headerOverlapsH1": false,
+              "sidebarOverlapsMain": false,
+              "tocOverlapsMain": false,
+              "h1BelowHeader": 92
+            }
+          },
+          "content": {
+            "articlePresent": true,
+            "headingCount": 6,
+            "paragraphCount": 11,
+            "listItemCount": 4,
+            "tableCount": 1,
+            "codeBlockCount": 1,
+            "blockquoteCount": 1,
+            "firstHeadingId": "页面结构",
+            "markdownExcerpt": "这一页是 FOL-014 浏览器验收的主场景。页面里的所有结构都来自 @uichat-mira/folio 的默认实现，消费者只写了入口文件与三篇 Markdown。 页面结构# 默认界面把一次文档阅读拆成固定的几块： 顶部是品牌、主导航、主题切换与搜索入口； 左侧是当前文档集合的目录，按 section 分组； 中间"
+          },
+          "mobileMenu": {
+            "panelPresent": false,
+            "drawer": null,
+            "mobileToc": null,
+            "overlay": null
+          }
+        },
+        "interactions": [
+          {
+            "step": "desktop: TOC link to 页面结构",
+            "clicked": {
+              "ok": true,
+              "tag": "a",
+              "text": "页面结构",
+              "href": "#页面结构"
+            },
+            "state": {
+              "pathname": "/docs/second",
+              "hash": "#%E9%A1%B5%E9%9D%A2%E7%BB%93%E6%9E%84",
+              "dataTheme": "light",
+              "h1": "默认文档界面",
+              "scrollY": 314,
+              "sidebarActiveHref": "/docs/second",
+              "tocActiveHref": "#页面结构",
+              "drawerPresent": false,
+              "mobileTocPresent": false,
+              "drawerLinkCount": 0,
+              "mobileTocLinkCount": 0,
+              "horizontalOverflow": false,
+              "scrollWidth": 1440,
+              "innerWidth": 1440
+            }
+          },
+          {
+            "step": "desktop: sidebar link to /docs/intro",
+            "clicked": {
+              "ok": true,
+              "tag": "a",
+              "text": "安装真实 tarball",
+              "href": "/docs/intro"
+            },
+            "state": {
+              "pathname": "/docs/intro",
+              "hash": "",
+              "dataTheme": "light",
+              "h1": "安装真实 tarball",
+              "scrollY": 0,
+              "sidebarActiveHref": "/docs/intro",
+              "tocActiveHref": null,
+              "drawerPresent": false,
+              "mobileTocPresent": false,
+              "drawerLinkCount": 0,
+              "mobileTocLinkCount": 0,
+              "horizontalOverflow": false,
+              "scrollWidth": 1440,
+              "innerWidth": 1440
+            }
+          },
+          {
+            "step": "desktop: pager next from /docs/intro",
+            "clicked": {
+              "ok": true,
+              "tag": "a",
+              "text": "下一篇默认文档界面",
+              "href": "/docs/second"
+            },
+            "state": {
+              "pathname": "/docs/second",
+              "hash": "",
+              "dataTheme": "light",
+              "h1": "默认文档界面",
+              "scrollY": 0,
+              "sidebarActiveHref": "/docs/second",
+              "tocActiveHref": "#页面结构",
+              "drawerPresent": false,
+              "mobileTocPresent": false,
+              "drawerLinkCount": 0,
+              "mobileTocLinkCount": 0,
+              "horizontalOverflow": false,
+              "scrollWidth": 1440,
+              "innerWidth": 1440
+            }
+          },
+          {
+            "step": "desktop: pager previous",
+            "clicked": {
+              "ok": true,
+              "tag": "a",
+              "text": "上一篇安装真实 tarball",
+              "href": "/docs/intro"
+            },
+            "state": {
+              "pathname": "/docs/intro",
+              "hash": "",
+              "dataTheme": "light",
+              "h1": "安装真实 tarball",
+              "scrollY": 0,
+              "sidebarActiveHref": "/docs/intro",
+              "tocActiveHref": null,
+              "drawerPresent": false,
+              "mobileTocPresent": false,
+              "drawerLinkCount": 0,
+              "mobileTocLinkCount": 0,
+              "horizontalOverflow": false,
+              "scrollWidth": 1440,
+              "innerWidth": 1440
+            }
+          }
+        ],
+        "theme": {
+          "step": "desktop: theme toggle to dark",
+          "via": "header-toggle",
+          "state": {
+            "pathname": "/docs/second",
+            "hash": "",
+            "dataTheme": "dark",
+            "h1": "默认文档界面",
+            "scrollY": 0,
+            "sidebarActiveHref": "/docs/second",
+            "tocActiveHref": null,
+            "drawerPresent": false,
+            "mobileTocPresent": false,
+            "drawerLinkCount": 0,
+            "mobileTocLinkCount": 0,
+            "horizontalOverflow": false,
+            "scrollWidth": 1440,
+            "innerWidth": 1440
+          }
+        },
+        "screenshots": [
+          "desktop-1440-light.png",
+          "desktop-1440-dark.png"
+        ]
+      },
+      "mobile": {
+        "light": {
+          "viewport": {
+            "width": 375,
+            "height": 812,
+            "devicePixelRatio": 1,
+            "scrollWidth": 375,
+            "scrollHeight": 2801
+          },
+          "url": {
+            "pathname": "/docs/second",
+            "hash": "",
+            "href": "http://127.0.0.1:1103/docs/second"
+          },
+          "document": {
+            "title": "Folio 默认文档站消费者验收",
+            "lang": "zh-CN"
+          },
+          "theme": {
+            "attribute": "light",
+            "colorScheme": "light",
+            "stored": "light",
+            "prefersDark": false
+          },
+          "consumer": {
+            "roots": "docs",
+            "rootChildren": 1,
+            "shellPresent": true
+          },
+          "heading": {
+            "text": "默认文档界面",
+            "rect": {
+              "x": 16,
+              "y": 186,
+              "width": 343,
+              "height": 40,
+              "right": 359,
+              "bottom": 226
+            },
+            "style": {
+              "font-size": "36px",
+              "line-height": "40.32px",
+              "font-weight": "500",
+              "color": "rgb(20, 20, 19)",
+              "font-family": "\"Cormorant Garamond\", Garamond, \"Times New Roman\", serif",
+              "margin-bottom": "0px"
+            }
+          },
+          "paragraph": {
+            "textLength": 83,
+            "style": {
+              "font-size": "16px",
+              "line-height": "28.48px",
+              "color": "rgb(61, 61, 58)",
+              "font-family": "\"Public Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+              "margin-top": "16px"
+            },
+            "contrast": 10.34
+          },
+          "readability": {
+            "h1Contrast": 17.5,
+            "bodyBackground": {
+              "background-color": "rgb(250, 249, 245)",
+              "color": "rgb(20, 20, 19)",
+              "margin-top": "0px",
+              "min-width": "320px"
+            }
+          },
+          "header": {
+            "visible": true,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 375,
+              "height": 64,
+              "right": 375,
+              "bottom": 64
+            },
+            "position": "sticky"
+          },
+          "layout": {
+            "sidebar": {
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "right": 0,
+                "bottom": 0
+              },
+              "collection": "消费者验收指南",
+              "sections": [
+                "开始",
+                "进阶"
+              ],
+              "links": [
+                {
+                  "text": "安装真实 tarball",
+                  "href": "/docs/intro",
+                  "current": null,
+                  "rect": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 0,
+                    "height": 0,
+                    "right": 0,
+                    "bottom": 0
+                  }
+                },
+                {
+                  "text": "默认文档界面",
+                  "href": "/docs/second",
+                  "current": "page",
+                  "rect": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 0,
+                    "height": 0,
+                    "right": 0,
+                    "bottom": 0
+                  }
+                },
+                {
+                  "text": "定制与边界",
+                  "href": "/docs/third",
+                  "current": null,
+                  "rect": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 0,
+                    "height": 0,
+                    "right": 0,
+                    "bottom": 0
+                  }
+                }
+              ]
+            },
+            "toc": {
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "right": 0,
+                "bottom": 0
+              },
+              "items": [
+                {
+                  "text": "页面结构",
+                  "href": "#页面结构",
+                  "current": null
+                },
+                {
+                  "text": "侧栏与目录的分工",
+                  "href": "#侧栏与目录的分工",
+                  "current": null
+                },
+                {
+                  "text": "正文排版",
+                  "href": "#正文排版",
+                  "current": null
+                },
+                {
+                  "text": "明暗两种主题",
+                  "href": "#明暗两种主题",
+                  "current": null
+                },
+                {
+                  "text": "分页与相邻文档",
+                  "href": "#分页与相邻文档",
+                  "current": null
+                },
+                {
+                  "text": "可读性观察点",
+                  "href": "#可读性观察点",
+                  "current": null
+                }
+              ],
+              "activeHref": null
+            },
+            "pager": {
+              "visible": true,
+              "rect": {
+                "x": 16,
+                "y": 2578,
+                "width": 343,
+                "height": 83,
+                "right": 359,
+                "bottom": 2661
+              },
+              "links": [
+                {
+                  "text": "上一篇安装真实 tarball",
+                  "href": "/docs/intro"
+                },
+                {
+                  "text": "下一篇定制与边界",
+                  "href": "/docs/third"
+                }
+              ]
+            },
+            "mobileBar": {
+              "visible": true,
+              "rect": {
+                "x": 0,
+                "y": 64,
+                "width": 375,
+                "height": 42,
+                "right": 375,
+                "bottom": 106
+              },
+              "buttons": [
+                {
+                  "text": "菜单",
+                  "disabled": false,
+                  "expanded": null,
+                  "rect": {
+                    "x": 16,
+                    "y": 74,
+                    "width": 38,
+                    "height": 21,
+                    "right": 54,
+                    "bottom": 95
+                  }
+                },
+                {
+                  "text": "页面导航",
+                  "disabled": false,
+                  "expanded": "false",
+                  "rect": {
+                    "x": 295,
+                    "y": 74,
+                    "width": 64,
+                    "height": 21,
+                    "right": 359,
+                    "bottom": 95
+                  }
+                }
+              ]
+            },
+            "main": {
+              "rect": {
+                "x": 16,
+                "y": 106,
+                "width": 343,
+                "height": 2619,
+                "right": 359,
+                "bottom": 2725
+              }
+            },
+            "overflow": {
+              "horizontal": false,
+              "documentScrollWidth": 375,
+              "bodyScrollWidth": 375,
+              "offenders": [],
+              "contained": [
+                {
+                  "tag": "span",
+                  "className": "language-xml",
+                  "left": 161,
+                  "right": 637,
+                  "width": 475,
+                  "container": "pre.",
+                  "containerScrollWidth": 627,
+                  "containerClientWidth": 343,
+                  "containerOverflowX": "auto"
+                },
+                {
+                  "tag": "span",
+                  "className": "hljs-tag",
+                  "left": 161,
+                  "right": 637,
+                  "width": 475
+                },
+                {
+                  "tag": "span",
+                  "className": "hljs-attr",
+                  "left": 392,
+                  "right": 472,
+                  "width": 79
+                },
+                {
+                  "tag": "span",
+                  "className": "hljs-attr",
+                  "left": 485,
+                  "right": 511,
+                  "width": 26
+                },
+                {
+                  "tag": "span",
+                  "className": "hljs-attr",
+                  "left": 544,
+                  "right": 571,
+                  "width": 26
+                },
+                {
+                  "tag": "span",
+                  "className": "hljs-string",
+                  "left": 577,
+                  "right": 617,
+                  "width": 40
+                }
+              ],
+              "clipped": []
+            },
+            "overlap": {
+              "headerOverlapsH1": false,
+              "sidebarOverlapsMain": false,
+              "tocOverlapsMain": false,
+              "h1BelowHeader": 122
+            }
+          },
+          "content": {
+            "articlePresent": true,
+            "headingCount": 6,
+            "paragraphCount": 11,
+            "listItemCount": 4,
+            "tableCount": 1,
+            "codeBlockCount": 1,
+            "blockquoteCount": 1,
+            "firstHeadingId": "页面结构",
+            "markdownExcerpt": "这一页是 FOL-014 浏览器验收的主场景。页面里的所有结构都来自 @uichat-mira/folio 的默认实现，消费者只写了入口文件与三篇 Markdown。 页面结构# 默认界面把一次文档阅读拆成固定的几块： 顶部是品牌、主导航、主题切换与搜索入口； 左侧是当前文档集合的目录，按 section 分组； 中间"
+          },
+          "mobileMenu": {
+            "panelPresent": false,
+            "drawer": null,
+            "mobileToc": null,
+            "overlay": null
+          }
+        },
+        "dark": {
+          "viewport": {
+            "width": 375,
+            "height": 812,
+            "devicePixelRatio": 1,
+            "scrollWidth": 375,
+            "scrollHeight": 2801
+          },
+          "url": {
+            "pathname": "/docs/second",
+            "hash": "",
+            "href": "http://127.0.0.1:1103/docs/second"
+          },
+          "document": {
+            "title": "Folio 默认文档站消费者验收",
+            "lang": "zh-CN"
+          },
+          "theme": {
+            "attribute": "dark",
+            "colorScheme": "dark",
+            "stored": "dark",
+            "prefersDark": false
+          },
+          "consumer": {
+            "roots": "docs",
+            "rootChildren": 1,
+            "shellPresent": true
+          },
+          "heading": {
+            "text": "默认文档界面",
+            "rect": {
+              "x": 16,
+              "y": 186,
+              "width": 343,
+              "height": 40,
+              "right": 359,
+              "bottom": 226
+            },
+            "style": {
+              "font-size": "36px",
+              "line-height": "40.32px",
+              "font-weight": "500",
+              "color": "rgb(250, 249, 245)",
+              "font-family": "\"Cormorant Garamond\", Garamond, \"Times New Roman\", serif",
+              "margin-bottom": "0px"
+            }
+          },
+          "paragraph": {
+            "textLength": 83,
+            "style": {
+              "font-size": "16px",
+              "line-height": "28.48px",
+              "color": "rgb(235, 230, 223)",
+              "font-family": "\"Public Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+              "margin-top": "16px"
+            },
+            "contrast": 14.43
+          },
+          "readability": {
+            "h1Contrast": 17,
+            "bodyBackground": {
+              "background-color": "rgb(24, 23, 21)",
+              "color": "rgb(250, 249, 245)",
+              "margin-top": "0px",
+              "min-width": "320px"
+            }
+          },
+          "header": {
+            "visible": true,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 375,
+              "height": 64,
+              "right": 375,
+              "bottom": 64
+            },
+            "position": "sticky"
+          },
+          "layout": {
+            "sidebar": {
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "right": 0,
+                "bottom": 0
+              },
+              "collection": "消费者验收指南",
+              "sections": [
+                "开始",
+                "进阶"
+              ],
+              "links": [
+                {
+                  "text": "安装真实 tarball",
+                  "href": "/docs/intro",
+                  "current": null,
+                  "rect": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 0,
+                    "height": 0,
+                    "right": 0,
+                    "bottom": 0
+                  }
+                },
+                {
+                  "text": "默认文档界面",
+                  "href": "/docs/second",
+                  "current": "page",
+                  "rect": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 0,
+                    "height": 0,
+                    "right": 0,
+                    "bottom": 0
+                  }
+                },
+                {
+                  "text": "定制与边界",
+                  "href": "/docs/third",
+                  "current": null,
+                  "rect": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 0,
+                    "height": 0,
+                    "right": 0,
+                    "bottom": 0
+                  }
+                }
+              ]
+            },
+            "toc": {
+              "visible": false,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "right": 0,
+                "bottom": 0
+              },
+              "items": [
+                {
+                  "text": "页面结构",
+                  "href": "#页面结构",
+                  "current": null
+                },
+                {
+                  "text": "侧栏与目录的分工",
+                  "href": "#侧栏与目录的分工",
+                  "current": null
+                },
+                {
+                  "text": "正文排版",
+                  "href": "#正文排版",
+                  "current": null
+                },
+                {
+                  "text": "明暗两种主题",
+                  "href": "#明暗两种主题",
+                  "current": null
+                },
+                {
+                  "text": "分页与相邻文档",
+                  "href": "#分页与相邻文档",
+                  "current": null
+                },
+                {
+                  "text": "可读性观察点",
+                  "href": "#可读性观察点",
+                  "current": null
+                }
+              ],
+              "activeHref": null
+            },
+            "pager": {
+              "visible": true,
+              "rect": {
+                "x": 16,
+                "y": 2578,
+                "width": 343,
+                "height": 83,
+                "right": 359,
+                "bottom": 2661
+              },
+              "links": [
+                {
+                  "text": "上一篇安装真实 tarball",
+                  "href": "/docs/intro"
+                },
+                {
+                  "text": "下一篇定制与边界",
+                  "href": "/docs/third"
+                }
+              ]
+            },
+            "mobileBar": {
+              "visible": true,
+              "rect": {
+                "x": 0,
+                "y": 64,
+                "width": 375,
+                "height": 42,
+                "right": 375,
+                "bottom": 106
+              },
+              "buttons": [
+                {
+                  "text": "菜单",
+                  "disabled": false,
+                  "expanded": null,
+                  "rect": {
+                    "x": 16,
+                    "y": 74,
+                    "width": 38,
+                    "height": 21,
+                    "right": 54,
+                    "bottom": 95
+                  }
+                },
+                {
+                  "text": "页面导航",
+                  "disabled": false,
+                  "expanded": "false",
+                  "rect": {
+                    "x": 295,
+                    "y": 74,
+                    "width": 64,
+                    "height": 21,
+                    "right": 359,
+                    "bottom": 95
+                  }
+                }
+              ]
+            },
+            "main": {
+              "rect": {
+                "x": 16,
+                "y": 106,
+                "width": 343,
+                "height": 2619,
+                "right": 359,
+                "bottom": 2725
+              }
+            },
+            "overflow": {
+              "horizontal": false,
+              "documentScrollWidth": 375,
+              "bodyScrollWidth": 375,
+              "offenders": [],
+              "contained": [
+                {
+                  "tag": "span",
+                  "className": "language-xml",
+                  "left": 161,
+                  "right": 637,
+                  "width": 475,
+                  "container": "pre.",
+                  "containerScrollWidth": 627,
+                  "containerClientWidth": 343,
+                  "containerOverflowX": "auto"
+                },
+                {
+                  "tag": "span",
+                  "className": "hljs-tag",
+                  "left": 161,
+                  "right": 637,
+                  "width": 475
+                },
+                {
+                  "tag": "span",
+                  "className": "hljs-attr",
+                  "left": 392,
+                  "right": 472,
+                  "width": 79
+                },
+                {
+                  "tag": "span",
+                  "className": "hljs-attr",
+                  "left": 485,
+                  "right": 511,
+                  "width": 26
+                },
+                {
+                  "tag": "span",
+                  "className": "hljs-attr",
+                  "left": 544,
+                  "right": 571,
+                  "width": 26
+                },
+                {
+                  "tag": "span",
+                  "className": "hljs-string",
+                  "left": 577,
+                  "right": 617,
+                  "width": 40
+                }
+              ],
+              "clipped": []
+            },
+            "overlap": {
+              "headerOverlapsH1": false,
+              "sidebarOverlapsMain": false,
+              "tocOverlapsMain": false,
+              "h1BelowHeader": 122
+            }
+          },
+          "content": {
+            "articlePresent": true,
+            "headingCount": 6,
+            "paragraphCount": 11,
+            "listItemCount": 4,
+            "tableCount": 1,
+            "codeBlockCount": 1,
+            "blockquoteCount": 1,
+            "firstHeadingId": "页面结构",
+            "markdownExcerpt": "这一页是 FOL-014 浏览器验收的主场景。页面里的所有结构都来自 @uichat-mira/folio 的默认实现，消费者只写了入口文件与三篇 Markdown。 页面结构# 默认界面把一次文档阅读拆成固定的几块： 顶部是品牌、主导航、主题切换与搜索入口； 左侧是当前文档集合的目录，按 section 分组； 中间"
+          },
+          "mobileMenu": {
+            "panelPresent": false,
+            "drawer": null,
+            "mobileToc": null,
+            "overlay": null
+          }
+        },
+        "interactions": [
+          {
+            "step": "mobile: open 菜单 drawer",
+            "clicked": {
+              "ok": true,
+              "tag": "button",
+              "text": "菜单",
+              "href": null
+            },
+            "state": {
+              "pathname": "/docs/second",
+              "hash": "",
+              "dataTheme": "light",
+              "h1": "默认文档界面",
+              "scrollY": 0,
+              "sidebarActiveHref": "/docs/second",
+              "tocActiveHref": null,
+              "drawerPresent": true,
+              "mobileTocPresent": false,
+              "drawerLinkCount": 3,
+              "mobileTocLinkCount": 0,
+              "horizontalOverflow": false,
+              "scrollWidth": 375,
+              "innerWidth": 375
+            },
+            "drawer": {
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 323,
+                "height": 812,
+                "right": 323,
+                "bottom": 812
+              },
+              "links": [
+                {
+                  "text": "安装真实 tarball",
+                  "href": "/docs/intro"
+                },
+                {
+                  "text": "默认文档界面",
+                  "href": "/docs/second"
+                },
+                {
+                  "text": "定制与边界",
+                  "href": "/docs/third"
+                }
+              ],
+              "closeButton": {
+                "x": 269,
+                "y": 13,
+                "width": 38,
+                "height": 21,
+                "right": 307,
+                "bottom": 34
+              }
+            },
+            "overlay": {
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 375,
+                "height": 812,
+                "right": 375,
+                "bottom": 812
+              },
+              "background": "rgba(15, 14, 13, 0.42)"
+            },
+            "overflow": {
+              "horizontal": false,
+              "documentScrollWidth": 375,
+              "bodyScrollWidth": 375,
+              "offenders": [],
+              "contained": [
+                {
+                  "tag": "span",
+                  "className": "language-xml",
+                  "left": 161,
+                  "right": 637,
+                  "width": 475,
+                  "container": "pre.",
+                  "containerScrollWidth": 627,
+                  "containerClientWidth": 343,
+                  "containerOverflowX": "auto"
+                },
+                {
+                  "tag": "span",
+                  "className": "hljs-tag",
+                  "left": 161,
+                  "right": 637,
+                  "width": 475
+                },
+                {
+                  "tag": "span",
+                  "className": "hljs-attr",
+                  "left": 392,
+                  "right": 472,
+                  "width": 79
+                },
+                {
+                  "tag": "span",
+                  "className": "hljs-attr",
+                  "left": 485,
+                  "right": 511,
+                  "width": 26
+                },
+                {
+                  "tag": "span",
+                  "className": "hljs-attr",
+                  "left": 544,
+                  "right": 571,
+                  "width": 26
+                },
+                {
+                  "tag": "span",
+                  "className": "hljs-string",
+                  "left": 577,
+                  "right": 617,
+                  "width": 40
+                }
+              ],
+              "clipped": []
+            }
+          },
+          {
+            "step": "mobile: close drawer via 关闭",
+            "clicked": {
+              "ok": true,
+              "tag": "button",
+              "text": "关闭",
+              "href": null
+            },
+            "state": {
+              "pathname": "/docs/second",
+              "hash": "",
+              "dataTheme": "light",
+              "h1": "默认文档界面",
+              "scrollY": 0,
+              "sidebarActiveHref": "/docs/second",
+              "tocActiveHref": null,
+              "drawerPresent": false,
+              "mobileTocPresent": false,
+              "drawerLinkCount": 0,
+              "mobileTocLinkCount": 0,
+              "horizontalOverflow": false,
+              "scrollWidth": 375,
+              "innerWidth": 375
+            }
+          },
+          {
+            "step": "mobile: select doc from drawer",
+            "clicked": {
+              "ok": true,
+              "tag": "a",
+              "text": "定制与边界",
+              "href": "/docs/third"
+            },
+            "state": {
+              "pathname": "/docs/third",
+              "hash": "",
+              "dataTheme": "light",
+              "h1": "定制与边界",
+              "scrollY": 0,
+              "sidebarActiveHref": "/docs/third",
+              "tocActiveHref": null,
+              "drawerPresent": false,
+              "mobileTocPresent": false,
+              "drawerLinkCount": 0,
+              "mobileTocLinkCount": 0,
+              "horizontalOverflow": false,
+              "scrollWidth": 375,
+              "innerWidth": 375
+            }
+          },
+          {
+            "step": "mobile: open 页面导航 panel",
+            "clicked": {
+              "ok": true,
+              "tag": "button",
+              "text": "页面导航",
+              "href": null
+            },
+            "state": {
+              "pathname": "/docs/third",
+              "hash": "",
+              "dataTheme": "light",
+              "h1": "定制与边界",
+              "scrollY": 0,
+              "sidebarActiveHref": "/docs/third",
+              "tocActiveHref": null,
+              "drawerPresent": false,
+              "mobileTocPresent": true,
+              "drawerLinkCount": 0,
+              "mobileTocLinkCount": 4,
+              "horizontalOverflow": false,
+              "scrollWidth": 375,
+              "innerWidth": 375
+            },
+            "mobileToc": {
+              "rect": {
+                "x": 12,
+                "y": 106,
+                "width": 351,
+                "height": 217,
+                "right": 363,
+                "bottom": 323
+              },
+              "links": [
+                {
+                  "text": "可定制的表面",
+                  "href": "#可定制的表面"
+                },
+                {
+                  "text": "没有提供的能力",
+                  "href": "#没有提供的能力"
+                },
+                {
+                  "text": "因此本卡不做什么",
+                  "href": "#因此本卡不做什么"
+                },
+                {
+                  "text": "回到验收",
+                  "href": "#回到验收"
+                }
+              ],
+              "closeButton": {
+                "x": 308,
+                "y": 120,
+                "width": 38,
+                "height": 21,
+                "right": 346,
+                "bottom": 141
+              }
+            },
+            "overflow": {
+              "horizontal": false,
+              "documentScrollWidth": 375,
+              "bodyScrollWidth": 375,
+              "offenders": [],
+              "contained": [],
+              "clipped": []
+            }
+          },
+          {
+            "step": "mobile: select heading from 页面导航",
+            "clicked": {
+              "ok": true,
+              "tag": "a",
+              "text": "可定制的表面",
+              "href": "#可定制的表面"
+            },
+            "state": {
+              "pathname": "/docs/third",
+              "hash": "#%E5%8F%AF%E5%AE%9A%E5%88%B6%E7%9A%84%E8%A1%A8%E9%9D%A2",
+              "dataTheme": "light",
+              "h1": "定制与边界",
+              "scrollY": 393,
+              "sidebarActiveHref": "/docs/third",
+              "tocActiveHref": "#可定制的表面",
+              "drawerPresent": false,
+              "mobileTocPresent": false,
+              "drawerLinkCount": 0,
+              "mobileTocLinkCount": 0,
+              "horizontalOverflow": false,
+              "scrollWidth": 375,
+              "innerWidth": 375
+            }
+          },
+          {
+            "step": "mobile: close 页面导航 panel via 关闭",
+            "clicked": {
+              "ok": true,
+              "tag": "button",
+              "text": "关闭",
+              "href": null
+            },
+            "state": {
+              "pathname": "/docs/third",
+              "hash": "#%E5%8F%AF%E5%AE%9A%E5%88%B6%E7%9A%84%E8%A1%A8%E9%9D%A2",
+              "dataTheme": "light",
+              "h1": "定制与边界",
+              "scrollY": 393,
+              "sidebarActiveHref": "/docs/third",
+              "tocActiveHref": "#可定制的表面",
+              "drawerPresent": false,
+              "mobileTocPresent": false,
+              "drawerLinkCount": 0,
+              "mobileTocLinkCount": 0,
+              "horizontalOverflow": false,
+              "scrollWidth": 375,
+              "innerWidth": 375
+            }
+          }
+        ],
+        "theme": {
+          "step": "mobile: theme toggle to dark",
+          "via": "mobile-panel",
+          "state": {
+            "pathname": "/docs/second",
+            "hash": "",
+            "dataTheme": "dark",
+            "h1": "默认文档界面",
+            "scrollY": 0,
+            "sidebarActiveHref": "/docs/second",
+            "tocActiveHref": null,
+            "drawerPresent": false,
+            "mobileTocPresent": false,
+            "drawerLinkCount": 0,
+            "mobileTocLinkCount": 0,
+            "horizontalOverflow": false,
+            "scrollWidth": 375,
+            "innerWidth": 375
+          }
+        },
+        "screenshots": [
+          "mobile-375-light.png",
+          "mobile-375-dark.png",
+          "mobile-375-drawer-open.png",
+          "mobile-375-toc-open.png"
+        ]
+      },
+      "systemDark": {
+        "viewport": {
+          "width": 1440,
+          "height": 900,
+          "devicePixelRatio": 1,
+          "scrollWidth": 1440,
+          "scrollHeight": 2217
+        },
+        "url": {
+          "pathname": "/docs/second",
+          "hash": "",
+          "href": "http://127.0.0.1:1103/docs/second"
+        },
+        "document": {
+          "title": "Folio 默认文档站消费者验收",
+          "lang": "zh-CN"
+        },
+        "theme": {
+          "attribute": "dark",
+          "colorScheme": "dark",
+          "stored": "dark",
+          "prefersDark": true
+        },
+        "consumer": {
+          "roots": "docs",
+          "rootChildren": 1,
+          "shellPresent": true
+        },
+        "heading": {
+          "text": "默认文档界面",
+          "rect": {
+            "x": 378,
+            "y": 156,
+            "width": 724,
+            "height": 49,
+            "right": 1102,
+            "bottom": 205
+          },
+          "style": {
+            "font-size": "44px",
+            "line-height": "49.28px",
+            "font-weight": "500",
+            "color": "rgb(250, 249, 245)",
+            "font-family": "\"Cormorant Garamond\", Garamond, \"Times New Roman\", serif",
+            "margin-bottom": "0px"
+          }
+        },
+        "paragraph": {
+          "textLength": 83,
+          "style": {
+            "font-size": "16px",
+            "line-height": "28.48px",
+            "color": "rgb(235, 230, 223)",
+            "font-family": "\"Public Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "margin-top": "16px"
+          },
+          "contrast": 14.43
+        },
+        "readability": {
+          "h1Contrast": 17,
+          "bodyBackground": {
+            "background-color": "rgb(24, 23, 21)",
+            "color": "rgb(250, 249, 245)",
+            "margin-top": "0px",
+            "min-width": "320px"
+          }
+        },
+        "header": {
+          "visible": true,
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 1440,
+            "height": 64,
+            "right": 1440,
+            "bottom": 64
+          },
+          "position": "sticky"
+        },
+        "layout": {
+          "sidebar": {
+            "visible": true,
+            "rect": {
+              "x": 80,
+              "y": 64,
+              "width": 250,
+              "height": 836,
+              "right": 330,
+              "bottom": 900
+            },
+            "collection": "消费者验收指南",
+            "sections": [
+              "开始",
+              "进阶"
+            ],
+            "links": [
+              {
+                "text": "安装真实 tarball",
+                "href": "/docs/intro",
+                "current": null,
+                "rect": {
+                  "x": 100,
+                  "y": 141,
+                  "width": 209,
+                  "height": 32,
+                  "right": 309,
+                  "bottom": 173
+                }
+              },
+              {
+                "text": "默认文档界面",
+                "href": "/docs/second",
+                "current": "page",
+                "rect": {
+                  "x": 100,
+                  "y": 173,
+                  "width": 209,
+                  "height": 32,
+                  "right": 309,
+                  "bottom": 204
+                }
+              },
+              {
+                "text": "定制与边界",
+                "href": "/docs/third",
+                "current": null,
+                "rect": {
+                  "x": 100,
+                  "y": 252,
+                  "width": 209,
+                  "height": 32,
+                  "right": 309,
+                  "bottom": 284
+                }
+              }
+            ]
+          },
+          "toc": {
+            "visible": true,
+            "rect": {
+              "x": 1150,
+              "y": 88,
+              "width": 210,
+              "height": 248,
+              "right": 1360,
+              "bottom": 336
+            },
+            "items": [
+              {
+                "text": "页面结构",
+                "href": "#页面结构",
+                "current": null
+              },
+              {
+                "text": "侧栏与目录的分工",
+                "href": "#侧栏与目录的分工",
+                "current": null
+              },
+              {
+                "text": "正文排版",
+                "href": "#正文排版",
+                "current": null
+              },
+              {
+                "text": "明暗两种主题",
+                "href": "#明暗两种主题",
+                "current": null
+              },
+              {
+                "text": "分页与相邻文档",
+                "href": "#分页与相邻文档",
+                "current": null
+              },
+              {
+                "text": "可读性观察点",
+                "href": "#可读性观察点",
+                "current": null
+              }
+            ],
+            "activeHref": null
+          },
+          "pager": {
+            "visible": true,
+            "rect": {
+              "x": 378,
+              "y": 1955,
+              "width": 724,
+              "height": 90,
+              "right": 1102,
+              "bottom": 2045
+            },
+            "links": [
+              {
+                "text": "上一篇安装真实 tarball",
+                "href": "/docs/intro"
+              },
+              {
+                "text": "下一篇定制与边界",
+                "href": "/docs/third"
+              }
+            ]
+          },
+          "mobileBar": {
+            "visible": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "right": 0,
+              "bottom": 0
+            },
+            "buttons": [
+              {
+                "text": "菜单",
+                "disabled": false,
+                "expanded": null,
+                "rect": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 0,
+                  "height": 0,
+                  "right": 0,
+                  "bottom": 0
+                }
+              },
+              {
+                "text": "页面导航",
+                "disabled": false,
+                "expanded": "false",
+                "rect": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 0,
+                  "height": 0,
+                  "right": 0,
+                  "bottom": 0
+                }
+              }
+            ]
+          },
+          "main": {
+            "rect": {
+              "x": 330,
+              "y": 64,
+              "width": 820,
+              "height": 2077,
+              "right": 1150,
+              "bottom": 2141
+            }
+          },
+          "overflow": {
+            "horizontal": false,
+            "documentScrollWidth": 1440,
+            "bodyScrollWidth": 1440,
+            "offenders": [],
+            "contained": [],
+            "clipped": []
+          },
+          "overlap": {
+            "headerOverlapsH1": false,
+            "sidebarOverlapsMain": false,
+            "tocOverlapsMain": false,
+            "h1BelowHeader": 92
+          }
+        },
+        "content": {
+          "articlePresent": true,
+          "headingCount": 6,
+          "paragraphCount": 11,
+          "listItemCount": 4,
+          "tableCount": 1,
+          "codeBlockCount": 1,
+          "blockquoteCount": 1,
+          "firstHeadingId": "页面结构",
+          "markdownExcerpt": "这一页是 FOL-014 浏览器验收的主场景。页面里的所有结构都来自 @uichat-mira/folio 的默认实现，消费者只写了入口文件与三篇 Markdown。 页面结构# 默认界面把一次文档阅读拆成固定的几块： 顶部是品牌、主导航、主题切换与搜索入口； 左侧是当前文档集合的目录，按 section 分组； 中间"
+        },
+        "mobileMenu": {
+          "panelPresent": false,
+          "drawer": null,
+          "mobileToc": null,
+          "overlay": null
+        }
+      }
+    }
+  },
+  "console": [],
+  "checks": [
+    {
+      "id": "install-independent",
+      "status": "PASS",
+      "detail": "tarball installed outside the repository; workspace link=false"
+    },
+    {
+      "id": "types-root-entry",
+      "status": "PASS",
+      "detail": "@uichat-mira/folio root types: tsc exit 0 (strict, skipLibCheck=false)"
+    },
+    {
+      "id": "types-vite-entry",
+      "status": "PASS",
+      "detail": "@uichat-mira/folio/vite types: tsc exit 0 (strict, skipLibCheck=false)"
+    },
+    {
+      "id": "types-virtual-module",
+      "status": "FAIL",
+      "detail": "virtual:folio/content does not resolve from the tarball: TS2307 Cannot find module 'virtual:folio/content' or its corresponding type declarations. (only-virtual-module=true)"
+    },
+    {
+      "id": "types-virtual-module-with-consumer-declaration",
+      "status": "PASS",
+      "detail": "documented consumer workaround (types/virtual-folio.d.ts): tsc exit 0"
+    },
+    {
+      "id": "types-app-project",
+      "status": "PASS",
+      "detail": "consumer app project (src/main.tsx + vite.config.ts): tsc exit 0"
+    },
+    {
+      "id": "build-default-ui",
+      "status": "PASS",
+      "detail": "vite build produced the default UI bundle with all three documents"
+    },
+    {
+      "id": "build-no-official-site-css",
+      "status": "PASS",
+      "detail": "consumer CSS assets index-DqpBTcOP.css (18851 bytes) contain no apps/site selector; source stylesheet sha256=58d5e7094187684e633bfd3f83ba32935dd3e3a9f15511b0732804ec32493718"
+    },
+    {
+      "id": "desktop-no-horizontal-overflow",
+      "status": "PASS",
+      "detail": "page scrollWidth/viewport = 1440/1440 (dark 1440); page-level escapees=0; scroll-contained=0; silently clipped=0"
+    },
+    {
+      "id": "desktop-no-overlap",
+      "status": "PASS",
+      "detail": "header/h1=false, sidebar/main=false, toc/main=false, h1 starts 92px below the header"
+    },
+    {
+      "id": "desktop-dark-theme-applied",
+      "status": "PASS",
+      "detail": "light: theme=light body=rgb(250, 249, 245) text=rgb(61, 61, 58); dark: theme=dark body=rgb(24, 23, 21) text=rgb(235, 230, 223); stored=dark, color-scheme=dark"
+    },
+    {
+      "id": "desktop-interactions",
+      "status": "PASS",
+      "detail": "4 interactions executed, 0 unusable",
+      "interactions": [
+        {
+          "step": "desktop: TOC link to 页面结构",
+          "clicked": {
+            "ok": true,
+            "tag": "a",
+            "text": "页面结构",
+            "href": "#页面结构"
+          },
+          "pathname": "/docs/second",
+          "hash": "#%E9%A1%B5%E9%9D%A2%E7%BB%93%E6%9E%84",
+          "h1": "默认文档界面",
+          "tocActiveHref": "#页面结构"
+        },
+        {
+          "step": "desktop: sidebar link to /docs/intro",
+          "clicked": {
+            "ok": true,
+            "tag": "a",
+            "text": "安装真实 tarball",
+            "href": "/docs/intro"
+          },
+          "pathname": "/docs/intro",
+          "hash": "",
+          "h1": "安装真实 tarball",
+          "tocActiveHref": null
+        },
+        {
+          "step": "desktop: pager next from /docs/intro",
+          "clicked": {
+            "ok": true,
+            "tag": "a",
+            "text": "下一篇默认文档界面",
+            "href": "/docs/second"
+          },
+          "pathname": "/docs/second",
+          "hash": "",
+          "h1": "默认文档界面",
+          "tocActiveHref": "#页面结构"
+        },
+        {
+          "step": "desktop: pager previous",
+          "clicked": {
+            "ok": true,
+            "tag": "a",
+            "text": "上一篇安装真实 tarball",
+            "href": "/docs/intro"
+          },
+          "pathname": "/docs/intro",
+          "hash": "",
+          "h1": "安装真实 tarball",
+          "tocActiveHref": null
+        }
+      ]
+    },
+    {
+      "id": "mobile-no-horizontal-overflow",
+      "status": "PASS",
+      "detail": "page scrollWidth/viewport = 375/375 (dark 375); page-level escapees=0; scroll-contained=6 (pre. 627/343, overflow-x:auto); silently clipped=0"
+    },
+    {
+      "id": "mobile-no-overlap",
+      "status": "PASS",
+      "detail": "header/h1=false, sidebar/main=false, toc/main=false, h1 starts 122px below the header"
+    },
+    {
+      "id": "mobile-dark-theme-applied",
+      "status": "PASS",
+      "detail": "light: theme=light body=rgb(250, 249, 245) text=rgb(61, 61, 58); dark: theme=dark body=rgb(24, 23, 21) text=rgb(235, 230, 223); stored=dark, color-scheme=dark"
+    },
+    {
+      "id": "mobile-interactions",
+      "status": "PASS",
+      "detail": "6 interactions executed, 0 unusable",
+      "interactions": [
+        {
+          "step": "mobile: open 菜单 drawer",
+          "clicked": {
+            "ok": true,
+            "tag": "button",
+            "text": "菜单",
+            "href": null
+          },
+          "pathname": "/docs/second",
+          "hash": "",
+          "h1": "默认文档界面",
+          "tocActiveHref": null
+        },
+        {
+          "step": "mobile: close drawer via 关闭",
+          "clicked": {
+            "ok": true,
+            "tag": "button",
+            "text": "关闭",
+            "href": null
+          },
+          "pathname": "/docs/second",
+          "hash": "",
+          "h1": "默认文档界面",
+          "tocActiveHref": null
+        },
+        {
+          "step": "mobile: select doc from drawer",
+          "clicked": {
+            "ok": true,
+            "tag": "a",
+            "text": "定制与边界",
+            "href": "/docs/third"
+          },
+          "pathname": "/docs/third",
+          "hash": "",
+          "h1": "定制与边界",
+          "tocActiveHref": null
+        },
+        {
+          "step": "mobile: open 页面导航 panel",
+          "clicked": {
+            "ok": true,
+            "tag": "button",
+            "text": "页面导航",
+            "href": null
+          },
+          "pathname": "/docs/third",
+          "hash": "",
+          "h1": "定制与边界",
+          "tocActiveHref": null
+        },
+        {
+          "step": "mobile: select heading from 页面导航",
+          "clicked": {
+            "ok": true,
+            "tag": "a",
+            "text": "可定制的表面",
+            "href": "#可定制的表面"
+          },
+          "pathname": "/docs/third",
+          "hash": "#%E5%8F%AF%E5%AE%9A%E5%88%B6%E7%9A%84%E8%A1%A8%E9%9D%A2",
+          "h1": "定制与边界",
+          "tocActiveHref": "#可定制的表面"
+        },
+        {
+          "step": "mobile: close 页面导航 panel via 关闭",
+          "clicked": {
+            "ok": true,
+            "tag": "button",
+            "text": "关闭",
+            "href": null
+          },
+          "pathname": "/docs/third",
+          "hash": "#%E5%8F%AF%E5%AE%9A%E5%88%B6%E7%9A%84%E8%A1%A8%E9%9D%A2",
+          "h1": "定制与边界",
+          "tocActiveHref": "#可定制的表面"
+        }
+      ]
+    },
+    {
+      "id": "mobile-drawer",
+      "status": "PASS",
+      "detail": "opened 3 links (323x812px, overlay=rgba(15, 14, 13, 0.42)); 关闭 closes it=true; selecting a document routes to /docs/third and closes=true"
+    },
+    {
+      "id": "mobile-toc",
+      "status": "PASS",
+      "detail": "opened 4 headings (351x217px); selecting a heading sets hash #%E5%8F%AF%E5%AE%9A%E5%88%B6%E7%9A%84%E8%A1%A8%E9%9D%A2 and closes=true; 关闭 closes=true"
+    },
+    {
+      "id": "mobile-dark-panel-closed",
+      "status": "PASS",
+      "detail": "theme reached dark through the mobile panel (mobile-panel) and the panel is closed afterwards (panelPresent=false)"
+    },
+    {
+      "id": "system-theme-default",
+      "status": "PASS",
+      "detail": "no stored choice + prefers-color-scheme: dark -> theme=dark, prefersDark=true, body=rgb(24, 23, 21)"
+    },
+    {
+      "id": "mobile-tap-target-size",
+      "status": "WARN",
+      "detail": "mobile tool-bar buttons: 菜单 38x21, 页面导航 64x21; drawer 关闭 38x21 — 21px height is under the 44px comfortable target and under the 24px WCAG 2.2 minimum unless the spacing exception applies; recorded as an observation, not a blocker"
+    },
+    {
+      "id": "documentation-structure",
+      "status": "PASS",
+      "detail": "sidebar=3 links across sections [开始 / 进阶], toc=6, pager=[上一篇安装真实 tarball | 下一篇定制与边界], tables=1, code=1"
+    },
+    {
+      "id": "readability-metrics",
+      "status": "PASS",
+      "detail": "desktop body 16px/28.48px contrast 10.34:1, h1 44px contrast 17.5:1, dark body contrast 14.43:1, mobile h1 36px, mobile body 16px"
+    },
+    {
+      "id": "console-errors",
+      "status": "PASS",
+      "detail": "no console errors or uncaught exceptions across 2 viewports × light/dark"
+    }
+  ],
+  "summary": {
+    "generatedAt": "2026-10-31T19:53:06.178Z",
+    "commit": "471c605d8377484867f69607ca6deedd2238a0d6",
+    "passing": 22,
+    "failing": 1
+  }
+}

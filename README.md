@@ -20,9 +20,18 @@ npm run release:check
 
 That builds the package, audits the packed file list, and installs the resulting tarball into an isolated Vite + React consumer.
 
+## Consumer contract
+
+The 0.1.0 consumer boundaries are defined once in [docs/consumer-contract.md](docs/consumer-contract.md):
+
+- Markdown rendering is trusted-content-only. Raw HTML, `::: html` blocks, and Callout bodies are preserved without sanitization, so unreviewed submissions, scraped pages, and external PR previews must not be rendered.
+- `@uichat-mira/folio/styles.css` is a whole-site default stylesheet. It is not an isolated embed stylesheet, and importing it into an existing branded page affects that page globally.
+- The default `staticRoutes` document shell supports sidebar, TOC, and previous/next navigation without JavaScript. Sites that supply custom static route bodies own that markup and do not get the shell.
+- Runtime and package entrypoint types work, but the `virtual:folio/content` TypeScript declaration is not yet shipped; the canonical contract documents the temporary consumer workaround and required pre-release fix.
+
 ## Publication status
 
-Package identity, the public API, and isolated tarball verification are complete. The first npm publication, npm Trusted Publishing, and the `uichat-mira-docs` downstream migration are still open.
+Package identity, the current runtime entrypoints, and isolated tarball verification are in place. [FOL-014's independent browser/TypeScript acceptance](docs/research/fol-014-default-ui-acceptance.md) supports the default UI but identified the virtual-module declaration gap. The first npm publication, resolution of that type gap, release-tag lineage, npm Trusted Publishing, and the `uichat-mira-docs` downstream migration remain open.
 
 The [migration status page](https://uichat-mira.github.io/folio/api/guide/migration-status/) records the current state with its evidence.
 
@@ -37,13 +46,13 @@ The [migration status page](https://uichat-mira.github.io/folio/api/guide/migrat
 - `404.html`, `sitemap.xml`, and `robots.txt`
 - GitHub Pages project-path and root-path support
 - A lightweight React runtime that consumers may use or replace
-- Reusable Markdown compatibility rendering
+- Reusable Markdown compatibility rendering for reviewed content
 
 ## Package exports
 
 - `@uichat-mira/folio` — content model, configuration helpers, React runtime, and Markdown rendering
 - `@uichat-mira/folio/vite` — Markdown discovery, virtual manifests, and static output
-- `@uichat-mira/folio/styles.css` — default lightweight styles
+- `@uichat-mira/folio/styles.css` — whole-site default stylesheet (not an isolated embed stylesheet)
 
 ## Development
 
