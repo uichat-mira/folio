@@ -6,11 +6,15 @@ It keeps Markdown, navigation, routing, SEO, and static deployment inside a stab
 
 ## Install
 
+The first Folio package release is `0.1.0`, and it is **not published to the npm registry yet**. The command below is the intended installation once that release exists:
+
 ```bash
 npm install @uichat-mira/folio
 ```
 
-The first Folio package release is `0.1.0`. The UIChat Mira documentation site is the first production consumer and installs the package from npm.
+Until then, the verified consumption path is the packed tarball: `npm pack` in `packages/folio` produces `uichat-mira-folio-<version>.tgz`, and `npm run pack:consumer -w @uichat-mira/folio` installs that exact tarball into a throwaway consumer, resolves the declared entrypoints and types, and builds a Vite site from it.
+
+Within this repository the official site in `apps/site` consumes the package through the npm workspace link, not through the registry. The UIChat Mira documentation site (`uichat-mira/uichat-mira-docs`) is the intended first downstream production consumer, but it still depends on `@uichat-mira/docs` and has not migrated yet.
 
 ## Vite integration
 
@@ -80,4 +84,10 @@ Consumer applications remain responsible for branding, page composition, custom 
 
 ## Project status
 
-Folio starts a new package line at `0.1.0`; the predecessor `@uichat-mira/docs` package remains available only for existing consumers during migration.
+Verified on 2026-11-01:
+
+- **Done** — package identity, the public entrypoints listed above, and isolated tarball verification in `npm run release:check`. The official site in `apps/site` builds against the package through the workspace link.
+- **Pending** — the first npm registry publication (the registry does not serve `@uichat-mira/folio` yet), npm Trusted Publishing (`.github/workflows/publish.yml` exists, but no Folio GitHub Release has triggered it), and the downstream migration of `uichat-mira/uichat-mira-docs`, which still depends on `@uichat-mira/docs@^0.1.1`.
+- **Unconfirmed** — whether the Trusted Publisher entry already exists on npmjs.com; that setting is not publicly readable.
+
+The predecessor `@uichat-mira/docs` package stays available for existing consumers during migration.

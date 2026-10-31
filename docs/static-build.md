@@ -62,4 +62,4 @@ export default {
 - Map site-specific authors, merged documents, and content categories.
 - Supply brand-specific images, locale, title rules, and JSON-LD.
 
-The UIChat Mira documentation site is the first production consumer of this contract. Its migration verifies frozen dependency installation, real content routes, GitHub Pages base paths, canonical URLs, JSON-LD, 404 indexing rules, sitemap coverage, and `robots.txt` output.
+The UIChat Mira documentation site is the intended first downstream consumer of this contract. Its migration — frozen dependency installation, real content routes, GitHub Pages base paths, canonical URLs, JSON-LD, 404 indexing rules, sitemap coverage, and `robots.txt` output — is still pending, because that site has not moved off `@uichat-mira/docs` yet.
