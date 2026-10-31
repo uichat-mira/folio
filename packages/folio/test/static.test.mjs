@@ -121,6 +121,120 @@ test("static site writer creates routes, 404, sitemap, and robots", () => {
 });
 
 
+test("duplicate and slash-equivalent static routes fail before any output", () => {
+  const collisions = [
+    ["/guide", "/guide"],
+    ["/guide", "/guide/"],
+    ["/guide", "//guide//"],
+  ];
+
+  for (const [firstPath, secondPath] of collisions) {
+    const outDir = mkdtempSync(resolve(tmpdir(), "folio-route-collision-"));
+    try {
+      writeFileSync(resolve(outDir, "index.html"), template, "utf8");
+      assert.throws(
+        () =>
+          writeFolioStaticSite(context(outDir), {
+            routes: () => [
+              { path: "/healthy", title: "Healthy", description: "Valid", body: "<main>Should not render</main>" },
+              { path: firstPath, title: "First guide", description: "First", body: "<main>First</main>" },
+              { path: secondPath, title: "Second guide", description: "Second", body: "<main>Second</main>" },
+            ],
+          }),
+        (error) => {
+          assert.match(error.message, /folio static route conflict/);
+          assert.ok(error.message.includes(JSON.stringify(firstPath)));
+          assert.ok(error.message.includes(JSON.stringify(secondPath)));
+          assert.ok(error.message.includes('"First guide"'));
+          assert.ok(error.message.includes('"Second guide"'));
+          assert.ok(error.message.includes('both normalize to "/guide"'));
+          return true;
+        },
+      );
+      assert.equal(readFileSync(resolve(outDir, "index.html"), "utf8"), template);
+      for (const file of [
+        "healthy/index.html",
+        "guide/index.html",
+        "404.html",
+        "sitemap.xml",
+        "robots.txt",
+      ]) {
+        assert.equal(existsSync(resolve(outDir, file)), false, `no partial output: ${file}`);
+      }
+    } finally {
+      rmSync(outDir, { recursive: true, force: true });
+    }
+  }
+});
+
+test("default Markdown content routes also reject normalized collisions", () => {
+  const outDir = mkdtempSync(resolve(tmpdir(), "folio-doc-route-collision-"));
+  try {
+    writeFileSync(resolve(outDir, "index.html"), template, "utf8");
+    const doc = (path, title) => ({
+      id: title,
+      path,
+      sourcePath: `docs/${title}.md`,
+      type: "article",
+      title,
+      description: title,
+      group: "Docs",
+      body: `# ${title}`,
+      headings: [],
+      data: {},
+    });
+    assert.throws(
+      () =>
+        writeFolioStaticSite({
+          ...context(outDir),
+          docs: [doc("/docs/intro", "First intro"), doc("/docs/intro/", "Second intro")],
+        }),
+      (error) => {
+        assert.match(error.message, /folio static route conflict/);
+        assert.ok(error.message.includes('"/docs/intro"'));
+        assert.ok(error.message.includes('"/docs/intro/"'));
+        assert.ok(error.message.includes('both normalize to "/docs/intro"'));
+        return true;
+      },
+    );
+    assert.equal(readFileSync(resolve(outDir, "index.html"), "utf8"), template);
+    assert.equal(existsSync(resolve(outDir, "docs/intro/index.html")), false);
+    assert.equal(existsSync(resolve(outDir, "404.html")), false);
+    assert.equal(existsSync(resolve(outDir, "sitemap.xml")), false);
+  } finally {
+    rmSync(outDir, { recursive: true, force: true });
+  }
+});
+
+test("distinct normalized static routes still publish pages and metadata", () => {
+  const outDir = mkdtempSync(resolve(tmpdir(), "folio-routes-unique-"));
+  try {
+    writeFileSync(resolve(outDir, "index.html"), template, "utf8");
+    const result = writeFolioStaticSite(context(outDir), {
+      routes: () => [
+        { path: "/", title: "Home", description: "Home", body: "<main>Home content</main>" },
+        { path: "/guide/", title: "Guide", description: "Guide", body: "<main>Guide content</main>" },
+        { path: "/docs/reference", title: "Reference", description: "Reference", body: "<main>Reference content</main>" },
+      ],
+    });
+
+    assert.equal(result.routes, 3);
+    assert.match(readFileSync(resolve(outDir, "index.html"), "utf8"), /Home content/);
+    assert.match(readFileSync(resolve(outDir, "guide/index.html"), "utf8"), /Guide content/);
+    assert.match(readFileSync(resolve(outDir, "docs/reference/index.html"), "utf8"), /Reference content/);
+    assert.match(readFileSync(resolve(outDir, "404.html"), "utf8"), /noindex,nofollow/);
+    const sitemap = readFileSync(resolve(outDir, "sitemap.xml"), "utf8");
+    assert.equal((sitemap.match(/<url>/g) ?? []).length, 3);
+    assert.ok(sitemap.includes("https://example.com/guide/docs/reference/"));
+    assert.equal(
+      readFileSync(resolve(outDir, "robots.txt"), "utf8"),
+      "User-agent: *\nAllow: /\nSitemap: https://example.com/guide/sitemap.xml\n",
+    );
+  } finally {
+    rmSync(outDir, { recursive: true, force: true });
+  }
+});
+
 test("default document routes use the documentation structure shell", () => {
   const outDir = mkdtempSync(resolve(tmpdir(), "folio-doc-shell-"));
   try {
