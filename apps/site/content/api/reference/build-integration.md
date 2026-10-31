@@ -46,7 +46,7 @@ folio({
 import docs, { roots } from "virtual:folio/content";
 ```
 
-当前源码候选的 tarball 已包含自动可发现的 TypeScript 虚拟模块声明，类型分别为 `FolioDoc[]` 与 `string[]`，不需要消费者自行写声明；最终 Registry 发布仍待复验，详见[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)。
+当前源码候选的 tarball 已包含 TypeScript 虚拟模块声明，类型分别为 `FolioDoc[]` 与 `string[]`，不需要消费者自行写 `declare module`。但仅使用虚拟模块、没有在同一 TS 工程中导入 Folio 公开入口时，须在 `compilerOptions.types` 中显式注册 `@uichat-mira/folio`；最终 Registry 发布仍待复验，详见[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)。
 
 ## staticRoutes
 

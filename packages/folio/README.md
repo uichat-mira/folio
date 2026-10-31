@@ -18,7 +18,7 @@ The first Folio package release is `0.1.0`, and it is **not published to the npm
 npm install @uichat-mira/folio
 ```
 
-Until then, the verified consumption path is the packed tarball: `npm pack` in `packages/folio` produces `uichat-mira-folio-<version>.tgz`, and `npm run pack:consumer -w @uichat-mira/folio` installs that exact tarball into a throwaway consumer, resolves the declared package entrypoints and their types, and builds a Vite site from it. The strict NodeNext and Bundler consumer fixtures now additionally check importing `virtual:folio/content` without declaring that virtual module locally.
+Until then, the verified consumption path is the packed tarball: `npm pack` in `packages/folio` produces `uichat-mira-folio-<version>.tgz`, and `npm run pack:consumer -w @uichat-mira/folio` installs that exact tarball into a throwaway consumer, resolves the declared package entrypoints and their types, and builds a Vite site from it. The strict NodeNext and Bundler consumer fixtures now additionally check importing `virtual:folio/content` without declaring that virtual module locally. In a TypeScript program that only imports the virtual module and no Folio package entry, register `@uichat-mira/folio` under `compilerOptions.types` to load its published declaration; see the canonical consumer contract.
 
 Within this repository the official site in `apps/site` consumes the package through the npm workspace link, not through the registry. The UIChat Mira documentation site (`uichat-mira/uichat-mira-docs`) is the intended first downstream production consumer, but it still depends on `@uichat-mira/docs` and has not migrated yet.
 

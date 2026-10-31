@@ -94,6 +94,23 @@ export function verifyViteConsumer({ consumerDir, fixtureDir, typescriptCli, log
   }
   log("[types]    ok  strict Bundler-mode tsc resolves virtual:folio/content without a local declaration");
 
+  // A virtual-only TypeScript program never imports the Folio package entry:
+  // TypeScript does not discover declarations from unrelated installed packages.
+  // Explicit package type registration, not a consumer-side ambient shim, is
+  // the supported integration path for that program shape.
+  const virtualOnly = spawnSync(process.execPath, [typescriptCli, "-p", "tsconfig.virtual-only.json"], {
+    cwd: appDir,
+    encoding: "utf8",
+    timeout: 300_000,
+  });
+  if (virtualOnly.error || virtualOnly.status !== 0) {
+    throw new Error(
+      "[types] FAIL virtual-only TypeScript consumer with package types registered: " +
+        (virtualOnly.error?.message ?? `exit ${virtualOnly.status}\n${virtualOnly.stdout}\n${virtualOnly.stderr}`),
+    );
+  }
+  log("[types]    ok  virtual-only strict tsc loads installed Folio types via compilerOptions.types");
+
   const viteCli = join(consumerDir, "node_modules", "vite", "bin", "vite.js");
   assert.ok(
     existsSync(viteCli),

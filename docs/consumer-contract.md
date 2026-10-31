@@ -47,6 +47,18 @@ Peer requirements: React `^19`, React DOM `^19`, React Router DOM `^7`, and Vite
 
 **Original FOL-014 regression evidence:** its real tarball generated `TS2307` when a consumer imported `virtual:folio/content` without a project-local declaration. The historical report and saved results remain unchanged. The current **source candidate** includes a `dist/virtual.d.ts` ambient declaration, reachable from `dist/index.d.ts` and `dist/vite.d.ts`. The tarball consumer gate now checks strict NodeNext and Bundler TypeScript imports of both `default` (`FolioDoc[]`) and `roots` (`string[]`) **without a consumer shim or `skipLibCheck` bypass**.
 
+**TypeScript-only virtual imports:** TypeScript only loads ambient declarations from referenced packages. A typical app already imports `@uichat-mira/folio` in the same TypeScript project and needs no additional setup. If a separate TS project *only* imports `virtual:folio/content` (for example, a UI program that excludes its Vite config and never imports either Folio package entry), register the installed package's published types via `compilerOptions.types`, alongside that project's other required types:
+
+```json
+{
+  "compilerOptions": {
+    "types": ["vite/client", "@uichat-mira/folio"]
+  }
+}
+```
+
+This is **type entry registration**, not a local `declare module` workaround. It is necessary in virtual-only TypeScript programs because an otherwise unreferenced dependency cannot inject its ambient declarations automatically. Both ordinary imports and this explicit-registration case are covered by the tarball consumer checks.
+
 A 0.1.0 Registry package has not been published. Re-run FOL-014 against the **final release candidate** to confirm the resolved type contract, actual 40px button rectangles, and heading navigation after FOL-013. Browser DOM `element.click()` does not prove physical touch hit-testing.
 
 ## Markdown: trusted repository content only
