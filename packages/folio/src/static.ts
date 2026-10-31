@@ -502,10 +502,25 @@ export function writeFolioStaticSite(
 
   // Validate all destinations before writing, avoiding partial output for
   // either duplicate routes or invalid filesystem paths.
-  const outputs = normalizedRoutes.map((route) => ({
+  const outputs = normalizedRoutes.map((route, index) => ({
     route,
+    original: routes[index],
     target: routeOutputPath(context.outDir, route.path),
   }));
+
+  // Different URL strings can still resolve to the same file (e.g. /guide
+  // and /guide/.). Compare actual destinations, including Windows case folding.
+  const seenTargets = new Map<string, FolioStaticRoute>();
+  for (const { original, target } of outputs) {
+    const key = comparablePath(target);
+    const previous = seenTargets.get(key);
+    if (previous) {
+      throw new Error(
+        `folio static route conflict: ${JSON.stringify(previous.path)} (${JSON.stringify(previous.title)}) and ${JSON.stringify(original.path)} (${JSON.stringify(original.title)}) both write to ${JSON.stringify(target)}`,
+      );
+    }
+    seenTargets.set(key, original);
+  }
 
   for (const { route, target } of outputs) {
     mkdirSync(dirname(target), { recursive: true });
