@@ -13,7 +13,7 @@
     "typecheck": "npm run typecheck -w @uichat-mira/folio && npm run build -w @uichat-mira/folio && npm run typecheck -w @uichat-mira/folio-site",
     "validate": "npm run typecheck && npm run test -w @uichat-mira/folio && npm run build -w @uichat-mira/folio-site",
     "test": "npm run build -w @uichat-mira/folio && npm run test -w @uichat-mira/folio",
-    "release:check": "npm run validate && npm run pack:verify -w @uichat-mira/folio"
+    "release:check": "npm run validate && npm run pack:verify -w @uichat-mira/folio && npm run pack:consumer -w @uichat-mira/folio"
   },
   "engines": {
     "node": ">=20"
