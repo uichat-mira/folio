@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FOL-007 minimal host page</title>
+    <!--
+      Minimal branded host page for the FOL-007 host-boundary research.
+
+      Opened directly it is the "before" baseline: host CSS only, no Folio
+      stylesheet. `run.mjs` copies this file and replaces the two markers below
+      to control where a Folio stylesheet lands in the cascade, and replaces
+      FOLIO_EMBED with real `FolioMarkdown` markup.
+
+      The host deliberately owns every surface the research probes: body
+      background/colour/margin/font, link colour and underline, form control
+      fonts, a fixed-width box that exposes `box-sizing`, its own custom
+      properties, and a local component class.
+    -->
+    <!--FOLIO_BEFORE-->
+    <style id="host-brand">
+      :root {
+        --host-ink: #102a43;
+        --host-accent: #b45309;
+      }
+
+      body {
+        margin: 32px;
+        background: #f0f4f8;
+        color: var(--host-ink);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 18px;
+      }
+
+      a {
+        color: var(--host-accent);
+        text-decoration: underline;
+      }
+
+      button,
+      input {
+        font-family: "Courier New", monospace;
+        font-size: 17px;
+      }
+
+      .host-card {
+        border: 1px solid #bcccdc;
+        border-radius: 6px;
+        background: #fff;
+        color: var(--host-accent);
+        padding: 12px;
+      }
+
+      .host-card h1 {
+        font-size: 22px;
+        margin: 0;
+      }
+    </style>
+    <!--FOLIO_AFTER-->
+  </head>
+  <body>
+    <header class="host-card"><h1>Host brand page</h1></header>
+
+    <p id="probe-paragraph">
+      Host paragraph with <a id="probe-link" href="#target">a host link</a>.
+    </p>
+
+    <p>
+      <button id="probe-button" type="button">Host button</button>
+      <input id="probe-input" value="host input" />
+    </p>
+
+    <div id="probe-box" style="width: 200px; padding: 10px; border: 1px solid #94a3b8">
+      fixed-width host box
+    </div>
+
+    <div class="host-card" id="probe-card">Host card reading --host-accent</div>
+
+    <div id="folio-slot"><!--FOLIO_EMBED--></div>
+
+    <pre id="results" hidden>pending</pre>
+
+    <script>
+      (() => {
+        const read = (element, properties) => {
+          if (!element) return null;
+          const style = getComputedStyle(element);
+          const out = {};
+          for (const property of properties) {
+            out[property] = style.getPropertyValue(property);
+          }
+          return out;
+        };
+
+        const rootStyle = getComputedStyle(document.documentElement);
+        const box = document.getElementById("probe-box");
+        const embed = document.querySelector(".folio-markdown");
+
+        const result = {
+          variant: document.documentElement.dataset.variant || "unknown",
+          viewport: { width: innerWidth, height: innerHeight },
+          root: read(document.documentElement, [
+            "font-family",
+            "color",
+            "background-color",
+            "font-synthesis",
+            "text-rendering",
+          ]),
+          body: read(document.body, [
+            "margin-top",
+            "min-width",
+            "background-color",
+            "color",
+            "font-family",
+            "font-size",
+          ]),
+          // Inherited properties: `:root` reaches these on every host element
+          // that does not declare them itself.
+          paragraph: read(document.getElementById("probe-paragraph"), [
+            "font-synthesis",
+            "text-rendering",
+            "font-family",
+            "color",
+          ]),
+          link: read(document.getElementById("probe-link"), [
+            "color",
+            "text-decoration-line",
+          ]),
+          button: read(document.getElementById("probe-button"), [
+            "font-family",
+            "font-size",
+          ]),
+          input: read(document.getElementById("probe-input"), [
+            "font-family",
+            "font-size",
+          ]),
+          box: {
+            ...read(box, ["box-sizing", "width"]),
+            offsetWidth: box ? box.offsetWidth : null,
+          },
+          hostCard: read(document.getElementById("probe-card"), [
+            "color",
+            "background-color",
+            "border-top-width",
+          ]),
+          tokens: {
+            hostInk: rootStyle.getPropertyValue("--host-ink").trim(),
+            hostAccent: rootStyle.getPropertyValue("--host-accent").trim(),
+            folioCanvas: rootStyle.getPropertyValue("--folio-canvas").trim(),
+            folioFontSans: rootStyle.getPropertyValue("--folio-font-sans").trim(),
+          },
+          embed: embed
+            ? {
+                present: true,
+                article: read(embed, ["color", "font-family"]),
+                heading: read(embed.querySelector("h2"), ["color", "font-family"]),
+                paragraph: read(embed.querySelector("p"), ["color", "font-family"]),
+                headingAnchor: read(embed.querySelector(".md-anchor"), ["color"]),
+                contentLink: read(embed.querySelector('a[href^="http"]'), [
+                  "color",
+                  "text-decoration-line",
+                ]),
+              }
+            : { present: false },
+        };
+
+        document.getElementById("results").textContent = JSON.stringify(result);
+      })();
+    </script>
+  </body>
+</html>
