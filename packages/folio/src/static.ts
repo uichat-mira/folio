@@ -485,15 +485,42 @@ export function writeFolioStaticSite(
 
   const template = readFileSync(indexPath, "utf8");
   const routes = options.routes?.(context) ?? defaultRoutes(context);
-  const routeMap = new Map(
-    routes.map((route) => [normalizeRoute(route.path), { ...route, path: normalizeRoute(route.path) }]),
-  );
+  // Reject route collisions before any output: a Map used to silently
+  // overwrite the first page when two paths normalized to the same key.
+  const seen = new Map<string, FolioStaticRoute>();
+  const normalizedRoutes = routes.map((route) => {
+    const path = normalizeRoute(route.path);
+    const previous = seen.get(path);
+    if (previous) {
+      throw new Error(
+        `folio static route conflict: ${JSON.stringify(previous.path)} (${JSON.stringify(previous.title)}) and ${JSON.stringify(route.path)} (${JSON.stringify(route.title)}) both normalize to ${JSON.stringify(path)}`,
+      );
+    }
+    seen.set(path, route);
+    return { ...route, path };
+  });
 
-  // 先校验全部路由再落盘：任一非法路由都不会留下半成品输出。
-  const outputs = [...routeMap.values()].map((route) => ({
+  // Validate all destinations before writing, avoiding partial output for
+  // either duplicate routes or invalid filesystem paths.
+  const outputs = normalizedRoutes.map((route, index) => ({
     route,
+    original: routes[index],
     target: routeOutputPath(context.outDir, route.path),
   }));
+
+  // Different URL strings can still resolve to the same file (e.g. /guide
+  // and /guide/.). Compare actual destinations, including Windows case folding.
+  const seenTargets = new Map<string, FolioStaticRoute>();
+  for (const { original, target } of outputs) {
+    const key = comparablePath(target);
+    const previous = seenTargets.get(key);
+    if (previous) {
+      throw new Error(
+        `folio static route conflict: ${JSON.stringify(previous.path)} (${JSON.stringify(previous.title)}) and ${JSON.stringify(original.path)} (${JSON.stringify(original.title)}) both write to ${JSON.stringify(target)}`,
+      );
+    }
+    seenTargets.set(key, original);
+  }
 
   for (const { route, target } of outputs) {
     mkdirSync(dirname(target), { recursive: true });
@@ -512,7 +539,7 @@ export function writeFolioStaticSite(
   );
 
   if (context.config.siteUrl && options.sitemap !== false) {
-    const urls = [...routeMap.values()]
+    const urls = normalizedRoutes
       .map((route) =>
         `<url><loc>${folioEscapeHtml(
           folioAbsoluteRouteUrl(
@@ -542,5 +569,5 @@ export function writeFolioStaticSite(
     );
   }
 
-  return { routes: routeMap.size };
+  return { routes: normalizedRoutes.length };
 }
