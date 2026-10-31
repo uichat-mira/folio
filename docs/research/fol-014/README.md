@@ -9,8 +9,7 @@
 | `consumer/content/docs/*.md` | 3 篇文档，覆盖侧栏分组、页内目录、表格、代码块、引用与分页 |
 | `consumer/src/main.tsx` | 消费者入口：`FolioApp` + `styles.css` + `virtual:folio/content` |
 | `consumer/vite.config.ts` | 消费者 Vite 配置：`@uichat-mira/folio/vite` 的 `folio()` 插件 |
-| `consumer/types/virtual-folio.d.ts` | 消费者侧的虚拟模块声明（包未发布该声明，见报告第 4 节） |
-| `consumer/tsconfig*.json` | 5 个真实 `tsc` 工程：app、根入口、`/vite` 入口、虚拟模块基线、虚拟模块带声明 |
+| `consumer/tsconfig*.json` | 4 个真实 `tsc` 工程：app、根入口、`/vite` 入口、虚拟模块（无消费者声明） |
 
 运行：
 
@@ -21,3 +20,7 @@ node docs/research/fol-014/run.mjs
 产物写在 `results/`：`acceptance.json`（原始数据）、`screenshots/`（6 张真实截图）、
 `dom-*.html`（渲染后的 DOM）。报告见
 [`../fol-014-default-ui-acceptance.md`](../fol-014-default-ui-acceptance.md)。
+
+> 历史 FOL-014 报告及 `results/acceptance.json` 保留修复前的 TS2307 原始证据，
+> 不可覆盖或误写成当时已经通过。当前 `run.mjs` 已升级为发布候选回归脚本：
+> 只用包内声明复测严格 TypeScript 消费及浏览器 UI。
