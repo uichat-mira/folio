@@ -8,7 +8,10 @@ on:
 permissions:
   contents: read
   issues: write
-  pull-requests: read
+  # PR conversation comments need both grants in current GitHub App token behavior:
+  # https://github.com/github/rest-api-description/issues/6994
+  # GITHUB_TOKEN is exposed only to metadata-fetch and publisher steps, never OpenCode.
+  pull-requests: write
 
 concurrency:
   group: folio-opencode-review-${{ github.event.pull_request.number }}
