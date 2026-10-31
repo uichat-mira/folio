@@ -209,9 +209,20 @@ try {
     // accepted source tree after building it using the locked toolchain.
     const installedDir = join(consumerDir, "node_modules", "@uichat-mira", "folio", "dist");
     for (const filename of ["index.js", "index.d.ts", "vite.js", "vite.d.ts", "virtual.d.ts", "styles.css"]) {
-      const local = readFileSync(join(packageRoot, "dist", filename));
-      const published = readFileSync(join(installedDir, filename));
-      assert.deepEqual(published, local, `[registry] published dist/${filename} differs from accepted source`);
+      const local = readFileSync(join(packageRoot, "dist", filename), "utf8");
+      const published = readFileSync(join(installedDir, filename), "utf8");
+      // npm publish on Windows may pack copied .d.ts files with CRLF while
+      // Linux Git checkouts build LF. Allow *only* line-ending normalization,
+      // not missing exports, stale declarations or other content drift.
+      const normalizeEol = (value) => value.replace(/\r\n/g, "\n");
+      assert.equal(
+        normalizeEol(published),
+        normalizeEol(local),
+        `[registry] published dist/${filename} differs from accepted source beyond CRLF/LF`,
+      );
+      if (published !== local) {
+        log(`[registry] note dist/${filename} matches after CRLF/LF normalization`);
+      }
     }
     log("[registry] ok  published JS/types/CSS match the checked-out source build");
   }
