@@ -192,7 +192,7 @@ test("static routes with dot-segment aliases cannot overwrite the same output fi
           assert.ok(error.message.includes('"First page"'));
           assert.ok(error.message.includes('"Alias page"'));
           assert.ok(error.message.includes("both write to"));
-          assert.ok(error.message.includes(expectedOutput.replaceAll("/", process.platform === "win32" ? "\\" : "/")));
+          assert.ok(error.message.includes(JSON.stringify(resolve(outDir, expectedOutput))));
           return true;
         },
       );
