@@ -78,9 +78,10 @@ for (const name of ["index.d.ts", "vite.d.ts"]) {
     `dist/${name} does not reference the packaged virtual module declaration`,
   );
 }
-assert.match(
-  readFileSync(resolve(packageRoot, "dist/virtual.d.ts"), "utf8"),
-  /declare module "virtual:folio\\/content"/,
+assert.ok(
+  readFileSync(resolve(packageRoot, "dist/virtual.d.ts"), "utf8")
+    .includes('declare module "virtual:folio/content"'),
+  "dist/virtual.d.ts does not declare the Folio content module",
 );
 
 for (const path of files) {
