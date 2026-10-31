@@ -1,10 +1,15 @@
-// T2 contract verification: install the package's real .tgz tarball into a
+// T2/T3 contract verification: install the package's real .tgz tarball into a
 // throwaway consumer and prove the three public entrypoints and their declared
-// types resolve without any monorepo/workspace resolution.
+// types resolve without any monorepo/workspace resolution. The same isolated
+// installation also builds a minimal Vite + React application, which proves
+// the Folio plugin discovers Markdown and that virtual:folio/content reaches a
+// real client bundle.
 //
 // The acceptance evidence this produces is tied to one commit: it rebuilds
 // dist, packs the tarball, records its sha256, and installs that exact file
-// into a temporary directory outside the repository.
+// into a temporary directory outside the repository. One build, one pack and
+// one dependency installation cover both consumer checks so CI pays for them
+// only once.
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -21,6 +26,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { verifyViteConsumer } from "./checks/vite-consumer.mjs";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const packageRoot = resolve(scriptDir, "..");
@@ -148,6 +154,7 @@ try {
         "--no-audit",
         "--no-fund",
         tarballPath,
+        "@vitejs/plugin-react@^5",
         "@types/node@^24",
         "@types/react@^19",
         "@types/react-dom@^19",
@@ -181,6 +188,12 @@ try {
     }),
   );
   log(`[types]    ok  tsc --noEmit (NodeNext, skipLibCheck=false) resolved the declarations`);
+
+  verifyViteConsumer({
+    consumerDir,
+    fixtureDir: join(scriptDir, "fixtures", "vite-consumer"),
+    log,
+  });
 
   succeeded = true;
   log("");
