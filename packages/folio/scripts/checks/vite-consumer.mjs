@@ -64,7 +64,7 @@ function readBundle(directory) {
   };
 }
 
-export function verifyViteConsumer({ consumerDir, fixtureDir, log }) {
+export function verifyViteConsumer({ consumerDir, fixtureDir, typescriptCli, log }) {
   const appDir = join(consumerDir, "vite-app");
   cpSync(fixtureDir, appDir, { recursive: true });
 
@@ -78,6 +78,21 @@ export function verifyViteConsumer({ consumerDir, fixtureDir, log }) {
     `[fixture] FAIL ${markdownPath} has no ${MARKER_PLACEHOLDER} placeholder`,
   );
   writeFileSync(markdownPath, markdown.replaceAll(MARKER_PLACEHOLDER, marker));
+
+  // Strict Bundler-mode consumer check, independent of any workspace or local
+  // virtual-module declaration. Compile against only the installed tarball.
+  const types = spawnSync(process.execPath, [typescriptCli, "-p", "tsconfig.json"], {
+    cwd: appDir,
+    encoding: "utf8",
+    timeout: 300_000,
+  });
+  if (types.error || types.status !== 0) {
+    throw new Error(
+      "[types] FAIL independent Bundler-mode TypeScript consumer: " +
+        (types.error?.message ?? `exit ${types.status}\n${types.stdout}\n${types.stderr}`),
+    );
+  }
+  log("[types]    ok  strict Bundler-mode tsc resolves virtual:folio/content without a local declaration");
 
   const viteCli = join(consumerDir, "node_modules", "vite", "bin", "vite.js");
   assert.ok(
