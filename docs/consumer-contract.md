@@ -9,20 +9,20 @@ The root `README.md`, `packages/folio/README.md`, and the Markdown/static docume
 - **Markdown is trusted-content-only.** Raw HTML, `::: html` blocks, and Callout bodies are preserved without sanitization. Do not feed unreviewed submissions, scraped pages, or external PR previews into the renderer.
 - **`styles.css` is a whole-site stylesheet.** It assumes Folio owns the document. It is not an isolated embed stylesheet, and importing it into an existing branded page changes that page globally.
 - **The default static document shell works without JavaScript.** Sidebar, in-page TOC, and previous/next survive with JS disabled. Sites that supply custom static route bodies own that markup and do not get the shell.
-- **The package is not on the npm registry yet.** The documented `npm install` command becomes valid only after the first release.
-- **Virtual-module types are included in the source candidate's packed declaration files.** Both `default` docs and named `roots` must resolve without a consumer-side `declare module`; the final release candidate remains to be verified.
+- **`@uichat-mira/folio@0.1.0` is publicly published.** Independent Registry-installed consumer checks passed; GitHub Release and OIDC remain separate.
+- **The published package includes virtual-module types.** Strict Registry-installed consumers resolve `default` and `roots` without writing a local `declare module`.
 
 ## Package status and installation
 
-Folio begins a new npm package line at `0.1.0`. As of 2026-11-01 the npm registry returns `404` for `@uichat-mira/folio`: the package has not been published, no GitHub Release exists, and `publish.yml` has never run.
+Folio `0.1.0` was manually published from accepted `prod` SHA `40db582b20b5be7a070ab936a99255a75ca15232` on 2026-11-01. An independent runner installed the exact Registry version, verified its SRI and compared its JS/types/CSS to source ([FOL-016 evidence](https://github.com/uichat-mira/folio/actions/runs/41247604056)). No GitHub Folio Release or OIDC publish run has occurred.
 
-Once the first release exists, install it with:
+Install the published version with:
 
 ```bash
 npm install @uichat-mira/folio
 ```
 
-Until then, the verified consumption path is the packed tarball. From the repository root:
+For source changes, the repository's `release:check` still verifies a locally packed tarball:
 
 ```bash
 npm ci --no-audit --no-fund
@@ -59,7 +59,7 @@ Peer requirements: React `^19`, React DOM `^19`, React Router DOM `^7`, and Vite
 
 This is **type entry registration**, not a local `declare module` workaround. It is necessary in virtual-only TypeScript programs because an otherwise unreferenced dependency cannot inject its ambient declarations automatically. Both ordinary imports and this explicit-registration case are covered by the tarball consumer checks.
 
-A 0.1.0 Registry package has not been published. Re-run FOL-014 against the **final release candidate** to confirm the resolved type contract, actual 40px button rectangles, and heading navigation after FOL-013. Browser DOM `element.click()` does not prove physical touch hit-testing.
+The real npm Registry 0.1.0 package passed strict TS/Vite/static-site tests. The final pre-production Chrome browser acceptance passed 23/23 checks and measured 40px React touch targets; this does not prove physical-device touch behavior.
 
 ## Markdown: trusted repository content only
 

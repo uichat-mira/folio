@@ -12,13 +12,13 @@ The canonical boundary list, trusted Markdown example, stylesheet caveats, stati
 
 ## Install
 
-The first Folio package release is `0.1.0`, and it is **not published to the npm registry yet**. The command below is the intended installation once that release exists:
+Folio `0.1.0` is publicly available on npm. Install it with:
 
 ```bash
 npm install @uichat-mira/folio
 ```
 
-Until then, the verified consumption path is the packed tarball: `npm pack` in `packages/folio` produces `uichat-mira-folio-<version>.tgz`, and `npm run pack:consumer -w @uichat-mira/folio` installs that exact tarball into a throwaway consumer, resolves the declared package entrypoints and their types, and builds a Vite site from it. The strict NodeNext and Bundler consumer fixtures now additionally check importing `virtual:folio/content` without declaring that virtual module locally. In a TypeScript program that only imports the virtual module and no Folio package entry, register `@uichat-mira/folio` under `compilerOptions.types` to load its published declaration; see the canonical consumer contract.
+The independent `registry:consumer` test installs the real npm package and verifies strict TypeScript, public exports, Vite content discovery and static output. Source changes continue through `pack:consumer`. For TypeScript projects that import only the virtual module, register `@uichat-mira/folio` in `compilerOptions.types`.
 
 Within this repository the official site in `apps/site` consumes the package through the npm workspace link, not through the registry. The UIChat Mira documentation site (`uichat-mira/uichat-mira-docs`) is the intended first downstream production consumer, but it still depends on `@uichat-mira/docs` and has not migrated yet.
 
@@ -96,8 +96,8 @@ Consumer applications remain responsible for branding, page composition, custom 
 
 Verified on 2026-11-01:
 
-- **Done** — package identity, the public entrypoints listed above, and isolated tarball verification in `npm run release:check`. The official site in `apps/site` builds against the package through the workspace link.
-- **Pending** — final release-candidate and Registry verification of the package-owned virtual-module types, the first npm registry publication (the registry does not serve `@uichat-mira/folio` yet), the historical `v0.1.0` tag conflict, npm Trusted Publishing (`.github/workflows/publish.yml` exists, but no Folio GitHub Release has triggered it), and the downstream migration of `uichat-mira/uichat-mira-docs`, which still depends on `@uichat-mira/docs@^0.1.1`.
+- **Done** — `0.1.0` public npm bootstrap, independent Registry consumer verification, public entrypoints, local tarball checks and official site's workspace build.
+- **Pending** — GitHub `folio-v0.1.0` tag/Release record, npm Trusted Publisher/OIDC validation, and downstream Mira Docs migration. Historical MiraDocs `v0.1.0` stays untouched.
 - **Unconfirmed** — whether the Trusted Publisher entry already exists on npmjs.com; that setting is not publicly readable.
 
 The predecessor `@uichat-mira/docs` package stays available for existing consumers during migration.
