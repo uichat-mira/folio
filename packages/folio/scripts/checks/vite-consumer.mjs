@@ -141,4 +141,9 @@ export function verifyViteConsumer({ consumerDir, fixtureDir, log }) {
   log(
     `[content]  ok  negative control without Markdown built and contains no marker`,
   );
+
+  // The prepared app directory is handed back so the static-output check can
+  // build the same fixture in the same installation instead of copying it
+  // again and paying for another install.
+  return { appDir };
 }
