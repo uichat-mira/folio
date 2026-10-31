@@ -910,6 +910,8 @@ button, input { font: inherit; }
   }
 
   .folio-docs-mobile-bar button {
+    min-height: 40px;
+    padding: 0 8px;
     border: 0;
     background: transparent;
     color: var(--folio-muted);
@@ -1007,6 +1009,8 @@ button, input { font: inherit; }
 
   .folio-docs-drawer__head button,
   .folio-mobile-toc__head button {
+    min-height: 40px;
+    padding: 0 8px;
     border: 0;
     background: transparent;
     color: var(--folio-muted);
