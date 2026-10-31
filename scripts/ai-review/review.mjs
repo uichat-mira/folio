@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
+import { dirname, resolve, delimiter } from "node:path";
 
 export const MODEL = "opencode-go/deepseek-v4.1-flash";
 export const MARKER = "<!-- folio-opencode-review:v1 -->";
@@ -155,6 +156,14 @@ export function renderComment(ctx, result) {
   return lines.join("\n");
 }
 
+
+export function configureOpencodeRuntimePath(sdkEntry, env = process.env) {
+  if (typeof sdkEntry !== "string" || !sdkEntry.trim()) throw new Error("missing_sdk_entry");
+  const binPath = resolve(dirname(sdkEntry), "../../../.bin");
+  env.PATH = binPath + delimiter + (env.PATH ?? "");
+  return binPath;
+}
+
 async function main() {
   const ctx = JSON.parse(await readFile(process.env.FOLIO_REVIEW_CONTEXT_PATH, "utf8"));
   const outputPath = process.env.FOLIO_REVIEW_RESULT_PATH;
@@ -171,6 +180,8 @@ async function main() {
     delete process.env.OPENCODE_GO_API_KEY;
     let instance;
     try {
+      const binPath = configureOpencodeRuntimePath(process.env.OPENCODE_SDK_ENTRY);
+      console.log("Folio OpenCode executable directory configured:", binPath);
       const sdk = await import(pathToFileURL(process.env.OPENCODE_SDK_ENTRY).href);
       instance = await sdk.createOpencode({
         hostname: "127.0.0.1",
