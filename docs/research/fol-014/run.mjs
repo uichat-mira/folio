@@ -676,7 +676,10 @@ async function main() {
 
   // A fixed virtual module type contract is a release gate: the harness must
   // not produce fresh screenshots for a TypeScript-broken candidate.
-  for (const [name, result] of Object.entries(typeRuns)) {
+  // acceptance.types.summary shares the typeRuns object; never treat the
+  // computed summary as a fifth tsc result.
+  for (const name of ["app", "rootEntry", "viteEntry", "virtualBaseline"]) {
+    const result = typeRuns[name];
     if (result.exitCode !== 0) {
       fail("types", `${name}: ${result.raw || `tsc exited ${result.exitCode}`}`);
     }
