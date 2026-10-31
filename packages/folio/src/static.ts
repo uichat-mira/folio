@@ -4,7 +4,7 @@ import {
   readFileSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
 import { findFolioDocCollection, getFolioDocNeighbors } from "./docs-structure";
 import { renderFolioMarkdown } from "./markdown";
 import type { FolioDoc, FolioConfig } from "./types";
@@ -97,10 +97,62 @@ export function folioAbsoluteAssetUrl(
   return `${origin}${normalizeBase(base)}/${assetPath}`;
 }
 
+function staticRoutePathError(
+  path: string,
+  outDir: string,
+  reason: string,
+): Error {
+  return new Error(
+    `folio static route ${JSON.stringify(path)} cannot be written inside outDir ${JSON.stringify(outDir)}: ${reason}`,
+  );
+}
+
+// Windows 会静默丢弃路径片段末尾的空格和点，因此 ".. "、"..." 可能被解释为目录上跳。
+function isTraversalSegment(segment: string): boolean {
+  if (segment === ".") return false;
+  const withoutTrailingDotsOrSpaces = segment.replace(/[. ]+$/, "");
+  if (withoutTrailingDotsOrSpaces === "..") return true;
+  return withoutTrailingDotsOrSpaces === "" && segment.includes(".");
+}
+
 function routeOutputPath(outDir: string, path: string): string {
   const route = normalizeRoute(path);
-  if (route === "/") return resolve(outDir, "index.html");
-  return resolve(outDir, route.replace(/^\//, ""), "index.html");
+  const root = resolve(outDir);
+  if (route === "/") return resolve(root, "index.html");
+
+  const relativeRoute = route.slice(1);
+  for (const segment of relativeRoute.split("/")) {
+    if (segment.includes("\\") || segment.includes("\0")) {
+      throw staticRoutePathError(
+        path,
+        root,
+        `path segment ${JSON.stringify(segment)} contains a character that is not valid in a static route`,
+      );
+    }
+    if (isTraversalSegment(segment)) {
+      throw staticRoutePathError(
+        path,
+        root,
+        `path segment ${JSON.stringify(segment)} escapes the output directory`,
+      );
+    }
+  }
+
+  const target = resolve(root, relativeRoute, "index.html");
+  const relativeTarget = relative(root, target);
+  if (
+    !relativeTarget ||
+    isAbsolute(relativeTarget) ||
+    relativeTarget === ".." ||
+    relativeTarget.startsWith(`..${sep}`)
+  ) {
+    throw staticRoutePathError(
+      path,
+      root,
+      `resolved output ${JSON.stringify(target)} is outside of the output directory`,
+    );
+  }
+  return target;
 }
 
 function dataList(value: unknown): string[] {
@@ -354,8 +406,13 @@ export function writeFolioStaticSite(
     routes.map((route) => [normalizeRoute(route.path), { ...route, path: normalizeRoute(route.path) }]),
   );
 
-  for (const route of routeMap.values()) {
-    const target = routeOutputPath(context.outDir, route.path);
+  // 先校验全部路由再落盘：任一非法路由都不会留下半成品输出。
+  const outputs = [...routeMap.values()].map((route) => ({
+    route,
+    target: routeOutputPath(context.outDir, route.path),
+  }));
+
+  for (const { route, target } of outputs) {
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(
       target,
