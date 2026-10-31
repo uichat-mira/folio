@@ -14,7 +14,7 @@ tags:
 
 ## 在 Folio 仓库中开发
 
-Folio 当前仓库及 npm 包声明支持 Node.js `>=20`，CI 使用 Node.js 24；建议开发与首发验收优先使用 Node.js 24。
+Folio 仓库与 npm 包的 `engines.node` 声明为 `>=20`，但项目依赖的 Vite 7 要求 Node.js `20.19+` 或 `22.12+`。CI 使用 Node.js 24，建议开发与首发验收也使用 Node.js 24。
 
 ```bash
 npm ci --no-audit --no-fund
