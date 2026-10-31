@@ -1,0 +1,142 @@
+# FOL-011: trusted Folio caller; shared Worker owns implementation and Draft PR delivery.
+name: Mira External Worker
+
+on:
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Open Folio Issue number to execute
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# Serialize the whole enrollment + execution for a single Issue, not just the guard.
+concurrency:
+  group: ${{ format('folio-worker-{0}-{1}', github.repository, github.event.issue.number || inputs.issue_number || github.run_id) }}
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  enrollment:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.action == 'created' &&
+       startsWith(github.event.comment.body, '/worker'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+    outputs:
+      issue_number: ${{ steps.guard.outputs.issue_number }}
+    steps:
+      - name: Verify human authorization and live Issue contract
+        id: guard
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          DISPATCH_ISSUE_NUMBER: ${{ inputs.issue_number }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          set -euo pipefail
+
+          test "$GITHUB_REPOSITORY" = 'uichat-mira/folio'
+          # GitHub executes issue_comment workflows from the repository default branch.
+          if test "$EVENT_NAME" = issue_comment && test "$GITHUB_REF_NAME" != "$DEFAULT_BRANCH"; then
+            echo '::error::Comment caller must run from the default branch.' >&2
+            exit 1
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/branches/dev" --jq '.name' >/dev/null
+          test -s "$GITHUB_EVENT_PATH"
+
+          # Both paths require the *current* repository permission of an actual human.
+          jq -e --arg actor "$ACTOR" '
+            .sender.login == $actor and .sender.type == "User"
+          ' "$GITHUB_EVENT_PATH" >/dev/null ||
+            { echo '::error::Event sender is not the human workflow actor.' >&2; exit 1; }
+          permission="$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$ACTOR/permission" --jq '.permission')"
+          case "$permission" in
+            write|maintain|admin) ;;
+            *) echo '::error::Actor does not have current repository write permission.' >&2; exit 1 ;;
+          esac
+
+          if test "$EVENT_NAME" = issue_comment; then
+            issue_number="$(jq -er '.issue.number | numbers' "$GITHUB_EVENT_PATH")"
+            comment_id="$(jq -er '.comment.id | numbers' "$GITHUB_EVENT_PATH")"
+            jq -e --arg actor "$ACTOR" '
+              .action == "created" and
+              .issue.state == "open" and
+              (.issue | has("pull_request") | not) and
+              .comment.user.login == $actor and
+              .comment.user.type == "User" and
+              .comment.body == "/worker run" and
+              .comment.created_at == .comment.updated_at
+            ' "$GITHUB_EVENT_PATH" >/dev/null ||
+              { echo '::error::Only an original, unedited /worker run on an open Issue is allowed.' >&2; exit 1; }
+            case "$comment_id" in
+              ''|0|*[!0-9]*) echo '::error::Invalid comment ID.' >&2; exit 1 ;;
+            esac
+
+            # Re-fetch immediately before enrollment to reject deletions, edits or substitutions.
+            live_comment="$(gh api "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id")"
+            jq -e --slurpfile event "$GITHUB_EVENT_PATH" '
+              .id == $event[0].comment.id and
+              .user.id == $event[0].comment.user.id and
+              .user.login == $event[0].comment.user.login and
+              .user.type == "User" and
+              .issue_url == $event[0].issue.url and
+              .body == "/worker run" and
+              .created_at == $event[0].comment.created_at and
+              .updated_at == $event[0].comment.updated_at and
+              .created_at == .updated_at
+            ' <<< "$live_comment" >/dev/null ||
+              { echo '::error::The comment was edited, removed or replaced.' >&2; exit 1; }
+          else
+            issue_number="$DISPATCH_ISSUE_NUMBER"
+          fi
+
+          case "$issue_number" in
+            ''|0|0*|*[!0-9]*) echo '::error::Issue must be a positive decimal integer.' >&2; exit 1 ;;
+          esac
+          live_issue="$(gh api "repos/$GITHUB_REPOSITORY/issues/$issue_number")"
+          jq -e '
+            .state == "open" and
+            (has("pull_request") | not) and
+            (.body // "" | gsub("[[:space:]]"; "") | length > 0)
+          ' <<< "$live_issue" >/dev/null ||
+            { echo '::error::Issue closed, a pull request, or missing a contract.' >&2; exit 1; }
+
+          echo "issue_number=$issue_number" >> "$GITHUB_OUTPUT"
+
+  worker:
+    needs: enrollment
+    permissions:
+      contents: write
+      issues: read
+      pull-requests: write
+    # Immutable Organization main revision verified for FOL-011; do not use a moving tag.
+    uses: uichat-mira/.github/.github/workflows/mira-external-worker.yml@7b8b33302650053d4128794aefd4d366fca661fe
+    with:
+      issue_number: ${{ fromJSON(needs.enrollment.outputs.issue_number) }}
+      base_branch: dev
+      timeout_minutes: 60
+      free_mode: false
+      provider: opencode-go
+      model: deepseek-v4.1-flash
+      verification_command: |
+        NODE_BIN="$(find /opt/hostedtoolcache/node -path '*/22.*/x64/bin/node' -type f -print | sort -V | tail -n 1)"
+        test -n "$NODE_BIN"
+        export PATH="$(dirname "$NODE_BIN"):$PATH"
+        node --version | grep -E '^v22\.'
+        npm ci --no-audit --no-fund
+        npm run typecheck -w @uichat-mira/folio
+        npm run build -w @uichat-mira/folio
+        npm run test -w @uichat-mira/folio
+    secrets:
+      opencode_go_api_key: ${{ secrets.AI_PROVIDER_OPENCODE_GO_KEY }}
