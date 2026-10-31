@@ -85,3 +85,19 @@ jobs:
           path: docs/research/fol-014/results/
           retention-days: 7
           if-no-files-found: warn
+
+  registry-consumer:
+    # FOL-016: run only for the bootstrap acceptance PR. Installs the actual
+    # published npm version; never pushes/tags/releases/publishes anything.
+    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'feat/fol-016-')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      - run: npm ci --no-audit --no-fund
+      - name: Independently install and verify published Registry version
+        run: npm run registry:consumer -w @uichat-mira/folio
