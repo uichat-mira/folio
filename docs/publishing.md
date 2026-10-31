@@ -37,9 +37,10 @@ npm install @uichat-mira/folio@0.1.0
 ### Release lineage and remaining work
 
 - Legacy MiraDocs tag `v0.1.0` belongs to historical commit `7cbf4b9` and is unchanged.
-- Future Folio GitHub Release tag is `folio-v0.1.0`; as of this record it has not been created. `publish.yml` requires this prefix plus `prod` ancestry and safely skips `npm publish` when the version already exists. Its OIDC path **has not** been exercised by the first manual publish.
+- Folio's first GitHub OIDC-published Release is planned for `folio-v0.1.1`, from a reviewed `prod` commit. The historical `v0.1.0` belongs to MiraDocs; the manually published Folio 0.1.0 never had a GitHub Release. `publish.yml` requires this prefix plus `prod` ancestry and safely skips `npm publish` when the version already exists. Its OIDC path **has not** been exercised by the first manual publish.
 - Trusted Publisher is a separate **npm package-admin private setting** and is unverified. Exact future binding: GitHub organization `uichat-mira`, repository `folio`, workflow filename `publish.yml`, allow `npm publish`. The workflow uses GitHub-hosted runners, `id-token: write`, Node 24/npm 11.
 - npm's current rule requires first successful OIDC publish within **48 hours of configuring a new Trusted Publisher**; coordinate configuration with the next approved version release so it does not expire unused. Do not create a long-lived npm automation token.
+- The `0.1.1` release corrects the README embedded in the package and exercises the authenticated OIDC workflow. The workflow also re-installs the exact just-published Registry package, checks SRI against npm metadata, and executes strict TypeScript, Vite, and static output consumption. Configure the package's Trusted Publisher with direct `npm publish` permission before the GitHub Release; npm's current trust setup defaults to staged-publish-only unless direct publish is enabled.
 - The previous `@uichat-mira/docs` package remains supported while downstream consumers migrate. Neither FOL-016 nor this doc authorizes a new npm version, tag, GitHub Release or deprecation.
 
 ## Trusted Publisher

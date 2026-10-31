@@ -65,6 +65,24 @@ jobs:
         working-directory: packages/folio
         run: npm publish --access public
 
+      # Verify the *registry* artifact, never a workspace-linked build. Allow
+      # npm's CDN to propagate newly published package metadata before checking.
+      - name: Verify public Registry install and consumer behavior
+        shell: bash
+        run: |
+          VERSION="${{ steps.package.outputs.version }}"
+          for attempt in $(seq 1 12); do
+            if npm view "@uichat-mira/folio@${VERSION}" dist.integrity --registry=https://registry.npmjs.org | grep -q '^sha512-'; then
+              break
+            fi
+            if [ "$attempt" -eq 12 ]; then
+              echo "::error::Published @uichat-mira/folio@${VERSION} unavailable from npm Registry"
+              exit 1
+            fi
+            sleep 10
+          done
+          npm run registry:consumer -w @uichat-mira/folio
+
       - name: Record release result
         shell: bash
         run: |

@@ -4,15 +4,15 @@ Folio is a Git-native documentation, publishing, and project portal runtime for 
 
 It keeps Markdown, navigation, routing, SEO, and static deployment inside a stable package contract while allowing every consumer to keep its own UI, branding, and product-specific behavior.
 
-## 0.1.0 consumer contract
+## 0.1.x consumer contract
 
 Markdown rendering is trusted-content-only: raw HTML, `::: html`, and Callout bodies are preserved without sanitization. `styles.css` is a whole-site stylesheet, not an isolated embed stylesheet. The default static document shell works without JavaScript, while custom static route bodies are site-owned.
 
-The canonical boundary list, trusted Markdown example, stylesheet caveats, static-mode comparison, and known limitations live in the [Folio consumer contract](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md). That file is the single source of truth for these rules. It also records the independent [FOL-014 tarball/UI acceptance](https://github.com/uichat-mira/folio/blob/dev/docs/research/fol-014-default-ui-acceptance.md) and the original missing ambient TypeScript declaration for `virtual:folio/content`, now addressed in the source candidate.
+The canonical boundary list, trusted Markdown example, stylesheet caveats, static-mode comparison, and known limitations live in the [Folio consumer contract](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md). That file is the single source of truth for these rules. It also records the independent [FOL-014 tarball/UI acceptance](https://github.com/uichat-mira/folio/blob/dev/docs/research/fol-014-default-ui-acceptance.md) and the original missing ambient TypeScript declaration for `virtual:folio/content`, included in the published package.
 
 ## Install
 
-Folio `0.1.0` is publicly available on npm. Install it with:
+Folio `0.1.1` is the next patch release after the manually published `0.1.0`. It retains the same public API, ships the corrected installation README, and is distributed from the npm Registry after its GitHub release succeeds. Install the latest Folio with:
 
 ```bash
 npm install @uichat-mira/folio
