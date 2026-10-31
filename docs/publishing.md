@@ -17,7 +17,7 @@ npm run release:check
 
 ## First release candidate: unresolved gates
 
-The package's existing `release:check` verifies exported package entrypoints and an isolated Vite consumer. It does **not** currently prove that a TypeScript user can import `virtual:folio/content` without a local declaration: [FOL-014](research/fol-014-default-ui-acceptance.md) reproduced `TS2307` on a real tarball. Before 0.1.0 publication, ship the package-owned ambient declaration and rerun strict `tsc` from a fresh tarball consumer **without** any consumer declaration; rerun the FOL-014 UI/navigation acceptance on the final merged candidate after FOL-013.
+[FOL-014](research/fol-014-default-ui-acceptance.md) originally reproduced `TS2307` for `virtual:folio/content` in a fresh independent consumer. The source candidate now packages an ambient declaration referenced by its public type entrypoints and extends `release:check` to cover strict NodeNext/Bundler TypeScript imports from the real tarball without local declarations or `skipLibCheck`. Verify the final 0.1.0 candidate and rerun FOL-014 browser/TOC tests after FOL-013 and the mobile tap-target change.
 
 There is an independent **release-tag identity conflict**: the existing `v0.1.0` tag points to the 2026-07-25 historical MiraDocs commit `7cbf4b9`, even though it is an ancestor of `prod`. The current `publish.yml` checks the exact `v${VERSION}` name plus `prod` ancestry, but this is **not evidence that the tag denotes Folio's accepted release candidate**. FOL-015 must explicitly resolve the tag/version/workflow strategy while preserving historical provenance; do not move or delete the legacy tag silently, and do not create a Folio Release from it.
 

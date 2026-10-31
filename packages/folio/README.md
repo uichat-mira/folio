@@ -8,7 +8,7 @@ It keeps Markdown, navigation, routing, SEO, and static deployment inside a stab
 
 Markdown rendering is trusted-content-only: raw HTML, `::: html`, and Callout bodies are preserved without sanitization. `styles.css` is a whole-site stylesheet, not an isolated embed stylesheet. The default static document shell works without JavaScript, while custom static route bodies are site-owned.
 
-The canonical boundary list, trusted Markdown example, stylesheet caveats, static-mode comparison, and known limitations live in the [Folio consumer contract](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md). That file is the single source of truth for these rules. It also records the independent [FOL-014 tarball/UI acceptance](https://github.com/uichat-mira/folio/blob/dev/docs/research/fol-014-default-ui-acceptance.md) and the currently missing ambient TypeScript declaration for `virtual:folio/content` (including a temporary consumer-side workaround).
+The canonical boundary list, trusted Markdown example, stylesheet caveats, static-mode comparison, and known limitations live in the [Folio consumer contract](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md). That file is the single source of truth for these rules. It also records the independent [FOL-014 tarball/UI acceptance](https://github.com/uichat-mira/folio/blob/dev/docs/research/fol-014-default-ui-acceptance.md) and the original missing ambient TypeScript declaration for `virtual:folio/content`, now addressed in the source candidate.
 
 ## Install
 
@@ -18,7 +18,7 @@ The first Folio package release is `0.1.0`, and it is **not published to the npm
 npm install @uichat-mira/folio
 ```
 
-Until then, the verified consumption path is the packed tarball: `npm pack` in `packages/folio` produces `uichat-mira-folio-<version>.tgz`, and `npm run pack:consumer -w @uichat-mira/folio` installs that exact tarball into a throwaway consumer, resolves the declared package entrypoints and their types, and builds a Vite site from it. It does **not** currently prove that a TypeScript consumer can import `virtual:folio/content` without declaring that virtual module.
+Until then, the verified consumption path is the packed tarball: `npm pack` in `packages/folio` produces `uichat-mira-folio-<version>.tgz`, and `npm run pack:consumer -w @uichat-mira/folio` installs that exact tarball into a throwaway consumer, resolves the declared package entrypoints and their types, and builds a Vite site from it. The strict NodeNext and Bundler consumer fixtures now additionally check importing `virtual:folio/content` without declaring that virtual module locally.
 
 Within this repository the official site in `apps/site` consumes the package through the npm workspace link, not through the registry. The UIChat Mira documentation site (`uichat-mira/uichat-mira-docs`) is the intended first downstream production consumer, but it still depends on `@uichat-mira/docs` and has not migrated yet.
 
@@ -97,7 +97,7 @@ Consumer applications remain responsible for branding, page composition, custom 
 Verified on 2026-11-01:
 
 - **Done** — package identity, the public entrypoints listed above, and isolated tarball verification in `npm run release:check`. The official site in `apps/site` builds against the package through the workspace link.
-- **Pending** — the package-owned `virtual:folio/content` TypeScript declaration, the first npm registry publication (the registry does not serve `@uichat-mira/folio` yet), the historical `v0.1.0` tag conflict, npm Trusted Publishing (`.github/workflows/publish.yml` exists, but no Folio GitHub Release has triggered it), and the downstream migration of `uichat-mira/uichat-mira-docs`, which still depends on `@uichat-mira/docs@^0.1.1`.
+- **Pending** — final release-candidate and Registry verification of the package-owned virtual-module types, the first npm registry publication (the registry does not serve `@uichat-mira/folio` yet), the historical `v0.1.0` tag conflict, npm Trusted Publishing (`.github/workflows/publish.yml` exists, but no Folio GitHub Release has triggered it), and the downstream migration of `uichat-mira/uichat-mira-docs`, which still depends on `@uichat-mira/docs@^0.1.1`.
 - **Unconfirmed** — whether the Trusted Publisher entry already exists on npmjs.com; that setting is not publicly readable.
 
 The predecessor `@uichat-mira/docs` package stays available for existing consumers during migration.

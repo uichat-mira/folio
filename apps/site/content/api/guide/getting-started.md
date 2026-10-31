@@ -43,9 +43,9 @@ npm install @uichat-mira/folio
 
 `npm install` 只适用于首次 Registry 发布之后；当前 Registry 仍返回 404，完整状态见[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)。该契约同时说明可信 Markdown 边界与默认样式用法。
 
-在 `0.1.0` 候选包补齐类型声明前，TypeScript 消费者导入 `virtual:folio/content` 还需要自行添加环境声明，否则会出现 `TS2307`。**这不是 `npm install` 或 `vite build` 的报错**。临时声明示例与独立 tarball 实测证据见[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)；正式首发前应由 Folio 包修复，不应要求消费者永久维护声明。
+FOL-014 原始独立 tarball 曾因虚拟模块缺少类型声明出现 `TS2307`。当前源码候选已将声明随包提供，并在独立 tarball 消费者中要求无本地 workaround 的严格类型检查。最终 Registry 版本还需验收，详见[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)。
 
-React 入口（示例假定虚拟模块类型已由消费者暂时声明或由未来包版本提供）：
+React 入口（不再需要消费者自行声明虚拟模块）：
 
 ```tsx
 import { FolioApp } from "@uichat-mira/folio";
