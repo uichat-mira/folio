@@ -6,13 +6,13 @@ It turns structured Markdown in a repository into a stable content model, Vite i
 
 ## Install
 
-Folio starts a new npm package line at `0.1.0`. The package is **not published to the npm registry yet**; the command below is the intended installation once that release exists.
+Folio `0.1.0` is publicly available on the npm Registry. Install the published package:
 
 ```bash
 npm install @uichat-mira/folio
 ```
 
-Until then, consumption is verified from the packed tarball rather than the registry:
+The published package passed independent Registry-installed NodeNext/Bundler, Vite and static-site checks ([FOL-016 evidence](https://github.com/uichat-mira/folio/actions/runs/41247604056)). Continue using the local tarball gate for source changes:
 
 ```bash
 npm run release:check
@@ -27,11 +27,11 @@ The 0.1.0 consumer boundaries are defined once in [docs/consumer-contract.md](do
 - Markdown rendering is trusted-content-only. Raw HTML, `::: html` blocks, and Callout bodies are preserved without sanitization, so unreviewed submissions, scraped pages, and external PR previews must not be rendered.
 - `@uichat-mira/folio/styles.css` is a whole-site default stylesheet. It is not an isolated embed stylesheet, and importing it into an existing branded page affects that page globally.
 - The default `staticRoutes` document shell supports sidebar, TOC, and previous/next navigation without JavaScript. Sites that supply custom static route bodies own that markup and do not get the shell.
-- The source candidate now includes an automatically discoverable `virtual:folio/content` TypeScript declaration, verified by independent tarball consumer gates; final Registry verification remains pending.
+- The npm package ships `virtual:folio/content` declarations; NodeNext/Bundler and virtual-only strict TS imports passed against the real published Registry package.
 
 ## Publication status
 
-Package identity, the current runtime entrypoints, and isolated tarball verification are in place. [FOL-014's independent browser/TypeScript acceptance](docs/research/fol-014-default-ui-acceptance.md) supports the default UI and identified the virtual-module type gap, now addressed in the source candidate. The first npm publication, final candidate browser revalidation, release-tag lineage, npm Trusted Publishing, and the `uichat-mira-docs` downstream migration remain open.
+`@uichat-mira/folio@0.1.0` was manually published from accepted `prod` commit `40db582b` on 2026-11-01; the Registry tarball has passed external installation, type and Vite/static consumption checks. The final FOL-015 Chrome candidate passed 23/23 checks. GitHub Release/tag records, npm Trusted Publisher/OIDC activation and downstream site migration remain separate.
 
 The [migration status page](https://uichat-mira.github.io/folio/api/guide/migration-status/) records the current state with its evidence.
 
