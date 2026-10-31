@@ -13,9 +13,12 @@
 
 浏览器实测确认：
 
-- **与加载顺序无关的必然影响**只有两条 —— `* { box-sizing: border-box }`（实测把一个 200px+padding+border 的盒子从 222px 压到 200px）和 `body { min-width: 320px }`。
-- **与加载顺序相关的影**响有三组 —— `body` 的 margin/背景/文字色、`a` 的颜色与下划线、`button, input { font: inherit }` 的控件字体。宿主自己在同特异性下声明了这些属性时，只有 Folio 样式表**后加载**才会被覆盖。
-- `:root` 上的 `font-family`/`color`/`background` 只落在 `<html>` 上，宿主在 `body` 声明过时**视觉上不产生变化**（实测 `host-folio-first` 的 body 全部保留宿主值）。
+- **与加载顺序无关的宿主影响有三项**（前提是宿主没有自行声明竞争属性，见 4.6）——
+  1. `* { box-sizing: border-box }`：实测把一个 200px + padding + border 的盒子从 `222px` 压到 `200px`；
+  2. `body { min-width: 320px }`：`0px → 320px`；
+  3. `:root { font-synthesis: none; text-rendering: optimizeLegibility }`：两条都是**继承属性**，实测宿主正文 `<p>` 在**两个加载顺序下都**从 `font-synthesis: weight style small-caps` / `text-rendering: auto` 变成 `none` / `optimizelegibility`，而同一次测量里 `font-family` 仍保留宿主的 Georgia。`font-synthesis: none` 会关掉浏览器的合成粗体/斜体，`text-rendering: optimizeLegibility` 会改变字距与连字。
+- **与加载顺序相关的影响有三组** —— `body` 的 margin/背景/文字色、`a` 的颜色与下划线、`button, input { font: inherit }` 的控件字体。宿主自己在同特异性下声明了这些属性时，只有 Folio 样式表**后加载**才会被覆盖。
+- `:root` 上的 `font-family`/`color`/`background` 只落在 `<html>` 上，宿主在 `body` 声明过时**视觉上不产生变化**（实测 `host-folio-first` 的 body 全部保留宿主值）。这条"惰性"结论**不适用于**同为 `:root` 声明的 `font-synthesis`/`text-rendering`——它们是继承属性，会直接穿透到宿主正文。
 - `--folio-*` 变量、`.markdown-mermaid*`、媒体查询、`[data-folio-theme]` 都**不会**影响宿主。
 
 当前仓库内没有任何嵌入模式（模式 B）的真实消费者：`apps/site` 是整站模式，Pearl 与 `uichat-mira-docs` 都还没迁移。因此不存在已发生的生产故障，本报告不把实测风险描述成事故。
@@ -78,9 +81,11 @@ tarball: `uichat-mira-folio-0.1.0.tgz`，sha256 `ebc5abe101ac9efc8d567ac0397c8e1
 
 | 探测点 | 宿主声明 | Folio 之后 | 变化 | 来源规则 |
 | --- | --- | --- | --- | --- |
-| `html` background | 未声明 | `rgb(250,249,245)` | 新增 | `:root` |
-| `html` color | 未声明 | `rgb(20,20,19)` | 新增 | `:root` |
-| `html` font-family | 未声明 | `"Public Sans", -apple-system, …` | 新增 | `:root` |
+| `html` background | 未声明 | `rgb(250,249,245)` | 新增 | `:root` (L1) |
+| `html` color | 未声明 | `rgb(20,20,19)` | 新增 | `:root` (L1) |
+| `html` font-family | 未声明 | `"Public Sans", -apple-system, …` | 新增 | `:root` (L1) |
+| `p` font-synthesis | 继承 `weight style small-caps` | `none` | **被替换** | `:root` (L1)，继承 |
+| `p` text-rendering | `auto` | `optimizelegibility` | **被替换** | `:root` (L1)，继承 |
 | `body` margin-top | `32px` | `0px` | **丢失** | `body` (68) |
 | `body` min-width | `0px` | `320px` | 新增 | `body` (68) |
 | `body` background | `rgb(240,244,248)` | `rgb(250,249,245)` | **被替换** | `body` (68) |
@@ -104,13 +109,15 @@ tarball: `uichat-mira-folio-0.1.0.tgz`，sha256 `ebc5abe101ac9efc8d567ac0397c8e1
 | `body` color | `rgb(16,42,67)` | `rgb(16,42,67)` | 否 |
 | `a` color / decoration | `rgb(180,83,9)` / `underline` | `rgb(180,83,9)` / `underline` | 否 |
 | `button`,`input` font | `"Courier New"` / `17px` | `"Courier New"` / `17px` | 否 |
+| `p` font-synthesis | `weight style small-caps` | `none` | **是**（`:root` 继承属性，宿主未声明） |
+| `p` text-rendering | `auto` | `optimizelegibility` | **是**（同上） |
 | `body` min-width | `0px` | `320px` | **是**（宿主没有声明，无竞争） |
 | `div` box-sizing | `content-box` | `border-box` | **是**（`*` 特异性最低但对"未声明"仍然生效） |
 | 该盒子 `offsetWidth` | `222px` | `200px` | **是** |
 
-这张表是本次研究最关键的一张：**把 Folio 样式表放到宿主 CSS 之前，可以消掉 5 条元素选择器规则的影响，但消不掉 `*` 和 `body{min-width}`。**
+这张表是本次研究最关键的一张：**把 Folio 样式表放到宿主 CSS 之前，可以消掉 5 条元素选择器规则的影响，但消不掉 `*`、`body{min-width}` 和 `:root` 的两条继承属性。**
 
-原因是 CSS 级联顺序而非特异性：`body`、`a`、`button,input` 在宿主与 Folio 之间特异性相同（都是元素选择器），后加载者胜出；而 `*` 的特异性为 0，宿主只要**没有**给该元素声明 `box-sizing`，`*` 就会生效——绝大多数宿主不会给每个元素都声明 `box-sizing`，只会用 `*` 或不做。
+原因是 CSS 级联顺序而非特异性：`body`、`a`、`button,input` 在宿主与 Folio 之间特异性相同（都是元素选择器），后加载者胜出；而 `*` 的特异性为 0，宿主只要**没有**给该元素声明 `box-sizing`，`*` 就会生效——绝大多数宿主不会给每个元素都声明 `box-sizing`，只会用 `*` 或不做。`font-synthesis`/`text-rendering` 由 `:root` 声明在 `<html>` 上，作为继承属性落到每一个未自行声明的宿主元素，与样式表顺序无关。
 
 ### 4.3 模式 A：官方 FolioApp 站点（真实构建产物）
 
@@ -152,6 +159,15 @@ tarball: `uichat-mira-folio-0.1.0.tgz`，sha256 `ebc5abe101ac9efc8d567ac0397c8e1
 
 即：嵌入模式默认是"Folio 的配色 + 宿主的字体骨架"，宿主若想完全品牌化，必须覆盖 `--folio-*`，而不是继承宿主自己的变量。这一点目前没有任何文档说明。
 
+### 4.6 结论的适用条件
+
+"与加载顺序无关"有两个前提，不能外推成"对任意宿主都必然发生"：
+
+1. **宿主没有声明竞争属性**。宿主若自己写 `* { box-sizing: content-box }`、`body { min-width: 0 }`，或 `:root { font-synthesis: auto; text-rendering: auto }`，对应的三项影响都会消失（这些规则需在 Folio 之后加载或使用更高特异性）。
+2. **`:root` 的视觉性属性是否显露，取决于宿主有没有在 `body` 上声明同名属性**。本实验的宿主声明了 `body` 的字体/颜色/背景，所以那三项只落在 `<html>` 上、视觉惰性；而继承属性（`font-synthesis`/`text-rendering`）不受此保护，会穿透到正文。
+
+因此本报告的措辞是"在本实验宿主上必然发生"，而非"对任何宿主都必然发生"。
+
 ## 5. 判断
 
 ### 5.1 已证实的宿主污染（模式 B）
@@ -160,6 +176,8 @@ tarball: `uichat-mira-folio-0.1.0.tgz`，sha256 `ebc5abe101ac9efc8d567ac0397c8e1
 | --- | --- | --- | --- |
 | `* { box-sizing: border-box }` 改变宿主既定布局的盒子尺寸 | **是** | 高：静默、全局、改的是布局而非配色 | 4.1 / 4.2 的 `offsetWidth 222 → 200` |
 | `body { min-width: 320px }` | **是** | 低：只影响极窄容器或绝对定位页面 | 4.1 / 4.2 |
+| `:root { font-synthesis: none }` 继承到宿主正文 | **是** | 中：宿主字体缺少粗体/斜体字面时，原本由浏览器合成的粗/斜体会消失，文字层级会塌 | 4.1 / 4.2 的 `p` 采样 |
+| `:root { text-rendering: optimizeLegibility }` 继承到宿主正文 | **是** | 低到中：改变字距与连字，非拉丁字体、等宽排版可能出现细节差异 | 同上 |
 | `body` margin/背景/文字色被替换 | 否（宿主后加载可胜出） | 中：默认 import 顺序下整页换肤 | 4.1 |
 | 全站链接变 `color: inherit` + 无下划线 | 否 | 中：可读性/品牌一致性 | 4.1 |
 | `button`/`input` 字体与字号被 `font: inherit` 重置 | 否 | 中：表单控件视觉不一致 | 4.1 |
@@ -176,7 +194,7 @@ tarball: `uichat-mira-folio-0.1.0.tgz`，sha256 `ebc5abe101ac9efc8d567ac0397c8e1
 
 - `--folio-*` 变量（命名空间已隔离，不覆盖宿主变量）
 - `.markdown-mermaid*`、`@media`、`[data-folio-theme]`
-- `:root` 上的 `font-family`/`color`/`background`：宿主在 `body` 有声明时视觉无变化；只有在完全没有 body 规则的页面上才显露
+- `:root` 上的 `font-family`/`color`/`background`：宿主在 `body` 有声明时视觉无变化；只有在完全没有 body 规则的页面上才显露。**注意 `font-synthesis`/`text-rendering` 不属于此列**——它们是继承属性，见 5.1
 - 嵌入内容的 Folio 配色（属于预期行为，缺的是文档，不是代码）
 
 ## 6. 两个最小方案
@@ -186,7 +204,7 @@ tarball: `uichat-mira-folio-0.1.0.tgz`，sha256 `ebc5abe101ac9efc8d567ac0397c8e1
 在 `packages/folio/README.md` 的 Real package entrypoints 一节增加一段「Style contract」：
 
 1. `@uichat-mira/folio/styles.css` 是**整站入口**，隐含"本文档归 Folio 所有"。
-2. 嵌入到已有品牌页面时，宿主必须知道：`* { box-sizing }`、`body { min-width: 320px }`、`:root` 基线三种影响与加载顺序无关；其余元素选择器影响可通过在 Folio 之后加载宿主 CSS 消除。
+2. 嵌入到已有品牌页面时，宿主必须知道有**三项**影响与加载顺序无关：`* { box-sizing }`、`body { min-width: 320px }`、`:root` 的 `font-synthesis: none` + `text-rendering: optimizeLegibility`（两条继承属性会落到宿主正文）。其余元素选择器影响可通过在 Folio 之后加载宿主 CSS 消除；上述三项则必须由宿主显式声明竞争属性才能覆盖。
 3. 品牌化方式是覆盖 `--folio-*`，组件不会自动继承宿主变量。
 
 - 兼容影响：无

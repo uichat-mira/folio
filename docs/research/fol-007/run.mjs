@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 // FOL-007 host-impact harness.
 //
 // Reproduces the measurement behind docs/research/fol-007-css-host-impact.md:
@@ -399,7 +399,7 @@ async function main() {
   for (const name of ["host-folio-after", "host-folio-first"]) {
     const after = measurements.variants[name];
     log(`\n=== ${name} vs host-before ===`);
-    for (const section of ["root", "body", "link", "button", "input", "box", "hostCard"]) {
+    for (const section of ["root", "body", "paragraph", "link", "button", "input", "box", "hostCard"]) {
       for (const property of Object.keys(after[section] ?? {})) {
         const a = before[section]?.[property];
         const b = after[section]?.[property];

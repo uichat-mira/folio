@@ -1,9 +1,9 @@
 {
   "meta": {
-    "generatedAt": "2026-10-31T18:28:40.529Z",
+    "generatedAt": "2026-10-31T18:42:31.953Z",
     "node": "v24.9.0",
     "platform": "win32 x64",
-    "gitHead": "de368cbbebf9ce53c496a4fe722f992da99abdc1",
+    "gitHead": "83643bf09130d2ffa03b9bc2606f6a4d760c70e4",
     "gitDirty": true,
     "tarball": "uichat-mira-folio-0.1.0.tgz sha256=ebc5abe101ac9efc8d567ac0397c8e1a29efaba5611adecfaa456e80810ce6fa",
     "stylesheetHashes": {
@@ -23,7 +23,9 @@
       "root": {
         "font-family": "\"Noto Sans SC\"",
         "color": "rgb(0, 0, 0)",
-        "background-color": "rgba(0, 0, 0, 0)"
+        "background-color": "rgba(0, 0, 0, 0)",
+        "font-synthesis": "weight style small-caps",
+        "text-rendering": "auto"
       },
       "body": {
         "margin-top": "32px",
@@ -32,6 +34,12 @@
         "color": "rgb(16, 42, 67)",
         "font-family": "Georgia, \"Times New Roman\", serif",
         "font-size": "18px"
+      },
+      "paragraph": {
+        "font-synthesis": "weight style small-caps",
+        "text-rendering": "auto",
+        "font-family": "Georgia, \"Times New Roman\", serif",
+        "color": "rgb(16, 42, 67)"
       },
       "link": {
         "color": "rgb(180, 83, 9)",
@@ -74,7 +82,9 @@
       "root": {
         "font-family": "\"Public Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
         "color": "rgb(20, 20, 19)",
-        "background-color": "rgb(250, 249, 245)"
+        "background-color": "rgb(250, 249, 245)",
+        "font-synthesis": "none",
+        "text-rendering": "optimizelegibility"
       },
       "body": {
         "margin-top": "0px",
@@ -83,6 +93,12 @@
         "color": "rgb(20, 20, 19)",
         "font-family": "Georgia, \"Times New Roman\", serif",
         "font-size": "18px"
+      },
+      "paragraph": {
+        "font-synthesis": "none",
+        "text-rendering": "optimizelegibility",
+        "font-family": "Georgia, \"Times New Roman\", serif",
+        "color": "rgb(20, 20, 19)"
       },
       "link": {
         "color": "rgb(20, 20, 19)",
@@ -144,7 +160,9 @@
       "root": {
         "font-family": "\"Public Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
         "color": "rgb(20, 20, 19)",
-        "background-color": "rgb(250, 249, 245)"
+        "background-color": "rgb(250, 249, 245)",
+        "font-synthesis": "none",
+        "text-rendering": "optimizelegibility"
       },
       "body": {
         "margin-top": "32px",
@@ -153,6 +171,12 @@
         "color": "rgb(16, 42, 67)",
         "font-family": "Georgia, \"Times New Roman\", serif",
         "font-size": "18px"
+      },
+      "paragraph": {
+        "font-synthesis": "none",
+        "text-rendering": "optimizelegibility",
+        "font-family": "Georgia, \"Times New Roman\", serif",
+        "color": "rgb(16, 42, 67)"
       },
       "link": {
         "color": "rgb(180, 83, 9)",

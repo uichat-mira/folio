@@ -61,7 +61,9 @@
   <body>
     <header class="host-card"><h1>Host brand page</h1></header>
 
-    <p>Host paragraph with <a id="probe-link" href="#target">a host link</a>.</p>
+    <p id="probe-paragraph">
+      Host paragraph with <a id="probe-link" href="#target">a host link</a>.
+    </p>
 
     <p>
       <button id="probe-button" type="button">Host button</button>
@@ -101,6 +103,8 @@
             "font-family",
             "color",
             "background-color",
+            "font-synthesis",
+            "text-rendering",
           ]),
           body: read(document.body, [
             "margin-top",
@@ -109,6 +113,14 @@
             "color",
             "font-family",
             "font-size",
+          ]),
+          // Inherited properties: `:root` reaches these on every host element
+          // that does not declare them itself.
+          paragraph: read(document.getElementById("probe-paragraph"), [
+            "font-synthesis",
+            "text-rendering",
+            "font-family",
+            "color",
           ]),
           link: read(document.getElementById("probe-link"), [
             "color",
