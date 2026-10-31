@@ -10,6 +10,7 @@ The root `README.md`, `packages/folio/README.md`, and the Markdown/static docume
 - **`styles.css` is a whole-site stylesheet.** It assumes Folio owns the document. It is not an isolated embed stylesheet, and importing it into an existing branded page changes that page globally.
 - **The default static document shell works without JavaScript.** Sidebar, in-page TOC, and previous/next survive with JS disabled. Sites that supply custom static route bodies own that markup and do not get the shell.
 - **The package is not on the npm registry yet.** The documented `npm install` command becomes valid only after the first release.
+- **The TypeScript virtual module still needs a consumer-side declaration.** Published JavaScript entrypoint declarations do not currently resolve `virtual:folio/content` on their own (FOL-014).
 
 ## Package status and installation
 
@@ -30,7 +31,7 @@ npm run release:check
 
 `release:check` type-checks and tests the package, builds the official site, audits the packed file list, then installs the produced tarball into a throwaway Vite + React consumer and builds that consumer.
 
-The package is ESM (`"type": "module"` with `import`/`default` export conditions). It ships types for every JavaScript entry point.
+The package is ESM (`"type": "module"` with `import`/`default` export conditions). It ships types for its public JavaScript package entrypoints (`.` and `./vite`); **that does not yet include an ambient TypeScript declaration for `virtual:folio/content`**.
 
 | Entry point | Contents |
 | --- | --- |
@@ -38,7 +39,24 @@ The package is ESM (`"type": "module"` with `import`/`default` export conditions
 | `@uichat-mira/folio/vite` | The `folio()` Vite plugin, `virtual:folio/content`, and the static publishing helpers and types |
 | `@uichat-mira/folio/styles.css` | The default design tokens and stylesheet (CSS only) |
 
-Peer requirements: React `^19`, React DOM `^19`, React Router DOM `^7`, and Vite `^7`. Node.js `>= 20` is required for the Vite/static build.
+Peer requirements: React `^19`, React DOM `^19`, React Router DOM `^7`, and Vite `^7`. Folio's own `engines.node` declares `>=20`, but the Vite 7 peer requires Node.js `20.19+` or `22.12+`; use Node 24 for the tested build and release workflow.
+
+## Independent consumer verification and virtual module types
+
+[FOL-014](research/fol-014-default-ui-acceptance.md) independently installed the actual `.tgz` outside the workspace and exercised the unbranded Folio default UI in Chrome 156 at desktop 1440×900 and mobile 375×812, in both light and dark modes. The captured screenshots, DOM and console results support a **usable default reading experience** with sidebar, TOC, pager, mobile drawer and theme switching; the report documents the tested surfaces and exclusions. These tests use browser-side DOM `element.click()` to verify event wiring, **not** physical touch hit-testing. The reported mobile menu/navigation/close button bounds of approximately 21 px high merit touch-target polish; Safari, real devices and a release-candidate retest remain unverified.
+
+**Confirmed TypeScript limitation (FOL-014):** an independent TypeScript consumer can import `@uichat-mira/folio` and `@uichat-mira/folio/vite` with strict `tsc`, but importing `virtual:folio/content` with only the packed package produces `TS2307: Cannot find module 'virtual:folio/content'`. The runtime Vite module itself resolves and builds. Until the package ships a referenced ambient declaration, consumers must provide this temporary declaration in a `.d.ts` file included by their TypeScript project:
+
+```ts
+declare module "virtual:folio/content" {
+  import type { FolioDoc } from "@uichat-mira/folio";
+  const docs: FolioDoc[];
+  export default docs;
+  export const roots: string[];
+}
+```
+
+This workaround is **not a shipped Folio declaration**. The 0.1.0 release candidate should fix the package-owned declaration and prove strict `tsc` passes from an independent tarball install **without** this workaround, then rerun FOL-014 against the final candidate. Do not infer complete virtual-module type support from the existing green `release:check` / package-entrypoint tests.
 
 ## Markdown: trusted repository content only
 

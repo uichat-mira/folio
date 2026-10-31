@@ -46,6 +46,8 @@ folio({
 import docs, { roots } from "virtual:folio/content";
 ```
 
+当前该虚拟模块在 Vite 运行时可以解析，但 npm tarball 尚未附带可自动发现的 TypeScript 模块声明；独立 TS 消费者需暂时声明该模块（包括 `default` 和 `roots`），见[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)。首发前需在包侧修复并复验。
+
 ## staticRoutes
 
 ```ts
