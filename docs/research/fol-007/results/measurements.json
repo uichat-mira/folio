@@ -1,0 +1,263 @@
+{
+  "meta": {
+    "generatedAt": "2026-10-31T18:42:31.953Z",
+    "node": "v24.9.0",
+    "platform": "win32 x64",
+    "gitHead": "83643bf09130d2ffa03b9bc2606f6a4d760c70e4",
+    "gitDirty": true,
+    "tarball": "uichat-mira-folio-0.1.0.tgz sha256=ebc5abe101ac9efc8d567ac0397c8e1a29efaba5611adecfaa456e80810ce6fa",
+    "stylesheetHashes": {
+      "tarball package/dist/styles.css": "58d5e7094187684e633bfd3f83ba32935dd3e3a9f15511b0732804ec32493718",
+      "repo packages/folio/dist/styles.css": "58d5e7094187684e633bfd3f83ba32935dd3e3a9f15511b0732804ec32493718",
+      "repo packages/folio/src/styles.css": "58d5e7094187684e633bfd3f83ba32935dd3e3a9f15511b0732804ec32493718"
+    }
+  },
+  "browser": "Chrome/156.0.8078.79 (Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36)",
+  "variants": {
+    "host-before": {
+      "variant": "host-before",
+      "viewport": {
+        "width": 900,
+        "height": 720
+      },
+      "root": {
+        "font-family": "\"Noto Sans SC\"",
+        "color": "rgb(0, 0, 0)",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "font-synthesis": "weight style small-caps",
+        "text-rendering": "auto"
+      },
+      "body": {
+        "margin-top": "32px",
+        "min-width": "0px",
+        "background-color": "rgb(240, 244, 248)",
+        "color": "rgb(16, 42, 67)",
+        "font-family": "Georgia, \"Times New Roman\", serif",
+        "font-size": "18px"
+      },
+      "paragraph": {
+        "font-synthesis": "weight style small-caps",
+        "text-rendering": "auto",
+        "font-family": "Georgia, \"Times New Roman\", serif",
+        "color": "rgb(16, 42, 67)"
+      },
+      "link": {
+        "color": "rgb(180, 83, 9)",
+        "text-decoration-line": "underline"
+      },
+      "button": {
+        "font-family": "\"Courier New\", monospace",
+        "font-size": "17px"
+      },
+      "input": {
+        "font-family": "\"Courier New\", monospace",
+        "font-size": "17px"
+      },
+      "box": {
+        "box-sizing": "content-box",
+        "width": "200px",
+        "offsetWidth": 222
+      },
+      "hostCard": {
+        "color": "rgb(180, 83, 9)",
+        "background-color": "rgb(255, 255, 255)",
+        "border-top-width": "1px"
+      },
+      "tokens": {
+        "hostInk": "#102a43",
+        "hostAccent": "#b45309",
+        "folioCanvas": "",
+        "folioFontSans": ""
+      },
+      "embed": {
+        "present": false
+      }
+    },
+    "host-folio-after": {
+      "variant": "host-folio-after",
+      "viewport": {
+        "width": 900,
+        "height": 720
+      },
+      "root": {
+        "font-family": "\"Public Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "color": "rgb(20, 20, 19)",
+        "background-color": "rgb(250, 249, 245)",
+        "font-synthesis": "none",
+        "text-rendering": "optimizelegibility"
+      },
+      "body": {
+        "margin-top": "0px",
+        "min-width": "320px",
+        "background-color": "rgb(250, 249, 245)",
+        "color": "rgb(20, 20, 19)",
+        "font-family": "Georgia, \"Times New Roman\", serif",
+        "font-size": "18px"
+      },
+      "paragraph": {
+        "font-synthesis": "none",
+        "text-rendering": "optimizelegibility",
+        "font-family": "Georgia, \"Times New Roman\", serif",
+        "color": "rgb(20, 20, 19)"
+      },
+      "link": {
+        "color": "rgb(20, 20, 19)",
+        "text-decoration-line": "none"
+      },
+      "button": {
+        "font-family": "Georgia, \"Times New Roman\", serif",
+        "font-size": "18px"
+      },
+      "input": {
+        "font-family": "Georgia, \"Times New Roman\", serif",
+        "font-size": "18px"
+      },
+      "box": {
+        "box-sizing": "border-box",
+        "width": "200px",
+        "offsetWidth": 200
+      },
+      "hostCard": {
+        "color": "rgb(180, 83, 9)",
+        "background-color": "rgb(255, 255, 255)",
+        "border-top-width": "1px"
+      },
+      "tokens": {
+        "hostInk": "#102a43",
+        "hostAccent": "#b45309",
+        "folioCanvas": "#faf9f5",
+        "folioFontSans": "\"Public Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+      },
+      "embed": {
+        "present": true,
+        "article": {
+          "color": "rgb(61, 61, 58)",
+          "font-family": "Georgia, \"Times New Roman\", serif"
+        },
+        "heading": {
+          "color": "rgb(61, 61, 58)",
+          "font-family": "\"Cormorant Garamond\", Garamond, \"Times New Roman\", serif"
+        },
+        "paragraph": {
+          "color": "rgb(61, 61, 58)",
+          "font-family": "Georgia, \"Times New Roman\", serif"
+        },
+        "headingAnchor": {
+          "color": "rgba(0, 0, 0, 0)"
+        },
+        "contentLink": {
+          "color": "rgb(169, 88, 62)",
+          "text-decoration-line": "underline"
+        }
+      }
+    },
+    "host-folio-first": {
+      "variant": "host-folio-first",
+      "viewport": {
+        "width": 900,
+        "height": 720
+      },
+      "root": {
+        "font-family": "\"Public Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "color": "rgb(20, 20, 19)",
+        "background-color": "rgb(250, 249, 245)",
+        "font-synthesis": "none",
+        "text-rendering": "optimizelegibility"
+      },
+      "body": {
+        "margin-top": "32px",
+        "min-width": "320px",
+        "background-color": "rgb(240, 244, 248)",
+        "color": "rgb(16, 42, 67)",
+        "font-family": "Georgia, \"Times New Roman\", serif",
+        "font-size": "18px"
+      },
+      "paragraph": {
+        "font-synthesis": "none",
+        "text-rendering": "optimizelegibility",
+        "font-family": "Georgia, \"Times New Roman\", serif",
+        "color": "rgb(16, 42, 67)"
+      },
+      "link": {
+        "color": "rgb(180, 83, 9)",
+        "text-decoration-line": "underline"
+      },
+      "button": {
+        "font-family": "\"Courier New\", monospace",
+        "font-size": "17px"
+      },
+      "input": {
+        "font-family": "\"Courier New\", monospace",
+        "font-size": "17px"
+      },
+      "box": {
+        "box-sizing": "border-box",
+        "width": "200px",
+        "offsetWidth": 200
+      },
+      "hostCard": {
+        "color": "rgb(180, 83, 9)",
+        "background-color": "rgb(255, 255, 255)",
+        "border-top-width": "1px"
+      },
+      "tokens": {
+        "hostInk": "#102a43",
+        "hostAccent": "#b45309",
+        "folioCanvas": "#faf9f5",
+        "folioFontSans": "\"Public Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+      },
+      "embed": {
+        "present": true,
+        "article": {
+          "color": "rgb(61, 61, 58)",
+          "font-family": "Georgia, \"Times New Roman\", serif"
+        },
+        "heading": {
+          "color": "rgb(61, 61, 58)",
+          "font-family": "\"Cormorant Garamond\", Garamond, \"Times New Roman\", serif"
+        },
+        "paragraph": {
+          "color": "rgb(61, 61, 58)",
+          "font-family": "Georgia, \"Times New Roman\", serif"
+        },
+        "headingAnchor": {
+          "color": "rgba(0, 0, 0, 0)"
+        },
+        "contentLink": {
+          "color": "rgb(169, 88, 62)",
+          "text-decoration-line": "underline"
+        }
+      }
+    }
+  },
+  "site": {
+    "body": {
+      "margin-top": "0px",
+      "background-color": "rgb(250, 249, 245)",
+      "color": "rgb(20, 20, 19)",
+      "font-family": "\"Public Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+    },
+    "firstLink": {
+      "color": "rgb(20, 20, 19)",
+      "text-decoration-line": "none",
+      "href": "/"
+    },
+    "button": {
+      "font-family": "\"Public Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "font-size": "16px"
+    },
+    "shell": {
+      "box-sizing": "border-box",
+      "className": "folio-shell"
+    },
+    "generic": {
+      "box-sizing": "border-box",
+      "tagName": "MAIN",
+      "className": "showcase-home"
+    },
+    "tokens": {
+      "folioCanvas": "#faf9f5",
+      "folioFontSans": "\"Public Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+    }
+  }
+}

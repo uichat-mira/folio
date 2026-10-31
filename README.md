@@ -6,11 +6,34 @@ It turns structured Markdown in a repository into a stable content model, Vite i
 
 ## Install
 
+Folio starts a new npm package line at `0.1.0`. The package is **not published to the npm registry yet**; the command below is the intended installation once that release exists.
+
 ```bash
 npm install @uichat-mira/folio
 ```
 
-Folio starts a new npm package line at `0.1.0`.
+Until then, consumption is verified from the packed tarball rather than the registry:
+
+```bash
+npm run release:check
+```
+
+That builds the package, audits the packed file list, and installs the resulting tarball into an isolated Vite + React consumer.
+
+## Consumer contract
+
+The 0.1.0 consumer boundaries are defined once in [docs/consumer-contract.md](docs/consumer-contract.md):
+
+- Markdown rendering is trusted-content-only. Raw HTML, `::: html` blocks, and Callout bodies are preserved without sanitization, so unreviewed submissions, scraped pages, and external PR previews must not be rendered.
+- `@uichat-mira/folio/styles.css` is a whole-site default stylesheet. It is not an isolated embed stylesheet, and importing it into an existing branded page affects that page globally.
+- The default `staticRoutes` document shell supports sidebar, TOC, and previous/next navigation without JavaScript. Sites that supply custom static route bodies own that markup and do not get the shell.
+- The source candidate now includes an automatically discoverable `virtual:folio/content` TypeScript declaration, verified by independent tarball consumer gates; final Registry verification remains pending.
+
+## Publication status
+
+Package identity, the current runtime entrypoints, and isolated tarball verification are in place. [FOL-014's independent browser/TypeScript acceptance](docs/research/fol-014-default-ui-acceptance.md) supports the default UI and identified the virtual-module type gap, now addressed in the source candidate. The first npm publication, final candidate browser revalidation, release-tag lineage, npm Trusted Publishing, and the `uichat-mira-docs` downstream migration remain open.
+
+The [migration status page](https://uichat-mira.github.io/folio/api/guide/migration-status/) records the current state with its evidence.
 
 ## What Folio provides
 
@@ -23,13 +46,13 @@ Folio starts a new npm package line at `0.1.0`.
 - `404.html`, `sitemap.xml`, and `robots.txt`
 - GitHub Pages project-path and root-path support
 - A lightweight React runtime that consumers may use or replace
-- Reusable Markdown compatibility rendering
+- Reusable Markdown compatibility rendering for reviewed content
 
 ## Package exports
 
 - `@uichat-mira/folio` — content model, configuration helpers, React runtime, and Markdown rendering
 - `@uichat-mira/folio/vite` — Markdown discovery, virtual manifests, and static output
-- `@uichat-mira/folio/styles.css` — default lightweight styles
+- `@uichat-mira/folio/styles.css` — whole-site default stylesheet (not an isolated embed stylesheet)
 
 ## Development
 
@@ -70,4 +93,4 @@ Folio itself does not carry compatibility aliases for the predecessor API. Exist
 
 - **uichat-mira/.github** — Organization policy, SOP, and canonical reusable Skills
 - **folio** — runtime, schemas, package, official site, and release pipeline
-- **uichat-mira-docs** — Mira website and first downstream migration target
+- **uichat-mira-docs** — Mira website and first downstream migration target; it still depends on `@uichat-mira/docs`

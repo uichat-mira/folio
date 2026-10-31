@@ -30,7 +30,7 @@ The canonical package is `@uichat-mira/folio`.
 
 - Folio begins its npm version line at `0.1.0`.
 - Publishing is triggered by a published GitHub Release.
-- The release tag must match the package version.
+- The release tag must be `folio-v<package-version>` (for example, `folio-v0.1.0`); the numeric suffix must equal `packages/folio/package.json` version. The historical unprefixed `v0.1.0` belongs to MiraDocs and must not be moved or reused.
 - The tagged commit must be contained in `prod`.
 - Publishing uses npm Trusted Publishing / GitHub OIDC after the package bootstrap is complete.
 - The Trusted Publisher must target GitHub owner `uichat-mira`, repository `folio`, and workflow `publish.yml`.

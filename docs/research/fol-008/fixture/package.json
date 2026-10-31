@@ -1,0 +1,9 @@
+{
+  "name": "folio-fol-008-fixture",
+  "private": true,
+  "type": "module",
+  "description": "FOL-008 navigation parity fixture: builds the real Folio static site and React docs view from the same Markdown corpus.",
+  "scripts": {
+    "build": "node ../../../../node_modules/vite/bin/vite.js build"
+  }
+}

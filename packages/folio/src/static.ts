@@ -1,10 +1,12 @@
 import {
   existsSync,
+  lstatSync,
   mkdirSync,
   readFileSync,
+  realpathSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
 import { findFolioDocCollection, getFolioDocNeighbors } from "./docs-structure";
 import { renderFolioMarkdown } from "./markdown";
 import type { FolioDoc, FolioConfig } from "./types";
@@ -97,10 +99,143 @@ export function folioAbsoluteAssetUrl(
   return `${origin}${normalizeBase(base)}/${assetPath}`;
 }
 
+function staticRoutePathError(
+  path: string,
+  outDir: string,
+  reason: string,
+): Error {
+  return new Error(
+    `folio static route ${JSON.stringify(path)} cannot be written inside outDir ${JSON.stringify(outDir)}: ${reason}`,
+  );
+}
+
+// Windows 会静默丢弃路径片段末尾的空格和点，因此 ".. "、"..." 可能被解释为目录上跳。
+function isTraversalSegment(segment: string): boolean {
+  if (segment === ".") return false;
+  const withoutTrailingDotsOrSpaces = segment.replace(/[. ]+$/, "");
+  if (withoutTrailingDotsOrSpaces === "..") return true;
+  return withoutTrailingDotsOrSpaces === "" && segment.includes(".");
+}
+
 function routeOutputPath(outDir: string, path: string): string {
   const route = normalizeRoute(path);
-  if (route === "/") return resolve(outDir, "index.html");
-  return resolve(outDir, route.replace(/^\//, ""), "index.html");
+  const root = resolve(outDir);
+  if (route === "/") {
+    const target = resolve(root, "index.html");
+    assertRealTargetInsideOutDir(path, root, target);
+    return target;
+  }
+
+  const relativeRoute = route.slice(1);
+  for (const segment of relativeRoute.split("/")) {
+    if (segment.includes("\\") || segment.includes("\0")) {
+      throw staticRoutePathError(
+        path,
+        root,
+        `path segment ${JSON.stringify(segment)} contains a character that is not valid in a static route`,
+      );
+    }
+    if (isTraversalSegment(segment)) {
+      throw staticRoutePathError(
+        path,
+        root,
+        `path segment ${JSON.stringify(segment)} escapes the output directory`,
+      );
+    }
+  }
+
+  const target = resolve(root, relativeRoute, "index.html");
+  const relativeTarget = relative(root, target);
+  if (
+    !relativeTarget ||
+    isAbsolute(relativeTarget) ||
+    relativeTarget === ".." ||
+    relativeTarget.startsWith(`..${sep}`)
+  ) {
+    throw staticRoutePathError(
+      path,
+      root,
+      `resolved output ${JSON.stringify(target)} is outside of the output directory`,
+    );
+  }
+
+  assertRealTargetInsideOutDir(path, root, target);
+  return target;
+}
+
+// Windows 路径大小写不敏感，比较真实路径前先统一大小写，避免误判越界。
+function comparablePath(value: string): string {
+  return process.platform === "win32" ? value.toLowerCase() : value;
+}
+
+function isInsideOutDir(root: string, candidate: string): boolean {
+  const relativeCandidate = relative(
+    comparablePath(root),
+    comparablePath(candidate),
+  );
+  return (
+    relativeCandidate !== "" &&
+    !isAbsolute(relativeCandidate) &&
+    relativeCandidate !== ".." &&
+    !relativeCandidate.startsWith(`..${sep}`)
+  );
+}
+
+// 词法校验只保证字符串不越界；已存在的 symlink / Windows junction 会让后续
+// mkdirSync / writeFileSync 实际写到 outDir 之外，因此再按真实路径校验一次。
+// 尚不存在的层级由随后的写入新建，不会跟随旧链接。
+function assertRealTargetInsideOutDir(
+  path: string,
+  root: string,
+  target: string,
+): void {
+  if (!existsSync(root)) return;
+
+  const realRoot = realpathSync(root);
+  const segments = relative(root, target).split(sep);
+  let current = root;
+
+  for (const [index, segment] of segments.entries()) {
+    current = resolve(current, segment);
+
+    let stats;
+    try {
+      stats = lstatSync(current);
+    } catch {
+      return;
+    }
+
+    if (!stats.isSymbolicLink()) continue;
+
+    if (index === segments.length - 1) {
+      throw staticRoutePathError(
+        path,
+        root,
+        `existing target ${JSON.stringify(current)} is a symbolic link`,
+      );
+    }
+
+    let linked: string;
+    try {
+      linked = realpathSync(current);
+    } catch {
+      throw staticRoutePathError(
+        path,
+        root,
+        `existing path ${JSON.stringify(current)} is a dangling symbolic link`,
+      );
+    }
+
+    if (!isInsideOutDir(realRoot, linked)) {
+      throw staticRoutePathError(
+        path,
+        root,
+        `existing path ${JSON.stringify(current)} resolves outside of the output directory to ${JSON.stringify(linked)}`,
+      );
+    }
+
+    current = linked;
+  }
 }
 
 function dataList(value: unknown): string[] {
@@ -350,12 +485,44 @@ export function writeFolioStaticSite(
 
   const template = readFileSync(indexPath, "utf8");
   const routes = options.routes?.(context) ?? defaultRoutes(context);
-  const routeMap = new Map(
-    routes.map((route) => [normalizeRoute(route.path), { ...route, path: normalizeRoute(route.path) }]),
-  );
+  // Reject route collisions before any output: a Map used to silently
+  // overwrite the first page when two paths normalized to the same key.
+  const seen = new Map<string, FolioStaticRoute>();
+  const normalizedRoutes = routes.map((route) => {
+    const path = normalizeRoute(route.path);
+    const previous = seen.get(path);
+    if (previous) {
+      throw new Error(
+        `folio static route conflict: ${JSON.stringify(previous.path)} (${JSON.stringify(previous.title)}) and ${JSON.stringify(route.path)} (${JSON.stringify(route.title)}) both normalize to ${JSON.stringify(path)}`,
+      );
+    }
+    seen.set(path, route);
+    return { ...route, path };
+  });
 
-  for (const route of routeMap.values()) {
-    const target = routeOutputPath(context.outDir, route.path);
+  // Validate all destinations before writing, avoiding partial output for
+  // either duplicate routes or invalid filesystem paths.
+  const outputs = normalizedRoutes.map((route, index) => ({
+    route,
+    original: routes[index],
+    target: routeOutputPath(context.outDir, route.path),
+  }));
+
+  // Different URL strings can still resolve to the same file (e.g. /guide
+  // and /guide/.). Compare actual destinations, including Windows case folding.
+  const seenTargets = new Map<string, FolioStaticRoute>();
+  for (const { original, target } of outputs) {
+    const key = comparablePath(target);
+    const previous = seenTargets.get(key);
+    if (previous) {
+      throw new Error(
+        `folio static route conflict: ${JSON.stringify(previous.path)} (${JSON.stringify(previous.title)}) and ${JSON.stringify(original.path)} (${JSON.stringify(original.title)}) both write to ${JSON.stringify(target)}`,
+      );
+    }
+    seenTargets.set(key, original);
+  }
+
+  for (const { route, target } of outputs) {
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(
       target,
@@ -372,7 +539,7 @@ export function writeFolioStaticSite(
   );
 
   if (context.config.siteUrl && options.sitemap !== false) {
-    const urls = [...routeMap.values()]
+    const urls = normalizedRoutes
       .map((route) =>
         `<url><loc>${folioEscapeHtml(
           folioAbsoluteRouteUrl(
@@ -402,5 +569,5 @@ export function writeFolioStaticSite(
     );
   }
 
-  return { routes: routeMap.size };
+  return { routes: normalizedRoutes.length };
 }

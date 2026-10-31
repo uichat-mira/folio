@@ -1,4 +1,5 @@
 import { parse as parseYaml } from "yaml";
+import { marked } from "marked";
 import type { FolioDoc, FolioHeading } from "./types";
 import { createHeadingIdAllocator } from "./heading-ids";
 
@@ -74,11 +75,33 @@ type HeadingCandidate = {
   index: number;
   depth: number;
   text: string;
+  idBase: string;
   explicitId?: string;
 };
 
 function cleanHeadingText(value: string): string {
-  return value.replace(/<[^>]+>/g, "").replace(/[*_`]/g, "").trim();
+  const entities: Record<string, string> = {
+    amp: "&",
+    lt: "<",
+    gt: ">",
+    quot: '"',
+    apos: "'",
+    nbsp: " ",
+  };
+
+  return value
+    .replace(/<[^>]+>/g, "")
+    .replace(/&(?:amp|lt|gt|quot|apos|nbsp|#(?:x[0-9a-f]+|[0-9]+));/gi, (entity) => {
+      const name = entity.slice(1, -1).toLowerCase();
+      if (!name.startsWith("#")) return entities[name] ?? entity;
+      const hex = name.startsWith("#x");
+      const codePoint = Number.parseInt(name.slice(hex ? 2 : 1), hex ? 16 : 10);
+      return codePoint > 0 && codePoint <= 0x10ffff
+        ? String.fromCodePoint(codePoint)
+        : entity;
+    })
+    .replace(/[*_`]/g, "")
+    .trim();
 }
 
 function withoutFencedCode(source: string): string {
@@ -115,10 +138,14 @@ export function extractHeadings(body: string): FolioHeading[] {
   const source = withoutFencedCode(body);
 
   for (const match of source.matchAll(/^(#{2,4})\s+(.+)$/gm)) {
+    // The Markdown renderer assigns IDs from Marked's HTML, not raw Markdown.
+    // Reuse that input here to avoid links and entities producing different slugs.
+    const inlineHtml = marked.parseInline(match[2], { gfm: true }) as string;
     candidates.push({
       index: match.index ?? 0,
       depth: match[1].length,
-      text: cleanHeadingText(match[2]),
+      text: cleanHeadingText(inlineHtml),
+      idBase: slugify(inlineHtml),
     });
   }
 
@@ -130,6 +157,7 @@ export function extractHeadings(body: string): FolioHeading[] {
       index: match.index ?? 0,
       depth: Number(match[1]),
       text: cleanHeadingText(match[3]),
+      idBase: slugify(match[3]),
       explicitId: idMatch?.[1],
     });
   }
@@ -152,7 +180,7 @@ export function extractHeadings(body: string): FolioHeading[] {
       };
     }
 
-    const base = slugify(candidate.text) || "section";
+    const base = candidate.idBase || "section";
     return {
       depth: candidate.depth,
       text: candidate.text,
