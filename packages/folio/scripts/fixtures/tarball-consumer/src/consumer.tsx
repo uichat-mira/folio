@@ -10,6 +10,7 @@ import {
   type FolioConfig,
   type FolioDoc,
 } from "@uichat-mira/folio";
+import virtualDocs, { roots as virtualRoots } from "virtual:folio/content";
 import {
   folio,
   folioEscapeHtml,
@@ -45,6 +46,10 @@ const results = searchFolioDocs(docs, "intro");
 const html: string = renderFolioMarkdown("# Intro");
 const escaped: string = folioEscapeHtml("<script>");
 const virtualModule: string = folioVirtualModule;
+// Strict NodeNext check: both virtual exports must be provided by the packed
+// Folio declaration. This fixture intentionally has no local declare module.
+const typedVirtualDocs: FolioDoc[] = virtualDocs;
+const typedVirtualRoots: string[] = virtualRoots;
 const plugin = folio(pluginOptions);
 const app = <FolioApp config={config} docs={docs} />;
 
@@ -62,6 +67,8 @@ export function consumerSurface(): unknown[] {
     html,
     escaped,
     virtualModule,
+    typedVirtualDocs,
+    typedVirtualRoots,
     plugin,
     app,
     missingDescription,

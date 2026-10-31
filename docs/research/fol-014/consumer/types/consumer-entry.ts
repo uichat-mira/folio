@@ -1,12 +1,8 @@
 // FOL-014 type-consumption probe.
 //
 // One file exercises the three public entrypoints a default-UI consumer needs.
-// It is compiled twice by `run.mjs`:
-//   * tsconfig.types-baseline.json  -> no local declaration for the virtual
-//     module, i.e. the type experience of a consumer who only installed the
-//     tarball;
-//   * tsconfig.types-declared.json  -> plus types/virtual-folio.d.ts, the
-//     workaround documented in the report.
+// The strict tsconfig.types-baseline.json deliberately does not include
+// consumer-side ambient declarations. It must pass from the installed tarball.
 import {
   defineFolioConfig,
   FolioApp,

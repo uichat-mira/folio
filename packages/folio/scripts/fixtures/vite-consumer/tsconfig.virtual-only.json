@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["@uichat-mira/folio"]
+  },
+  "files": ["src/virtual-only.ts"],
+  "include": []
+}
