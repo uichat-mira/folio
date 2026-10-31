@@ -23,6 +23,7 @@ import {
   mkdtempSync,
   readdirSync,
   readFileSync,
+  realpathSync,
   rmSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -110,7 +111,10 @@ const tarballSource = commit
   ? `${commit}${dirty ? " (working tree dirty)" : ""}`
   : "unknown commit";
 
-const tempRoot = mkdtempSync(join(tmpdir(), "folio-tarball-consumer-"));
+// Windows runners can expose the same TEMP parent as RUNNER~1 (short path)
+// while Vite resolves the consumer as runneradmin (long path). Canonicalize
+// once so HTML assets and Vite outDir share an identical filesystem root.
+const tempRoot = realpathSync.native(mkdtempSync(join(tmpdir(), "folio-tarball-consumer-")));
 const tarballDir = join(tempRoot, "tarball");
 const consumerDir = join(tempRoot, "consumer");
 mkdirSync(tarballDir, { recursive: true });
