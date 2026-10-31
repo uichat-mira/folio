@@ -1,0 +1,197 @@
+{
+  "generatedAt": "2026-10-31T18:51:31.717Z",
+  "results": [
+    {
+      "sample": "plain",
+      "body": "## 普通标题\n\n正文",
+      "toc": [
+        {
+          "depth": 2,
+          "id": "普通标题",
+          "text": "普通标题"
+        }
+      ],
+      "rendered": [
+        {
+          "depth": 2,
+          "id": "普通标题",
+          "text": "普通标题#"
+        }
+      ],
+      "tocTargetsMissing": []
+    },
+    {
+      "sample": "inline-code",
+      "body": "## 安装 `@uichat-mira/folio`\n\n正文",
+      "toc": [
+        {
+          "depth": 2,
+          "id": "安装-uichat-mira-folio",
+          "text": "安装 @uichat-mira/folio"
+        }
+      ],
+      "rendered": [
+        {
+          "depth": 2,
+          "id": "安装-uichat-mira-folio",
+          "text": "安装 @uichat-mira/folio#"
+        }
+      ],
+      "tocTargetsMissing": []
+    },
+    {
+      "sample": "emphasis",
+      "body": "## Hello *World*\n\n正文",
+      "toc": [
+        {
+          "depth": 2,
+          "id": "hello-world",
+          "text": "Hello World"
+        }
+      ],
+      "rendered": [
+        {
+          "depth": 2,
+          "id": "hello-world",
+          "text": "Hello World#"
+        }
+      ],
+      "tocTargetsMissing": []
+    },
+    {
+      "sample": "markdown-link",
+      "body": "## [链接标题](https://example.com)\n\n正文",
+      "toc": [
+        {
+          "depth": 2,
+          "id": "链接标题https-examplecom",
+          "text": "[链接标题](https://example.com)"
+        }
+      ],
+      "rendered": [
+        {
+          "depth": 2,
+          "id": "链接标题",
+          "text": "链接标题#"
+        }
+      ],
+      "tocTargetsMissing": [
+        "#链接标题https-examplecom"
+      ]
+    },
+    {
+      "sample": "entity-amp",
+      "body": "## FAQ & 支持\n\n正文",
+      "toc": [
+        {
+          "depth": 2,
+          "id": "faq-支持",
+          "text": "FAQ & 支持"
+        }
+      ],
+      "rendered": [
+        {
+          "depth": 2,
+          "id": "faq-amp-支持",
+          "text": "FAQ &amp; 支持#"
+        }
+      ],
+      "tocTargetsMissing": [
+        "#faq-支持"
+      ]
+    },
+    {
+      "sample": "inline-html",
+      "body": "## 标题带 <span>内联</span> HTML\n\n正文",
+      "toc": [
+        {
+          "depth": 2,
+          "id": "标题带-内联-html",
+          "text": "标题带 内联 HTML"
+        }
+      ],
+      "rendered": [
+        {
+          "depth": 2,
+          "id": "标题带-内联-html",
+          "text": "标题带 内联 HTML#"
+        }
+      ],
+      "tocTargetsMissing": []
+    },
+    {
+      "sample": "duplicate",
+      "body": "## 重复\n\n## 重复\n\n正文",
+      "toc": [
+        {
+          "depth": 2,
+          "id": "重复",
+          "text": "重复"
+        },
+        {
+          "depth": 2,
+          "id": "重复-2",
+          "text": "重复"
+        }
+      ],
+      "rendered": [
+        {
+          "depth": 2,
+          "id": "重复",
+          "text": "重复#"
+        },
+        {
+          "depth": 2,
+          "id": "重复-2",
+          "text": "重复#"
+        }
+      ],
+      "tocTargetsMissing": []
+    },
+    {
+      "sample": "explicit-html",
+      "body": "<h2 id=\"explicit-x\">显式标题</h2>\n\n正文",
+      "toc": [
+        {
+          "depth": 2,
+          "id": "explicit-x",
+          "text": "显式标题"
+        }
+      ],
+      "rendered": [
+        {
+          "depth": 2,
+          "id": "explicit-x",
+          "text": "显式标题"
+        }
+      ],
+      "tocTargetsMissing": []
+    },
+    {
+      "sample": "clipboard",
+      "body": "## 剪贴板 Title\n\n正文",
+      "toc": [
+        {
+          "depth": 2,
+          "id": "剪贴板-title",
+          "text": "剪贴板 Title"
+        }
+      ],
+      "rendered": [
+        {
+          "depth": 2,
+          "id": "剪贴板-title",
+          "text": "剪贴板 Title#"
+        }
+      ],
+      "tocTargetsMissing": []
+    }
+  ],
+  "parsedHeadings": [
+    {
+      "depth": 2,
+      "text": "A",
+      "id": "a"
+    }
+  ]
+}
