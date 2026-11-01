@@ -26,13 +26,15 @@ export {
 export { renderFolioMarkdown } from "./markdown";
 export type { FolioMarkdownRenderOptions } from "./markdown";
 export type {
-  FolioDoc,
-  FolioAppProps,
   FolioConfig,
+  FolioDoc,
+  FolioEntryType,
+  FolioHeading,
   FolioNavigationItem,
+} from "./types";
+export type {
+  FolioAppProps,
   FolioSlots,
   FolioThemePreference,
   FolioUiOptions,
-  FolioEntryType,
-  FolioHeading,
-} from "./types";
+} from "./ui-types";

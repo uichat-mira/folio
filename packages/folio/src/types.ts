@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+// Core content/config types. This module must stay free of React (and of every
+// other UI runtime) so Core and Build code can depend on it directly.
 
 export type FolioEntryType = "doc" | "article" | "project" | "page" | string;
 
@@ -42,28 +43,4 @@ export type FolioConfig = {
   navigation?: FolioNavigationItem[];
   footer?: string;
   github?: string;
-};
-
-export type FolioSlots = {
-  home?: ReactNode;
-  headerActions?: ReactNode;
-  articleFooter?: ReactNode;
-};
-
-export type FolioThemePreference = "light" | "dark" | "system";
-
-export type FolioUiOptions = {
-  search?: boolean;
-  theme?: boolean;
-  share?: boolean;
-  docsShell?: boolean;
-  defaultTheme?: FolioThemePreference;
-};
-
-export type FolioAppProps = {
-  config: FolioConfig;
-  docs: FolioDoc[];
-  basePath?: string;
-  slots?: FolioSlots;
-  ui?: FolioUiOptions;
 };
