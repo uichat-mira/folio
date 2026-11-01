@@ -23,8 +23,8 @@ export {
   slugify,
   sourcePathToRoute,
 } from "./core/content";
-export { renderFolioMarkdown } from "./markdown";
-export type { FolioMarkdownRenderOptions } from "./markdown";
+export { renderFolioMarkdown } from "./core/markdown";
+export type { FolioMarkdownRenderOptions } from "./core/markdown";
 export type {
   FolioConfig,
   FolioDoc,

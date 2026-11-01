@@ -42,6 +42,8 @@
     "styles:build": "node scripts/build-styles.mjs",
     "styles:verify": "node scripts/verify-styles.mjs",
     "styles:selftest": "node scripts/verify-styles.mjs --self-test",
+    "layers:check": "node scripts/dependency-layers.mjs",
+    "layers:selftest": "node scripts/dependency-layers.mjs --self-test",
     "prepack": "npm run build",
     "pack:verify": "node scripts/verify-package.mjs",
     "pack:consumer": "node scripts/verify-tarball-consumer.mjs",

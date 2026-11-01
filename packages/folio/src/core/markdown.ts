@@ -1,7 +1,7 @@
 import { marked } from "marked";
 import hljs from "highlight.js/lib/common";
-import { slugify } from "./core/content";
-import { createHeadingIdAllocator } from "./core/heading-ids";
+import { slugify } from "./content";
+import { createHeadingIdAllocator } from "./heading-ids";
 
 export type FolioMarkdownRenderOptions = {
   removeH1?: boolean;
