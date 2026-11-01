@@ -891,6 +891,15 @@ button, input { font: inherit; }
   font-size: 16px;
 }
 
+.folio-editorial-lead--single {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.folio-editorial-lower--single {
+  display: block;
+}
+
 .folio-editorial-lead {
   display: grid;
   grid-template-columns: minmax(0, 1.16fr) minmax(0, .84fr);

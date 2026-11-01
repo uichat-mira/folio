@@ -11,6 +11,7 @@ export {
   folioAbsoluteRouteUrl,
   folioEscapeHtml,
   folioVirtualModule,
+  renderFolioStaticHome,
   renderFolioStaticHtml,
   writeFolioStaticSite,
 } from "./build/vite-adapter";
@@ -19,6 +20,7 @@ export type {
   FolioPluginOptions,
   FolioStaticBuildContext,
   FolioStaticBuildOptions,
+  FolioStaticHomeOverride,
   FolioStaticImageMetadata,
   FolioStaticRoute,
 } from "./build/vite-adapter";

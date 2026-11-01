@@ -45,6 +45,75 @@ export default defineConfig({
 
 The plugin discovers Markdown, parses YAML Frontmatter, and exposes content through `virtual:folio/content`. It can also generate route-level HTML, canonical and social metadata, JSON-LD, `404.html`, `sitemap.xml`, and `robots.txt`.
 
+## Home page customization
+
+The built-in home page has three supported levels. Without any configuration the
+current default editorial home, navigation, SEO metadata and static HTML stay
+as they are. `FolioConfig.collections` remains the only source for collection
+routes; home sections do not hardcode `/blogs` or `/projects`.
+
+1. **Use the default home.** Set no `home` and no `slots.home`.
+2. **Configure the built-in home.** `FolioConfig.home` controls block order,
+   visibility, the featured/recent collection source, limits and the small
+   amount of copy the default design needs. React and the default static build
+   consume the same resolved model.
+3. **Take full control.** `slots.home` replaces only the React `/` route.
+   `staticRoutes.home` replaces only the generated static `/` route body and
+   metadata; it does not require copying every other static route. For a fully
+   custom static route list, `renderFolioStaticHome({ config, docs, ... })`
+   exposes the same configured body and `resolveFolioHome()` exposes the
+   platform-neutral model.
+
+```ts
+const config = defineFolioConfig({
+  title: "Field notes",
+  description: "A small journal",
+  collections: [
+    { path: "/notes", title: "Notes" },
+    { path: "/projects", title: "Projects" },
+  ],
+  home: {
+    sections: [
+      { type: "intro", title: "Notes from the workshop" },
+      { type: "featured", collection: "/notes" },
+      { type: "recent", collection: "/notes", limit: 3 },
+      { type: "collections", paths: ["/projects"], limit: 2 },
+      { type: "about", path: "/info/about", linkLabel: "Read more" },
+    ],
+  },
+});
+```
+
+Section order is the array order. Omitting `home.sections` keeps the default
+`intro`, `featured`, `recent`, `collections`, `about` order; an empty array
+renders only the optional meta strip. Empty collections produce an explicit
+empty state, a featured/recent block without entries is omitted or shows the
+empty/end message, and a configured `path` that does not match a document fails
+the build instead of silently falling back.
+
+For static-only customization, keep the default route set and override `/`:
+
+```ts
+const staticBuild: FolioStaticBuildOptions = {
+  home: () => ({
+    title: "My home",
+    description: "The same site, with a custom static home",
+    body: '<main><h1>My home</h1><a href="/notes/">Read the notes</a></main>',
+  }),
+};
+```
+
+`staticRoutes.home` is an explicit HTML contract. A React node in `slots.home`
+is not serialized into static HTML automatically, and Folio does not add an SSR
+renderer for it. Consumers who server-render React own that integration; they
+can reuse `resolveFolioHome()` for selection and ordering. When a consumer
+supplies a complete `staticRoutes.routes` array, that array remains
+authoritative for every route; `home` patches only the `/` route and requires
+that array to contain `/`.
+The published `0.1.1` package has a built-in home and `slots.home`, but does not
+expose the `home` configuration or `staticRoutes.home` contract described here.
+See the [consumer contract](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md).
+
 ## React runtime
 
 Use the default lightweight runtime:
@@ -77,6 +146,7 @@ It preserves `::: html` blocks, renders `::: tip` blocks, escapes fenced code, p
 ## What the package owns
 
 - Content parsing and normalized entry types
+- Configurable built-in home selection, ordering and static home override
 - Vite content discovery and hot updates
 - Stable route and navigation data
 - Markdown and HTML heading extraction

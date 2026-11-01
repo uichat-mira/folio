@@ -5,6 +5,7 @@ import {
   getFolioDocNeighbors,
   parseFolioDoc,
   renderFolioMarkdown,
+  resolveFolioHome,
   resolveGithubPagesBase,
   searchFolioDocs,
   type FolioAppProps,
@@ -17,6 +18,10 @@ import {
   type FolioEntryType,
   type FolioHeaderProps,
   type FolioHeading,
+  type FolioHomeConfig,
+  type FolioHomeModel,
+  type FolioHomeSectionConfig,
+  type FolioHomeSectionType,
   type FolioMarkdownProps,
   type FolioMarkdownRenderOptions,
   type FolioNavigationItem,
@@ -30,7 +35,9 @@ import {
   folio,
   folioEscapeHtml,
   folioVirtualModule,
+  renderFolioStaticHome,
   type FolioPluginOptions,
+  type FolioStaticHomeOverride,
 } from "@uichat-mira/folio/vite";
 
 // Every published type name must resolve from the tarball root entry. This is
@@ -54,6 +61,11 @@ type PublicTypeSurface = {
   uiOptions: FolioUiOptions;
   entryType: FolioEntryType;
   heading: FolioHeading;
+  homeConfig: FolioHomeConfig;
+  homeSectionConfig: FolioHomeSectionConfig;
+  homeSectionType: FolioHomeSectionType;
+  homeModel: FolioHomeModel;
+  staticHome: FolioStaticHomeOverride;
 };
 
 export type { PublicTypeSurface };
@@ -66,6 +78,12 @@ const config: FolioConfig = defineFolioConfig({
   description: "Standalone type check of the published package shape.",
   base: resolveGithubPagesBase("uichat-mira/folio"),
   navigation: [{ label: "Docs", href: "/docs" }],
+  home: {
+    sections: [
+      { type: "intro", title: "Home" },
+      { type: "recent", limit: 2 },
+    ],
+  },
 });
 
 const docs: FolioDoc[] = [
@@ -75,16 +93,20 @@ const docs: FolioDoc[] = [
   ),
 ];
 
+const staticHome: FolioStaticHomeOverride = ({ base }) => ({
+  body: '<main><a href="' + base + 'docs/intro/">Intro</a></main>',
+});
 const pluginOptions: FolioPluginOptions = {
   config,
   contentDir: "content",
-  staticRoutes: false,
+  staticRoutes: { home: staticHome },
 };
 
 const structure = buildFolioDocStructure(docs);
 const neighbors = getFolioDocNeighbors(docs, docs[0]);
 const results = searchFolioDocs(docs, "intro");
 const html: string = renderFolioMarkdown("# Intro");
+const homeModel: FolioHomeModel = resolveFolioHome(config, docs);
 const escaped: string = folioEscapeHtml("<script>");
 const virtualModule: string = folioVirtualModule;
 // Strict NodeNext check: both virtual exports must be provided by the packed
@@ -107,6 +129,8 @@ export function consumerSurface(): unknown[] {
     results,
     html,
     escaped,
+    homeModel,
+    renderFolioStaticHome instanceof Function,
     virtualModule,
     typedVirtualDocs,
     typedVirtualRoots,

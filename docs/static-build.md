@@ -47,6 +47,34 @@ export default {
 };
 ```
 
+## Home-only override
+
+`FolioStaticBuildOptions.routes` replaces every route. When only the `/` page
+should differ, use `home` instead and keep the default route set:
+
+```ts
+const staticBuild: FolioStaticBuildOptions = {
+  home: {
+    title: "My home",
+    description: "The same content graph, with one custom static page",
+    body: '<main><h1>My home</h1><a href="/notes/">Read the notes</a></main>',
+  },
+};
+```
+
+`home` may also be a function `(context, defaultHome) => route`. It replaces the
+body and metadata of the `/` route only; other routes, `404.html`,
+`sitemap.xml`, `robots.txt`, canonical URLs and base-path link handling keep
+their normal output. Supplying `routes` still makes that array authoritative for
+the full route set; `home` patches only its `/` entry and fails explicitly when
+the array has no `/` route. A returned `path` must normalise to `/`.
+
+For custom route arrays that still want the built-in selection, the public
+`renderFolioStaticHome(context)` returns the same built-in body that the default
+route uses (`config.home` included), and `resolveFolioHome(config, docs)` returns
+the platform-neutral model. A React node is never serialized automatically;
+`home` and `renderFolioStaticHome` produce HTML strings only.
+
 ## Folio responsibilities
 
 - Write route HTML into the Vite output directory.

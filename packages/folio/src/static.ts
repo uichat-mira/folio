@@ -8,6 +8,7 @@ import {
   type FolioCollectionIndex,
 } from "./core/collection-index";
 import { renderFolioMarkdown } from "./core/markdown";
+import { resolveFolioHome, type FolioHomeModel } from "./core/home";
 import {
   normalizeStaticRoute,
   writeFolioStaticOutputs,
@@ -41,8 +42,21 @@ export type FolioStaticImageMetadata = {
   height?: number;
 };
 
+export type FolioStaticHomeOverride =
+  | Partial<Omit<FolioStaticRoute, "path">>
+  | ((
+      context: FolioStaticBuildContext,
+      home: FolioStaticRoute,
+    ) => FolioStaticRoute | Partial<Omit<FolioStaticRoute, "path">>);
+
 export type FolioStaticBuildOptions = {
   routes?: (context: FolioStaticBuildContext) => FolioStaticRoute[];
+  /**
+   * Replaces only the `/` route body/metadata. Other routes keep coming from
+   * `routes` or the default route set. Provide explicit HTML; React nodes are
+   * not serialized automatically.
+   */
+  home?: FolioStaticHomeOverride;
   notFound?: (context: FolioStaticBuildContext) => FolioStaticRoute;
   locale?: string;
   siteName?: string;
@@ -335,7 +349,7 @@ function renderStaticCollectionIndex(
     '</header>' + list + "</main>";
 }
 
-function renderStaticHome(context: FolioStaticBuildContext): string {
+function renderDefaultStaticHome(context: FolioStaticBuildContext): string {
   const collections = folioCollectionIndexes(context.config);
   const primary = collections[0];
   const primaryDocs = primary
@@ -408,6 +422,109 @@ function renderStaticHome(context: FolioStaticBuildContext): string {
     '</div></main>';
 }
 
+function renderConfiguredStaticHome(
+  context: FolioStaticBuildContext,
+  model: FolioHomeModel,
+): string {
+  const link = (path: string): string => folioEscapeHtml(staticRouteHref(context, path));
+  const meta = model.meta
+    ? '<div class="folio-editorial-meta" aria-label="站点首页">' +
+      '<span>' + folioEscapeHtml(model.meta.left) + '</span>' +
+      '<span>' + folioEscapeHtml(model.meta.right) + '</span></div>'
+    : "";
+
+  const sections = model.sections.map((section) => {
+    switch (section.type) {
+      case "intro": {
+        const collection = section.collection;
+        return '<section class="folio-editorial-lead folio-editorial-lead--single">' +
+          '<div class="folio-editorial-intro">' +
+          '<div class="folio-editorial-kicker">' +
+          '<span class="folio-editorial-kicker-line" aria-hidden="true"></span>' +
+          folioEscapeHtml(section.kicker) + '</div>' +
+          '<h1>' + folioEscapeHtml(section.title) + '</h1>' +
+          '<p>' + folioEscapeHtml(section.description) + '</p>' +
+          (collection
+            ? '<a class="folio-editorial-hero-link" href="' + link(collection.path) + '">浏览' +
+              folioEscapeHtml(collection.title) + ' <span aria-hidden="true">↗</span></a>'
+            : "") +
+          '</div></section>';
+      }
+      case "featured":
+        return '<section class="folio-editorial-lead folio-editorial-lead--single">' +
+          '<a class="folio-editorial-feature" href="' + link(section.doc.path) + '">' +
+          '<span class="folio-editorial-feature-label"><span aria-hidden="true">✳</span> ' +
+          folioEscapeHtml(section.label) + '</span>' +
+          '<span class="folio-editorial-feature-body">' +
+          '<span class="folio-editorial-feature-no">' +
+          String(section.number).padStart(2, "0") + ' / ' +
+          String(section.total).padStart(2, "0") + '</span>' +
+          '<h2>' + folioEscapeHtml(section.doc.title) + '</h2>' +
+          (section.doc.description
+            ? '<p>' + folioEscapeHtml(section.doc.description) + '</p>'
+            : "") +
+          '</span><span class="folio-editorial-feature-bottom">' +
+          folioEscapeHtml(section.readLabel) + ' <span aria-hidden="true">↗</span></span></a></section>';
+      case "recent":
+        return '<section class="folio-editorial-lower folio-editorial-lower--single">' +
+          '<section class="folio-editorial-recent" aria-label="文章选读">' +
+          '<div class="folio-editorial-section-heading"><div>' +
+          '<span class="folio-editorial-section-label">' + folioEscapeHtml(section.label) + '</span>' +
+          '<h2>' + folioEscapeHtml(section.title) + '</h2></div>' +
+          (section.collection
+            ? '<a class="folio-editorial-view-all" href="' + link(section.collection.path) + '">' +
+              '全部' + folioEscapeHtml(section.collection.title) +
+              ' <span aria-hidden="true">↗</span></a>'
+            : "") +
+          '</div>' +
+          (section.docs.length
+            ? renderStaticEntryList(context, section.docs, "h3")
+            : section.hadEntries
+              ? '<p class="folio-editorial-endnote">' + folioEscapeHtml(section.endMessage) + '</p>'
+              : '<p class="folio-collection-empty">' + folioEscapeHtml(section.emptyMessage) + '</p>') +
+          '</section></section>';
+      case "collections":
+        return '<section class="folio-editorial-lower folio-editorial-lower--single">' +
+          '<div class="folio-editorial-aside">' +
+          section.collections.map((entry, index) =>
+            '<section class="folio-editorial-side-section">' +
+            '<div class="folio-editorial-section-heading"><div>' +
+            '<span class="folio-editorial-section-label">' +
+            String(index + 2).padStart(2, "0") + ' / COLLECTION</span>' +
+            '<h2>' + folioEscapeHtml(entry.collection.title) + '</h2></div>' +
+            '<a class="folio-editorial-view-all" aria-label="全部' +
+            folioEscapeHtml(entry.collection.title) + '" href="' +
+            link(entry.collection.path) + '">↗</a></div>' +
+            (entry.docs.length
+              ? renderStaticEntryList(context, entry.docs, "h3")
+              : '<p class="folio-collection-empty">' +
+                folioEscapeHtml(entry.emptyMessage) + '</p>') +
+            '</section>',
+          ).join("") +
+          '</div></section>';
+      case "about":
+        return '<section class="folio-editorial-lower folio-editorial-lower--single">' +
+          '<aside class="folio-editorial-about">' +
+          '<span class="folio-editorial-section-label">A LITTLE ABOUT</span>' +
+          '<h2>' + folioEscapeHtml(section.title) + '</h2>' +
+          '<p>' + folioEscapeHtml(section.description) + '</p>' +
+          '<a href="' + link(section.doc.path) + '">' +
+          folioEscapeHtml(section.linkLabel) +
+          ' <span aria-hidden="true">↗</span></a></aside></section>';
+    }
+  }).join("");
+
+  return '<main class="folio-home folio-journal-home folio-editorial-home">' +
+    meta + sections + '</main>';
+}
+
+/** Renders the built-in home body, including `FolioConfig.home`. */
+export function renderFolioStaticHome(context: FolioStaticBuildContext): string {
+  return context.config.home
+    ? renderConfiguredStaticHome(context, resolveFolioHome(context.config, context.docs))
+    : renderDefaultStaticHome(context);
+}
+
 function renderStaticArticle(doc: FolioDoc): string {
   const article = '<main class="folio-doc-page' +
     (doc.headings.length ? ' folio-article-main' : '') + '">' +
@@ -431,7 +548,7 @@ function defaultRoutes(context: FolioStaticBuildContext): FolioStaticRoute[] {
       path: "/",
       title: context.config.title,
       description: context.config.description,
-      body: renderStaticHome(context),
+      body: renderFolioStaticHome(context),
       type: "website",
     },
     ...folioCollectionIndexes(context.config).map((collection) => {
@@ -481,6 +598,31 @@ function defaultNotFound(context: FolioStaticBuildContext): FolioStaticRoute {
   };
 }
 
+function applyStaticHomeOverride(
+  routes: FolioStaticRoute[],
+  context: FolioStaticBuildContext,
+  home: FolioStaticHomeOverride,
+): FolioStaticRoute[] {
+  const index = routes.findIndex((route) => normalizeStaticRoute(route.path) === "/");
+  if (index < 0) {
+    throw new Error("folio staticRoutes.home requires a '/' route in the route set");
+  }
+  const base = routes[index];
+  const value = typeof home === "function" ? home(context, base) : home;
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("folio staticRoutes.home must return a route object");
+  }
+  if ("path" in value && value.path !== undefined && normalizeStaticRoute(String(value.path)) !== "/") {
+    throw new Error("folio staticRoutes.home may only override the '/' route, got " + JSON.stringify(value.path));
+  }
+  const merged = { ...base, ...value, path: "/" };
+  if (typeof merged.body !== "string") {
+    throw new Error("folio staticRoutes.home body must be a string");
+  }
+  routes[index] = merged;
+  return routes;
+}
+
 export function writeFolioStaticSite(
   context: FolioStaticBuildContext,
   options: FolioStaticBuildOptions = {},
@@ -490,11 +632,14 @@ export function writeFolioStaticSite(
 
   const template = readFileSync(indexPath, "utf8");
   const routes = options.routes?.(context) ?? defaultRoutes(context);
+  const overriddenRoutes = options.home
+    ? applyStaticHomeOverride([...routes], context, options.home)
+    : routes;
   // All route destinations are validated (including duplicate and real-target
   // collisions) before the first page is written; see static-output.ts.
   const normalizedRoutes = writeFolioStaticOutputs(
     context.outDir,
-    routes,
+    overriddenRoutes,
     (route) => renderFolioStaticHtml(template, route, context, options),
   );
 

@@ -220,7 +220,7 @@ export default {
 
 For `type: doc` entries the generated page includes the static document shell: a sidebar with every document in the collection, an in-page table of contents, and previous/next links. Every link points at a real generated file, so navigation, section jumps, and previous/next work with JavaScript disabled. Other entry types render a simpler main region with their article body and no docs sidebar or pager.
 
-The default home route is only a minimal title/description prerender with no links into the docs. Supplying custom routes replaces every route, so a site that needs a different home route also takes ownership of the document bodies and their no-JS navigation.
+The built-in home route is generated from the same content model and collection configuration. On the `dev` candidate it is the editorial home described under FOL-022/FOL-030 below; published `0.1.1` also has a built-in home but does not expose the `home` configuration or static home override. Supplying custom `routes` replaces every route, so that mode still takes ownership of all route bodies; use the narrow home contracts below when only `/` should differ.
 
 ### Custom route bodies (`staticRoutes: { routes }`)
 
@@ -326,15 +326,85 @@ const config = defineFolioConfig({
   prerendered \`index.html\`, canonical, OG, JSON-LD and sitemap entry.
   The default view is a compact, serif editorial list with separators only
   **between** rows. Empty collections render a short empty state.
-- Home previews up to five full-depth entries per configured collection,
-  using the same selector. Both React and static home are generated from the
-  same configuration, without consumer-side custom components.
+- The default home previews the primary collection plus other configured
+  collections with the same selector. `config.home` can change the featured
+  source, recent limits, block order and visibility; both React and static
+  home use that same configuration without consumer-side custom components.
 - \`staticRoutes.routes\` custom override remains authoritative. When a
   consumer explicitly supplies its own static route array, it owns adding
   any index pages to that array.
 
 As this is an unreleased PR candidate, sites pinned to
 \`@uichat-mira/folio@0.1.1\` must not claim the feature is published.
+
+## Configurable built-in home (FOL-030 candidate, not published in 0.1.1)
+
+`FolioConfig.home` is a lightweight, ordered contract for the built-in home.
+It is not a theme engine or a layout DSL. It reuses `FolioConfig.collections`,
+`FolioDoc`, and the same recursive collection selector as collection indexes;
+no `/blogs`, `/projects`, or document type is hardcoded.
+
+```ts
+const config = defineFolioConfig({
+  title: "My site",
+  description: "Notes and projects",
+  collections: [
+    { path: "/notes", title: "Notes" },
+    { path: "/projects", title: "Projects" },
+  ],
+  home: {
+    meta: { left: "FIELD NOTES", right: "ARCHIVE" },
+    sections: [
+      { type: "intro", title: "Notes from the workshop" },
+      { type: "featured", collection: "/notes", path: "/notes/start-here" },
+      { type: "recent", collection: "/notes", limit: 3 },
+      { type: "collections", paths: ["/projects"], limit: 2 },
+      { type: "about", path: "/info/about", linkLabel: "Read more" },
+    ],
+  },
+});
+```
+
+- Section array order is render order. Omitting `sections` preserves the
+  default `intro`, `featured`, `recent`, `collections`, `about` order;
+  `sections: []` renders only the optional meta strip. `meta: false` hides the
+  strip.
+- `featured` accepts `path` or a `collection` route. `recent` and `collections`
+  read the same date-descending selector as collection pages. A featured entry
+  is excluded from `recent` even when the featured section is placed later.
+- Empty collections render the configured empty message. A `recent` block
+  whose only entry was the featured story shows the end note; a missing source
+  collection or `path` throws during resolution instead of silently falling
+  back to unrelated content.
+- Resolution is centralised in the public `resolveFolioHome(config, docs)`
+  model. The React home and default static home consume that model, so selected
+  content, ordering, links and `basePath` handling stay aligned. Static config
+  text is HTML-escaped; only an explicit static override body is trusted raw
+  HTML.
+
+### Three supported home paths
+
+1. **Default home.** Set neither `home` nor `slots.home`. Existing React output,
+   static `index.html`, SEO metadata, navigation and no-JS behavior stay on the
+   default path.
+2. **Configured home.** Set `config.home`. The React runtime and the default
+   static build both render it. If `staticRoutes.routes` supplies a complete
+   route array, that array remains authoritative and the consumer must include
+   a matching home route (reuse `renderFolioStaticHome(context)` if useful).
+3. **Advanced full override.** `slots.home` still replaces the React `/` route
+   completely. `staticRoutes.home` replaces only the static `/` route body and
+   metadata while keeping every other generated route, `404.html`,
+   `sitemap.xml` and `robots.txt`. It accepts explicit HTML, not a React node.
+   A consumer with a full custom route array that includes `/` can still patch
+   only that route with `staticRoutes.home`, or call `renderFolioStaticHome` / `resolveFolioHome`
+   when it wants the built-in selection data.
+
+There is no automatic React-to-static serialization. Vite builds can generate
+the static home from `config.home`; SSR and React server rendering remain
+consumer-owned, and a `slots.home` node must have a separately supplied static
+body if the static `/` should match it. Sites pinned to
+`@uichat-mira/folio@0.1.1` must not claim this configurable contract is
+published.
 
 ## Public article TOC (FOL-023 candidate, not published in 0.1.1)
 

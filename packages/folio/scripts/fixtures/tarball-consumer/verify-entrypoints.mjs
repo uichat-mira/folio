@@ -77,6 +77,11 @@ const checks = [
         "function",
         "root entry does not export defineFolioConfig",
       );
+      assert.equal(
+        typeof entry.resolveFolioHome,
+        "function",
+        "root entry does not export resolveFolioHome",
+      );
 
       const doc = entry.parseFolioDoc(
         "docs/consumer.md",
@@ -104,6 +109,11 @@ const checks = [
         entry.folioVirtualModule,
         "virtual:folio/content",
         "vite entry exported an unexpected virtual module id",
+      );
+      assert.equal(
+        typeof entry.renderFolioStaticHome,
+        "function",
+        "vite entry does not export renderFolioStaticHome",
       );
 
       const plugin = entry.folio({

@@ -69,6 +69,12 @@ const base = resolveGithubPagesBase(process.env.GITHUB_REPOSITORY);
 
 这也是 reference implementation 必须真实部署，而不能只在 localhost 截图的原因。
 
+## 只覆写首页
+
+如果只想改静态首页而不接管全站路由，使用 `staticRoutes.home`。它只替换 `/` 的 body 与元数据，其他文章、目录、404、sitemap/robots 保持默认输出；`staticRoutes.routes` 仍然可以继续作为完整路由数组的真相源。`staticRoutes.home` 接收显式 HTML，也可以是 `(context, defaultHome) => route`。需要复用内置选择逻辑时，调用公开的 `renderFolioStaticHome(context)` 或 `resolveFolioHome(config, docs)`，不要把 ReactNode 当作可自动序列化的静态内容。
+
+`config.home` 可以让 React 与默认静态首页共享轻量配置；完整边界见[站点配置与扩展](/api/guide/configuration)和[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)。
+
 ## 无 JavaScript 时能做什么
 
 官方站通过 `staticRoutes.routes` 提供自己的静态 body，因此静态文档页在无 JavaScript 时只有正文：能阅读单篇文档，但没有跨文档侧栏、页内目录和上一篇/下一篇。
