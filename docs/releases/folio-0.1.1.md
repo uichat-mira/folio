@@ -1,6 +1,16 @@
-# Folio 0.1.1 — release candidate
+# Folio 0.1.1 — published release
 
-**Status:** source candidate; not published until GitHub Release `folio-v0.1.1` succeeds through npm Trusted Publishing.
+**Status:** Published on 2026-11-01 through [GitHub Release `folio-v0.1.1`](https://github.com/uichat-mira/folio/releases/tag/folio-v0.1.1), with npm Trusted Publishing / OIDC and verified public Registry consumer.
+
+## Final release evidence
+
+- Release tag `folio-v0.1.1` points to accepted production candidate `e4af1f7de3a8d6004f052fcb99f0b412405fcc3c`; historical MiraDocs `v0.1.0` was not moved.
+- [Publish workflow #41282326983](https://github.com/uichat-mira/folio/actions/runs/41282326983), attempt 1: successful `npm publish --access public` with signed provenance; npm reported post-publish processing. The public Registry returned `E404` during the original ~2-minute visibility gate, so the first attempt failed only at the post-publish Registry acceptance step.
+- Attempt 2: package `0.1.1` was already visible; publishing was skipped safely, and the independent Registry-installed consumer (SRI, JS/types/CSS equality, strict TypeScript, Vite and static HTML) passed. Entire workflow concluded **success**.
+- [PRs #101](https://github.com/uichat-mira/folio/pull/101), [#102](https://github.com/uichat-mira/folio/pull/102), and [#103](https://github.com/uichat-mira/folio/pull/103) promoted the bounded ~30-minute scan/propagation poll fix through `dev → test → prod`. The resulting `prod` head is `711c6c6350abfd15e47f0ce04f6f3a35b8d64843`; its Linux validation, Windows package check, Pages build/deploy succeeded. This workflow repair did **not** modify or re-publish `0.1.1`.
+- Downstream `uichat-mira-docs@prod` still uses `@uichat-mira/docs`; GitHub Pages deployment is distinct from a separately executed public HTTP smoke. The current private npm Trusted Publisher dashboard badge has not been read back independently.
+
+The following scope and constraints are the **historical pre-release candidate contract**, retained for traceability.
 
 ## Scope
 
@@ -10,7 +20,7 @@ Patch-only release following the public manual `@uichat-mira/folio@0.1.0` bootst
 - Ship corrected, up-to-date package README instead of the 0.1.0 tarball's historical “not published” text.
 - Strengthen the production `publish.yml` path: after real OIDC `npm publish`, read public Registry metadata with bounded propagation retries and run the existing `registry:consumer` to verify SRI, JavaScript/types/CSS provenance and real NodeNext/Bundler/Vite/static consumption.
 
-## Candidate and release constraints
+## Original candidate and release constraints (historical)
 
 - Follow `feat/* → dev → test → prod` with reviewed merge PRs; preserve source/target history and check both Linux and Windows packaging plus official-site build on exact promotion trees.
 - Pin the final `prod` SHA in the GitHub Release; tag must be **`folio-v0.1.1`**, not historical `v0.1.0` (MiraDocs). Ensure it resolves to the reviewed production commit.
