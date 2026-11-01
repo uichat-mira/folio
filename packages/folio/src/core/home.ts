@@ -135,9 +135,13 @@ function collectionForPath(
   path: string | undefined,
   fallback: FolioCollectionIndex | undefined,
 ): FolioCollectionIndex | undefined {
-  if (!path) return fallback;
+  if (path === undefined) return fallback;
   const normalized = normalizeFolioCollectionPath(path);
-  return collections.find((collection) => collection.path === normalized);
+  const collection = collections.find((candidate) => candidate.path === normalized);
+  if (!collection) {
+    throw new Error("folio home collection " + JSON.stringify(normalized) + " is not a configured collection");
+  }
+  return collection;
 }
 
 function sourceDocs(
@@ -147,10 +151,10 @@ function sourceDocs(
   fallback: FolioCollectionIndex | undefined,
 ): { collection?: FolioCollectionIndex; docs: FolioDoc[] } {
   const collection = collectionForPath(collections, path, fallback);
-  if (path) {
+  if (path !== undefined) {
     return {
       collection,
-      docs: selectFolioCollectionDocs(docs, path),
+      docs: selectFolioCollectionDocs(docs, collection!.path),
     };
   }
   return {

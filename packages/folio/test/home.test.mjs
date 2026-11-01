@@ -301,6 +301,9 @@ test("home configuration failures are explicit", () => {
     [{ home: { sections: [{ type: "featured", path: "/missing" }] } }, /does not match any document/],
     [{ home: { sections: [{ type: "about", path: "/missing" }] } }, /does not match any document/],
     [{ home: { sections: [{ type: "collections", paths: ["/missing"] }] } }, /not a configured collection/],
+    [{ home: { sections: [{ type: "intro", collection: "/info" }] } }, /not a configured collection/],
+    [{ home: { sections: [{ type: "featured", collection: "/info" }] } }, /not a configured collection/],
+    [{ home: { sections: [{ type: "recent", collection: "/info" }] } }, /not a configured collection/],
     [{ home: { sections: [{ type: "collections", paths: ["/notes", "/notes/"] }] } }, /duplicates/],
     [{ home: { sections: [{ type: "intro", title: 3 }] } }, /must be a string/],
   ];
