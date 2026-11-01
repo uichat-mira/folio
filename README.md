@@ -31,7 +31,7 @@ The unchanged 0.1.x consumer boundaries are defined once in [docs/consumer-contr
 
 ## Publication status
 
-`@uichat-mira/folio@0.1.0` was manually bootstrapped from accepted `prod` commit `40db582b` on 2026-11-01. Folio `0.1.1` was published by the signed GitHub Release `folio-v0.1.1` from tag commit `e4af1f7` using the npm Trusted Publishing / OIDC workflow. The initial run's Registry visibility check expired while npm processed the new package; its second attempt passed the real Registry consumer, SRI, TypeScript, Vite and static-site acceptance. The later `prod` workflow polling fix is in [PR #103](https://github.com/uichat-mira/folio/pull/103) (current `prod` `711c6c6`), without moving the release tag or republishing the version. The pre-release Chrome candidate passed 23/23 checks; live Pages HTTP smoke and downstream Mira Docs migration are separate.
+`@uichat-mira/folio@0.1.0` was manually bootstrapped from accepted `prod` commit `40db582b` on 2026-11-01. Folio `0.1.1` was published through GitHub Release `folio-v0.1.1` from tag commit `e4af1f7` using the npm Trusted Publishing / OIDC workflow. The initial run's Registry visibility check expired while npm processed the new package; its second attempt passed the real Registry consumer, SRI, TypeScript, Vite and static-site acceptance. The later `prod` workflow polling fix is in [PR #103](https://github.com/uichat-mira/folio/pull/103) (current `prod` `711c6c6`), without moving the release tag or republishing the version. The pre-release Chrome candidate passed 23/23 checks; live Pages HTTP smoke and downstream Mira Docs migration are separate.
 
 The [migration status page](https://uichat-mira.github.io/folio/api/guide/migration-status/) records the current state with its evidence.
 
