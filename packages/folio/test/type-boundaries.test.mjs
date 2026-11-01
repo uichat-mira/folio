@@ -21,6 +21,7 @@ const REACT_FREE_MODULES = [
   "config.ts",
   "markdown.ts",
   "static.ts",
+  "static-output.ts",
   "vite.ts",
 ];
 

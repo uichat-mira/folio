@@ -10,6 +10,7 @@ import {
   writeFolioStaticSite,
   type FolioStaticBuildOptions,
 } from "./static";
+import { normalizeStaticRoute } from "./static-output";
 import type { FolioDoc, FolioConfig } from "./types";
 
 const VIRTUAL_ID = "virtual:folio/content";
@@ -38,11 +39,6 @@ function markdownFiles(directory: string): string[] {
   });
 }
 
-function normalizeRoute(path: string): string {
-  const normalized = `/${path}`.replace(/\/{2,}/g, "/");
-  return normalized.length > 1 ? normalized.replace(/\/+$/, "") : normalized;
-}
-
 function readManifest(
   contentDir: string,
   options: FolioPluginOptions,
@@ -54,7 +50,7 @@ function readManifest(
 
       const doc = parseFolioDoc(sourcePath, readFileSync(file, "utf8"));
       const path = options.route?.(sourcePath, doc) ?? doc.path;
-      return { ...doc, path: normalizeRoute(path) };
+      return { ...doc, path: normalizeStaticRoute(path) };
     })
     .filter((doc): doc is FolioDoc => Boolean(doc))
     .sort(compareFolioDocs);
