@@ -12,7 +12,7 @@ The canonical boundary list, trusted Markdown example, stylesheet caveats, stati
 
 ## Install
 
-Folio `0.1.1` is the next patch release after the manually published `0.1.0`. It retains the same public API, ships the corrected installation README, and is distributed from the npm Registry after its GitHub release succeeds. Install the latest Folio with:
+Folio `0.1.1` is publicly released through [GitHub Release `folio-v0.1.1`](https://github.com/uichat-mira/folio/releases/tag/folio-v0.1.1) and the [OIDC publish workflow](https://github.com/uichat-mira/folio/actions/runs/41282326983), following the manual `0.1.0` bootstrap. The patch retains the same public API and ships the corrected installation README. Install the latest Folio with:
 
 ```bash
 npm install @uichat-mira/folio
@@ -97,7 +97,7 @@ Consumer applications remain responsible for branding, page composition, custom 
 Verified on 2026-11-01:
 
 - **Done** — `0.1.0` public npm bootstrap, independent Registry consumer verification, public entrypoints, local tarball checks and official site's workspace build.
-- **Release lineage** — `0.1.0` was bootstrapped manually without a Folio GitHub Release. `0.1.1` is the first planned `folio-v0.1.1` GitHub Release / npm OIDC publish. Check the [GitHub Releases](https://github.com/uichat-mira/folio/releases) and [npm version](https://www.npmjs.com/package/@uichat-mira/folio) for actual publication status; this bundled README is not a live status feed.
-- **Separate work** — migrate downstream Mira Docs consumers from `@uichat-mira/docs`. Historical MiraDocs tag `v0.1.0` remains untouched. npm Trusted Publisher binding and its OIDC publish result must be verified through npm settings and GitHub Actions, not inferred from this README.
+- **Release lineage** — `0.1.0` was bootstrapped manually without a Folio GitHub Release. `0.1.1` is the first actual OIDC-published [Folio GitHub Release](https://github.com/uichat-mira/folio/releases/tag/folio-v0.1.1). The initial post-publish Registry visibility probe timed out while npm processed the package; the workflow rerun passed full Registry consumer acceptance without republishing. This README is not a live status feed.
+- **Separate work** — migrate downstream Mira Docs consumers from `@uichat-mira/docs`. Historical MiraDocs tag `v0.1.0` remains untouched. The OIDC publish is evidenced by GitHub Actions; the private npm settings dashboard is a distinct administrative UI.
 
 The predecessor `@uichat-mira/docs` package stays available for existing consumers during migration.

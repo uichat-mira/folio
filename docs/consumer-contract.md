@@ -1,6 +1,6 @@
-# Folio consumer contract (0.1.0)
+# Folio consumer contract (0.1.x)
 
-This file is the single source of truth for what `@uichat-mira/folio` 0.1.0 promises an npm consumer: which Markdown input the renderer can handle safely, how the default stylesheet behaves when it is imported, and which static-site capabilities belong to the library versus the site.
+This file is the single source of truth for what `@uichat-mira/folio` 0.1.x (including the published 0.1.1 patch) promises an npm consumer: which Markdown input the renderer can handle safely, how the default stylesheet behaves when it is imported, and which static-site capabilities belong to the library versus the site.
 
 The root `README.md`, `packages/folio/README.md`, and the Markdown/static documentation link here and keep only short summaries. When the behavior changes, update this file first.
 
@@ -9,12 +9,12 @@ The root `README.md`, `packages/folio/README.md`, and the Markdown/static docume
 - **Markdown is trusted-content-only.** Raw HTML, `::: html` blocks, and Callout bodies are preserved without sanitization. Do not feed unreviewed submissions, scraped pages, or external PR previews into the renderer.
 - **`styles.css` is a whole-site stylesheet.** It assumes Folio owns the document. It is not an isolated embed stylesheet, and importing it into an existing branded page changes that page globally.
 - **The default static document shell works without JavaScript.** Sidebar, in-page TOC, and previous/next survive with JS disabled. Sites that supply custom static route bodies own that markup and do not get the shell.
-- **`@uichat-mira/folio@0.1.0` is publicly published.** Independent Registry-installed consumer checks passed; GitHub Release and OIDC remain separate.
+- **`@uichat-mira/folio@0.1.1` is publicly published through GitHub Release and npm OIDC.** The release workflow's second attempt passed independent Registry-installed consumer checks; the initial 0.1.0 bootstrap was manual.
 - **The published package includes virtual-module types.** Strict Registry-installed consumers resolve `default` and `roots` without writing a local `declare module`.
 
 ## Package status and installation
 
-Folio `0.1.0` was manually published from accepted `prod` SHA `40db582b20b5be7a070ab936a99255a75ca15232` on 2026-11-01. An independent runner installed the exact Registry version, verified its SRI and compared its JS/types/CSS to source ([FOL-016 evidence](https://github.com/uichat-mira/folio/actions/runs/41247604056)). No GitHub Folio Release or OIDC publish run has occurred.
+Folio `0.1.0` was manually bootstrapped from accepted `prod` SHA `40db582b20b5be7a070ab936a99255a75ca15232` on 2026-11-01, then independently verified via [FOL-016 Registry consumer evidence](https://github.com/uichat-mira/folio/actions/runs/41247604056). Folio `0.1.1` was subsequently published through [GitHub Release `folio-v0.1.1`](https://github.com/uichat-mira/folio/releases/tag/folio-v0.1.1) and the [OIDC workflow](https://github.com/uichat-mira/folio/actions/runs/41282326983): initial publish succeeded with signed provenance, but its public Registry probe timed out during npm processing; the same workflow's successful second attempt verified the immutable Registry version, its SRI, and the external consumer. Runtime and public API behavior did not change in this patch.
 
 Install the published version with:
 
