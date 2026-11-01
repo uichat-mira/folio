@@ -70,6 +70,33 @@ function DocumentPage({
   );
 }
 
+function EntryList({
+  entries,
+  headingLevel,
+}: {
+  entries: FolioDoc[];
+  headingLevel: "h2" | "h3";
+}) {
+  const Heading = headingLevel;
+  return (
+    <div className="folio-entry-list">
+      {entries.map((doc, index) => (
+        <Link to={href(doc.path)} className="folio-entry" key={doc.path}>
+          <span className="folio-entry-number" aria-hidden="true">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          <div className="folio-entry-copy">
+            {doc.date ? <time className="folio-entry-date" dateTime={doc.date}>{doc.date}</time> : null}
+            <Heading className="folio-entry-title">{doc.title}</Heading>
+            {doc.description ? <p className="folio-entry-description">{doc.description}</p> : null}
+          </div>
+          <span className="folio-entry-arrow" aria-hidden="true">↗</span>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 function Home({
   docs,
   title,
@@ -82,28 +109,51 @@ function Home({
   custom?: ReactNode;
 }) {
   if (custom) return <>{custom}</>;
-  const featured = docs.filter((doc) => doc.path !== "/").slice(0, 8);
+  const articles = selectFolioCollectionDocs(docs, "article").slice(0, 5);
+  const projects = selectFolioCollectionDocs(docs, "project").slice(0, 3);
+  const about = docs.find((doc) => doc.type === "page");
 
   return (
-    <main className="folio-home">
-      <section className="folio-hero">
-        <div className="folio-eyebrow">FOLIO</div>
+    <main className="folio-home folio-journal-home">
+      <header className="folio-journal-hero">
+        <span className="folio-journal-kicker">PERSONAL JOURNAL</span>
         <h1>{title}</h1>
         <p>{description}</p>
+      </header>
+      <section className="folio-journal-section" aria-labelledby="folio-home-articles">
+        <div className="folio-section-heading">
+          <div>
+            <span className="folio-section-eyebrow">01 / WRITING</span>
+            <h2 id="folio-home-articles">最近的文章</h2>
+          </div>
+          <Link to="/blogs" className="folio-section-link">全部文章 <span aria-hidden="true">↗</span></Link>
+        </div>
+        {articles.length ? (
+          <EntryList entries={articles} headingLevel="h3" />
+        ) : <p className="folio-collection-empty">还没有发布文章。</p>}
       </section>
-      <section className="folio-card-grid">
-        {featured.map((doc) => (
-          <Link key={doc.path} to={href(doc.path)} className="folio-card">
-            <span>{doc.group}</span>
-            <h2>{doc.title}</h2>
-            <p>{doc.description}</p>
-          </Link>
-        ))}
-      </section>
+      {projects.length ? (
+        <section className="folio-journal-section" aria-labelledby="folio-home-projects">
+          <div className="folio-section-heading">
+            <div>
+              <span className="folio-section-eyebrow">02 / COLLECTION</span>
+              <h2 id="folio-home-projects">好物与发现</h2>
+            </div>
+            <Link to="/projects" className="folio-section-link">查看全部 <span aria-hidden="true">↗</span></Link>
+          </div>
+          <EntryList entries={projects} headingLevel="h3" />
+        </section>
+      ) : null}
+      {about ? (
+        <aside className="folio-home-about">
+          <span>ABOUT THIS SITE</span>
+          <p>不赶时间，慢慢记录生活。</p>
+          <Link to={href(about.path)}>关于这个小站 <span aria-hidden="true">↗</span></Link>
+        </aside>
+      ) : null}
     </main>
   );
 }
-
 
 function CollectionIndex({
   docs,
@@ -117,21 +167,13 @@ function CollectionIndex({
   const entries = selectFolioCollectionDocs(docs, collection.kind);
   return (
     <main className="folio-home folio-collection-page">
-      <section className="folio-hero">
-        <div className="folio-eyebrow">{collection.kind === "article" ? "BLOG" : "COLLECTION"}</div>
+      <header className="folio-journal-hero folio-collection-hero">
+        <span className="folio-journal-kicker">{collection.kind === "article" ? "WRITING" : "COLLECTION"}</span>
         <h1>{title}</h1>
         <p>{collection.description}</p>
-      </section>
+      </header>
       {entries.length ? (
-        <section className="folio-card-grid" aria-label={title + "列表"}>
-          {entries.map((doc) => (
-            <Link key={doc.path} to={href(doc.path)} className="folio-card">
-              <span>{doc.group}{doc.date ? " · " + doc.date : ""}</span>
-              <h2>{doc.title}</h2>
-              {doc.description ? <p>{doc.description}</p> : null}
-            </Link>
-          ))}
-        </section>
+        <EntryList entries={entries} headingLevel="h2" />
       ) : (
         <p className="folio-collection-empty">{collection.emptyMessage}</p>
       )}

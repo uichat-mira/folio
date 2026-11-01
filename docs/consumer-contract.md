@@ -290,8 +290,8 @@ The research files are evidence for these behavior claims. They are not a browse
 
 On the FOL-022 feature branch, Folio generates `/blogs` for `type: article`
 and `/projects` for `type: project` with the *default* `FolioApp` and
-default static routes. The two indexes reuse Folio's existing cards and
-styles; no consumer-managed page or theme is necessary.
+default static routes. The two indexes use Folio's own compact editorial lists and
+theme tokens; no consumer-managed page or theme is necessary.
 
 - The navigation labels can be overridden by a site's `config.navigation`
   (`{ label: "好物", href: "/projects" }`).
@@ -311,3 +311,12 @@ styles; no consumer-managed page or theme is necessary.
 
 This is future-source evidence; downstream consumers pinned to `0.1.1` must
 wait for an actual npm release before claiming the feature.
+
+
+### Native personal-site home (FOL-022 visual acceptance)
+The default home separates a short introduction, latest 5 articles, and
+up to 3 projects. Its collection lists use compact rows with semantic
+headings rather than mixing article, project and page entries in a large
+two-column card wall. Static HTML includes the same readable sections and
+real hyperlinks. The consumer can still supply a custom \`slots.home\`
+when intentionally replacing this default.

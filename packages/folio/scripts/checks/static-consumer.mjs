@@ -193,7 +193,7 @@ export function verifyStaticConsumer({ consumerDir, appDir, log }) {
   );
   check(
     "static:home",
-    staticIndex.includes('<div id="root"><main class="folio-prerender">'),
+    staticIndex.includes('<div id="root"><main class="folio-home folio-journal-home">'),
     "the home page did not receive prerendered content inside #root",
   );
   check(

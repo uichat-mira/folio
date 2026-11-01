@@ -68,6 +68,18 @@ test("default static indexes have no-JS cards, escaped links, canonical and site
     const projects = readFileSync(resolve(context.outDir,"projects/index.html"),"utf8");
     const sitemap = readFileSync(resolve(context.outDir,"sitemap.xml"),"utf8");
     assert.match(blogs, /folio-collection-page/);
+    assert.match(blogs, /class="folio-entry-list"/);
+    assert.doesNotMatch(blogs, /class="folio-card"/);
+    const home = readFileSync(resolve(context.outDir,"index.html"),"utf8");
+    assert.match(home, /folio-journal-home/);
+    assert.match(home, /最近的文章/);
+    assert.match(home, /好物与发现/);
+    assert.match(home, /href="\/moyu\/blogs\/"/);
+    assert.match(home, /href="\/moyu\/projects\/"/);
+    assert.match(home, /href="\/moyu\/blogs\/hello\/"/);
+    assert.match(home, /href="\/moyu\/projects\/coffee\/"/);
+    assert.doesNotMatch(home, /href="\/moyu\/docs\/about\/"/);
+
     assert.match(blogs, /href="\/moyu\/blogs\/hello\/"/);
     assert.match(blogs, /href="\/moyu\/blogs\/second\/"/);
     assert.ok(blogs.indexOf("hello") < blogs.indexOf("second"));

@@ -449,28 +449,78 @@ function renderStaticDocShell(
 }
 
 
+function renderStaticEntryList(
+  context: FolioStaticBuildContext,
+  docs: FolioDoc[],
+  heading: "h2" | "h3",
+): string {
+  return '<div class="folio-entry-list">' + docs.map((doc, index) =>
+    '<a class="folio-entry" href="' + folioEscapeHtml(staticRouteHref(context, doc.path)) + '">' +
+    '<span class="folio-entry-number" aria-hidden="true">' + String(index + 1).padStart(2, "0") + '</span>' +
+    '<div class="folio-entry-copy">' +
+    (doc.date ? '<time class="folio-entry-date" datetime="' + folioEscapeHtml(doc.date) + '">' +
+      folioEscapeHtml(doc.date) + '</time>' : '') +
+    '<' + heading + ' class="folio-entry-title">' + folioEscapeHtml(doc.title) + '</' + heading + '>' +
+    (doc.description ? '<p class="folio-entry-description">' +
+      folioEscapeHtml(doc.description) + '</p>' : '') +
+    '</div><span class="folio-entry-arrow" aria-hidden="true">↗</span></a>'
+  ).join("") + "</div>";
+}
+
 function renderStaticCollectionIndex(
   context: FolioStaticBuildContext,
   collection: FolioCollectionIndex,
 ): string {
   const title = folioCollectionTitle(context.config, collection);
   const entries = selectFolioCollectionDocs(context.docs, collection.kind);
-  const cards = entries.length
-    ? '<section class="folio-card-grid" aria-label="' + folioEscapeHtml(title + "列表") + '">' +
-      entries.map((doc) =>
-        '<a class="folio-card" href="' + folioEscapeHtml(staticRouteHref(context, doc.path)) + '">' +
-        '<span>' + folioEscapeHtml(doc.group + (doc.date ? " · " + doc.date : "")) + '</span>' +
-        '<h2>' + folioEscapeHtml(doc.title) + '</h2>' +
-        (doc.description ? '<p>' + folioEscapeHtml(doc.description) + '</p>' : '') +
-        '</a>'
-      ).join("") + "</section>"
+  const list = entries.length
+    ? renderStaticEntryList(context, entries, "h2")
     : '<p class="folio-collection-empty">' + folioEscapeHtml(collection.emptyMessage) + '</p>';
   return '<main class="folio-home folio-collection-page">' +
-    '<section class="folio-hero"><div class="folio-eyebrow">' +
-    (collection.kind === "article" ? "BLOG" : "COLLECTION") +
-    '</div><h1>' + folioEscapeHtml(title) + '</h1><p>' +
-    folioEscapeHtml(collection.description) + '</p></section>' +
-    cards + "</main>";
+    '<header class="folio-journal-hero folio-collection-hero">' +
+    '<span class="folio-journal-kicker">' +
+    (collection.kind === "article" ? "WRITING" : "COLLECTION") +
+    '</span><h1>' + folioEscapeHtml(title) + '</h1><p>' +
+    folioEscapeHtml(collection.description) + '</p></header>' +
+    list + "</main>";
+}
+
+function renderStaticHome(context: FolioStaticBuildContext): string {
+  const articles = selectFolioCollectionDocs(context.docs, "article").slice(0, 5);
+  const projects = selectFolioCollectionDocs(context.docs, "project").slice(0, 3);
+  const about = context.docs.find((doc) => doc.type === "page");
+  const section = (
+    id: string,
+    kicker: string,
+    title: string,
+    route: string,
+    linkText: string,
+    entries: FolioDoc[],
+  ): string => {
+    return '<section class="folio-journal-section" aria-labelledby="' + id + '">' +
+      '<div class="folio-section-heading"><div><span class="folio-section-eyebrow">' +
+      kicker + '</span><h2 id="' + id + '">' + folioEscapeHtml(title) + '</h2></div>' +
+      '<a class="folio-section-link" href="' +
+      folioEscapeHtml(staticRouteHref(context, route)) + '">' +
+      folioEscapeHtml(linkText) + ' <span aria-hidden="true">↗</span></a></div>' +
+      (entries.length ? renderStaticEntryList(context, entries, "h3")
+        : '<p class="folio-collection-empty">还没有发布文章。</p>') +
+      '</section>';
+  };
+  return '<main class="folio-home folio-journal-home">' +
+    '<header class="folio-journal-hero">' +
+    '<span class="folio-journal-kicker">PERSONAL JOURNAL</span>' +
+    '<h1>' + folioEscapeHtml(context.config.title) + '</h1>' +
+    '<p>' + folioEscapeHtml(context.config.description) + '</p></header>' +
+    section("folio-home-articles", "01 / WRITING", "最近的文章", "/blogs", "全部文章", articles) +
+    (projects.length
+      ? section("folio-home-projects", "02 / COLLECTION", "好物与发现", "/projects", "查看全部", projects)
+      : "") +
+    (about ? '<aside class="folio-home-about"><span>ABOUT THIS SITE</span>' +
+      '<p>不赶时间，慢慢记录生活。</p><a href="' +
+      folioEscapeHtml(staticRouteHref(context, about.path)) +
+      '">关于这个小站 <span aria-hidden="true">↗</span></a></aside>' : "") +
+    '</main>';
 }
 
 function defaultRoutes(context: FolioStaticBuildContext): FolioStaticRoute[] {
@@ -480,7 +530,7 @@ function defaultRoutes(context: FolioStaticBuildContext): FolioStaticRoute[] {
       path: "/",
       title: context.config.title,
       description: context.config.description,
-      body: `<main class="folio-prerender"><h1>${folioEscapeHtml(context.config.title)}</h1><p>${folioEscapeHtml(context.config.description)}</p></main>`,
+      body: renderStaticHome(context),
       type: "website",
     },
     ...FOLIO_COLLECTION_INDEXES.map((collection) => {
