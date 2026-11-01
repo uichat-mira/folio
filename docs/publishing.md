@@ -26,22 +26,23 @@ On 2026-11-01 the maintainer **manually bootstrapped** `@uichat-mira/folio@0.1.0
 - Compared installed JS, declaration and stylesheet contents with the accepted source, allowing only CRLF/LF differences in Windows-published text;
 - Passed strict NodeNext/Bundler and virtual-only TypeScript consumer checks, real Vite Markdown discovery and negative control, and staticRoutes on/off with 404, sitemap and robots files.
 
-The public install command is now:
+Install the current published release:
 
 ```bash
-npm install @uichat-mira/folio@0.1.0
+npm install @uichat-mira/folio@0.1.1
 ```
 
-**Do not republish 0.1.0:** npm versions are immutable. Its already-published README was packed before the manual bootstrap and still contains historical pre-publication wording; that specific Registry README cannot be edited in place and must be corrected in a future version. This repository's current README and official site documents are corrected in FOL-016.
+**Do not republish 0.1.0:** npm versions are immutable. Its already-published README was packed before the manual bootstrap and still contains historical pre-publication wording; that immutable `0.1.0` Registry tarball cannot be edited in place. The subsequent `0.1.1` release contains the corrected package README, and the repository/official-site documentation is being reconciled separately.
 
-### Release lineage and remaining work
+### Release lineage and current state
 
-- Legacy MiraDocs tag `v0.1.0` belongs to historical commit `7cbf4b9` and is unchanged.
-- Folio's first GitHub OIDC-published Release is planned for `folio-v0.1.1`, from a reviewed `prod` commit. The historical `v0.1.0` belongs to MiraDocs; the manually published Folio 0.1.0 never had a GitHub Release. `publish.yml` requires this prefix plus `prod` ancestry and safely skips `npm publish` when the version already exists. Its OIDC path **has not** been exercised by the first manual publish.
-- Trusted Publisher is a separate **npm package-admin private setting** and is unverified. Exact future binding: GitHub organization `uichat-mira`, repository `folio`, workflow filename `publish.yml`, allow `npm publish`. The workflow uses GitHub-hosted runners, `id-token: write`, Node 24/npm 11.
-- npm's current rule requires first successful OIDC publish within **48 hours of configuring a new Trusted Publisher**; coordinate configuration with the next approved version release so it does not expire unused. Do not create a long-lived npm automation token.
-- The `0.1.1` release corrects the README embedded in the package and exercises the authenticated OIDC workflow. The workflow also re-installs the exact just-published Registry package, checks SRI against npm metadata, and executes strict TypeScript, Vite, and static output consumption. Configure the package's Trusted Publisher with direct `npm publish` permission before the GitHub Release; npm's current trust setup defaults to staged-publish-only unless direct publish is enabled.
-- The previous `@uichat-mira/docs` package remains supported while downstream consumers migrate. Neither FOL-016 nor this doc authorizes a new npm version, tag, GitHub Release or deprecation.
+- The historical MiraDocs tag `v0.1.0` remains unchanged. The Folio `0.1.0` npm package was manually bootstrapped and has no Folio GitHub Release.
+- The first Folio OIDC-backed GitHub Release is [`folio-v0.1.1`](https://github.com/uichat-mira/folio/releases/tag/folio-v0.1.1), published on 2026-11-01. Its immutable tag resolves to `e4af1f7de3a8d6004f052fcb99f0b412405fcc3c` in the `prod` history, with package version `0.1.1`.
+- The initial [Publish npm package #41282326983](https://github.com/uichat-mira/folio/actions/runs/41282326983) used npm 11 on Node 24 with `id-token: write`. The actual `npm publish --access public` step succeeded and published a signed provenance statement to the transparency log. npm reported that the package was still being processed; the public Registry returned `E404` for the original ~2-minute gate, so the overall first attempt failed **after** publishing.
+- [Attempt 2 of the same release workflow](https://github.com/uichat-mira/folio/actions/runs/41282326983) completed successfully: the already-published-version check skipped the publish step, then the real Registry-installed consumer verified SRI, matching JS/types/CSS, strict TypeScript, Vite discovery, and static output. **Do not re-publish `0.1.1`.** A green rerun alone is not evidence of a second publish.
+- [PR #101](https://github.com/uichat-mira/folio/pull/101) → [#102](https://github.com/uichat-mira/folio/pull/102) → [#103](https://github.com/uichat-mira/folio/pull/103) improved the future publish workflow's bounded Registry visibility polling to 60 probes at 30-second intervals. This code landed on `prod` commit `711c6c6350abfd15e47f0ce04f6f3a35b8d64843` without changing the released tarball or tag. Production Linux Validate, Windows package check and Pages build/deploy checks passed on this commit.
+- The maintainer previously confirmed the npm website's private Trusted Publisher configuration for `uichat-mira/folio`, workflow `publish.yml`, with direct `npm publish` permission. The successful OIDC publication is independent execution evidence. The npm dashboard's current private UI validation badge is not directly readable through GitHub and should not be reported as independently checked.
+- The previous `@uichat-mira/docs` package remains available while downstream consumers migrate. No new version, deprecation, or migration is authorized by these release records.
 
 ## Trusted Publisher
 
