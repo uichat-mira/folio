@@ -14,6 +14,7 @@ import { compareFolioDocs, parseFolioDoc } from "../core/content";
 import {
   writeFolioStaticSite,
   type FolioStaticBuildOptions,
+  type FolioStaticHomeOverride,
 } from "../static";
 import { normalizeStaticRoute } from "../static-output";
 import type { FolioDoc, FolioConfig } from "../types";
@@ -135,6 +136,7 @@ export function folio(options: FolioPluginOptions): Plugin {
 export type {
   FolioStaticBuildContext,
   FolioStaticBuildOptions,
+  FolioStaticHomeOverride,
   FolioStaticImageMetadata,
   FolioStaticRoute,
 } from "../static";
@@ -142,6 +144,7 @@ export {
   folioAbsoluteAssetUrl,
   folioAbsoluteRouteUrl,
   folioEscapeHtml,
+  renderFolioStaticHome,
   renderFolioStaticHtml,
   writeFolioStaticSite,
 } from "../static";

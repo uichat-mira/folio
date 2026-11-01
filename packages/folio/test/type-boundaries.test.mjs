@@ -21,6 +21,7 @@ const CORE_CONTENT_MODULES = [
   "core/heading-ids.ts",
   "core/search.ts",
   "core/config.ts",
+  "core/home.ts",
 ];
 
 // Core content/build modules outside src/core plus the shared Core type module.
@@ -53,6 +54,10 @@ const PUBLIC_TYPE_NAMES = [
   "FolioEntryType",
   "FolioHeaderProps",
   "FolioHeading",
+  "FolioHomeConfig",
+  "FolioHomeModel",
+  "FolioHomeSectionConfig",
+  "FolioHomeSectionType",
   "FolioMarkdownProps",
   "FolioMarkdownRenderOptions",
   "FolioNavigationItem",

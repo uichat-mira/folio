@@ -43,7 +43,7 @@ function readGenerated(stage, path, what) {
   return readFileSync(path, "utf8");
 }
 
-function runBuild(viteCli, appDir, { outDir, staticMode }) {
+function runBuild(viteCli, appDir, { outDir, staticMode, homeMode = "default" }) {
   // Start from nothing so a file can only exist because this build wrote it.
   rmSync(join(appDir, outDir), { recursive: true, force: true });
 
@@ -61,6 +61,7 @@ function runBuild(viteCli, appDir, { outDir, staticMode }) {
         FOLIO_CONSUMER_BASE: STATIC_BASE,
         FOLIO_CONSUMER_SITE_URL: STATIC_SITE_URL,
         FOLIO_CONSUMER_STATIC: staticMode ? "on" : "off",
+        FOLIO_CONSUMER_HOME_MODE: homeMode,
       },
     },
   );
@@ -401,6 +402,111 @@ export function verifyStaticConsumer({ consumerDir, appDir, log }) {
     `robots.txt is ${JSON.stringify(robots)}, expected ${JSON.stringify(expectedRobots)}`,
   );
   log("[static]   ok  robots.txt  points at the base-prefixed sitemap");
+
+  // FOL-030: the same installed tarball also proves a config-driven home and a
+  // static-only home override. Each mode is a separate real Vite build so the
+  // default, configured and advanced fixtures cannot share stale output.
+  const configuredDir = runBuild(viteCli, appDir, {
+    outDir: "dist-home-configured",
+    staticMode: true,
+    homeMode: "configured",
+  });
+  const configuredIndex = readGenerated(
+    "static:home:configured",
+    join(configuredDir, "index.html"),
+    "the configured home page",
+  );
+  check(
+    "static:home:configured",
+    configuredIndex.includes("<h1>Configured consumer home</h1>"),
+    "the configured home did not use the configured intro text",
+  );
+  check(
+    "static:home:configured",
+    configuredIndex.includes('<span>CONFIGURED HOME</span>'),
+    "the configured home did not use the configured meta strip",
+  );
+  check(
+    "static:home:configured",
+    configuredIndex.includes(`href="${STATIC_BASE}docs/hello/"`),
+    "the configured featured/recent block did not link to the configured collection under the deployment base",
+  );
+  check(
+    "static:home:configured",
+    configuredIndex.includes("<h2>Consumer discovery fixture</h2>"),
+    "the configured featured story was not selected from the configured route collection",
+  );
+  for (const relative of [join("blogs", "index.html"), join("projects", "index.html"), "404.html", "sitemap.xml", "robots.txt"]) {
+    check(
+      "static:home:configured",
+      existsSync(join(configuredDir, relative)),
+      `configuring home changed unrelated static output: ${relative} is missing`,
+    );
+  }
+  const configuredSitemap = readFileSync(join(configuredDir, "sitemap.xml"), "utf8");
+  check(
+    "static:home:configured",
+    existsSync(join(configuredDir, "docs", "index.html")),
+    "configured /docs collection was not prerendered",
+  );
+  check(
+    "static:home:configured",
+    (configuredSitemap.match(/<url>/g) ?? []).length === 5,
+    "configured home must include root, docs/hello, docs collection, blogs and projects",
+  );
+  log("[static]   ok  configured home uses config text, collection links and base path");
+
+  const overrideDir = runBuild(viteCli, appDir, {
+    outDir: "dist-home-override",
+    staticMode: true,
+    homeMode: "override",
+  });
+  const overrideIndex = readGenerated(
+    "static:home:override",
+    join(overrideDir, "index.html"),
+    "the advanced static home page",
+  );
+  check(
+    "static:home:override",
+    overrideIndex.includes('<main class="folio-static-home-override"><h1>Advanced static home</h1>'),
+    "the static home override body did not reach only the '/' route",
+  );
+  check(
+    "static:home:override",
+    overrideIndex.includes(`href="${STATIC_BASE}docs/hello/"`),
+    "the static home override did not receive the deployment base",
+  );
+  check(
+    "static:home:override",
+    overrideIndex.includes('<link rel="canonical" href="https://example.test/folio-smoke/">'),
+    "the static home override changed the home canonical URL",
+  );
+  check(
+    "static:home:override",
+    !overrideIndex.includes("folio-editorial-home"),
+    "the static home override still rendered the default home body",
+  );
+  for (const relative of [
+    join("docs", "hello", "index.html"),
+    join("blogs", "index.html"),
+    join("projects", "index.html"),
+    "404.html",
+    "sitemap.xml",
+    "robots.txt",
+  ]) {
+    check(
+      "static:home:override",
+      existsSync(join(overrideDir, relative)),
+      `overriding home removed unrelated static output: ${relative} is missing`,
+    );
+  }
+  const overrideSitemap = readFileSync(join(overrideDir, "sitemap.xml"), "utf8");
+  check(
+    "static:home:override",
+    (overrideSitemap.match(/<url>/g) ?? []).length === 4,
+    "a static-only home override changed the sitemap route set",
+  );
+  log("[static]   ok  static-only home override keeps every other route, canonical and sitemap entry");
 
   // Counter-proof: with static generation disabled, the same fixture, base,
   // site URL and Markdown must produce a normal Vite build with no static
