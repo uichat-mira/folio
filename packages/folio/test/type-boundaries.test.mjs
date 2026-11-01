@@ -32,6 +32,7 @@ const REACT_FREE_MODULES = [
   "static.ts",
   "static-output.ts",
   "vite.ts",
+  "build/vite-adapter.ts",
 ];
 
 const UI_TYPE_NAMES = [
@@ -155,4 +156,78 @@ test("the public barrel still re-exports every published type name", () => {
     /from\s+["']\.\/core\/docs-structure["']/,
     "barrel must re-export document structure from src/core",
   );
+});
+
+// FOL-031 (B8): the Vite integration has exactly one implementation, in the
+// Build/Adapter layer. src/vite.ts stays the tsup `/vite` input and only
+// re-exports it, so the tested adapter and the published entry cannot drift.
+test("the Vite adapter implementation lives only in src/build/vite-adapter.ts", () => {
+  const adapter = readSource("build/vite-adapter.ts");
+  assert.match(adapter, /export function folio\(/, "the adapter must own the plugin factory");
+  assert.match(adapter, /function readManifest\(/, "the adapter must own the manifest reader");
+  assert.match(adapter, /writeBundle\(\)/, "the adapter must own the writeBundle stage");
+  assert.match(adapter, /"virtual:folio\/content"/, "the adapter must own the virtual module id");
+  assert.match(adapter, /from\s+["']\.\.\/core\/content["']/, "the adapter must import Core content");
+  assert.match(adapter, /from\s+["']\.\.\/static["']/, "the adapter must import the static builder");
+
+  const entry = readSource("vite.ts");
+  assert.match(
+    entry,
+    /from\s+["']\.\/build\/vite-adapter["']/,
+    "src/vite.ts must re-export the adapter module",
+  );
+  for (const forbidden of [
+    "node:fs",
+    "node:path",
+    "readManifest",
+    "writeBundle",
+    "export function folio",
+    "virtual:folio/content",
+  ]) {
+    assert.ok(
+      !entry.includes(forbidden),
+      `src/vite.ts must stay a thin re-export of the adapter; found ${forbidden}`,
+    );
+  }
+
+  const sourceFiles = [];
+  const walk = (directory) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      if (entry.isDirectory()) walk(path);
+      else if (/\.tsx?$/.test(entry.name) && !entry.name.endsWith(".d.ts")) {
+        sourceFiles.push(path.slice(sourceRoot.length + 1).replace(/\\/g, "/"));
+      }
+    }
+  };
+  walk(sourceRoot);
+
+  const duplicateImplementations = sourceFiles.filter((file) => {
+    if (file === "build/vite-adapter.ts") return false;
+    const source = readSource(file);
+    return (
+      /function readManifest\(/.test(source) ||
+      /writeBundle\s*\(/.test(source) ||
+      /export function folio\(/.test(source)
+    );
+  });
+  assert.deepEqual(
+    duplicateImplementations,
+    [],
+    "the Vite adapter must not be re-implemented in another module",
+  );
+
+  // The tsup inputs and the /vite export contract are what keep the moved
+  // implementation publicly identical.
+  const manifest = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8"));
+  assert.match(
+    manifest.scripts.build,
+    /tsup src\/index\.ts src\/vite\.ts\b/,
+    "the tsup build inputs must stay src/index.ts + src/vite.ts",
+  );
+  assert.deepEqual(manifest.exports["./vite"], {
+    types: "./dist/vite.d.ts",
+    import: "./dist/vite.js",
+    default: "./dist/vite.js",
+  });
 });
