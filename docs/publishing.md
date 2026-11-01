@@ -32,7 +32,7 @@ Install the current published release:
 npm install @uichat-mira/folio@0.1.1
 ```
 
-**Do not republish 0.1.0:** npm versions are immutable. Its already-published README was packed before the manual bootstrap and still contains historical pre-publication wording; that specific Registry README cannot be edited in place and must be corrected in a future version. This repository's current README and official site documents are corrected in FOL-016.
+**Do not republish 0.1.0:** npm versions are immutable. Its already-published README was packed before the manual bootstrap and still contains historical pre-publication wording; that immutable `0.1.0` Registry tarball cannot be edited in place. The subsequent `0.1.1` release contains the corrected package README, and the repository/official-site documentation is being reconciled separately.
 
 ### Release lineage and current state
 
