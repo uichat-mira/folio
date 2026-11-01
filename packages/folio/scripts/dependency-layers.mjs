@@ -63,9 +63,12 @@ const SOURCE_EXTENSIONS = [".ts", ".tsx", ".mts", ".cts"];
 const REACT_PACKAGES = [/^react$/, /^react\//, /^react-dom$/, /^react-dom\//, /^react-router-dom$/, /^react-router-dom\//];
 // The Vite build framework is Build-layer tooling; Core must not import it.
 const BUILD_TOOL_PACKAGES = [/^vite$/, /^vite\//];
-// DOM globals used as values. Comments and strings are masked before matching,
-// so this only sees real code.
-const DOM_GLOBAL_USAGE = /\b(?:document|window|localStorage|sessionStorage|navigator)\s*[.(]/;
+// DOM globals used as values, through property access (`document.title`),
+// optional chaining (`document?.title`), bracket access (`document["title"]`)
+// or a call (`navigator.clipboard.writeText(...)`). Comments and strings are
+// masked before matching, so this only sees real code.
+const DOM_GLOBAL_USAGE =
+  /\b(?:document|window|localStorage|sessionStorage|navigator)\s*(?:\?\.|\.|\[|\()/;
 
 function toPosix(path) {
   return path.replace(/\\/g, "/");
@@ -321,6 +324,22 @@ const SYNTHETIC_SCENARIOS = [
     },
     expect: ["core:dom"],
     what: "a Core module touching the DOM",
+  },
+  {
+    id: "core-uses-dom-bracket-access",
+    files: {
+      "core/content.ts": 'export const title = document["title"];\n',
+    },
+    expect: ["core:dom"],
+    what: "a Core module reading the DOM through bracket access",
+  },
+  {
+    id: "core-uses-dom-optional-chaining",
+    files: {
+      "core/content.ts": "export const title = window?.location?.href;\n",
+    },
+    expect: ["core:dom"],
+    what: "a Core module reading the DOM through optional chaining",
   },
   {
     id: "build-imports-ui-component",
