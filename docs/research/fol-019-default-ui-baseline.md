@@ -332,6 +332,9 @@ node docs/research/fol-014/run.mjs --out C:\Users\Administrator\AppData\Local\Te
 
 ## 10. PR 与 head SHA
 
-- PR: 待创建（本提交 push 后创建 Draft PR，随后用一次仅文档提交补齐链接与
-  evidence commit SHA）。
+- PR: [#116](https://github.com/uichat-mira/folio/pull/116)（`feat/fol-019-visual-baseline` → `dev`）
+- 证据提交（evidence commit / 创建 PR 时的 head）:
+  `995260751a6ec2ee2e1c815598bf2c9ecab10a65`
+- 本报告首版与全部证据在该提交中；本提交只追加 PR 链接与 head SHA 记录，不改动
+  证据数据。Ready 时的精确 head SHA 记录在 PR 描述与本任务的 captain 汇报中。
 - 自检后转 Ready，并由 Folio OpenCode Review 复核。
