@@ -65,21 +65,25 @@ jobs:
         working-directory: packages/folio
         run: npm publish --access public
 
-      # Verify the *registry* artifact, never a workspace-linked build. Allow
-      # npm's CDN to propagate newly published package metadata before checking.
+      # npm scans new packages before making them installable; the scan may take
+      # 15+ minutes. Poll the real public Registry without weakening the
+      # independent package/SRI/consumer verification that follows.
+      # https://github.blog/changelog/2026-07-28-npm-publish-time-malware-scanning-and-dual-use-metadata/
       - name: Verify public Registry install and consumer behavior
         shell: bash
         run: |
           VERSION="${{ steps.package.outputs.version }}"
-          for attempt in $(seq 1 12); do
-            if npm view "@uichat-mira/folio@${VERSION}" dist.integrity --registry=https://registry.npmjs.org | grep -q '^sha512-'; then
+          for attempt in $(seq 1 60); do
+            if npm view "@uichat-mira/folio@${VERSION}" dist.integrity --registry=https://registry.npmjs.org --fetch-retries=0 2>/dev/null | grep -q '^sha512-'; then
+              echo "@uichat-mira/folio@${VERSION} is visible in the public Registry (probe ${attempt}/60)."
               break
             fi
-            if [ "$attempt" -eq 12 ]; then
-              echo "::error::Published @uichat-mira/folio@${VERSION} unavailable from npm Registry"
+            if [ "$attempt" -eq 60 ]; then
+              echo "::error::Published @uichat-mira/folio@${VERSION} is not installable after 30 minutes; inspect npm publish-time scan status"
               exit 1
             fi
-            sleep 10
+            echo "Waiting for @uichat-mira/folio@${VERSION} to clear npm scanning (probe ${attempt}/60)"
+            sleep 30
           done
           npm run registry:consumer -w @uichat-mira/folio
 
