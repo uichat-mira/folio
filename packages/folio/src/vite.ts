@@ -5,7 +5,7 @@ import {
 } from "node:fs";
 import { relative, resolve } from "node:path";
 import type { Plugin } from "vite";
-import { compareFolioDocs, parseFolioDoc } from "./content";
+import { compareFolioDocs, parseFolioDoc } from "./core/content";
 import {
   writeFolioStaticSite,
   type FolioStaticBuildOptions,

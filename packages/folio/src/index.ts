@@ -8,8 +8,8 @@ export type { FolioShareButtonProps } from "./share";
 export { FolioMarkdown } from "./markdown-react";
 export type { FolioMarkdownProps } from "./markdown-react";
 export { searchFolioDocs } from "./search";
-export { buildFolioDocStructure, findFolioDocCollection, getFolioDocNeighbors } from "./docs-structure";
-export type { FolioDocCollection, FolioDocSection, FolioDocStructure } from "./docs-structure";
+export { buildFolioDocStructure, findFolioDocCollection, getFolioDocNeighbors } from "./core/docs-structure";
+export type { FolioDocCollection, FolioDocSection, FolioDocStructure } from "./core/docs-structure";
 export {
   defineFolioConfig,
   normalizeBasePath,
@@ -22,7 +22,7 @@ export {
   parseFolioDoc,
   slugify,
   sourcePathToRoute,
-} from "./content";
+} from "./core/content";
 export { renderFolioMarkdown } from "./markdown";
 export type { FolioMarkdownRenderOptions } from "./markdown";
 export type {
