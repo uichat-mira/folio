@@ -446,8 +446,13 @@ export function verifyStaticConsumer({ consumerDir, appDir, log }) {
   const configuredSitemap = readFileSync(join(configuredDir, "sitemap.xml"), "utf8");
   check(
     "static:home:configured",
-    (configuredSitemap.match(/<url>/g) ?? []).length === 4,
-    "configuring home changed the sitemap route set",
+    existsSync(join(configuredDir, "docs", "index.html")),
+    "configured /docs collection was not prerendered",
+  );
+  check(
+    "static:home:configured",
+    (configuredSitemap.match(/<url>/g) ?? []).length === 5,
+    "configured home must include root, docs/hello, docs collection, blogs and projects",
   );
   log("[static]   ok  configured home uses config text, collection links and base path");
 

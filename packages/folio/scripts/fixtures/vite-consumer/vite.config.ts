@@ -22,6 +22,7 @@ const config = {
   collections: [
     { path: "/blogs", title: "博客" },
     { path: "/projects", title: "项目" },
+    ...(homeMode === "configured" ? [{ path: "/docs", title: "Docs" }] : []),
   ],
   ...(homeMode === "configured"
     ? {
