@@ -100,6 +100,18 @@ test("static lists and home recursively publish arbitrary configured routes with
     assert.doesNotMatch(blogs,/href="\/moyu\/projects\/coffee\/"/);
     assert.match(projects,/<h1>好物<\/h1>/);
     assert.match(projects,/href="\/moyu\/projects\/coffee\/"/);
+    assert.match(home,/folio-journal-home folio-editorial-home/);
+    assert.match(home,/class="folio-editorial-feature"/);
+    assert.match(home,/class="folio-editorial-meta"/);
+    assert.match(home,/class="folio-editorial-lower"/);
+    assert.match(home,/class="folio-editorial-about"/);
+    assert.match(home,/class="folio-editorial-aside"/);
+    assert.match(home,/class="folio-editorial-recent"/);
+    assert.match(home,/href="\/moyu\/blogs\/2026\/notes\/second\/"/);
+    assert.match(home,/href="\/moyu\/blogs\/hello\/"/);
+    assert.equal((home.match(/class="folio-editorial-feature"/g)||[]).length,1,
+      "one featured article, not repeated large cards");
+    assert.doesNotMatch(home,/class="folio-card"/);
     assert.match(home,/folio-journal-home/);
     assert.match(home,/<h2>博客<\/h2>/);
     assert.match(home,/<h2>好物<\/h2>/);
@@ -150,4 +162,21 @@ test("conflicts rejected before writing and parent/child indexes may both be con
     assert.match(readFileSync(resolve(context.outDir,"notes/index.html"),"utf8"),/notes\/2026\/a/);
     assert.match(readFileSync(resolve(context.outDir,"notes/2026/index.html"),"utf8"),/notes\/2026\/a/);
   },{title:"N",description:"D",collections:[{path:"/notes"},{path:"/notes/2026"}]});
+});
+
+
+test("editorial home highlights exactly one featured story and renders the ordinary About page", () => {
+  fixture([
+    item("/notes/a","article",1),
+    item("/notes/b","article",2),
+    item("/info/about","page",1),
+  ], context => {
+    writeFolioStaticSite(context);
+    const home=readFileSync(resolve(context.outDir,"index.html"),"utf8");
+    assert.match(home,/class="folio-editorial-feature"/);
+    assert.match(home,/class="folio-editorial-about"/);
+    assert.match(home,/href="\/moyu\/info\/about\/"/);
+    assert.match(home,/href="\/moyu\/notes\/b\/"/);
+    assert.equal((home.match(/class="folio-editorial-feature"/g)||[]).length,1);
+  }, {title:"Journal",description:"Notes",collections:[{path:"/notes",title:"阅读记录"}]});
 });

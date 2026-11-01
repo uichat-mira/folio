@@ -484,37 +484,75 @@ function renderStaticCollectionIndex(
 
 function renderStaticHome(context: FolioStaticBuildContext): string {
   const collections = folioCollectionIndexes(context.config);
+  const primary = collections[0];
+  const primaryDocs = primary
+    ? selectFolioCollectionDocs(context.docs, primary.path)
+    : context.docs.filter((doc) => doc.type !== "page");
+  const featured = primaryDocs[0];
+  const recent = primaryDocs.slice(1, 5);
   const about = context.docs.find((doc) => doc.type === "page");
-  const sections = collections.map((collection, index) => {
-    const entries = selectFolioCollectionDocs(context.docs, collection.path).slice(0, 5);
-    return '<section class="folio-journal-section">' +
-      '<div class="folio-section-heading"><div><span class="folio-section-eyebrow">' +
-      String(index + 1).padStart(2, "0") + ' / COLLECTION</span><h2>' +
-      folioEscapeHtml(collection.title) + '</h2></div>' +
-      '<a class="folio-section-link" href="' +
-      folioEscapeHtml(staticRouteHref(context, collection.path)) +
-      '">查看全部 <span aria-hidden="true">↗</span></a></div>' +
+  const link = (path: string): string => folioEscapeHtml(staticRouteHref(context, path));
+
+  const hero = '<div class="folio-editorial-meta" aria-label="站点首页">' +
+    '<span>PERSONAL JOURNAL <span aria-hidden="true">✳</span></span>' +
+    '<span>READ · COLLECT · REMEMBER</span></div>' +
+    '<section class="folio-editorial-lead" aria-label="小站介绍与精选文章">' +
+    '<div class="folio-editorial-intro"><div class="folio-editorial-kicker">' +
+    '<span class="folio-editorial-kicker-line" aria-hidden="true"></span>' +
+    '写给生活的零碎记录</div><h1>' + folioEscapeHtml(context.config.title) + '</h1>' +
+    '<p>' + folioEscapeHtml(context.config.description) + '</p>' +
+    (primary ? '<a class="folio-editorial-hero-link" href="' + link(primary.path) +
+      '">浏览' + folioEscapeHtml(primary.title) + ' <span aria-hidden="true">↗</span></a>' : '') +
+    '</div>' +
+    (featured ? '<a class="folio-editorial-feature" href="' + link(featured.path) + '">' +
+      '<span class="folio-editorial-feature-label"><span aria-hidden="true">✳</span> FEATURED STORY</span>' +
+      '<span class="folio-editorial-feature-body">' +
+      '<span class="folio-editorial-feature-no">01 / ' + String(primaryDocs.length).padStart(2, "0") + '</span>' +
+      '<h2>' + folioEscapeHtml(featured.title) + '</h2>' +
+      (featured.description ? '<p>' + folioEscapeHtml(featured.description) + '</p>' : '') +
+      '</span><span class="folio-editorial-feature-bottom">开始阅读 <span aria-hidden="true">↗</span></span></a>' : '') +
+    '</section>';
+
+  const recentSection = '<section class="folio-editorial-recent" aria-label="文章选读">' +
+    '<div class="folio-editorial-section-heading"><div>' +
+    '<span class="folio-editorial-section-label">01 / READING</span>' +
+    '<h2>' + folioEscapeHtml(primary?.title ?? "近期内容") + '</h2></div>' +
+    (primary ? '<a class="folio-editorial-view-all" href="' + link(primary.path) + '">' +
+      '全部' + folioEscapeHtml(primary.title) + ' <span aria-hidden="true">↗</span></a>' : '') +
+    '</div>' +
+    (recent.length ? renderStaticEntryList(context, recent, "h3")
+      : !featured ? '<p class="folio-collection-empty">这里还没有内容。</p>'
+      : '<p class="folio-editorial-endnote">更多记录，正在慢慢写下。</p>') +
+    '</section>';
+
+  const sideSections = collections.slice(1).map((collection, index) => {
+    const entries = selectFolioCollectionDocs(context.docs, collection.path).slice(0, 3);
+    return '<section class="folio-editorial-side-section">' +
+      '<div class="folio-editorial-section-heading"><div>' +
+      '<span class="folio-editorial-section-label">' +
+      String(index + 2).padStart(2, "0") + ' / COLLECTION</span>' +
+      '<h2>' + folioEscapeHtml(collection.title) + '</h2></div>' +
+      '<a class="folio-editorial-view-all" aria-label="全部' + folioEscapeHtml(collection.title) +
+      '" href="' + link(collection.path) + '">↗</a></div>' +
       (entries.length ? renderStaticEntryList(context, entries, "h3") :
         '<p class="folio-collection-empty">' + folioEscapeHtml(collection.emptyMessage) + '</p>') +
       '</section>';
   }).join("");
-  const fallback = !collections.length && context.docs.length
-    ? '<section class="folio-journal-section"><div class="folio-section-heading">' +
-      '<h2>近期内容</h2></div>' +
-      renderStaticEntryList(context, context.docs.filter((doc) => doc.type !== "page").slice(0, 5), "h3") +
-      '</section>'
+  const aboutSection = about
+    ? '<aside class="folio-editorial-about">' +
+      '<span class="folio-editorial-section-label">A LITTLE ABOUT</span>' +
+      '<h2>' + folioEscapeHtml(about.title) + '</h2>' +
+      '<p>' + folioEscapeHtml(about.description || context.config.description) + '</p>' +
+      '<a href="' + link(about.path) + '">读读关于小站 <span aria-hidden="true">↗</span></a></aside>'
     : "";
-  return '<main class="folio-home folio-journal-home">' +
-    '<header class="folio-journal-hero">' +
-    '<span class="folio-journal-kicker">FOLIO</span>' +
-    '<h1>' + folioEscapeHtml(context.config.title) + '</h1>' +
-    '<p>' + folioEscapeHtml(context.config.description) + '</p></header>' +
-    sections + fallback +
-    (about ? '<aside class="folio-home-about"><span>ABOUT</span>' +
-      '<p>' + folioEscapeHtml(about.description || about.title) + '</p><a href="' +
-      folioEscapeHtml(staticRouteHref(context, about.path)) +
-      '">' + folioEscapeHtml(about.title) + ' <span aria-hidden="true">↗</span></a></aside>' : "") +
-    '</main>';
+
+  return '<main class="folio-home folio-journal-home folio-editorial-home">' +
+    hero +
+    '<div class="folio-editorial-rule"><span>THE NOTEBOOK</span><span>' +
+    String(primaryDocs.length).padStart(2, "0") + ' ENTRIES</span></div>' +
+    '<div class="folio-editorial-lower">' + recentSection +
+    '<div class="folio-editorial-aside">' + sideSections + aboutSection + '</div>' +
+    '</div></main>';
 }
 
 function renderStaticArticle(doc: FolioDoc): string {

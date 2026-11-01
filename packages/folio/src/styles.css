@@ -859,6 +859,345 @@ button, input { font: inherit; }
 }
 
 
+/* Magazine-inspired Folio home. All content and links come from Folio docs. */
+.folio-home.folio-editorial-home {
+  width: min(1160px, calc(100% - 72px));
+  padding: 30px 0 112px;
+}
+
+.folio-editorial-meta,
+.folio-editorial-rule {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  color: var(--folio-muted);
+  font: 600 10px/1.6 var(--folio-font-mono);
+  letter-spacing: .17em;
+}
+
+.folio-editorial-meta {
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--folio-hairline);
+}
+
+.folio-editorial-meta > span:first-child {
+  color: var(--folio-primary-active);
+}
+
+.folio-editorial-meta > span:first-child span {
+  margin-left: 8px;
+  color: var(--folio-primary);
+  font-size: 16px;
+}
+
+.folio-editorial-lead {
+  display: grid;
+  grid-template-columns: minmax(0, 1.16fr) minmax(0, .84fr);
+  gap: clamp(28px, 5.4vw, 78px);
+  padding: clamp(50px, 6vw, 80px) 0 76px;
+  align-items: stretch;
+}
+
+.folio-editorial-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.folio-editorial-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 13px;
+  color: var(--folio-primary-active);
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: .13em;
+}
+
+.folio-editorial-kicker-line {
+  width: 35px;
+  height: 1px;
+  background: var(--folio-primary);
+}
+
+.folio-editorial-intro h1 {
+  max-width: 660px;
+  margin: 20px 0 24px;
+  color: var(--folio-ink);
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", Georgia, serif;
+  font-size: clamp(48px, 6.1vw, 83px);
+  font-weight: 670;
+  letter-spacing: -.075em;
+  line-height: 1.22;
+  text-wrap: balance;
+}
+
+.folio-editorial-intro p {
+  max-width: 520px;
+  margin: 0;
+  color: var(--folio-muted);
+  font-size: 15px;
+  line-height: 2.15;
+  text-wrap: pretty;
+}
+
+.folio-editorial-hero-link {
+  display: inline-flex;
+  gap: 24px;
+  align-items: center;
+  margin-top: 32px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--folio-primary-active);
+  color: var(--folio-primary-active);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.folio-editorial-hero-link span,
+.folio-editorial-view-all span,
+.folio-editorial-feature-bottom span,
+.folio-editorial-about a span {
+  display: inline-block;
+  transition: transform .18s ease;
+}
+
+.folio-editorial-hero-link:hover span,
+.folio-editorial-view-all:hover span,
+.folio-editorial-feature:hover .folio-editorial-feature-bottom span,
+.folio-editorial-about a:hover span { transform: translate(3px, -3px); }
+
+.folio-editorial-feature {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 400px;
+  padding: clamp(26px, 3.5vw, 43px);
+  overflow: hidden;
+  background: var(--folio-surface-dark);
+  color: var(--folio-on-dark);
+  isolation: isolate;
+}
+
+.folio-editorial-feature::before,
+.folio-editorial-feature::after {
+  content: "";
+  position: absolute;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.folio-editorial-feature::before {
+  width: 350px;
+  height: 350px;
+  right: -168px;
+  top: -168px;
+}
+
+.folio-editorial-feature::after {
+  width: 240px;
+  height: 240px;
+  right: -112px;
+  top: -112px;
+}
+
+.folio-editorial-feature-label,
+.folio-editorial-feature-no {
+  color: #e6b4a1;
+  font: 600 10px/1.6 var(--folio-font-mono);
+  letter-spacing: .15em;
+}
+
+.folio-editorial-feature-label span {
+  color: #e2a98c;
+  margin-right: 9px;
+  font-size: 18px;
+}
+
+.folio-editorial-feature-body {
+  display: block;
+  padding: 48px 0 42px;
+}
+
+.folio-editorial-feature h2 {
+  position: relative;
+  margin: 14px 0 18px;
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", Georgia, serif;
+  font-size: clamp(29px, 3.2vw, 43px);
+  font-weight: 620;
+  letter-spacing: -.04em;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+.folio-editorial-feature p {
+  margin: 0;
+  max-width: 350px;
+  color: #c1beb6;
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+.folio-editorial-feature-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,.26);
+  font-size: 13px;
+  letter-spacing: .04em;
+}
+
+.folio-editorial-feature-bottom span { font-size: 20px; }
+
+.folio-editorial-rule {
+  padding: 16px 0 19px;
+  border-top: 1px solid var(--folio-hairline);
+  border-bottom: 1px solid var(--folio-hairline);
+}
+
+.folio-editorial-rule span:first-child { color: var(--folio-ink); }
+
+.folio-editorial-lower {
+  display: grid;
+  grid-template-columns: minmax(0, 1.28fr) minmax(275px, .72fr);
+  column-gap: clamp(30px, 6vw, 88px);
+  padding-top: 58px;
+  align-items: start;
+}
+
+.folio-editorial-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 21px;
+}
+
+.folio-editorial-section-label {
+  color: var(--folio-primary-active);
+  font: 600 10px/1.5 var(--folio-font-mono);
+  letter-spacing: .13em;
+}
+
+.folio-editorial-section-heading h2,
+.folio-editorial-about h2 {
+  margin: 10px 0 0;
+  color: var(--folio-ink);
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", Georgia, serif;
+  font-size: clamp(25px, 3vw, 34px);
+  line-height: 1.35;
+  letter-spacing: -.05em;
+  font-weight: 650;
+}
+
+.folio-editorial-view-all {
+  flex: none;
+  padding: 8px 0;
+  color: var(--folio-primary-active);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.folio-editorial-recent .folio-entry-list,
+.folio-editorial-aside .folio-entry-list {
+  margin: 0;
+}
+
+.folio-editorial-recent .folio-entry {
+  grid-template-columns: 30px minmax(0, 1fr) 24px;
+  gap: 14px;
+  padding: 23px 2px;
+}
+
+.folio-editorial-recent .folio-entry-title { font-size: 21px; }
+.folio-editorial-recent .folio-entry-description { font-size: 13px; }
+
+.folio-editorial-side-section .folio-entry {
+  grid-template-columns: 24px minmax(0, 1fr) 18px;
+  gap: 11px;
+  padding: 20px 2px;
+}
+
+.folio-editorial-side-section .folio-entry-title { font-size: 18px; }
+.folio-editorial-side-section .folio-entry-description { font-size: 13px; }
+
+.folio-editorial-side-section + .folio-editorial-side-section { margin-top: 45px; }
+
+.folio-editorial-about {
+  margin-top: 39px;
+  padding: 28px;
+  background: var(--folio-surface-soft);
+  border-left: 3px solid var(--folio-primary);
+}
+
+.folio-editorial-about h2 {
+  font-size: 25px;
+  margin-top: 9px;
+}
+
+.folio-editorial-about p {
+  margin: 15px 0 23px;
+  color: var(--folio-muted);
+  font-size: 13px;
+  line-height: 1.95;
+}
+
+.folio-editorial-about a {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--folio-primary-active);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.folio-editorial-endnote {
+  padding-top: 28px;
+  color: var(--folio-muted);
+  font-size: 14px;
+}
+
+@media (max-width: 970px) {
+  .folio-editorial-lead {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: 55px 0 50px;
+  }
+  .folio-editorial-feature { min-height: 330px; }
+  .folio-editorial-lower { grid-template-columns: minmax(0, 1fr) minmax(240px, .8fr); gap: 32px; }
+}
+
+@media (max-width: 700px) {
+  .folio-home.folio-editorial-home {
+    width: calc(100% - 40px);
+    padding: 20px 0 74px;
+  }
+  .folio-editorial-meta { font-size: 9px; letter-spacing: .06em; }
+  .folio-editorial-meta > span:last-child { display: none; }
+  .folio-editorial-lead { padding: 42px 0 38px; }
+  .folio-editorial-intro h1 { font-size: clamp(43px, 11vw, 62px); margin: 17px 0 19px; }
+  .folio-editorial-intro p { font-size: 14px; line-height: 1.95; }
+  .folio-editorial-hero-link { margin-top: 22px; }
+  .folio-editorial-feature { min-height: 325px; padding: 26px; }
+  .folio-editorial-feature h2 { font-size: 29px; }
+  .folio-editorial-feature-body { padding: 32px 0 30px; }
+  .folio-editorial-rule { font-size: 9px; letter-spacing: .1em; }
+  .folio-editorial-lower { display: block; padding-top: 42px; }
+  .folio-editorial-recent .folio-entry-title { font-size: 20px; }
+  .folio-editorial-aside { margin-top: 38px; }
+  .folio-editorial-side-section .folio-entry-title { font-size: 20px; }
+  .folio-editorial-about { margin-top: 35px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folio-editorial-home a span { transition: none; }
+}
+
 /* Syntax highlighting and diagram enhancement */
 .folio-markdown pre code.hljs {
   display: block;
