@@ -127,6 +127,8 @@ export function verifyStaticConsumer({ consumerDir, appDir, log }) {
   const expectedFiles = [
     "index.html",
     join("docs", "hello", "index.html"),
+    join("blogs", "index.html"),
+    join("projects", "index.html"),
     "404.html",
     "sitemap.xml",
     "robots.txt",
@@ -314,6 +316,40 @@ export function verifyStaticConsumer({ consumerDir, appDir, log }) {
   );
   log("[static]   ok  404.html  noindex,nofollow");
 
+  // FOL-022: real collection index routes must survive npm tarball
+  // installation and remain readable without a running React client.
+  for (const [route, heading, emptyMessage] of [
+    ["blogs", "博客", "还没有发布文章"],
+    ["projects", "项目", "这里暂时还没有内容"],
+  ]) {
+    const html = readGenerated(
+      "static:collection",
+      join(distDir, route, "index.html"),
+      route + "/index.html",
+    );
+    check(
+      "static:collection",
+      html.includes('<h1>' + heading + '</h1>'),
+      route + " default index is missing its title",
+    );
+    check(
+      "static:collection",
+      html.includes(emptyMessage),
+      route + " default index is missing its empty-state content",
+    );
+    check(
+      "static:collection",
+      html.includes('<link rel="canonical" href="https://example.test/folio-smoke/' + route + '/">'),
+      route + " index canonical is not under the deployment base",
+    );
+    check(
+      "static:collection",
+      html.includes('"@type":"CollectionPage"'),
+      route + " index is missing CollectionPage structured data",
+    );
+  }
+  log("[static]   ok  blogs/ and projects/ indexes are prerendered");
+
   const sitemap = readGenerated(
     "static:sitemap",
     join(distDir, "sitemap.xml"),
@@ -334,17 +370,24 @@ export function verifyStaticConsumer({ consumerDir, appDir, log }) {
     sitemap.includes("<loc>https://example.test/folio-smoke/docs/hello/</loc>"),
     "sitemap.xml does not list the content page under the deployment base",
   );
+  for (const route of ["blogs", "projects"]) {
+    check(
+      "static:sitemap",
+      sitemap.includes("<loc>https://example.test/folio-smoke/" + route + "/</loc>"),
+      "sitemap.xml is missing the " + route + " collection",
+    );
+  }
   check(
     "static:sitemap",
-    (sitemap.match(/<url>/g) ?? []).length === 2,
-    "sitemap.xml does not contain exactly the two configured routes",
+    (sitemap.match(/<url>/g) ?? []).length === 4,
+    "sitemap.xml does not contain the home, document, and two collection indexes",
   );
   check(
     "static:sitemap",
     !sitemap.includes("404"),
     "sitemap.xml advertises the not-found page",
   );
-  log("[static]   ok  sitemap.xml  two base-prefixed routes, no 404");
+  log("[static]   ok  sitemap.xml  four base-prefixed routes, no 404");
 
   const robots = readGenerated(
     "static:robots",

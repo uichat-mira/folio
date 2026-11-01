@@ -21,6 +21,13 @@ import { SearchIcon } from "./icons";
 import { FolioShareButton } from "./share";
 import { FolioMarkdown } from "./markdown-react";
 import { searchFolioDocs } from "./search";
+import {
+  FOLIO_COLLECTION_INDEXES,
+  selectFolioCollectionDocs,
+  folioCollectionTitle,
+  assertNoFolioCollectionConflicts,
+  type FolioCollectionIndex,
+} from "./collection-index";
 import type { FolioDoc } from "./types";
 import type {
   FolioAppProps,
@@ -93,6 +100,41 @@ function Home({
           </Link>
         ))}
       </section>
+    </main>
+  );
+}
+
+
+function CollectionIndex({
+  docs,
+  collection,
+  title,
+}: {
+  docs: FolioDoc[];
+  collection: FolioCollectionIndex;
+  title: string;
+}) {
+  const entries = selectFolioCollectionDocs(docs, collection.kind);
+  return (
+    <main className="folio-home folio-collection-page">
+      <section className="folio-hero">
+        <div className="folio-eyebrow">{collection.kind === "article" ? "BLOG" : "COLLECTION"}</div>
+        <h1>{title}</h1>
+        <p>{collection.description}</p>
+      </section>
+      {entries.length ? (
+        <section className="folio-card-grid" aria-label={title + "列表"}>
+          {entries.map((doc) => (
+            <Link key={doc.path} to={href(doc.path)} className="folio-card">
+              <span>{doc.group}{doc.date ? " · " + doc.date : ""}</span>
+              <h2>{doc.title}</h2>
+              {doc.description ? <p>{doc.description}</p> : null}
+            </Link>
+          ))}
+        </section>
+      ) : (
+        <p className="folio-collection-empty">{collection.emptyMessage}</p>
+      )}
     </main>
   );
 }
@@ -203,6 +245,7 @@ function Shell({
   slots,
   ui,
 }: Omit<FolioAppProps, "basePath">) {
+  assertNoFolioCollectionConflicts(docs);
   const location = useLocation();
   const current = docs.find((doc) => href(doc.path) === href(location.pathname));
   const navigation = config.navigation ?? [
@@ -281,6 +324,19 @@ function Shell({
               />
             }
           />
+          {FOLIO_COLLECTION_INDEXES.map((collection) => (
+            <Route
+              key={collection.path}
+              path={collection.path}
+              element={
+                <CollectionIndex
+                  docs={docs}
+                  collection={collection}
+                  title={folioCollectionTitle(config, collection)}
+                />
+              }
+            />
+          ))}
           {docs.map((doc) => (
             <Route
               key={doc.path}

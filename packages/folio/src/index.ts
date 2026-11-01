@@ -8,6 +8,8 @@ export type { FolioShareButtonProps } from "./share";
 export { FolioMarkdown } from "./markdown-react";
 export type { FolioMarkdownProps } from "./markdown-react";
 export { searchFolioDocs } from "./search";
+export { FOLIO_COLLECTION_INDEXES, selectFolioCollectionDocs, folioCollectionTitle, assertNoFolioCollectionConflicts } from "./collection-index";
+export type { FolioCollectionKind, FolioCollectionIndex } from "./collection-index";
 export { buildFolioDocStructure, findFolioDocCollection, getFolioDocNeighbors } from "./docs-structure";
 export type { FolioDocCollection, FolioDocSection, FolioDocStructure } from "./docs-structure";
 export {

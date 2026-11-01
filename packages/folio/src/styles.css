@@ -632,6 +632,15 @@ button, input { font: inherit; }
   font-size: 13px;
 }
 
+.folio-collection-empty {
+  margin: 0;
+  padding: 28px;
+  border: 1px solid var(--folio-hairline);
+  border-radius: 10px;
+  background: var(--folio-surface-soft);
+  color: var(--folio-muted);
+}
+
 .folio-prerender {
   width: min(900px, calc(100% - 48px));
   margin: 80px auto;

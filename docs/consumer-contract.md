@@ -285,3 +285,29 @@ The three boundaries above come from merged research, not from documentation inf
 - [FOL-008 · static and React navigation parity](research/fol-008-navigation-parity.md) — real-build comparison of the default static shell, custom route bodies, TOC anchors, and no-JS navigation.
 
 The research files are evidence for these behavior claims. They are not a browser security test and do not prove that a given site is safe.
+
+## Upcoming: native collection indexes (FOL-022, **not published in 0.1.1**)
+
+On the FOL-022 feature branch, Folio generates `/blogs` for `type: article`
+and `/projects` for `type: project` with the *default* `FolioApp` and
+default static routes. The two indexes reuse Folio's existing cards and
+styles; no consumer-managed page or theme is necessary.
+
+- The navigation labels can be overridden by a site's `config.navigation`
+  (`{ label: "好物", href: "/projects" }`).
+- Articles use newest `date` first and then `order`/path; projects use
+  `order`/path. Missing dates are not invented.
+- Empty collections still have an index route with an empty-state message.
+  `/blogs/` and `/projects/` static HTML contain real anchor links and do
+  not require JavaScript for article discovery. The generated indexes have
+  canonical/OG metadata and sitemap entries.
+- `/blogs` and `/projects` become reserved paths in the default publishing
+  mode. Content with either exact route fails early with an explicit collision
+  error, rather than silently overwriting an index.
+- The optional `staticRoutes.routes` override remains authoritative: a site
+  that supplies its own routes must explicitly include any desired collection
+  indexes in that custom route list. The default generator cannot mutate a
+  consumer-authored routes array. The runtime still registers collection routes.
+
+This is future-source evidence; downstream consumers pinned to `0.1.1` must
+wait for an actual npm release before claiming the feature.

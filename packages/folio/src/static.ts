@@ -8,6 +8,13 @@ import {
 } from "node:fs";
 import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
 import { findFolioDocCollection, getFolioDocNeighbors } from "./docs-structure";
+import {
+  FOLIO_COLLECTION_INDEXES,
+  selectFolioCollectionDocs,
+  folioCollectionTitle,
+  assertNoFolioCollectionConflicts,
+  type FolioCollectionIndex,
+} from "./collection-index";
 import { renderFolioMarkdown } from "./markdown";
 import type { FolioDoc, FolioConfig } from "./types";
 
@@ -441,7 +448,33 @@ function renderStaticDocShell(
   return `<div class="folio-docs-runtime folio-docs-runtime--static">${renderStaticMobileDocs(context, doc)}<div class="folio-docs-shell">${renderStaticDocNav(context, doc)}<main class="folio-doc-main"><div class="folio-doc-toolbar"><div class="folio-eyebrow">${folioEscapeHtml(doc.group)}</div></div><h1>${folioEscapeHtml(doc.title)}</h1>${doc.description ? `<p class="folio-lede">${folioEscapeHtml(doc.description)}</p>` : ""}<article class="folio-markdown">${renderFolioMarkdown(doc.body, { removeH1: true })}</article>${renderStaticPager(context, doc)}</main>${renderStaticToc(doc)}</div></div>`;
 }
 
+
+function renderStaticCollectionIndex(
+  context: FolioStaticBuildContext,
+  collection: FolioCollectionIndex,
+): string {
+  const title = folioCollectionTitle(context.config, collection);
+  const entries = selectFolioCollectionDocs(context.docs, collection.kind);
+  const cards = entries.length
+    ? '<section class="folio-card-grid" aria-label="' + folioEscapeHtml(title + "列表") + '">' +
+      entries.map((doc) =>
+        '<a class="folio-card" href="' + folioEscapeHtml(staticRouteHref(context, doc.path)) + '">' +
+        '<span>' + folioEscapeHtml(doc.group + (doc.date ? " · " + doc.date : "")) + '</span>' +
+        '<h2>' + folioEscapeHtml(doc.title) + '</h2>' +
+        (doc.description ? '<p>' + folioEscapeHtml(doc.description) + '</p>' : '') +
+        '</a>'
+      ).join("") + "</section>"
+    : '<p class="folio-collection-empty">' + folioEscapeHtml(collection.emptyMessage) + '</p>';
+  return '<main class="folio-home folio-collection-page">' +
+    '<section class="folio-hero"><div class="folio-eyebrow">' +
+    (collection.kind === "article" ? "BLOG" : "COLLECTION") +
+    '</div><h1>' + folioEscapeHtml(title) + '</h1><p>' +
+    folioEscapeHtml(collection.description) + '</p></section>' +
+    cards + "</main>";
+}
+
 function defaultRoutes(context: FolioStaticBuildContext): FolioStaticRoute[] {
+  assertNoFolioCollectionConflicts(context.docs);
   return [
     {
       path: "/",
@@ -450,6 +483,25 @@ function defaultRoutes(context: FolioStaticBuildContext): FolioStaticRoute[] {
       body: `<main class="folio-prerender"><h1>${folioEscapeHtml(context.config.title)}</h1><p>${folioEscapeHtml(context.config.description)}</p></main>`,
       type: "website",
     },
+    ...FOLIO_COLLECTION_INDEXES.map((collection) => {
+      const title = folioCollectionTitle(context.config, collection);
+      return {
+        path: collection.path,
+        title,
+        description: collection.description,
+        type: "website",
+        body: renderStaticCollectionIndex(context, collection),
+        jsonLd: {
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: title,
+          description: collection.description,
+          url: context.config.siteUrl
+            ? folioAbsoluteRouteUrl(context.config.siteUrl, context.base, collection.path)
+            : undefined,
+        },
+      };
+    }),
     ...context.docs.map((doc) => ({
       path: doc.path,
       title: doc.title,
