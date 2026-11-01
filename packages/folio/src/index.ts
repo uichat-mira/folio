@@ -7,14 +7,14 @@ export { FolioShareButton } from "./share";
 export type { FolioShareButtonProps } from "./share";
 export { FolioMarkdown } from "./markdown-react";
 export type { FolioMarkdownProps } from "./markdown-react";
-export { searchFolioDocs } from "./search";
+export { searchFolioDocs } from "./core/search";
 export { buildFolioDocStructure, findFolioDocCollection, getFolioDocNeighbors } from "./core/docs-structure";
 export type { FolioDocCollection, FolioDocSection, FolioDocStructure } from "./core/docs-structure";
 export {
   defineFolioConfig,
   normalizeBasePath,
   resolveGithubPagesBase,
-} from "./config";
+} from "./core/config";
 export {
   compareFolioDocs,
   extractHeadings,
