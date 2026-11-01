@@ -20,6 +20,7 @@ import { FolioDocsShell } from "./docs-shell";
 import { SearchIcon } from "./icons";
 import { FolioShareButton } from "./share";
 import { FolioMarkdown } from "./markdown-react";
+import { FolioToc } from "./toc";
 import { searchFolioDocs } from "./search";
 import {
   folioCollectionIndexes,
@@ -55,8 +56,10 @@ function DocumentPage({
   footer?: ReactNode;
   share: boolean;
 }) {
-  return (
-    <main className="folio-doc-page">
+  const articleToc = doc.type === "article" && doc.headings.length > 0;
+  const mobileTocRef = useRef<HTMLDetailsElement>(null);
+  const body = (
+    <main className={"folio-doc-page" + (articleToc ? " folio-article-main" : "")}>
       <div className="folio-doc-toolbar">
         <div className="folio-eyebrow">{doc.group}</div>
         {share ? <FolioShareButton title={doc.title} text={doc.description} /> : null}
@@ -66,6 +69,20 @@ function DocumentPage({
       <FolioMarkdown source={doc.body} options={{ removeH1: true }} />
       {footer}
     </main>
+  );
+
+  if (!articleToc) return body;
+  return (
+    <div className="folio-article-layout">
+      <details ref={mobileTocRef} className="folio-article-mobile-toc">
+        <summary>本页目录</summary>
+        <FolioToc headings={doc.headings} onNavigate={() => {
+          if (mobileTocRef.current) mobileTocRef.current.open = false;
+        }} />
+      </details>
+      {body}
+      <FolioToc headings={doc.headings} />
+    </div>
   );
 }
 

@@ -6,6 +6,7 @@ import {
 import { Link } from "react-router-dom";
 import { FolioMarkdown } from "./markdown-react";
 import { FolioShareButton } from "./share";
+import { FolioToc } from "./toc";
 import {
   findFolioDocCollection,
   getFolioDocNeighbors,
@@ -19,42 +20,6 @@ export type FolioDocsShellProps = {
   share?: boolean;
   children?: ReactNode;
 };
-
-function useActiveHeading(doc: FolioDoc): string {
-  const [activeHeading, setActiveHeading] = useState("");
-
-  useEffect(() => {
-    const nodes = doc.headings
-      .map((heading) => document.getElementById(heading.id))
-      .filter((node): node is HTMLElement => Boolean(node));
-
-    if (!nodes.length) {
-      setActiveHeading("");
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort(
-            (left, right) =>
-              left.boundingClientRect.top - right.boundingClientRect.top,
-          );
-        if (visible[0]) setActiveHeading(visible[0].target.id);
-      },
-      {
-        rootMargin: "-96px 0px -65% 0px",
-        threshold: [0, 1],
-      },
-    );
-
-    nodes.forEach((node) => observer.observe(node));
-    return () => observer.disconnect();
-  }, [doc.path, doc.headings]);
-
-  return activeHeading;
-}
 
 function FolioDocNav({
   doc,
@@ -94,41 +59,6 @@ function FolioDocNav({
   );
 }
 
-function FolioToc({
-  doc,
-  activeHeading,
-  onNavigate,
-}: {
-  doc: FolioDoc;
-  activeHeading: string;
-  onNavigate?: () => void;
-}) {
-  if (!doc.headings.length) return null;
-
-  return (
-    <aside className="folio-toc" aria-label="本页目录">
-      <h2>本页目录</h2>
-      <ul>
-        {doc.headings.map((heading) => (
-          <li
-            key={heading.id}
-            className={"folio-toc-depth-" + heading.depth}
-          >
-            <a
-              className={activeHeading === heading.id ? "active" : ""}
-              aria-current={activeHeading === heading.id ? "location" : undefined}
-              href={"#" + heading.id}
-              onClick={onNavigate}
-            >
-              {heading.text}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </aside>
-  );
-}
-
 function FolioPager({
   previous,
   next,
@@ -163,7 +93,6 @@ export function FolioDocsShell({
   share = true,
   children,
 }: FolioDocsShellProps) {
-  const activeHeading = useActiveHeading(doc);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileTocOpen, setMobileTocOpen] = useState(false);
   const neighbors = getFolioDocNeighbors(docs, doc);
@@ -231,8 +160,7 @@ export function FolioDocsShell({
             </button>
           </div>
           <FolioToc
-            doc={doc}
-            activeHeading={activeHeading}
+            headings={doc.headings}
             onNavigate={() => setMobileTocOpen(false)}
           />
         </div>
@@ -268,10 +196,7 @@ export function FolioDocsShell({
           />
         </main>
 
-        <FolioToc
-          doc={doc}
-          activeHeading={activeHeading}
-        />
+        <FolioToc headings={doc.headings} />
       </div>
     </div>
   );

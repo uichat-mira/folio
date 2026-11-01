@@ -914,6 +914,73 @@ button, input { font: inherit; }
   min-width: 0;
 }
 
+/* Ordinary article TOC shares the doc shell's existing FolioToc component. */
+.folio-article-layout {
+  display: grid;
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+  grid-template-columns: minmax(0, 820px) minmax(180px, 230px);
+  column-gap: clamp(24px, 4vw, 68px);
+  align-items: start;
+}
+
+.folio-article-layout > .folio-article-main {
+  width: 100%;
+  min-width: 0;
+}
+
+.folio-article-layout > .folio-toc {
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+}
+
+.folio-article-mobile-toc { display: none; }
+
+@media (max-width: 1000px) {
+  .folio-article-layout {
+    display: block;
+    width: min(820px, calc(100% - 32px));
+  }
+  .folio-article-layout > .folio-toc { display: none; }
+  .folio-article-mobile-toc {
+    position: sticky;
+    z-index: 33;
+    top: 64px;
+    display: block;
+    border-bottom: 1px solid var(--folio-hairline);
+    background: var(--folio-canvas);
+  }
+  .folio-article-mobile-toc > summary {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    padding: 0 14px;
+    color: var(--folio-body);
+    cursor: pointer;
+    font-size: 13px;
+    list-style: none;
+  }
+  .folio-article-mobile-toc > summary::-webkit-details-marker { display: none; }
+  .folio-article-mobile-toc[open] > .folio-toc {
+    position: absolute;
+    top: 44px;
+    right: 0;
+    left: 0;
+    z-index: 34;
+    height: auto;
+    max-height: min(60vh, 460px);
+    overflow-y: auto;
+    padding: 18px;
+    border: 1px solid var(--folio-hairline);
+    border-radius: 0 0 var(--folio-radius-lg) var(--folio-radius-lg);
+    background: var(--folio-canvas);
+    box-shadow: 0 18px 32px rgba(20,20,19,.12);
+  }
+  .folio-article-layout > .folio-article-main {
+    padding-top: 36px;
+  }
+}
+
 .folio-docs-shell {
   display: grid;
   grid-template-columns: 250px minmax(0, 1fr) 210px;

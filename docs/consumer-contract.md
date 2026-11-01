@@ -335,3 +335,11 @@ const config = defineFolioConfig({
 
 As this is an unreleased PR candidate, sites pinned to
 \`@uichat-mira/folio@0.1.1\` must not claim the feature is published.
+
+## Public article TOC (FOL-023 candidate, not published in 0.1.1)
+
+`FolioToc` is exported from the Folio package root as a React component accepting `headings: readonly FolioHeading[]`, with optional `className` and `onNavigate`. It uses exactly the IDs in `FolioDoc.headings` (as produced by `extractHeadings`) and highlights the current chapter on scrolling. Existing documentation shells share this same component rather than duplicating TOC rendering.
+
+The default Folio article route automatically shows an unobtrusive right-hand TOC when its headings are nonempty. At narrow widths, a native `<details>` control makes those anchors accessible without JavaScript; React closes the panel after navigation. Ordinary pages with no headings and non-article pages do not gain empty TOC chrome. Default static article HTML includes the same TOC and heading targets; documentation's existing no-JS navigation is unchanged.
+
+Example consumer: `import { FolioToc } from "@uichat-mira/folio"; <FolioToc headings={doc.headings} />`. This is a pending PR contract, not an npm `0.1.1` promise.

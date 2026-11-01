@@ -1,6 +1,8 @@
 export { FolioApp } from "./app";
 export { FolioHeader } from "./header";
 export { FolioDocsShell } from "./docs-shell";
+export { FolioToc } from "./toc";
+export type { FolioTocProps } from "./toc";
 export type { FolioDocsShellProps } from "./docs-shell";
 export type { FolioHeaderProps } from "./header";
 export { FolioShareButton } from "./share";
