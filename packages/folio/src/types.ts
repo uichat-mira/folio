@@ -34,6 +34,15 @@ export type FolioNavigationItem = {
   href: string;
 };
 
+export type FolioCollectionConfig = {
+  /** Route directory; descendants at any depth are indexed. */
+  path: string;
+  /** The collection heading. Defaults to navigation label or route segment. */
+  title?: string;
+  description?: string;
+  emptyMessage?: string;
+};
+
 export type FolioConfig = {
   title: string;
   description: string;
@@ -41,6 +50,8 @@ export type FolioConfig = {
   siteUrl?: string;
   base?: string;
   navigation?: FolioNavigationItem[];
+  /** Optional route-based collection index pages. */
+  collections?: FolioCollectionConfig[];
   footer?: string;
   github?: string;
 };

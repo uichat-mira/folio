@@ -285,3 +285,53 @@ The three boundaries above come from merged research, not from documentation inf
 - [FOL-008 · static and React navigation parity](research/fol-008-navigation-parity.md) — real-build comparison of the default static shell, custom route bodies, TOC anchors, and no-JS navigation.
 
 The research files are evidence for these behavior claims. They are not a browser security test and do not prove that a given site is safe.
+
+## Route-directory collections (FOL-022 candidate; not in published 0.1.1)
+
+A consumer declares collection **routes**. Folio discovers entries recursively
+by normalized URL path prefix (with a segment boundary), regardless of the
+document type or the physical Markdown source directory.
+
+\`\`\`ts
+const config = defineFolioConfig({
+  title: "My Site",
+  description: "Writing and things",
+  collections: [
+    { path: "/blogs", title: "博客", description: "所有文章" },
+    { path: "/projects", title: "好物", description: "收藏与发现" },
+    { path: "/journal/2026", title: "2026 年" },
+  ],
+  navigation: [
+    { label: "首页", href: "/" },
+    { label: "博客", href: "/blogs" },
+    { label: "好物", href: "/projects" },
+  ],
+});
+\`\`\`
+
+- \`selectFolioCollectionDocs(docs, "/blogs")\` returns **complete**
+  \`FolioDoc[]\` objects: original \`path\`, \`title\`, \`description\`,
+  \`type\`, \`group\`, \`date\`, \`tags\`, \`order\`, \`cover\`, \`body\`,
+  \`headings\`, and custom frontmatter \`data\` remain available.
+- Indexing \`/blogs\` includes \`/blogs/a\` and \`/blogs/2026/a\`, but
+  excludes \`/blogs\`, \`/blogger/a\` and \`/projects/a\`.
+- Sorting: \`date\` descending (missing dates last), then ascending
+  \`order\` and stable \`path\`. No dates are invented.
+- \`config.collections\` is **opt-in**; no special hardcoded \`/blogs\`
+  or \`/projects\` names or article/project type filters. Other or nested
+  collection routes can be configured, including \`/journal/2026\`.
+  Duplicate or invalid collection roots and content with the exact index
+  route fail explicitly. Parent and nested collection indexes can coexist.
+- Each configured root gets a native React collection page and real
+  prerendered \`index.html\`, canonical, OG, JSON-LD and sitemap entry.
+  The default view is a compact, serif editorial list with separators only
+  **between** rows. Empty collections render a short empty state.
+- Home previews up to five full-depth entries per configured collection,
+  using the same selector. Both React and static home are generated from the
+  same configuration, without consumer-side custom components.
+- \`staticRoutes.routes\` custom override remains authoritative. When a
+  consumer explicitly supplies its own static route array, it owns adding
+  any index pages to that array.
+
+As this is an unreleased PR candidate, sites pinned to
+\`@uichat-mira/folio@0.1.1\` must not claim the feature is published.

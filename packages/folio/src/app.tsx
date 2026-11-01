@@ -21,7 +21,13 @@ import { SearchIcon } from "./icons";
 import { FolioShareButton } from "./share";
 import { FolioMarkdown } from "./markdown-react";
 import { searchFolioDocs } from "./core/search";
-import type { FolioDoc } from "./types";
+import {
+  folioCollectionIndexes,
+  selectFolioCollectionDocs,
+  assertNoFolioCollectionConflicts,
+  type FolioCollectionIndex,
+} from "./core/collection-index";
+import type { FolioDoc, FolioConfig } from "./types";
 import type {
   FolioAppProps,
   FolioThemePreference,
@@ -63,36 +69,107 @@ function DocumentPage({
   );
 }
 
+function EntryList({
+  entries,
+  headingLevel,
+}: {
+  entries: FolioDoc[];
+  headingLevel: "h2" | "h3";
+}) {
+  const Heading = headingLevel;
+  return (
+    <div className="folio-entry-list">
+      {entries.map((doc, index) => (
+        <Link to={href(doc.path)} className="folio-entry" key={doc.path}>
+          <span className="folio-entry-number" aria-hidden="true">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          <div className="folio-entry-copy">
+            {doc.date ? <time className="folio-entry-date" dateTime={doc.date}>{doc.date}</time> : null}
+            <Heading className="folio-entry-title">{doc.title}</Heading>
+            {doc.description ? <p className="folio-entry-description">{doc.description}</p> : null}
+          </div>
+          <span className="folio-entry-arrow" aria-hidden="true">↗</span>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 function Home({
   docs,
-  title,
-  description,
+  config,
   custom,
 }: {
   docs: FolioDoc[];
-  title: string;
-  description: string;
+  config: FolioConfig;
   custom?: ReactNode;
 }) {
   if (custom) return <>{custom}</>;
-  const featured = docs.filter((doc) => doc.path !== "/").slice(0, 8);
+  const collections = folioCollectionIndexes(config);
+  const about = docs.find((doc) => doc.type === "page");
 
   return (
-    <main className="folio-home">
-      <section className="folio-hero">
-        <div className="folio-eyebrow">FOLIO</div>
-        <h1>{title}</h1>
-        <p>{description}</p>
-      </section>
-      <section className="folio-card-grid">
-        {featured.map((doc) => (
-          <Link key={doc.path} to={href(doc.path)} className="folio-card">
-            <span>{doc.group}</span>
-            <h2>{doc.title}</h2>
-            <p>{doc.description}</p>
-          </Link>
-        ))}
-      </section>
+    <main className="folio-home folio-journal-home">
+      <header className="folio-journal-hero">
+        <span className="folio-journal-kicker">FOLIO</span>
+        <h1>{config.title}</h1>
+        <p>{config.description}</p>
+      </header>
+      {collections.map((collection, index) => {
+        const entries = selectFolioCollectionDocs(docs, collection.path).slice(0, 5);
+        return (
+          <section className="folio-journal-section" key={collection.path}>
+            <div className="folio-section-heading">
+              <div>
+                <span className="folio-section-eyebrow">{String(index + 1).padStart(2, "0")} / COLLECTION</span>
+                <h2>{collection.title}</h2>
+              </div>
+              <Link to={collection.path} className="folio-section-link">查看全部 <span aria-hidden="true">↗</span></Link>
+            </div>
+            {entries.length ? (
+              <EntryList entries={entries} headingLevel="h3" />
+            ) : <p className="folio-collection-empty">{collection.emptyMessage}</p>}
+          </section>
+        );
+      })}
+      {!collections.length && docs.length ? (
+        <section className="folio-journal-section">
+          <div className="folio-section-heading"><h2>近期内容</h2></div>
+          <EntryList entries={docs.filter((doc) => doc.type !== "page").slice(0, 5)} headingLevel="h3" />
+        </section>
+      ) : null}
+      {about ? (
+        <aside className="folio-home-about">
+          <span>ABOUT</span>
+          <p>{about.description || about.title}</p>
+          <Link to={href(about.path)}>{about.title} <span aria-hidden="true">↗</span></Link>
+        </aside>
+      ) : null}
+    </main>
+  );
+}
+
+function CollectionIndex({
+  docs,
+  collection,
+}: {
+  docs: FolioDoc[];
+  collection: FolioCollectionIndex;
+}) {
+  const entries = selectFolioCollectionDocs(docs, collection.path);
+  return (
+    <main className="folio-home folio-collection-page">
+      <header className="folio-journal-hero folio-collection-hero">
+        <span className="folio-journal-kicker">COLLECTION</span>
+        <h1>{collection.title}</h1>
+        {collection.description ? <p>{collection.description}</p> : null}
+      </header>
+      {entries.length ? (
+        <EntryList entries={entries} headingLevel="h2" />
+      ) : (
+        <p className="folio-collection-empty">{collection.emptyMessage}</p>
+      )}
     </main>
   );
 }
@@ -203,6 +280,7 @@ function Shell({
   slots,
   ui,
 }: Omit<FolioAppProps, "basePath">) {
+  assertNoFolioCollectionConflicts(docs, config);
   const location = useLocation();
   const current = docs.find((doc) => href(doc.path) === href(location.pathname));
   const navigation = config.navigation ?? [
@@ -275,12 +353,23 @@ function Shell({
             element={
               <Home
                 docs={docs}
-                title={config.title}
-                description={config.description}
+                config={config}
                 custom={slots?.home}
               />
             }
           />
+          {folioCollectionIndexes(config).map((collection) => (
+            <Route
+              key={collection.path}
+              path={collection.path}
+              element={
+                <CollectionIndex
+                  docs={docs}
+                  collection={collection}
+                />
+              }
+            />
+          ))}
           {docs.map((doc) => (
             <Route
               key={doc.path}
