@@ -45,6 +45,7 @@ export const UI_ROOT_MODULES = [
   "icons.tsx",
   "share.tsx",
   "markdown-react.tsx",
+  "toc.tsx",
   "ui-types.ts",
 ];
 export const ENTRY_MODULES = ["index.ts"];

@@ -370,6 +370,22 @@ function renderStaticHome(context: FolioStaticBuildContext): string {
     '</main>';
 }
 
+function renderStaticArticle(doc: FolioDoc): string {
+  const article = '<main class="folio-doc-page' +
+    (doc.headings.length ? ' folio-article-main' : '') + '">' +
+    '<div class="folio-doc-toolbar"><div class="folio-eyebrow">' +
+    folioEscapeHtml(doc.group) + '</div></div>' +
+    '<h1>' + folioEscapeHtml(doc.title) + '</h1>' +
+    (doc.description ? '<p class="folio-lede">' + folioEscapeHtml(doc.description) + '</p>' : '') +
+    '<article class="folio-markdown">' +
+    renderFolioMarkdown(doc.body, { removeH1: true }) + '</article></main>';
+  const toc = renderStaticToc(doc);
+  if (!toc) return article;
+  return '<div class="folio-article-layout">' +
+    '<details class="folio-article-mobile-toc"><summary>本页目录</summary>' +
+    toc + '</details>' + article + toc + '</div>';
+}
+
 function defaultRoutes(context: FolioStaticBuildContext): FolioStaticRoute[] {
   assertNoFolioCollectionConflicts(context.docs, context.config);
   return [
@@ -406,7 +422,9 @@ function defaultRoutes(context: FolioStaticBuildContext): FolioStaticRoute[] {
       body:
         doc.type === "doc"
           ? renderStaticDocShell(context, doc)
-          : `<main class="folio-prerender"><p>${folioEscapeHtml(doc.group)}</p><h1>${folioEscapeHtml(doc.title)}</h1><p>${folioEscapeHtml(doc.description)}</p><article class="folio-markdown">${renderFolioMarkdown(doc.body, { removeH1: true })}</article></main>`,
+          : doc.type === "article"
+            ? renderStaticArticle(doc)
+            : `<main class="folio-prerender"><p>${folioEscapeHtml(doc.group)}</p><h1>${folioEscapeHtml(doc.title)}</h1><p>${folioEscapeHtml(doc.description)}</p><article class="folio-markdown">${renderFolioMarkdown(doc.body, { removeH1: true })}</article></main>`,
       type: doc.type === "article" ? "article" : "website",
       image: doc.cover,
       doc,
