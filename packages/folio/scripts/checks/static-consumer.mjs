@@ -319,8 +319,8 @@ export function verifyStaticConsumer({ consumerDir, appDir, log }) {
   // FOL-022: real collection index routes must survive npm tarball
   // installation and remain readable without a running React client.
   for (const [route, heading, emptyMessage] of [
-    ["blogs", "博客", "还没有发布文章"],
-    ["projects", "项目", "这里暂时还没有内容"],
+    ["blogs", "博客", "这里还没有内容。"],
+    ["projects", "项目", "这里还没有内容。"],
   ]) {
     const html = readGenerated(
       "static:collection",

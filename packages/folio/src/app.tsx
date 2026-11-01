@@ -22,13 +22,12 @@ import { FolioShareButton } from "./share";
 import { FolioMarkdown } from "./markdown-react";
 import { searchFolioDocs } from "./search";
 import {
-  FOLIO_COLLECTION_INDEXES,
+  folioCollectionIndexes,
   selectFolioCollectionDocs,
-  folioCollectionTitle,
   assertNoFolioCollectionConflicts,
   type FolioCollectionIndex,
 } from "./collection-index";
-import type { FolioDoc } from "./types";
+import type { FolioDoc, FolioConfig } from "./types";
 import type {
   FolioAppProps,
   FolioThemePreference,
@@ -99,56 +98,52 @@ function EntryList({
 
 function Home({
   docs,
-  title,
-  description,
+  config,
   custom,
 }: {
   docs: FolioDoc[];
-  title: string;
-  description: string;
+  config: FolioConfig;
   custom?: ReactNode;
 }) {
   if (custom) return <>{custom}</>;
-  const articles = selectFolioCollectionDocs(docs, "article").slice(0, 5);
-  const projects = selectFolioCollectionDocs(docs, "project").slice(0, 3);
+  const collections = folioCollectionIndexes(config);
   const about = docs.find((doc) => doc.type === "page");
 
   return (
     <main className="folio-home folio-journal-home">
       <header className="folio-journal-hero">
-        <span className="folio-journal-kicker">PERSONAL JOURNAL</span>
-        <h1>{title}</h1>
-        <p>{description}</p>
+        <span className="folio-journal-kicker">FOLIO</span>
+        <h1>{config.title}</h1>
+        <p>{config.description}</p>
       </header>
-      <section className="folio-journal-section" aria-labelledby="folio-home-articles">
-        <div className="folio-section-heading">
-          <div>
-            <span className="folio-section-eyebrow">01 / WRITING</span>
-            <h2 id="folio-home-articles">最近的文章</h2>
-          </div>
-          <Link to="/blogs" className="folio-section-link">全部文章 <span aria-hidden="true">↗</span></Link>
-        </div>
-        {articles.length ? (
-          <EntryList entries={articles} headingLevel="h3" />
-        ) : <p className="folio-collection-empty">还没有发布文章。</p>}
-      </section>
-      {projects.length ? (
-        <section className="folio-journal-section" aria-labelledby="folio-home-projects">
-          <div className="folio-section-heading">
-            <div>
-              <span className="folio-section-eyebrow">02 / COLLECTION</span>
-              <h2 id="folio-home-projects">好物与发现</h2>
+      {collections.map((collection, index) => {
+        const entries = selectFolioCollectionDocs(docs, collection.path).slice(0, 5);
+        return (
+          <section className="folio-journal-section" key={collection.path}>
+            <div className="folio-section-heading">
+              <div>
+                <span className="folio-section-eyebrow">{String(index + 1).padStart(2, "0")} / COLLECTION</span>
+                <h2>{collection.title}</h2>
+              </div>
+              <Link to={collection.path} className="folio-section-link">查看全部 <span aria-hidden="true">↗</span></Link>
             </div>
-            <Link to="/projects" className="folio-section-link">查看全部 <span aria-hidden="true">↗</span></Link>
-          </div>
-          <EntryList entries={projects} headingLevel="h3" />
+            {entries.length ? (
+              <EntryList entries={entries} headingLevel="h3" />
+            ) : <p className="folio-collection-empty">{collection.emptyMessage}</p>}
+          </section>
+        );
+      })}
+      {!collections.length && docs.length ? (
+        <section className="folio-journal-section">
+          <div className="folio-section-heading"><h2>近期内容</h2></div>
+          <EntryList entries={docs.filter((doc) => doc.type !== "page").slice(0, 5)} headingLevel="h3" />
         </section>
       ) : null}
       {about ? (
         <aside className="folio-home-about">
-          <span>ABOUT THIS SITE</span>
-          <p>不赶时间，慢慢记录生活。</p>
-          <Link to={href(about.path)}>关于这个小站 <span aria-hidden="true">↗</span></Link>
+          <span>ABOUT</span>
+          <p>{about.description || about.title}</p>
+          <Link to={href(about.path)}>{about.title} <span aria-hidden="true">↗</span></Link>
         </aside>
       ) : null}
     </main>
@@ -158,19 +153,17 @@ function Home({
 function CollectionIndex({
   docs,
   collection,
-  title,
 }: {
   docs: FolioDoc[];
   collection: FolioCollectionIndex;
-  title: string;
 }) {
-  const entries = selectFolioCollectionDocs(docs, collection.kind);
+  const entries = selectFolioCollectionDocs(docs, collection.path);
   return (
     <main className="folio-home folio-collection-page">
       <header className="folio-journal-hero folio-collection-hero">
-        <span className="folio-journal-kicker">{collection.kind === "article" ? "WRITING" : "COLLECTION"}</span>
-        <h1>{title}</h1>
-        <p>{collection.description}</p>
+        <span className="folio-journal-kicker">COLLECTION</span>
+        <h1>{collection.title}</h1>
+        {collection.description ? <p>{collection.description}</p> : null}
       </header>
       {entries.length ? (
         <EntryList entries={entries} headingLevel="h2" />
@@ -287,7 +280,7 @@ function Shell({
   slots,
   ui,
 }: Omit<FolioAppProps, "basePath">) {
-  assertNoFolioCollectionConflicts(docs);
+  assertNoFolioCollectionConflicts(docs, config);
   const location = useLocation();
   const current = docs.find((doc) => href(doc.path) === href(location.pathname));
   const navigation = config.navigation ?? [
@@ -360,13 +353,12 @@ function Shell({
             element={
               <Home
                 docs={docs}
-                title={config.title}
-                description={config.description}
+                config={config}
                 custom={slots?.home}
               />
             }
           />
-          {FOLIO_COLLECTION_INDEXES.map((collection) => (
+          {folioCollectionIndexes(config).map((collection) => (
             <Route
               key={collection.path}
               path={collection.path}
@@ -374,7 +366,6 @@ function Shell({
                 <CollectionIndex
                   docs={docs}
                   collection={collection}
-                  title={folioCollectionTitle(config, collection)}
                 />
               }
             />

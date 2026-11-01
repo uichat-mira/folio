@@ -655,7 +655,7 @@ button, input { font: inherit; }
 
 .folio-journal-hero h1 {
   margin: 18px 0 14px;
-  font-family: var(--folio-font-sans);
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", Georgia, serif;
   font-size: clamp(38px, 5vw, 58px);
   line-height: 1.16;
   font-weight: 680;
@@ -680,6 +680,7 @@ button, input { font: inherit; }
 }
 
 .folio-section-heading h2 {
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", Georgia, serif;
   margin: 9px 0 0;
   color: var(--folio-ink);
   font-size: clamp(24px, 3vw, 30px);
@@ -700,7 +701,6 @@ button, input { font: inherit; }
 
 .folio-entry-list {
   margin-top: 20px;
-  border-top: 1px solid var(--folio-hairline);
 }
 
 .folio-entry {
@@ -709,8 +709,11 @@ button, input { font: inherit; }
   align-items: start;
   gap: 20px;
   padding: 25px 6px 26px;
-  border-bottom: 1px solid var(--folio-hairline);
   transition: background-color .18s ease;
+}
+
+.folio-entry + .folio-entry {
+  border-top: 1px solid var(--folio-hairline);
 }
 
 .folio-entry:hover {
@@ -732,6 +735,7 @@ button, input { font: inherit; }
 }
 
 .folio-entry-title {
+  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", Georgia, serif;
   margin: 0;
   color: var(--folio-ink);
   font-size: clamp(19px, 2.2vw, 23px);
@@ -764,7 +768,10 @@ button, input { font: inherit; }
   transform: translate(2px, -2px);
 }
 
-.folio-collection-hero { margin-bottom: 14px; }
+.folio-collection-hero {
+  margin-bottom: 14px;
+  border-bottom: 0;
+}
 
 .folio-home-about {
   display: flex;

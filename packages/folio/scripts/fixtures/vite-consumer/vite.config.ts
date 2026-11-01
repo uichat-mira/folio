@@ -24,6 +24,10 @@ export default defineConfig({
         description:
           "Standalone Vite + React consumer of the published Folio package.",
         ...(siteUrl ? { siteUrl } : {}),
+        collections: [
+          { path: "/blogs", title: "博客" },
+          { path: "/projects", title: "项目" },
+        ],
       },
       // Static HTML generation stays off by default so the client-bundle
       // checks keep their original build shape; the static-output check turns
