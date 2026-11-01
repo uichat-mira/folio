@@ -420,6 +420,12 @@ button, input { font: inherit; }
   color: #eee8df;
 }
 
+/* Keep authored photos within narrow reading columns without altering source files. */
+.folio-markdown img {
+  max-width: 100%;
+  height: auto;
+}
+
 .folio-markdown table {
   width: 100%;
   margin: 16px 0 24px;
