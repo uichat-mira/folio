@@ -1,6 +1,6 @@
 import { parse as parseYaml } from "yaml";
 import { marked } from "marked";
-import type { FolioDoc, FolioHeading } from "./types";
+import type { FolioDoc, FolioHeading } from "../types";
 import { createHeadingIdAllocator } from "./heading-ids";
 
 const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/;

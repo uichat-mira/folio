@@ -1,4 +1,4 @@
-import type { FolioConfig, FolioDoc, FolioCollectionConfig } from "./types";
+import type { FolioConfig, FolioDoc, FolioCollectionConfig } from "../types";
 
 export type FolioCollectionIndex = Required<Pick<FolioCollectionConfig, "path" | "title" | "description" | "emptyMessage">>;
 
