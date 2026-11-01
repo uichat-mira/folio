@@ -14,19 +14,19 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import { normalizeBasePath } from "./config";
+import { normalizeBasePath } from "./core/config";
 import { FolioHeader } from "./header";
 import { FolioDocsShell } from "./docs-shell";
 import { SearchIcon } from "./icons";
 import { FolioShareButton } from "./share";
 import { FolioMarkdown } from "./markdown-react";
-import { searchFolioDocs } from "./search";
+import { searchFolioDocs } from "./core/search";
 import {
   folioCollectionIndexes,
   selectFolioCollectionDocs,
   assertNoFolioCollectionConflicts,
   type FolioCollectionIndex,
-} from "./collection-index";
+} from "./core/collection-index";
 import type { FolioDoc, FolioConfig } from "./types";
 import type {
   FolioAppProps,

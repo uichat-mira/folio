@@ -7,16 +7,16 @@ export { FolioShareButton } from "./share";
 export type { FolioShareButtonProps } from "./share";
 export { FolioMarkdown } from "./markdown-react";
 export type { FolioMarkdownProps } from "./markdown-react";
-export { searchFolioDocs } from "./search";
-export { normalizeFolioCollectionPath, selectFolioCollectionDocs, folioCollectionIndexes, assertNoFolioCollectionConflicts } from "./collection-index";
-export type { FolioCollectionIndex } from "./collection-index";
-export { buildFolioDocStructure, findFolioDocCollection, getFolioDocNeighbors } from "./docs-structure";
-export type { FolioDocCollection, FolioDocSection, FolioDocStructure } from "./docs-structure";
+export { searchFolioDocs } from "./core/search";
+export { normalizeFolioCollectionPath, selectFolioCollectionDocs, folioCollectionIndexes, assertNoFolioCollectionConflicts } from "./core/collection-index";
+export type { FolioCollectionIndex } from "./core/collection-index";
+export { buildFolioDocStructure, findFolioDocCollection, getFolioDocNeighbors } from "./core/docs-structure";
+export type { FolioDocCollection, FolioDocSection, FolioDocStructure } from "./core/docs-structure";
 export {
   defineFolioConfig,
   normalizeBasePath,
   resolveGithubPagesBase,
-} from "./config";
+} from "./core/config";
 export {
   compareFolioDocs,
   extractHeadings,
@@ -24,9 +24,9 @@ export {
   parseFolioDoc,
   slugify,
   sourcePathToRoute,
-} from "./content";
-export { renderFolioMarkdown } from "./markdown";
-export type { FolioMarkdownRenderOptions } from "./markdown";
+} from "./core/content";
+export { renderFolioMarkdown } from "./core/markdown";
+export type { FolioMarkdownRenderOptions } from "./core/markdown";
 export type {
   FolioConfig,
   FolioCollectionConfig,

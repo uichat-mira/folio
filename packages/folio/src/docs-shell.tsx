@@ -9,7 +9,7 @@ import { FolioShareButton } from "./share";
 import {
   findFolioDocCollection,
   getFolioDocNeighbors,
-} from "./docs-structure";
+} from "./core/docs-structure";
 import type { FolioDoc } from "./types";
 
 export type FolioDocsShellProps = {

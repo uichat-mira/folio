@@ -1,20 +1,18 @@
-import {
-  existsSync,
-  lstatSync,
-  mkdirSync,
-  readFileSync,
-  realpathSync,
-  writeFileSync,
-} from "node:fs";
-import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
-import { findFolioDocCollection, getFolioDocNeighbors } from "./docs-structure";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { findFolioDocCollection, getFolioDocNeighbors } from "./core/docs-structure";
 import {
   folioCollectionIndexes,
   selectFolioCollectionDocs,
   assertNoFolioCollectionConflicts,
   type FolioCollectionIndex,
-} from "./collection-index";
-import { renderFolioMarkdown } from "./markdown";
+} from "./core/collection-index";
+import { renderFolioMarkdown } from "./core/markdown";
+import {
+  normalizeStaticRoute,
+  writeFolioStaticOutputs,
+  writeFolioStaticRootFile,
+} from "./static-output";
 import type { FolioDoc, FolioConfig } from "./types";
 
 export type FolioStaticRoute = {
@@ -66,11 +64,6 @@ function normalizeBase(base: string): string {
   return `/${base.replace(/^\/+|\/+$/g, "")}`;
 }
 
-function normalizeRoute(path: string): string {
-  const normalized = `/${path}`.replace(/\/{2,}/g, "/");
-  return normalized.length > 1 ? normalized.replace(/\/+$/, "") : normalized;
-}
-
 export function folioEscapeHtml(value: string): string {
   return value.replace(
     /[&<>"']/g,
@@ -91,7 +84,7 @@ export function folioAbsoluteRouteUrl(
   path: string,
 ): string {
   const origin = siteUrl.replace(/\/$/, "");
-  const route = normalizeRoute(path);
+  const route = normalizeStaticRoute(path);
   return `${origin}${normalizeBase(base)}${route === "/" ? "/" : `${route}/`}`;
 }
 
@@ -103,145 +96,6 @@ export function folioAbsoluteAssetUrl(
   const origin = siteUrl.replace(/\/$/, "");
   const assetPath = path.replace(/^\/+/, "");
   return `${origin}${normalizeBase(base)}/${assetPath}`;
-}
-
-function staticRoutePathError(
-  path: string,
-  outDir: string,
-  reason: string,
-): Error {
-  return new Error(
-    `folio static route ${JSON.stringify(path)} cannot be written inside outDir ${JSON.stringify(outDir)}: ${reason}`,
-  );
-}
-
-// Windows 会静默丢弃路径片段末尾的空格和点，因此 ".. "、"..." 可能被解释为目录上跳。
-function isTraversalSegment(segment: string): boolean {
-  if (segment === ".") return false;
-  const withoutTrailingDotsOrSpaces = segment.replace(/[. ]+$/, "");
-  if (withoutTrailingDotsOrSpaces === "..") return true;
-  return withoutTrailingDotsOrSpaces === "" && segment.includes(".");
-}
-
-function routeOutputPath(outDir: string, path: string): string {
-  const route = normalizeRoute(path);
-  const root = resolve(outDir);
-  if (route === "/") {
-    const target = resolve(root, "index.html");
-    assertRealTargetInsideOutDir(path, root, target);
-    return target;
-  }
-
-  const relativeRoute = route.slice(1);
-  for (const segment of relativeRoute.split("/")) {
-    if (segment.includes("\\") || segment.includes("\0")) {
-      throw staticRoutePathError(
-        path,
-        root,
-        `path segment ${JSON.stringify(segment)} contains a character that is not valid in a static route`,
-      );
-    }
-    if (isTraversalSegment(segment)) {
-      throw staticRoutePathError(
-        path,
-        root,
-        `path segment ${JSON.stringify(segment)} escapes the output directory`,
-      );
-    }
-  }
-
-  const target = resolve(root, relativeRoute, "index.html");
-  const relativeTarget = relative(root, target);
-  if (
-    !relativeTarget ||
-    isAbsolute(relativeTarget) ||
-    relativeTarget === ".." ||
-    relativeTarget.startsWith(`..${sep}`)
-  ) {
-    throw staticRoutePathError(
-      path,
-      root,
-      `resolved output ${JSON.stringify(target)} is outside of the output directory`,
-    );
-  }
-
-  assertRealTargetInsideOutDir(path, root, target);
-  return target;
-}
-
-// Windows 路径大小写不敏感，比较真实路径前先统一大小写，避免误判越界。
-function comparablePath(value: string): string {
-  return process.platform === "win32" ? value.toLowerCase() : value;
-}
-
-function isInsideOutDir(root: string, candidate: string): boolean {
-  const relativeCandidate = relative(
-    comparablePath(root),
-    comparablePath(candidate),
-  );
-  return (
-    relativeCandidate !== "" &&
-    !isAbsolute(relativeCandidate) &&
-    relativeCandidate !== ".." &&
-    !relativeCandidate.startsWith(`..${sep}`)
-  );
-}
-
-// 词法校验只保证字符串不越界；已存在的 symlink / Windows junction 会让后续
-// mkdirSync / writeFileSync 实际写到 outDir 之外，因此再按真实路径校验一次。
-// 尚不存在的层级由随后的写入新建，不会跟随旧链接。
-function assertRealTargetInsideOutDir(
-  path: string,
-  root: string,
-  target: string,
-): void {
-  if (!existsSync(root)) return;
-
-  const realRoot = realpathSync(root);
-  const segments = relative(root, target).split(sep);
-  let current = root;
-
-  for (const [index, segment] of segments.entries()) {
-    current = resolve(current, segment);
-
-    let stats;
-    try {
-      stats = lstatSync(current);
-    } catch {
-      return;
-    }
-
-    if (!stats.isSymbolicLink()) continue;
-
-    if (index === segments.length - 1) {
-      throw staticRoutePathError(
-        path,
-        root,
-        `existing target ${JSON.stringify(current)} is a symbolic link`,
-      );
-    }
-
-    let linked: string;
-    try {
-      linked = realpathSync(current);
-    } catch {
-      throw staticRoutePathError(
-        path,
-        root,
-        `existing path ${JSON.stringify(current)} is a dangling symbolic link`,
-      );
-    }
-
-    if (!isInsideOutDir(realRoot, linked)) {
-      throw staticRoutePathError(
-        path,
-        root,
-        `existing path ${JSON.stringify(current)} resolves outside of the output directory to ${JSON.stringify(linked)}`,
-      );
-    }
-
-    current = linked;
-  }
 }
 
 function dataList(value: unknown): string[] {
@@ -375,7 +229,7 @@ function staticRouteHref(
   context: FolioStaticBuildContext,
   path: string,
 ): string {
-  const route = normalizeRoute(path);
+  const route = normalizeStaticRoute(path);
   const base = normalizeBase(context.base);
   return `${base}${route === "/" ? "/" : `${route}/`}`;
 }
@@ -446,7 +300,6 @@ function renderStaticDocShell(
 ): string {
   return `<div class="folio-docs-runtime folio-docs-runtime--static">${renderStaticMobileDocs(context, doc)}<div class="folio-docs-shell">${renderStaticDocNav(context, doc)}<main class="folio-doc-main"><div class="folio-doc-toolbar"><div class="folio-eyebrow">${folioEscapeHtml(doc.group)}</div></div><h1>${folioEscapeHtml(doc.title)}</h1>${doc.description ? `<p class="folio-lede">${folioEscapeHtml(doc.description)}</p>` : ""}<article class="folio-markdown">${renderFolioMarkdown(doc.body, { removeH1: true })}</article>${renderStaticPager(context, doc)}</main>${renderStaticToc(doc)}</div></div>`;
 }
-
 
 function renderStaticEntryList(
   context: FolioStaticBuildContext,
@@ -581,57 +434,19 @@ export function writeFolioStaticSite(
 
   const template = readFileSync(indexPath, "utf8");
   const routes = options.routes?.(context) ?? defaultRoutes(context);
-  // Reject route collisions before any output: a Map used to silently
-  // overwrite the first page when two paths normalized to the same key.
-  const seen = new Map<string, FolioStaticRoute>();
-  const normalizedRoutes = routes.map((route) => {
-    const path = normalizeRoute(route.path);
-    const previous = seen.get(path);
-    if (previous) {
-      throw new Error(
-        `folio static route conflict: ${JSON.stringify(previous.path)} (${JSON.stringify(previous.title)}) and ${JSON.stringify(route.path)} (${JSON.stringify(route.title)}) both normalize to ${JSON.stringify(path)}`,
-      );
-    }
-    seen.set(path, route);
-    return { ...route, path };
-  });
-
-  // Validate all destinations before writing, avoiding partial output for
-  // either duplicate routes or invalid filesystem paths.
-  const outputs = normalizedRoutes.map((route, index) => ({
-    route,
-    original: routes[index],
-    target: routeOutputPath(context.outDir, route.path),
-  }));
-
-  // Different URL strings can still resolve to the same file (e.g. /guide
-  // and /guide/.). Compare actual destinations, including Windows case folding.
-  const seenTargets = new Map<string, FolioStaticRoute>();
-  for (const { original, target } of outputs) {
-    const key = comparablePath(target);
-    const previous = seenTargets.get(key);
-    if (previous) {
-      throw new Error(
-        `folio static route conflict: ${JSON.stringify(previous.path)} (${JSON.stringify(previous.title)}) and ${JSON.stringify(original.path)} (${JSON.stringify(original.title)}) both write to ${JSON.stringify(target)}`,
-      );
-    }
-    seenTargets.set(key, original);
-  }
-
-  for (const { route, target } of outputs) {
-    mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(
-      target,
-      renderFolioStaticHtml(template, route, context, options),
-      "utf8",
-    );
-  }
+  // All route destinations are validated (including duplicate and real-target
+  // collisions) before the first page is written; see static-output.ts.
+  const normalizedRoutes = writeFolioStaticOutputs(
+    context.outDir,
+    routes,
+    (route) => renderFolioStaticHtml(template, route, context, options),
+  );
 
   const notFound = options.notFound?.(context) ?? defaultNotFound(context);
-  writeFileSync(
-    resolve(context.outDir, "404.html"),
+  writeFolioStaticRootFile(
+    context.outDir,
+    "404.html",
     renderFolioStaticHtml(template, notFound, context, options),
-    "utf8",
   );
 
   if (context.config.siteUrl && options.sitemap !== false) {
@@ -646,22 +461,22 @@ export function writeFolioStaticSite(
         )}</loc></url>`,
       )
       .join("");
-    writeFileSync(
-      resolve(context.outDir, "sitemap.xml"),
+    writeFolioStaticRootFile(
+      context.outDir,
+      "sitemap.xml",
       `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`,
-      "utf8",
     );
   }
 
   if (context.config.siteUrl && options.robots !== false) {
-    writeFileSync(
-      resolve(context.outDir, "robots.txt"),
+    writeFolioStaticRootFile(
+      context.outDir,
+      "robots.txt",
       `User-agent: *\nAllow: /\nSitemap: ${folioAbsoluteAssetUrl(
         context.config.siteUrl,
         context.base,
         "sitemap.xml",
       )}\n`,
-      "utf8",
     );
   }
 

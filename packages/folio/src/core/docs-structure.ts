@@ -1,5 +1,5 @@
 import { compareFolioDocs, slugify } from "./content";
-import type { FolioDoc } from "./types";
+import type { FolioDoc } from "../types";
 
 export type FolioDocSection = {
   id: string;
