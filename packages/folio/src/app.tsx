@@ -21,12 +21,12 @@ import { SearchIcon } from "./icons";
 import { FolioShareButton } from "./share";
 import { FolioMarkdown } from "./markdown-react";
 import { searchFolioDocs } from "./search";
+import type { FolioDoc } from "./types";
 import type {
   FolioAppProps,
-  FolioDoc,
   FolioThemePreference,
   FolioUiOptions,
-} from "./types";
+} from "./ui-types";
 
 function href(path: string): string {
   return path === "/" ? "/" : path.replace(/\/$/, "");
