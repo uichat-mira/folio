@@ -7,7 +7,7 @@ import {
 import {
   renderFolioMarkdown,
   type FolioMarkdownRenderOptions,
-} from "./markdown";
+} from "./core/markdown";
 
 let mermaidRenderSequence = 0;
 

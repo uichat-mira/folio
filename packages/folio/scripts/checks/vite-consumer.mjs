@@ -1,13 +1,18 @@
 // T3 runtime check: build a minimal Vite + React application that only consumes
 // the installed tarball. It imports the public plugin entry, imports the
 // virtual content module, and must carry one known Markdown document into the
-// client bundle.
+// client bundle. It also imports the public `@uichat-mira/folio/styles.css`
+// entry, so the built CSS asset is the installed package's aggregated
+// stylesheet (FOL-020): the asset must exist, be linked from index.html, and
+// still contain the representative React/shared/static class rules.
 //
 // Failures are staged so a red run says where it broke:
 //   [plugin]         the Vite config could not import @uichat-mira/folio/vite
 //   [virtual-module] "virtual:folio/content" could not be resolved
 //   [build]          Vite failed for another reason, or produced no assets
 //   [content]        the build succeeded but the Markdown did not reach the bundle
+//   [css]            the build produced no stylesheet asset, or the asset lost
+//                    the default component rules
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
@@ -19,6 +24,12 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join } from "node:path";
+
+import {
+  CONSUMER_CSS_SELECTORS,
+  CONSUMER_CSS_TOKENS,
+} from "../../styles/contract.mjs";
+import { selectorIndex } from "../verify-styles.mjs";
 
 const MARKER_PLACEHOLDER = "{{FOLIO_CONSUMER_MARKER}}";
 const KNOWN_TITLE = "Consumer discovery fixture";
@@ -54,6 +65,19 @@ function bundleFiles(directory) {
     if (entry.isDirectory()) return bundleFiles(path);
     return /\.(m?js)$/.test(entry.name) ? [path] : [];
   });
+}
+
+function cssFiles(directory) {
+  if (!existsSync(directory)) return [];
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) return cssFiles(path);
+    return entry.name.endsWith(".css") ? [path] : [];
+  });
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function readBundle(directory) {
@@ -154,6 +178,58 @@ export function verifyViteConsumer({ consumerDir, fixtureDir, typescriptCli, log
   );
   log(
     `[content]  ok  ${marker} and "${KNOWN_TITLE}" reached the client bundle (${positiveBundle.files.length} JS assets)`,
+  );
+
+  // FOL-020: the fixture imports the public `@uichat-mira/folio/styles.css`
+  // entry, so a passing build must emit a stylesheet asset, link it from
+  // index.html, and keep the default component rules inside it. Asserting the
+  // built asset (not the packaged file) proves the aggregated stylesheet is
+  // consumable and reaches a real client bundle.
+  const distDir = join(appDir, "dist");
+  const cssAssets = cssFiles(distDir);
+  assert.ok(
+    cssAssets.length > 0,
+    "[css] FAIL vite build emitted no CSS asset even though the fixture imports @uichat-mira/folio/styles.css",
+  );
+  const cssAssetText = cssAssets
+    .map((file) => readFileSync(file, "utf8"))
+    .join("\n");
+  // Exact selector matching: `.folio-header__wrap` must not satisfy the
+  // `.folio-header` requirement in a minified asset.
+  const builtSelectors = selectorIndex(cssAssetText);
+  const missingSelectors = CONSUMER_CSS_SELECTORS.filter(
+    (selector) => !builtSelectors.has(selector),
+  );
+  assert.equal(
+    missingSelectors.length,
+    0,
+    `[css] FAIL the consumer's built CSS asset is missing ${missingSelectors.length} default rule(s): ${missingSelectors.join(", ")}`,
+  );
+  const missingTokens = CONSUMER_CSS_TOKENS.filter(
+    (token) => !new RegExp(`(?:^|[;{])\\s*${escapeRegExp(token)}\\s*:`).test(cssAssetText),
+  );
+  assert.equal(
+    missingTokens.length,
+    0,
+    `[css] FAIL the consumer's built CSS asset is missing token declaration(s): ${missingTokens.join(", ")}`,
+  );
+
+  const stylesheetRefs = [
+    ...indexHtml.matchAll(/<link[^>]+href="([^"]+\.css)"/g),
+  ].map((match) => match[1]);
+  assert.ok(
+    stylesheetRefs.length > 0,
+    "[css] FAIL the built index.html does not link a stylesheet",
+  );
+  for (const ref of stylesheetRefs) {
+    const assetPath = join(distDir, ref.replace(/^\/+/, ""));
+    assert.ok(
+      existsSync(assetPath),
+      `[css] FAIL index.html links ${ref} but ${assetPath} does not exist`,
+    );
+  }
+  log(
+    `[css]      ok  ${cssAssets.length} CSS asset(s), ${CONSUMER_CSS_SELECTORS.length} exact component/static selectors and ${CONSUMER_CSS_TOKENS.length} tokens reached the built stylesheet`,
   );
 
   // Negative control: with no discoverable Markdown the build must still
