@@ -11,7 +11,7 @@
 - OS: Windows 11 Pro build 26100（`win32 x64`），Node `v24.9.0`，npm `11.6.0`
 - 复现: `node docs/research/fol-019/run.mjs`
 - 结果: **30 PASS / 0 FAIL / 1 WARN**（`results/acceptance.json`）
-- PR: 待创建；链接与 evidence commit SHA 在随后一次仅文档提交中补齐（见第 10 节）
+- PR: [#116](https://github.com/uichat-mira/folio/pull/116)；证据提交 `995260751a6ec2ee2e1c815598bf2c9ecab10a65`，PR head 以 GitHub 当前记录为准（见第 10 节）
 
 > 本文把「历史证据 / 本次实测 / 视觉主观判断 / 未执行项」分开写。所有数字来自
 > `results/acceptance.json`；本 agent **无法读取图片输入**，因此没有任何“看图得出”的
