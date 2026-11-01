@@ -124,45 +124,109 @@ function Home({
 }) {
   if (custom) return <>{custom}</>;
   const collections = folioCollectionIndexes(config);
+  const primary = collections[0];
+  const primaryDocs = primary
+    ? selectFolioCollectionDocs(docs, primary.path)
+    : docs.filter((doc) => doc.type !== "page");
+  const featured = primaryDocs[0];
+  const recent = primaryDocs.slice(1, 5);
   const about = docs.find((doc) => doc.type === "page");
 
   return (
-    <main className="folio-home folio-journal-home">
-      <header className="folio-journal-hero">
-        <span className="folio-journal-kicker">FOLIO</span>
-        <h1>{config.title}</h1>
-        <p>{config.description}</p>
-      </header>
-      {collections.map((collection, index) => {
-        const entries = selectFolioCollectionDocs(docs, collection.path).slice(0, 5);
-        return (
-          <section className="folio-journal-section" key={collection.path}>
-            <div className="folio-section-heading">
-              <div>
-                <span className="folio-section-eyebrow">{String(index + 1).padStart(2, "0")} / COLLECTION</span>
-                <h2>{collection.title}</h2>
-              </div>
-              <Link to={collection.path} className="folio-section-link">查看全部 <span aria-hidden="true">↗</span></Link>
+    <main className="folio-home folio-journal-home folio-editorial-home">
+      <div className="folio-editorial-meta" aria-label="站点首页">
+        <span>PERSONAL JOURNAL <span aria-hidden="true">✳</span></span>
+        <span>READ · COLLECT · REMEMBER</span>
+      </div>
+      <section className="folio-editorial-lead" aria-label="小站介绍与精选文章">
+        <div className="folio-editorial-intro">
+          <div className="folio-editorial-kicker">
+            <span className="folio-editorial-kicker-line" aria-hidden="true" />
+            写给生活的零碎记录
+          </div>
+          <h1>{config.title}</h1>
+          <p>{config.description}</p>
+          {primary && (
+            <Link className="folio-editorial-hero-link" to={primary.path}>
+              浏览{primary.title} <span aria-hidden="true">↗</span>
+            </Link>
+          )}
+        </div>
+        {featured && (
+          <Link className="folio-editorial-feature" to={href(featured.path)}>
+            <span className="folio-editorial-feature-label">
+              <span aria-hidden="true">✳</span> FEATURED STORY
+            </span>
+            <span className="folio-editorial-feature-body">
+              <span className="folio-editorial-feature-no">01 / {String(primaryDocs.length).padStart(2, "0")}</span>
+              <h2>{featured.title}</h2>
+              {featured.description && <p>{featured.description}</p>}
+            </span>
+            <span className="folio-editorial-feature-bottom">
+              开始阅读 <span aria-hidden="true">↗</span>
+            </span>
+          </Link>
+        )}
+      </section>
+      <div className="folio-editorial-rule">
+        <span>THE NOTEBOOK</span>
+        <span>{String(primaryDocs.length).padStart(2, "0")} ENTRIES</span>
+      </div>
+      <div className="folio-editorial-lower">
+        <section className="folio-editorial-recent" aria-label="文章选读">
+          <div className="folio-editorial-section-heading">
+            <div>
+              <span className="folio-editorial-section-label">01 / READING</span>
+              <h2>{primary?.title ?? "近期内容"}</h2>
             </div>
-            {entries.length ? (
-              <EntryList entries={entries} headingLevel="h3" />
-            ) : <p className="folio-collection-empty">{collection.emptyMessage}</p>}
-          </section>
-        );
-      })}
-      {!collections.length && docs.length ? (
-        <section className="folio-journal-section">
-          <div className="folio-section-heading"><h2>近期内容</h2></div>
-          <EntryList entries={docs.filter((doc) => doc.type !== "page").slice(0, 5)} headingLevel="h3" />
+            {primary && (
+              <Link to={primary.path} className="folio-editorial-view-all">
+                全部{primary.title} <span aria-hidden="true">↗</span>
+              </Link>
+            )}
+          </div>
+          {recent.length ? (
+            <EntryList entries={recent} headingLevel="h3" />
+          ) : !featured ? (
+            <p className="folio-collection-empty">这里还没有内容。</p>
+          ) : (
+            <p className="folio-editorial-endnote">更多记录，正在慢慢写下。</p>
+          )}
         </section>
-      ) : null}
-      {about ? (
-        <aside className="folio-home-about">
-          <span>ABOUT</span>
-          <p>{about.description || about.title}</p>
-          <Link to={href(about.path)}>{about.title} <span aria-hidden="true">↗</span></Link>
-        </aside>
-      ) : null}
+        <div className="folio-editorial-aside">
+          {collections.slice(1).map((collection, index) => {
+            const entries = selectFolioCollectionDocs(docs, collection.path).slice(0, 3);
+            return (
+              <section className="folio-editorial-side-section" key={collection.path}>
+                <div className="folio-editorial-section-heading">
+                  <div>
+                    <span className="folio-editorial-section-label">
+                      {String(index + 2).padStart(2, "0")} / COLLECTION
+                    </span>
+                    <h2>{collection.title}</h2>
+                  </div>
+                  <Link to={collection.path} className="folio-editorial-view-all" aria-label={"全部" + collection.title}>
+                    ↗
+                  </Link>
+                </div>
+                {entries.length ? (
+                  <EntryList entries={entries} headingLevel="h3" />
+                ) : (
+                  <p className="folio-collection-empty">{collection.emptyMessage}</p>
+                )}
+              </section>
+            );
+          })}
+          {about && (
+            <aside className="folio-editorial-about">
+              <span className="folio-editorial-section-label">A LITTLE ABOUT</span>
+              <h2>{about.title}</h2>
+              <p>{about.description || config.description}</p>
+              <Link to={href(about.path)}>读读关于小站 <span aria-hidden="true">↗</span></Link>
+            </aside>
+          )}
+        </div>
+      </div>
     </main>
   );
 }
