@@ -12,7 +12,7 @@ fixture 与结果。
 | `run.mjs` | 场景包装：用 `--out` / `--fixture` / `--scenario` 调用 FOL-014 harness |
 | `scenario.json` | 场景：起始路由、交互选择器、搜索探测、无 JS 静态阶段 |
 | `consumer/` | FOL-019 自有消费者 fixture（FOL-014 fixture 的副本 + 一篇长文样张） |
-| `results/` | 本次采集产物：`acceptance.json`、截图、渲染 DOM、静态 HTML 快照 |
+| `results/` | 本次采集产物：`acceptance.json`（含静态 HTML 构建及页面测量）、截图与渲染 DOM；不包含生成站点的完整 HTML 文件副本 |
 
 FOL-014 的 `consumer/` 与 `results/` 未被修改或覆盖；`run.mjs` 在不传任何参数时仍然
 完全复现 FOL-014 的默认行为与产物路径。
