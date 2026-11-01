@@ -23,11 +23,12 @@ const CORE_CONTENT_MODULES = [
 
 // Core content/build modules outside src/core plus the shared Core type module.
 // None of these may pull React into their declaration or runtime graph.
+// Markdown rendering left this list in FOL-029 (B2b) because it now lives in
+// src/core and is covered by the core/*.ts scan below.
 const REACT_FREE_MODULES = [
   "types.ts",
   "search.ts",
   "config.ts",
-  "markdown.ts",
   "static.ts",
   "static-output.ts",
   "vite.ts",
@@ -67,6 +68,38 @@ test("core content modules live only in src/core", () => {
     assert.ok(
       !existsSync(join(sourceRoot, legacy)),
       `src/${legacy} must not remain as a compatibility module`,
+    );
+  }
+});
+
+test("markdown rendering lives only in src/core and the barrel consumes it there", () => {
+  assert.ok(
+    existsSync(join(sourceRoot, "core/markdown.ts")),
+    "core/markdown.ts is missing from src/core",
+  );
+  assert.ok(
+    !existsSync(join(sourceRoot, "markdown.ts")),
+    "src/markdown.ts must not remain as a compatibility module",
+  );
+
+  const barrel = readSource("index.ts");
+  assert.match(
+    barrel,
+    /from\s+["']\.\/core\/markdown["']/,
+    "barrel must re-export Markdown rendering from src/core",
+  );
+  assert.doesNotMatch(
+    barrel,
+    /from\s+["']\.\/markdown["']/,
+    "barrel must not import Markdown rendering from the legacy root module",
+  );
+
+  // React and static rendering must consume the single Core implementation.
+  for (const consumer of ["markdown-react.tsx", "static.ts"]) {
+    assert.match(
+      readSource(consumer),
+      /from\s+["']\.\/core\/markdown["']/,
+      `${consumer} must import Markdown rendering from src/core`,
     );
   }
 });
