@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { findFolioDocCollection, getFolioDocNeighbors } from "./docs-structure";
+import { findFolioDocCollection, getFolioDocNeighbors } from "./core/docs-structure";
 import { renderFolioMarkdown } from "./markdown";
 import {
   normalizeStaticRoute,
