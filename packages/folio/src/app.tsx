@@ -14,13 +14,13 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import { normalizeBasePath } from "./config";
+import { normalizeBasePath } from "./core/config";
 import { FolioHeader } from "./header";
 import { FolioDocsShell } from "./docs-shell";
 import { SearchIcon } from "./icons";
 import { FolioShareButton } from "./share";
 import { FolioMarkdown } from "./markdown-react";
-import { searchFolioDocs } from "./search";
+import { searchFolioDocs } from "./core/search";
 import type { FolioDoc } from "./types";
 import type {
   FolioAppProps,

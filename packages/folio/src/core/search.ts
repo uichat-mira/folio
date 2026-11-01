@@ -1,4 +1,4 @@
-import type { FolioDoc } from "./types";
+import type { FolioDoc } from "../types";
 
 function normalized(value: string): string {
   return value.trim().toLocaleLowerCase();

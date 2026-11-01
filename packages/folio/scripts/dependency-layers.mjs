@@ -36,7 +36,7 @@ export const defaultSourceRoot = join(packageRoot, "src");
 // Root modules that still own their layer without living in a layer directory.
 // A module must be classified explicitly: an unclassified source file fails the
 // gate instead of silently escaping it.
-export const CORE_ROOT_MODULES = ["types.ts", "search.ts", "config.ts", "markdown.ts"];
+export const CORE_ROOT_MODULES = ["types.ts"];
 export const BUILD_ROOT_MODULES = ["static.ts", "static-output.ts", "vite.ts"];
 export const UI_ROOT_MODULES = [
   "app.tsx",

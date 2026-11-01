@@ -19,6 +19,8 @@ const CORE_CONTENT_MODULES = [
   "core/content.ts",
   "core/docs-structure.ts",
   "core/heading-ids.ts",
+  "core/search.ts",
+  "core/config.ts",
 ];
 
 // Core content/build modules outside src/core plus the shared Core type module.
@@ -27,8 +29,6 @@ const CORE_CONTENT_MODULES = [
 // src/core and is covered by the core/*.ts scan below.
 const REACT_FREE_MODULES = [
   "types.ts",
-  "search.ts",
-  "config.ts",
   "static.ts",
   "static-output.ts",
   "vite.ts",
@@ -62,7 +62,7 @@ const PUBLIC_TYPE_NAMES = [
   "FolioUiOptions",
 ];
 
-test("core content modules live only in src/core", () => {
+test("core modules live only in src/core", () => {
   for (const file of CORE_CONTENT_MODULES) {
     assert.ok(existsSync(join(sourceRoot, file)), `${file} is missing from src/core`);
     const legacy = file.replace(/^core\//, "");
@@ -156,6 +156,24 @@ test("the public barrel still re-exports every published type name", () => {
     /from\s+["']\.\/core\/docs-structure["']/,
     "barrel must re-export document structure from src/core",
   );
+
+  assert.match(
+    barrel,
+    /from\s+["']\.\/core\/search["']/,
+    "barrel must re-export search from src/core",
+  );
+  assert.match(
+    barrel,
+    /from\s+["']\.\/core\/config["']/,
+    "barrel must re-export configuration from src/core",
+  );
+  for (const legacy of ["search", "config"]) {
+    assert.doesNotMatch(
+      barrel,
+      new RegExp(`from\\s+["']\\./${legacy}["']`),
+      `barrel must not import ${legacy} from src root`,
+    );
+  }
 });
 
 // FOL-031 (B8): the Vite integration has exactly one implementation, in the
