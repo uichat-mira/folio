@@ -10,6 +10,8 @@ import {
   searchFolioDocs,
   type FolioAppProps,
   type FolioConfig,
+  type FolioDateSource,
+  type FolioDateSources,
   type FolioDoc,
   type FolioDocCollection,
   type FolioDocSection,
@@ -61,6 +63,8 @@ type PublicTypeSurface = {
   uiOptions: FolioUiOptions;
   entryType: FolioEntryType;
   heading: FolioHeading;
+  dateSource: FolioDateSource;
+  dateSources: FolioDateSources;
   homeConfig: FolioHomeConfig;
   homeSectionConfig: FolioHomeSectionConfig;
   homeSectionType: FolioHomeSectionType;
@@ -92,6 +96,18 @@ const docs: FolioDoc[] = [
     "---\ntitle: Intro\ndescription: First document\n---\n# Intro\n",
   ),
 ];
+
+// FOL-025: the date contract is part of the published types, and a strict
+// consumer can read and narrow the provenance values.
+const dateSource: FolioDateSource = "git-first-commit";
+const dateSources: FolioDateSources = {
+  publishedAt: "frontmatter",
+  updatedAt: "unknown",
+  historyComplete: true,
+};
+
+// @ts-expect-error FolioDateSource only accepts the frozen provenance values.
+const fabricatedDateSource: FolioDateSource = "file-mtime";
 
 const staticHome: FolioStaticHomeOverride = ({ base }) => ({
   body: '<main><a href="' + base + 'docs/intro/">Intro</a></main>',
@@ -130,6 +146,9 @@ export function consumerSurface(): unknown[] {
     html,
     escaped,
     homeModel,
+    dateSource,
+    dateSources,
+    fabricatedDateSource,
     renderFolioStaticHome instanceof Function,
     virtualModule,
     typedVirtualDocs,

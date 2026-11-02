@@ -270,6 +270,27 @@ Static links are directory URLs with a trailing slash (`/docs/guide/intro/`) bec
 
 `extractHeadings`/`doc.headings` and `renderFolioMarkdown` both build `h2`–`h4` anchors, including raw HTML headings. FOL-013 aligns TOC IDs with the rendered HTML for Markdown links (for example `## [Text](https://example.com)`), bare `&`, HTML entities, emphasis, and inline code. Duplicate headings and explicit `id` reservations remain supported. Punctuation-only headings receive addressable fallback IDs (`section`, `section-2`, etc.). Existing generated body IDs such as `faq-amp-支持` remain unchanged; the TOC now points to them, avoiding unnecessary breakage of existing anchor links. See FOL-013's cross-layer regression and the historical FOL-008 investigation for the original mismatch. Repeat FOL-014 browser navigation checks against the final release candidate after other pre-release fixes.
 
+## Content dates: `publishedAt` / `updatedAt` (FOL-025 candidate; not in published 0.1.1)
+
+`FolioDoc` gains two optional, cross-machine timestamps and their provenance:
+
+- `publishedAt?: string` — ISO 8601 UTC, for example `2025-01-01T19:04:05.000Z`.
+- `updatedAt?: string` — ISO 8601 UTC.
+- `dateSources?: { publishedAt: FolioDateSource; updatedAt: FolioDateSource; historyComplete?: boolean }`.
+
+Priority is frozen and applies per field:
+
+1. a valid explicit `publishedAt` / `updatedAt` frontmatter value (`"frontmatter"`);
+2. the legacy `date` field as `publishedAt` (`"legacy-date"`); `doc.date` itself stays verbatim for existing display and sorting;
+3. the local Git history (`"git-first-commit"` / `"git-last-commit"`);
+4. otherwise the value stays `undefined` with source `"unknown"`.
+
+`publishedAt` from Git is the first commit that contains the file **in the current repository**. After a migration or import it records when the file entered this repository, which can be later than its original publication date; never present it as the original date. `updatedAt` is the latest commit that changed the file. Both use the commit's committer date normalized to UTC, so different build machines produce identical strings; file mtimes and the build clock are never used.
+
+In a shallow clone the earliest visible commit cannot be proven to be the first one, so `publishedAt` stays `undefined` and `dateSources.historyComplete` is `false`; a warning recommends fetching full history. The Pages build sets `fetch-depth: 0`, while other CI keeps the default shallow clone. Untracked files, content outside a Git repository, and a missing `git` binary keep the dates unknown and never fail the build.
+
+Explicit values must be unambiguous: `YYYY-MM-DD` (anchored to UTC midnight) or an ISO date-time with `Z` or a numeric offset. A date-time without an offset is ignored, because its instant would depend on the build machine's timezone. The Core parser implements this rule.
+
 ## Known limitations
 
 - Unreviewed Markdown, scraped content, and user submissions are not supported in 0.1.0; the default renderer has no sanitizer.

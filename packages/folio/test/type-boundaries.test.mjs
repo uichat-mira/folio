@@ -17,6 +17,7 @@ const UI_TYPES_IMPORT = /from\s+["'](?:\.\.?\/)+ui-types["']/;
 // live together in src/core and own the pure logic without React or UI imports.
 const CORE_CONTENT_MODULES = [
   "core/content.ts",
+  "core/dates.ts",
   "core/docs-structure.ts",
   "core/heading-ids.ts",
   "core/search.ts",
@@ -46,6 +47,8 @@ const UI_TYPE_NAMES = [
 const PUBLIC_TYPE_NAMES = [
   "FolioAppProps",
   "FolioConfig",
+  "FolioDateSource",
+  "FolioDateSources",
   "FolioDoc",
   "FolioDocCollection",
   "FolioDocSection",

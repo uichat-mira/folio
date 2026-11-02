@@ -42,6 +42,8 @@ export type { FolioMarkdownRenderOptions } from "./core/markdown";
 export type {
   FolioConfig,
   FolioCollectionConfig,
+  FolioDateSource,
+  FolioDateSources,
   FolioDoc,
   FolioHomeAboutSectionConfig,
   FolioHomeCollectionsSectionConfig,

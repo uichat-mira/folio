@@ -9,6 +9,37 @@ export type FolioHeading = {
   id: string;
 };
 
+/**
+ * Provenance of a `FolioDoc` date. This is deliberately explicit: a Git first
+ * commit only proves when the file entered the *current* repository, which can
+ * be later than its original publication (for example after a migration).
+ *
+ * - `frontmatter`: an explicit `publishedAt` / `updatedAt` value.
+ * - `legacy-date`: the legacy `date` field used as `publishedAt`.
+ * - `git-first-commit`: earliest commit in the current repository containing
+ *   the file (not necessarily the original publication date).
+ * - `git-last-commit`: latest commit that changed the file.
+ * - `unknown`: no trustworthy source; no value is emitted.
+ */
+export type FolioDateSource =
+  | "frontmatter"
+  | "legacy-date"
+  | "git-first-commit"
+  | "git-last-commit"
+  | "unknown";
+
+/**
+ * Date provenance attached by `parseFolioDoc` and completed by the Vite
+ * adapter. `historyComplete` is `false` for a shallow/incomplete clone, where
+ * the earliest visible commit cannot be trusted as the first commit; `undefined`
+ * means no Git history was consulted.
+ */
+export type FolioDateSources = {
+  publishedAt: FolioDateSource;
+  updatedAt: FolioDateSource;
+  historyComplete?: boolean;
+};
+
 export type FolioDoc = {
   id: string;
   path: string;
@@ -20,7 +51,18 @@ export type FolioDoc = {
   collection?: string;
   section?: string;
   order: number;
+  /** Legacy frontmatter date, kept verbatim for existing display/sorting. */
   date?: string;
+  /**
+   * ISO 8601 UTC timestamp (`YYYY-MM-DDTHH:mm:ss.sssZ`), or `undefined` when no
+   * trustworthy source exists. Explicit frontmatter wins; otherwise the Vite
+   * adapter may fill it from local Git history.
+   */
+  publishedAt?: string;
+  /** ISO 8601 UTC timestamp, or `undefined` when no trustworthy source exists. */
+  updatedAt?: string;
+  /** Provenance for `publishedAt` / `updatedAt`; set by `parseFolioDoc`. */
+  dateSources?: FolioDateSources;
   tags: string[];
   status?: string;
   cover?: string;

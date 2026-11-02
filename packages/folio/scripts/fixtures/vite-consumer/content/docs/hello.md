@@ -1,6 +1,7 @@
 ---
 title: Consumer discovery fixture
 description: Markdown discovered through virtual:folio/content.
+publishedAt: 2025-06-07T08:09:10+08:00
 ---
 
 # Consumer discovery fixture

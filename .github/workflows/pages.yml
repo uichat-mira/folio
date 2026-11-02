@@ -22,7 +22,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # FOL-025: the production static build derives publishedAt from the first
+      # commit of each content file. A shallow checkout cannot prove a first
+      # commit, so only this Pages build asks for the full history; validate and
+      # Windows package jobs keep the default shallow clone.
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
