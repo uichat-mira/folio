@@ -10,6 +10,13 @@ import {
 import { renderFolioMarkdown } from "./core/markdown";
 import { resolveFolioHome, type FolioHomeModel } from "./core/home";
 import {
+  assertFolioSiteIndexing,
+  FOLIO_NOT_FOUND_ROBOTS,
+  folioIndexingRobots,
+  folioRobotsTxt,
+  resolveFolioIndexingRobots,
+} from "./build/indexing";
+import {
   normalizeStaticRoute,
   writeFolioStaticOutputs,
   writeFolioStaticRootFile,
@@ -81,6 +88,24 @@ export type FolioStaticBuildOptions = {
   rootPlaceholder?: string;
   sitemap?: boolean;
   robots?: boolean;
+  /**
+   * Site-level indexing policy. Leave it out for the unchanged, indexable
+   * default.
+   *
+   * `"noindex"` makes every default route page (home, collection indexes,
+   * document/article pages) and every custom `routes` page carry
+   * `<meta name="robots" content="noindex,nofollow">`, and writes a preview
+   * `robots.txt` that keeps crawling allowed but omits the `Sitemap:` line.
+   * `404.html` stays `noindex,nofollow` in both modes.
+   *
+   * Explicit opt-in only: Folio never infers a preview deployment from the
+   * hostname, `github.io`, `localhost`, sub-path, environment or repository
+   * name. Precedence: explicit `FolioStaticRoute.robots` > this policy >
+   * built-in `"index,follow"`. Independent from `robots`, which only controls
+   * whether `robots.txt` is written. Canonical, Open Graph, JSON-LD and base
+   * URL handling are unaffected; the policy changes indexing signals only.
+   */
+  siteIndexing?: "index" | "noindex";
 };
 
 function normalizeBase(base: string): string {
@@ -142,6 +167,9 @@ export function renderFolioStaticHtml(
   context: FolioStaticBuildContext,
   options: FolioStaticBuildOptions = {},
 ): string {
+  // A direct caller must fail on an ambiguous policy too, not only the site
+  // writer: a typoed preview flag must never produce an indexable page.
+  assertFolioSiteIndexing(options.siteIndexing);
   const pageTitle =
     options.title?.(route, context.config) ??
     (route.title === context.config.title
@@ -151,7 +179,10 @@ export function renderFolioStaticHtml(
     ? folioAbsoluteRouteUrl(context.config.siteUrl, context.base, route.path)
     : "";
   const image = resolveImage(route, context, options);
-  const robots = route.robots || "index,follow";
+  const robots = resolveFolioIndexingRobots(
+    route.robots,
+    folioIndexingRobots(options.siteIndexing),
+  );
   const jsonLd =
     route.jsonLd ?? defaultFolioJsonLd(route, context, canonical, image);
   const imageMetadata = options.image ?? {};
@@ -552,7 +583,7 @@ function defaultNotFound(context: FolioStaticBuildContext): FolioStaticRoute {
     description: "The requested page could not be found.",
     body: `<main class="folio-prerender"><h1>Page not found</h1><p>The requested page could not be found.</p></main>`,
     type: "website",
-    robots: "noindex,nofollow",
+    robots: FOLIO_NOT_FOUND_ROBOTS,
   };
 }
 
@@ -585,6 +616,9 @@ export function writeFolioStaticSite(
   context: FolioStaticBuildContext,
   options: FolioStaticBuildOptions = {},
 ): { routes: number } {
+  // Validate before touching the output directory: a mistyped preview flag must
+  // fail loudly instead of writing a silently indexable site.
+  assertFolioSiteIndexing(options.siteIndexing);
   const indexPath = resolve(context.outDir, "index.html");
   if (!existsSync(indexPath)) return { routes: 0 };
 
@@ -615,10 +649,18 @@ export function writeFolioStaticSite(
   );
 
   const notFound = options.notFound?.(context) ?? defaultNotFound(context);
+  // The 404 page is never indexable, even when a consumer-supplied not-found
+  // route omits `robots`: the not-found default beats the site policy. An
+  // explicit not-found `robots` still wins over this fallback, and the empty
+  // string keeps its historical fallback meaning.
+  const notFoundRoute = {
+    ...notFound,
+    robots: resolveFolioIndexingRobots(notFound.robots, FOLIO_NOT_FOUND_ROBOTS),
+  };
   writeFolioStaticRootFile(
     context.outDir,
     "404.html",
-    renderFolioStaticHtml(template, notFound, context, options),
+    renderFolioStaticHtml(template, notFoundRoute, context, options),
   );
 
   if (context.config.siteUrl && options.sitemap !== false) {
@@ -646,11 +688,14 @@ export function writeFolioStaticSite(
     writeFolioStaticRootFile(
       context.outDir,
       "robots.txt",
-      `User-agent: *\nAllow: /\nSitemap: ${folioAbsoluteAssetUrl(
-        context.config.siteUrl,
-        context.base,
-        "sitemap.xml",
-      )}\n`,
+      folioRobotsTxt({
+        siteIndexing: options.siteIndexing,
+        sitemapUrl: folioAbsoluteAssetUrl(
+          context.config.siteUrl,
+          context.base,
+          "sitemap.xml",
+        ),
+      }),
     );
   }
 

@@ -17,6 +17,8 @@
 //   [static:robots]   robots.txt is missing or points at the wrong sitemap
 //   [static:seo]      FOL-027 SEO fixture: JSON-LD author/dates or sitemap
 //                     <lastmod> is missing or invalid
+//   [static:noindex]  the explicit siteIndexing: "noindex" build is not a
+//                     consistent preview (page meta, robots.txt or canonical)
 //   [static:control]  the staticRoutes-off control emitted static files
 import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
@@ -35,6 +37,7 @@ const CONFIG_TITLE = "Folio Vite consumer fixture";
 const DOC_TITLE = "Consumer discovery fixture";
 const DOC_ROUTE = "/docs/hello";
 const STATIC_OUT_DIR = "dist-static";
+const NOINDEX_OUT_DIR = "dist-static-noindex";
 const CONTROL_OUT_DIR = "dist-static-off";
 const SEO_OUT_DIR = "dist-static-seo";
 // verify-vite-consumer.mjs commits the fixture with GIT_COMMITTER_DATE
@@ -84,6 +87,7 @@ function runBuild(
     homeMode = "default",
     seoMode = false,
     contentDir = "content",
+    siteIndexing,
   },
 ) {
   // Start from nothing so a file can only exist because this build wrote it.
@@ -105,6 +109,11 @@ function runBuild(
         FOLIO_CONSUMER_STATIC: staticMode ? "on" : "off",
         FOLIO_CONSUMER_HOME_MODE: homeMode,
         FOLIO_CONSUMER_SEO: seoMode ? "on" : "off",
+        // Only the explicit switch below can make the fixture a preview. The
+        // installed package never infers one from the environment.
+        ...(siteIndexing
+          ? { FOLIO_CONSUMER_SITE_INDEXING: siteIndexing }
+          : {}),
       },
     },
   );
@@ -465,6 +474,115 @@ export function verifyStaticConsumer({ consumerDir, appDir, log }) {
     `robots.txt is ${JSON.stringify(robots)}, expected ${JSON.stringify(expectedRobots)}`,
   );
   log("[static]   ok  robots.txt  points at the base-prefixed sitemap");
+
+  // FOL-028: the installed tarball must also be able to build the same fixture
+  // as an explicit preview. This is a second real Vite build over the same
+  // content, base and site URL, so only the explicit siteIndexing option can
+  // explain the difference in indexing signals.
+  const noindexDir = runBuild(viteCli, appDir, {
+    outDir: NOINDEX_OUT_DIR,
+    staticMode: true,
+    siteIndexing: "noindex",
+  });
+  for (const [relative, canonical] of [
+    ["index.html", "https://example.test/folio-smoke/"],
+    [
+      join("docs", "hello", "index.html"),
+      "https://example.test/folio-smoke/docs/hello/",
+    ],
+    [join("blogs", "index.html"), "https://example.test/folio-smoke/blogs/"],
+    [
+      join("projects", "index.html"),
+      "https://example.test/folio-smoke/projects/",
+    ],
+  ]) {
+    const label = relative.replace(/\\/g, "/");
+    const html = readGenerated(
+      "static:noindex",
+      join(noindexDir, relative),
+      label,
+    );
+    check(
+      "static:noindex",
+      html.includes('<meta name="robots" content="noindex,nofollow">'),
+      `${label} is not noindex,nofollow`,
+    );
+    check(
+      "static:noindex",
+      !html.includes('<meta name="robots" content="index,follow">'),
+      `${label} still declares index,follow`,
+    );
+    check(
+      "static:noindex",
+      html.includes(`<link rel="canonical" href="${canonical}">`),
+      `${label} canonical changed under siteIndexing: "noindex" (expected ${canonical})`,
+    );
+  }
+  const noindexNotFound = readGenerated(
+    "static:noindex",
+    join(noindexDir, "404.html"),
+    "404.html",
+  );
+  check(
+    "static:noindex",
+    noindexNotFound.includes('<meta name="robots" content="noindex,nofollow">'),
+    "the preview 404.html is not noindex,nofollow",
+  );
+  const expectedNoindexRobots = `# Preview build: site-wide noindex. Crawling stays allowed so crawlers can read the page-level noindex.\nUser-agent: *\nAllow: /\n`;
+  const noindexRobots = readGenerated(
+    "static:noindex",
+    join(noindexDir, "robots.txt"),
+    "robots.txt",
+  );
+  check(
+    "static:noindex",
+    noindexRobots === expectedNoindexRobots,
+    `preview robots.txt is ${JSON.stringify(noindexRobots)}, expected ${JSON.stringify(expectedNoindexRobots)}`,
+  );
+  check(
+    "static:noindex",
+    !noindexRobots.includes("Sitemap:"),
+    "preview robots.txt advertises a sitemap",
+  );
+  check(
+    "static:noindex",
+    !/^\s*Disallow:/m.test(noindexRobots),
+    "preview robots.txt disallows crawling, which would hide the page-level noindex",
+  );
+  // The preview sitemap may exist (it is simply not advertised), but it must
+  // still describe the real routes and never the not-found page.
+  const noindexSitemap = readGenerated(
+    "static:noindex",
+    join(noindexDir, "sitemap.xml"),
+    "sitemap.xml",
+  );
+  check(
+    "static:noindex",
+    (noindexSitemap.match(/<url>/g) ?? []).length === 4,
+    "the preview sitemap no longer lists the four base-prefixed routes",
+  );
+  check(
+    "static:noindex",
+    !noindexSitemap.includes("404"),
+    "the preview sitemap advertises the not-found page",
+  );
+  check(
+    "static:noindex",
+    noindexNotFound.includes(
+      `<title>Page not found · ${CONFIG_TITLE}</title>`,
+    ),
+    "the preview 404.html does not carry the not-found title",
+  );
+  check(
+    "static:noindex",
+    readFileSync(join(noindexDir, "docs", "hello", "index.html"), "utf8").includes(
+      marker,
+    ),
+    `the preview document page does not contain this run's marker ${marker}`,
+  );
+  log(
+    '[static]   ok  siteIndexing: "noindex" build  every page noindex,nofollow, canonicals unchanged, preview robots.txt, sitemap unadvertised',
+  );
 
   // FOL-030: the same installed tarball also proves a config-driven home and a
   // static-only home override. Each mode is a separate real Vite build so the
