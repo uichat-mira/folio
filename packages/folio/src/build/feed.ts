@@ -416,16 +416,17 @@ function renderAtom(
 function assertUniqueOutputs(files: readonly FolioStaticFeedOutput[]): void {
   const seen = new Map<string, FolioStaticFeedOutput>();
   for (const file of files) {
-    // Compared case-insensitively with Windows-ambiguous trailing dots/spaces
-    // folded: a case-only or dot-only difference would silently overwrite an
-    // earlier feed on Windows and macOS.
+    // Feed files must coexist with one another as files, not as directories.
+    // Compare at path-segment boundaries so "feed.xml" conflicts with
+    // "feed.xml/atom.xml", but not with the unrelated "feed.xml2".
     const key = comparableOutputKey(file.name);
-    const previous = seen.get(key);
-    if (previous) {
-      throw new Error(
-        `folio static feed output conflict: ${JSON.stringify(file.name)} would be written more than once ` +
-          `(feed ${JSON.stringify(previous.feedPath)} ${previous.format} and feed ${JSON.stringify(file.feedPath)} ${file.format})`,
-      );
+    for (const [previousKey, previous] of seen) {
+      if (comparableOutputPathsOverlap(key, previousKey)) {
+        throw new Error(
+          `folio static feed output conflict: ${JSON.stringify(file.name)} would conflict with ${JSON.stringify(previous.name)} ` +
+            `(feed ${JSON.stringify(previous.feedPath)} ${previous.format} and feed ${JSON.stringify(file.feedPath)} ${file.format}); normalized paths must not be equal or overlap at a path-segment boundary`,
+        );
+      }
     }
     seen.set(key, file);
   }
