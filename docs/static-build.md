@@ -75,7 +75,6 @@ route uses (`config.home` included), and `resolveFolioHome(config, docs)` return
 the platform-neutral model. A React node is never serialized automatically;
 `home` and `renderFolioStaticHome` produce HTML strings only.
 
-<<<<<<< HEAD
 ## Article metadata, authors and sitemap `lastmod`
 
 For every route that does not supply its own `jsonLd`, Folio generates a
@@ -147,6 +146,7 @@ date exists, in this order:
 modification date, so home and collection indexes without an explicit
 `route.lastmod` keep only `<loc>`. `404.html` is never listed. `lastmod`
 values and `loc` URLs follow the same base/canonical rules as the pages.
+
 
 ## Site-level indexing policy (preview builds)
 
