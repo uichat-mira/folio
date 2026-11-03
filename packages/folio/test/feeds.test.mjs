@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createRequire } from "node:module";
 import {
   existsSync,
   mkdirSync,
@@ -12,6 +13,12 @@ import { resolve } from "node:path";
 import test from "node:test";
 
 import { writeFolioStaticSite } from "../dist/vite.js";
+const require = createRequire(import.meta.url);
+const externalFeedReader =
+  process.env.FOLIO_EXTERNAL_FEED_READER === "1"
+    ? require("@rowanmanning/feed-parser")
+    : undefined;
+
 import {
   parseXml,
   xmlAttribute,
@@ -207,6 +214,29 @@ test("RSS 2.0 and Atom 1.0 use absolute sub-path URLs and trusted dates", () =>
     assert.equal(child(item, "lastBuildDate"), undefined);
 
     const atom = parseFeed(resolve(outDir, "atom.xml"));
+
+    // Add an independent real-world feed reader to the XML structure checks.
+    if (externalFeedReader) {
+      const parsedRss = externalFeedReader.parseFeed(rss.source);
+      assert.equal(parsedRss.meta.type, "rss");
+      assert.equal(parsedRss.meta.version, "2.0");
+      assert.equal(parsedRss.title, "博客");
+      assert.equal(parsedRss.items.length, 1);
+      assert.equal(parsedRss.items[0].title, "Hello");
+      assert.equal(parsedRss.items[0].url, "https://example.com/moyu/blogs/hello/");
+      assert.equal(parsedRss.items[0].published.toISOString(), "2025-06-07T00:09:10.000Z");
+
+      const parsedAtom = externalFeedReader.parseFeed(atom.source);
+      assert.equal(parsedAtom.meta.type, "atom");
+      assert.equal(parsedAtom.meta.version, "1.0");
+      assert.equal(parsedAtom.title, "博客");
+      assert.equal(parsedAtom.items.length, 1);
+      assert.equal(parsedAtom.items[0].title, "Hello");
+      assert.equal(parsedAtom.items[0].url, "https://example.com/moyu/blogs/hello/");
+      assert.equal(parsedAtom.items[0].published.toISOString(), "2025-06-07T00:09:10.000Z");
+      assert.equal(parsedAtom.items[0].updated.toISOString(), "2025-06-08T10:11:12.000Z");
+    }
+
     assert.equal(atom.root.name, "feed");
     assert.equal(
       xmlAttribute(atom.root, "xmlns"),
