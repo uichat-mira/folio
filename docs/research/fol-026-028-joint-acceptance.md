@@ -3,8 +3,9 @@
 - Date: 2026-11-03 (Asia/Shanghai)
 - Baseline: `origin/dev @ c828e8a6a00fdf3c0ecdf2f2dd613ad8d68c0be7`
   (merge of `feat/fol-025-content-dates`, PR #139)
-- Integration branch: `feat/integration-fol-026-027-028 @ 2bf99e6` before this
-  report; the report commit is the new branch head.
+- Integration branch: `feat/integration-fol-026-027-028`; three-feature merge
+  `2bf99e6`, post-review P2-fix merge `f9d97fb`, report updates committed after
+  review. The current branch head contains all of them.
 - Status: three independently reviewable Draft PRs + one integration branch.
   **Nothing was merged, closed, promoted or deployed.**
 
@@ -27,10 +28,10 @@ and ran the joint acceptance below.
 
 | Feature | Branch | Head commit | Draft PR | Issue |
 | --- | --- | --- | --- | --- |
-| FOL-026 feeds | `feat/fol-026-rss-atom` | `6a90499262086e951055778b2cbda43dce8dc574` | [#142](https://github.com/uichat-mira/folio/pull/142) | #125 |
+| FOL-026 feeds | `feat/fol-026-rss-atom` | `6f1d654` (P2 fix; features at `6a90499`) | [#142](https://github.com/uichat-mira/folio/pull/142) | #125 |
 | FOL-027 structured metadata | `feat/fol-027-structured-metadata` | `8dc00e0b197ded5488d990ca595c4e159f56f876` | [#141](https://github.com/uichat-mira/folio/pull/141) | #126 |
 | FOL-028 site indexing | `feat/fol-028-indexing` | `85507f753c161dfbce2ac5b5eba4558d07a51ccd` | [#140](https://github.com/uichat-mira/folio/pull/140) | #127 |
-| Integration | `feat/integration-fol-026-027-028` | `2bf99e6c2754a63571fbf92ea8384b6b5cd9d741` + this report | none (branch only) | — |
+| Integration | `feat/integration-fol-026-027-028` | `f9d97fb` (merge of the P2 fix) + this report | none (branch only) | — |
 
 All three PRs are `draft`, target `dev`, use `Refs #…` (never `Closes`), carry
 the dsh badge, and were authored from the same baseline.
@@ -44,7 +45,11 @@ the dsh badge, and were authored from the same baseline.
   defaults `rss.xml` / `atom.xml`. Exported from the `/vite` entry.
 - Feeds are per route directory, select documents recursively (all doc types),
   and require `config.siteUrl`; without it no feed file and no alternate link
-  is produced. Duplicate output names throw before the first write.
+  is produced. Output names are normalized (`./rss.xml`, `rss.xml`, `RSS.XML`
+  are one target) and checked against each other AND against every static
+  output the same build writes: page targets (`<route>/index.html`),
+  `404.html`, `sitemap.xml` and `robots.txt` when enabled. Any collision
+  throws before the first write; disabled fixed outputs release their names.
 - Every generated page (including `404.html`) gets absolute
   `rel="alternate"` links only for files actually written; pre-existing
   RSS/Atom alternates in a consumer template are stripped first.
@@ -53,7 +58,8 @@ the dsh badge, and were authored from the same baseline.
   `frontmatter` / `git-last-commit`, falling back to the trusted published
   date. An undated document stays in RSS without `pubDate` and is excluded
   from Atom. Empty source → valid zero-item RSS, no Atom.
-- New `src/build/feed.ts`, `test/feeds.test.mjs` (18 tests), test-only
+- New `src/build/feed.ts`, `test/feeds.test.mjs` (20 tests, including the
+  post-review static-output collision regression), test-only
   `scripts/checks/xml.mjs`, plus consumer fixture/checks and
   `docs/static-build.md`.
 
@@ -107,6 +113,7 @@ Merges (`--no-ff`, in this order):
 | `682daac` | FOL-027 `8dc00e0` | clean |
 | `0729ff5` | FOL-028 `85507f7` | conflicts: `docs/static-build.md`, `packages/folio/scripts/checks/static-consumer.mjs` |
 | `2bf99e6` | FOL-026 `6a90499` | conflicts: `src/static.ts`, `scripts/checks/static-consumer.mjs`, `fixtures/vite-consumer/vite.config.ts`, `docs/static-build.md` |
+| `f9d97fb` | FOL-026 `6f1d654` (P2 fix) | conflict: `src/static.ts` only (kept both the sitemap-lastmod preflight and the feed plan with reserved outputs) |
 
 Conflict log and resolution:
 
@@ -121,10 +128,14 @@ Conflict log and resolution:
      `defaultFolioJsonLd` for JSON-LD. No duplicate JSON-LD generator exists.
    - the single render path now resolves `robots` through
      `resolveFolioIndexingRobots`, injects feed `alternates`, and projects
-     structured data; the write path computes `feedPlan` first, then
-     `sitemapLastmods`, writes pages/404/sitemap/robots and finally the feed
-     files. Trusted-date sets are identical in `feed.ts` and
-     `structured-data.ts`.
+     structured data; the write path resolves `sitemapLastmods` and builds
+     `feedPlan` (with the reserved static outputs) before the first write, then
+     writes pages/404/sitemap/robots and finally the feed files. Trusted-date
+     sets are identical in `feed.ts` and `structured-data.ts`.
+   - the post-review fix merge `f9d97fb` conflicted only in the ordering block:
+     the bookkeeping order is `sitemapLastmods` → `feedPlan` → route write, and
+     the feed plan receives `staticReservedOutputs(...)` derived from the
+     home-overridden route set plus `404.html` and the enabled fixed outputs.
 2. `packages/folio/scripts/checks/static-consumer.mjs`
    - kept both test-only XML helpers (FOL-026 `./xml.mjs` for RSS/Atom,
      FOL-027 `../../test/helpers/xml.mjs` for sitemap), combined `runBuild`
@@ -142,7 +153,7 @@ Conflict log and resolution:
      without duplicated contract text.
 
 No worker test was changed or weakened; `npm test` runs all suites
-(149 tests total).
+(151 tests total).
 
 ## 5. Verification
 
@@ -154,11 +165,12 @@ All commands run on Windows (node v24.9.0, win32/x64) in
 | `npm ci --no-audit --no-fund` | pass | 274 packages |
 | `npm run build -w @uichat-mira/folio` | pass | tsup ESM + DTS |
 | `npm run typecheck` | pass | folio + site `tsc --noEmit` |
-| `npm test` | pass | 149 / 149 tests |
-| `npm run release:check` | pass | validate + `pack:verify` + tarball `pack:consumer`; consumer source `2bf99e6` |
-| combined smoke (`D:\folio-worktrees\combined-smoke`) | pass | 57 / 57 assertions |
-| joint matrix (`D:\folio-worktrees\acceptance`) | pass | 10 / 10 scenarios, 49 assertions, Python 3.10.6 + lxml 5.3.0 |
-| tarball consumer (`D:\folio-worktrees\tarball-acceptance`) | pass | 26 assertions, tarball sha256 `5f40411…029850ae` |
+| `npm test` | pass | 151 / 151 tests |
+| `npm run release:check` | pass | validate + `pack:verify` + tarball `pack:consumer`; consumer source `f9d97fb` (also re-run on the FOL-026 fix branch at `6f1d654`) |
+| combined smoke (`D:\folio-worktrees\combined-smoke`) | pass | 57 / 57 assertions, re-built and re-run from the merged tree after the P2 fix |
+| joint matrix (`D:\folio-worktrees\acceptance`) | pass | 10 / 10 scenarios, 49 assertions, Python 3.10.6 + lxml 5.3.0, re-built and re-run after the P2 fix |
+| tarball consumer (`D:\folio-worktrees\tarball-acceptance`) | pass | 26 assertions, tarball sha256 `687815…0ba1` |
+| FOL-026 static-output collision regression | pass | `feeds.test.mjs` 20/20 on the branch + tarball consumer `collision.mjs`: 12 rejected names (index/404/sitemap/robots/document/collection/`./`/case/trailing-dot/atom/traversal/drive-letter), 1 allowed disabled-output case, no partial writes |
 
 The tarball consumer is a real `npm pack` artifact from the integration
 branch, extracted into a clean consumer `node_modules`; its single Vite build
@@ -189,15 +201,48 @@ Parser: `python verify_acceptance.py` (lxml for RSS/Atom/sitemap,
 Empty-row counter-check: a build without `feeds` writes no feed file and adds
 no alternate link; the static consumer asserts this explicitly.
 
+### 6.1 Post-review fix: FOL-026 feed/static output collision (P2)
+
+Maintainer review found that the feed plan compared output names only with
+other feeds. Because feed files are written after the pages, `404.html`,
+`sitemap.xml` and `robots.txt`, a legal name such as `sitemap.xml`,
+`index.html`, `404.html` or `blogs/post/index.html` silently overwrote that
+artifact. The fix (branch commit `6f1d654`, merged as `f9d97fb`):
+
+- `feed.ts` normalizes every output name first: `"./rss.xml"`, `"rss.xml"` and
+  `"\\"`-free POSIX paths become one target; `.`/`..` segments, NUL,
+  backslash, `:` (drive/stream targets) and empty names are rejected by the
+  feed preflight instead of the late writer.
+- `static.ts` passes the exact reserved target set into the planner before the
+  first write: every final (home-overridden) route target
+  (`index.html`, `<route>/index.html`), `404.html`, and `sitemap.xml` /
+  `robots.txt` only when this build actually enables them.
+- Comparison is case-insensitive and folds Windows-ambiguous trailing dots and
+  spaces, so `SITEMAP.XML` and `sitemap.xml.` collide on every platform and the
+  configuration fails identically on Linux, macOS and Windows.
+- Collisions throw `folio static feed output conflict: …` while rendering the
+  plan, i.e. before any page, fixed output or feed is written; the new tests
+  assert the template is unchanged and no file appeared.
+- `sitemap: false` / `robots: false` release those names, which is covered by
+  an explicit positive test.
+
+Regression evidence: `test/feeds.test.mjs` 20/20 (branch + integration), the
+packaged tarball `collision.mjs` (12 rejected names + 1 allowed case, real
+filesystem), full `release:check` on both the branch and the merged tree, and
+the matrix/combined-smoke rebuilds above (`10/10`, `57/57`). No other feature
+was modified; the merge conflicted only in the `static.ts` write-ordering
+block.
+
 ## 7. CI status
 
 | Ref | Workflow / jobs | Result |
 | --- | --- | --- |
-| FOL-026 `6a90499` (PR #142) | Validate: `validate`, `windows-package-check` | pass, pass |
+| FOL-026 `6f1d654` (PR #142, P2 fix) | Validate: `validate`, `windows-package-check` (push run 41657194786, PR run 41657205256) | pass, pass |
 | FOL-027 `8dc00e0` (PR #141) | Validate: `validate`, `windows-package-check` | pass, pass |
 | FOL-028 `85507f7` (PR #140) | Validate: `validate`, `windows-package-check` | pass, pass |
 | Integration `2bf99e6` (branch push) | Validate run 41650121997: `validate`, `windows-package-check` | pass, pass |
-| Integration report commit | Validate (branch push) | recorded after push |
+| Integration `6e42147` report commit | Validate run 41651741152 | pass |
+| Integration `f9d97fb` (P2-fix merge) | Validate run 41658185466: `validate`, `windows-package-check` | pass, pass |
 
 Local Windows results are listed in section 5; CI `ubuntu` + Windows
 `windows-package-check` both passed for every measured head. No unexecuted
@@ -218,7 +263,8 @@ workflows, release scripts, or another feature's implementation.
 ## 9. Authority compliance
 
 - Issues #125, #126, #127 are still **open**.
-- No PR was merged; all three remain draft and open.
+- No PR was merged; all three remain draft and open. PR #142 received the
+  `6f1d654` fix commit on its branch (still draft, not merged).
 - `origin/dev` is still `c828e8a6a00fdf3c0ecdf2f2dd613ad8d68c0be7`.
 - No change to Project status, milestones or labels.
 - No promotion to `test`/`prod`, no deployment, no npm publish.
@@ -228,9 +274,12 @@ workflows, release scripts, or another feature's implementation.
 
 ## 10. Known limitations and risks
 
-1. Feed output names are checked against each other, not against fixed files
-   such as `sitemap.xml`/`robots.txt`/`404.html`; a consumer should use
-   distinct feed names. Documented as a limitation, not enforced.
+1. The review P2 (feed output name overwriting a page/`404.html`/`sitemap.xml`/
+   `robots.txt`) is fixed in `6f1d654`. Residual scope: names are compared
+   against the outputs Folio itself writes, not against arbitrary files a
+   consumer drops into the output directory before the plugin runs (for
+   example a hand-written `favicon.svg`); those are outside the static writer's
+   target set.
 2. No public W3C Feed Validator run (it needs a publicly reachable URL).
    Structural parsing, an independent XML parser and an independent feed
    reader were used instead.
