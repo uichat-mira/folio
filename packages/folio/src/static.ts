@@ -14,6 +14,10 @@ import {
   writeFolioStaticOutputs,
   writeFolioStaticRootFile,
 } from "./static-output";
+import {
+  defaultFolioJsonLd,
+  resolveFolioSitemapLastmod,
+} from "./build/structured-data";
 import type { FolioDoc, FolioConfig } from "./types";
 
 export type FolioStaticRoute = {
@@ -25,6 +29,12 @@ export type FolioStaticRoute = {
   image?: string;
   robots?: string;
   jsonLd?: unknown;
+  /**
+   * Explicit sitemap `<lastmod>` for this route (YYYY-MM-DD or a date-time with
+   * an explicit timezone). It wins over the document's trusted `updatedAt`;
+   * invalid values fail the static build.
+   */
+  lastmod?: string;
   doc?: FolioDoc;
 };
 
@@ -112,46 +122,6 @@ export function folioAbsoluteAssetUrl(
   return `${origin}${normalizeBase(base)}/${assetPath}`;
 }
 
-function dataList(value: unknown): string[] {
-  if (Array.isArray(value)) {
-    return value.map(String).map((item) => item.trim()).filter(Boolean);
-  }
-  if (typeof value !== "string" || !value.trim()) return [];
-  return value
-    .split(/[|,，]/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
-function defaultJsonLd(
-  route: FolioStaticRoute,
-  context: FolioStaticBuildContext,
-  canonical: string,
-  image: string | undefined,
-): unknown {
-  if (!route.doc) {
-    return {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      name: context.config.title,
-      url: canonical,
-    };
-  }
-
-  const authors = dataList(route.doc.data.author);
-  return {
-    "@context": "https://schema.org",
-    "@type": route.doc.type === "article" ? "Article" : "TechArticle",
-    headline: route.title,
-    description: route.description,
-    url: canonical,
-    image,
-    datePublished: route.doc.date,
-    author: authors.map((name) => ({ "@type": "Person", name })),
-    publisher: { "@type": "Organization", name: context.config.title },
-  };
-}
-
 function resolveImage(
   route: FolioStaticRoute,
   context: FolioStaticBuildContext,
@@ -183,7 +153,7 @@ export function renderFolioStaticHtml(
   const image = resolveImage(route, context, options);
   const robots = route.robots || "index,follow";
   const jsonLd =
-    route.jsonLd ?? defaultJsonLd(route, context, canonical, image);
+    route.jsonLd ?? defaultFolioJsonLd(route, context, canonical, image);
   const imageMetadata = options.image ?? {};
 
   const head = [
@@ -551,25 +521,13 @@ function defaultRoutes(context: FolioStaticBuildContext): FolioStaticRoute[] {
       body: renderFolioStaticHome(context),
       type: "website",
     },
-    ...folioCollectionIndexes(context.config).map((collection) => {
-      const title = collection.title;
-      return {
-        path: collection.path,
-        title,
-        description: collection.description,
-        type: "website",
-        body: renderStaticCollectionIndex(context, collection),
-        jsonLd: {
-          "@context": "https://schema.org",
-          "@type": "CollectionPage",
-          name: title,
-          description: collection.description,
-          url: context.config.siteUrl
-            ? folioAbsoluteRouteUrl(context.config.siteUrl, context.base, collection.path)
-            : undefined,
-        },
-      };
-    }),
+    ...folioCollectionIndexes(context.config).map((collection) => ({
+      path: collection.path,
+      title: collection.title,
+      description: collection.description,
+      type: "website",
+      body: renderStaticCollectionIndex(context, collection),
+    })),
     ...context.docs.map((doc) => ({
       path: doc.path,
       title: doc.title,
@@ -635,6 +593,19 @@ export function writeFolioStaticSite(
   const overriddenRoutes = options.home
     ? applyStaticHomeOverride([...routes], context, options.home)
     : routes;
+  // Sitemap `<lastmod>` values are resolved (and explicit route values are
+  // validated) before the first page is written: a consumer typo fails the
+  // build instead of leaving a half-written site. Routes without a trusted
+  // modification date keep only `<loc>`.
+  const sitemapLastmods =
+    context.config.siteUrl && options.sitemap !== false
+      ? new Map(
+          overriddenRoutes.map((route) => [
+            normalizeStaticRoute(route.path),
+            resolveFolioSitemapLastmod(route),
+          ]),
+        )
+      : undefined;
   // All route destinations are validated (including duplicate and real-target
   // collisions) before the first page is written; see static-output.ts.
   const normalizedRoutes = writeFolioStaticOutputs(
@@ -652,15 +623,17 @@ export function writeFolioStaticSite(
 
   if (context.config.siteUrl && options.sitemap !== false) {
     const urls = normalizedRoutes
-      .map((route) =>
-        `<url><loc>${folioEscapeHtml(
-          folioAbsoluteRouteUrl(
-            context.config.siteUrl!,
-            context.base,
-            route.path,
-          ),
-        )}</loc></url>`,
-      )
+      .map((route) => {
+        const loc = folioAbsoluteRouteUrl(
+          context.config.siteUrl!,
+          context.base,
+          route.path,
+        );
+        const lastmod = sitemapLastmods?.get(normalizeStaticRoute(route.path));
+        return `<url><loc>${folioEscapeHtml(loc)}</loc>${
+          lastmod ? `<lastmod>${folioEscapeHtml(lastmod)}</lastmod>` : ""
+        }</url>`;
+      })
       .join("");
     writeFolioStaticRootFile(
       context.outDir,
