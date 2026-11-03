@@ -257,10 +257,11 @@ const staticBuild: FolioStaticBuildOptions = {
 
 Omitting `feeds` (or passing an empty array) writes no feed and changes no page
 head. Output names are relative to the static site root and are normalized
-first: `./rss.xml`, `rss.xml` and `RSS.XML` all mean the same target. A feed may
-never overwrite a static artifact: names that resolve to a generated page
-(`<route>/index.html`, including `index.html` for `/`), `404.html`,
-`sitemap.xml` or `robots.txt` are rejected before the first file is written.
+first: `./rss.xml`, `rss.xml` and `RSS.XML` all mean the same target. A feed
+output path may not equal, contain, or be nested below a static output file
+path. This rejects both overwrites and file/directory conflicts with generated
+pages (`<route>/index.html`, including `index.html` for `/`), `404.html`,
+`sitemap.xml` or `robots.txt` before the first file is written.
 `sitemap.xml` and `robots.txt` are only reserved while the build actually
 enables them (`sitemap: false` / `robots: false` releases the name). Duplicate
 output names across feeds throw under the same rules. Comparison is
