@@ -15,11 +15,14 @@
 //   [static:404]      404.html is missing or is not noindex
 //   [static:sitemap]  sitemap.xml is missing or does not describe the routes
 //   [static:robots]   robots.txt is missing or points at the wrong sitemap
+//   [static:seo]      FOL-027 SEO fixture: JSON-LD author/dates or sitemap
+//                     <lastmod> is missing or invalid
 //   [static:control]  the staticRoutes-off control emitted static files
 import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { isW3cDatetime, parseSitemapXml } from "../../test/helpers/xml.mjs";
 
 // A fixed, non-production deployment shape: an unrelated test domain plus a
 // non-root base path, so canonical URLs, sitemap entries and internal links
@@ -33,6 +36,11 @@ const DOC_TITLE = "Consumer discovery fixture";
 const DOC_ROUTE = "/docs/hello";
 const STATIC_OUT_DIR = "dist-static";
 const CONTROL_OUT_DIR = "dist-static-off";
+const SEO_OUT_DIR = "dist-static-seo";
+// verify-vite-consumer.mjs commits the fixture with GIT_COMMITTER_DATE
+// "2024-01-02T03:04:05+08:00"; the trusted git-last-commit value is its UTC form.
+const GIT_COMMIT_UPDATED_AT = "2024-01-01T19:04:05.000Z";
+const SEO_SITE_PREFIX = `${STATIC_SITE_URL}${STATIC_BASE}`;
 
 function check(stage, condition, message) {
   if (!condition) throw new Error(`[${stage}] FAIL ${message}`);
@@ -43,7 +51,41 @@ function readGenerated(stage, path, what) {
   return readFileSync(path, "utf8");
 }
 
-function runBuild(viteCli, appDir, { outDir, staticMode, homeMode = "default" }) {
+function parseJsonLdScript(stage, html) {
+  const scripts = [
+    ...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g),
+  ];
+  check(
+    stage,
+    scripts.length === 1,
+    `expected exactly one JSON-LD script, found ${scripts.length}`,
+  );
+  try {
+    return JSON.parse(scripts[0][1]);
+  } catch (error) {
+    throw new Error(`[${stage}] FAIL JSON-LD is not valid JSON: ${error.message}`);
+  }
+}
+
+function parseSitemapOrFail(stage, xml) {
+  try {
+    return parseSitemapXml(xml);
+  } catch (error) {
+    throw new Error(`[${stage}] FAIL sitemap.xml did not parse as XML: ${error.message}`);
+  }
+}
+
+function runBuild(
+  viteCli,
+  appDir,
+  {
+    outDir,
+    staticMode,
+    homeMode = "default",
+    seoMode = false,
+    contentDir = "content",
+  },
+) {
   // Start from nothing so a file can only exist because this build wrote it.
   rmSync(join(appDir, outDir), { recursive: true, force: true });
 
@@ -57,11 +99,12 @@ function runBuild(viteCli, appDir, { outDir, staticMode, homeMode = "default" })
       env: {
         ...process.env,
         FOLIO_CONSUMER_OUT_DIR: outDir,
-        FOLIO_CONSUMER_CONTENT_DIR: "content",
+        FOLIO_CONSUMER_CONTENT_DIR: contentDir,
         FOLIO_CONSUMER_BASE: STATIC_BASE,
         FOLIO_CONSUMER_SITE_URL: STATIC_SITE_URL,
         FOLIO_CONSUMER_STATIC: staticMode ? "on" : "off",
         FOLIO_CONSUMER_HOME_MODE: homeMode,
+        FOLIO_CONSUMER_SEO: seoMode ? "on" : "off",
       },
     },
   );
@@ -388,7 +431,27 @@ export function verifyStaticConsumer({ consumerDir, appDir, log }) {
     !sitemap.includes("404"),
     "sitemap.xml advertises the not-found page",
   );
-  log("[static]   ok  sitemap.xml  four base-prefixed routes, no 404");
+  // FOL-027: the content document has an explicit `publishedAt` but no
+  // `updatedAt`, so the trusted git-last-commit value is the only valid
+  // <lastmod>; the home page and collection indexes have no document date and
+  // must keep only <loc>.
+  const staticSitemap = parseSitemapOrFail("static:sitemap", sitemap);
+  const staticSitemapByLoc = new Map(
+    staticSitemap.map((entry) => [entry.loc, entry.lastmod]),
+  );
+  check(
+    "static:sitemap",
+    staticSitemapByLoc.get(`${SEO_SITE_PREFIX}docs/hello/`) === GIT_COMMIT_UPDATED_AT,
+    `the content page lastmod is ${JSON.stringify(staticSitemapByLoc.get(`${SEO_SITE_PREFIX}docs/hello/`))}, expected its trusted git updatedAt`,
+  );
+  for (const loc of [`${SEO_SITE_PREFIX}`, `${SEO_SITE_PREFIX}blogs/`, `${SEO_SITE_PREFIX}projects/`]) {
+    check(
+      "static:sitemap",
+      staticSitemapByLoc.get(loc) === undefined,
+      `${loc} must not fabricate a lastmod without a trusted modification date`,
+    );
+  }
+  log("[static]   ok  sitemap.xml  four base-prefixed routes, trusted lastmod only, no 404");
 
   const robots = readGenerated(
     "static:robots",
@@ -507,6 +570,184 @@ export function verifyStaticConsumer({ consumerDir, appDir, log }) {
     "a static-only home override changed the sitemap route set",
   );
   log("[static]   ok  static-only home override keeps every other route, canonical and sitemap entry");
+
+  // FOL-027: the same installed tarball must project real content metadata in
+  // SEO mode. A separate `content-seo` fixture keeps every assertion above
+  // byte-for-byte about its original four routes.
+  const seoDir = runBuild(viteCli, appDir, {
+    outDir: SEO_OUT_DIR,
+    staticMode: true,
+    seoMode: true,
+    contentDir: "content-seo",
+  });
+  const seoArticleUrl = `${SEO_SITE_PREFIX}blogs/frontmatter-author/`;
+  const seoArticle = readGenerated(
+    "static:seo",
+    join(seoDir, "blogs", "frontmatter-author", "index.html"),
+    "the SEO article page",
+  );
+  const seoArticleLd = parseJsonLdScript("static:seo", seoArticle);
+  check(
+    "static:seo",
+    seoArticleLd["@type"] === "Article",
+    `the SEO article @type is ${JSON.stringify(seoArticleLd["@type"])}, expected "Article"`,
+  );
+  check(
+    "static:seo",
+    seoArticleLd.headline === "Consumer article with explicit metadata",
+    `the SEO article headline is ${JSON.stringify(seoArticleLd.headline)}`,
+  );
+  check(
+    "static:seo",
+    seoArticleLd.url === seoArticleUrl,
+    `the SEO article JSON-LD url is ${JSON.stringify(seoArticleLd.url)}, expected ${seoArticleUrl}`,
+  );
+  check(
+    "static:seo",
+    seoArticle.includes(`<link rel="canonical" href="${seoArticleUrl}">`),
+    "the SEO article canonical URL does not match its JSON-LD url",
+  );
+  check(
+    "static:seo",
+    JSON.stringify(seoArticleLd.author) ===
+      JSON.stringify([
+        {
+          "@type": "Person",
+          name: "Frontmatter Author",
+          url: "https://example.test/authors/frontmatter",
+        },
+        { "@type": "Person", name: "Second Author" },
+      ]),
+    `frontmatter author precedence is wrong: ${JSON.stringify(seoArticleLd.author)}`,
+  );
+  check(
+    "static:seo",
+    !JSON.stringify(seoArticleLd).includes("[object Object]"),
+    "a frontmatter author object was stringified into a Person name",
+  );
+  check(
+    "static:seo",
+    seoArticleLd.datePublished === "2025-02-03T04:05:06.000Z",
+    `datePublished is ${JSON.stringify(seoArticleLd.datePublished)}`,
+  );
+  check(
+    "static:seo",
+    seoArticleLd.dateModified === "2025-03-04T05:06:07.000Z",
+    `dateModified is ${JSON.stringify(seoArticleLd.dateModified)}`,
+  );
+  check(
+    "static:seo",
+    seoArticleLd.publisher?.name === CONFIG_TITLE,
+    "the SEO article publisher is not the configured site title",
+  );
+  check(
+    "static:seo",
+    seoArticle.includes('<meta property="og:type" content="article">'),
+    "the SEO article route does not keep og:type=article",
+  );
+
+  // config.author is the fallback for an article without a frontmatter author.
+  const seoDefaultAuthor = readGenerated(
+    "static:seo",
+    join(seoDir, "blogs", "default-author", "index.html"),
+    "the SEO default-author article",
+  );
+  const seoDefaultAuthorLd = parseJsonLdScript("static:seo", seoDefaultAuthor);
+  check(
+    "static:seo",
+    JSON.stringify(seoDefaultAuthorLd.author) ===
+      JSON.stringify([
+        {
+          "@type": "Person",
+          name: "Consumer Default Author",
+          url: "https://example.test/authors/default",
+        },
+      ]),
+    `config.author fallback is wrong: ${JSON.stringify(seoDefaultAuthorLd.author)}`,
+  );
+  check(
+    "static:seo",
+    !("datePublished" in seoDefaultAuthorLd),
+    "git-first-commit must not become datePublished",
+  );
+  check(
+    "static:seo",
+    seoDefaultAuthorLd.dateModified === GIT_COMMIT_UPDATED_AT,
+    `dateModified is ${JSON.stringify(seoDefaultAuthorLd.dateModified)}, expected the trusted git commit date`,
+  );
+
+  // A document without explicit dates omits datePublished but keeps only
+  // trustworthy modification metadata.
+  const seoDoc = readGenerated(
+    "static:seo",
+    join(seoDir, "docs", "hello", "index.html"),
+    "the SEO undated document",
+  );
+  const seoDocLd = parseJsonLdScript("static:seo", seoDoc);
+  check(
+    "static:seo",
+    seoDocLd["@type"] === "TechArticle",
+    `the SEO document @type is ${JSON.stringify(seoDocLd["@type"])}, expected "TechArticle"`,
+  );
+  check(
+    "static:seo",
+    !("datePublished" in seoDocLd),
+    "the undated document must not receive a fabricated datePublished",
+  );
+  check(
+    "static:seo",
+    seoDocLd.dateModified === GIT_COMMIT_UPDATED_AT,
+    `the undated document dateModified is ${JSON.stringify(seoDocLd.dateModified)}`,
+  );
+
+  const seoSitemap = parseSitemapOrFail(
+    "static:seo",
+    readGenerated("static:seo", join(seoDir, "sitemap.xml"), "the SEO sitemap.xml"),
+  );
+  const seoSitemapByLoc = new Map(
+    seoSitemap.map((entry) => [entry.loc, entry.lastmod]),
+  );
+  for (const entry of seoSitemap) {
+    if (entry.lastmod === undefined) continue;
+    check(
+      "static:seo",
+      isW3cDatetime(entry.lastmod),
+      `sitemap lastmod for ${entry.loc} is not a W3C datetime: ${JSON.stringify(entry.lastmod)}`,
+    );
+  }
+  check(
+    "static:seo",
+    seoSitemapByLoc.get(`${SEO_SITE_PREFIX}`) === "2025-05-06T07:08:09.000Z",
+    `the home route explicit route.lastmod is ${JSON.stringify(seoSitemapByLoc.get(`${SEO_SITE_PREFIX}`))}`,
+  );
+  check(
+    "static:seo",
+    seoSitemapByLoc.get(seoArticleUrl) === "2025-03-04T05:06:07.000Z",
+    `the SEO article lastmod is ${JSON.stringify(seoSitemapByLoc.get(seoArticleUrl))}`,
+  );
+  check(
+    "static:seo",
+    seoSitemapByLoc.get(`${SEO_SITE_PREFIX}blogs/default-author/`) === GIT_COMMIT_UPDATED_AT,
+    "the default-author article did not use its trusted git-last-commit lastmod",
+  );
+  check(
+    "static:seo",
+    seoSitemapByLoc.get(`${SEO_SITE_PREFIX}docs/hello/`) === GIT_COMMIT_UPDATED_AT,
+    "the undated document did not use its trusted git-last-commit lastmod",
+  );
+  check(
+    "static:seo",
+    seoSitemapByLoc.get(`${SEO_SITE_PREFIX}blogs/`) === undefined,
+    "the collection index must not fabricate a lastmod",
+  );
+  check(
+    "static:seo",
+    seoSitemap.every((entry) => !entry.loc.endsWith("/404/") && !entry.loc.endsWith("/404")),
+    "the SEO sitemap advertises the not-found page",
+  );
+  log(
+    "[static]   ok  SEO fixture: parsed JSON-LD author precedence/dates and parsed sitemap lastmod",
+  );
 
   // Counter-proof: with static generation disabled, the same fixture, base,
   // site URL and Markdown must produce a normal Vite build with no static

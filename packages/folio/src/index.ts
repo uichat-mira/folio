@@ -40,6 +40,7 @@ export {
 export { renderFolioMarkdown } from "./core/markdown";
 export type { FolioMarkdownRenderOptions } from "./core/markdown";
 export type {
+  FolioAuthor,
   FolioConfig,
   FolioCollectionConfig,
   FolioDateSource,

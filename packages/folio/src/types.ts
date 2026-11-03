@@ -40,6 +40,13 @@ export type FolioDateSources = {
   historyComplete?: boolean;
 };
 
+/**
+ * One author for generated Article/TechArticle structured data. A string is a
+ * display name; the object form adds an optional canonical profile URL to the
+ * emitted Schema.org `Person`.
+ */
+export type FolioAuthor = string | { name: string; url?: string };
+
 export type FolioDoc = {
   id: string;
   path: string;
@@ -167,6 +174,13 @@ export type FolioHomeConfig = {
 export type FolioConfig = {
   title: string;
   description: string;
+  /**
+   * Default author(s) for generated Article/TechArticle structured data. A
+   * document's explicit frontmatter `author` always wins. When neither exists
+   * the JSON-LD `author` property is omitted; Folio never emits an empty list
+   * or a fabricated person.
+   */
+  author?: FolioAuthor | FolioAuthor[];
   logo?: string;
   siteUrl?: string;
   base?: string;

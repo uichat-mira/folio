@@ -6,8 +6,12 @@ import { folio } from "@uichat-mira/folio/vite";
 // is an explicit override instead of a second config file: the content
 // directory and output directory (bundle check and its no-Markdown control),
 // plus the deployment base, site URL and static-generation switch (static
-// output check and its staticRoutes-off control).
-const contentDir = process.env.FOLIO_CONSUMER_CONTENT_DIR ?? "content";
+// output check and its staticRoutes-off control). FOL-027 adds a separate SEO
+// mode with its own content directory so the default four-URL sitemap fixture
+// keeps asserting exactly what it did before.
+const seoMode = process.env.FOLIO_CONSUMER_SEO === "on";
+const contentDir =
+  process.env.FOLIO_CONSUMER_CONTENT_DIR ?? (seoMode ? "content-seo" : "content");
 const outDir = process.env.FOLIO_CONSUMER_OUT_DIR ?? "dist";
 const base = process.env.FOLIO_CONSUMER_BASE ?? "/";
 const siteUrl = process.env.FOLIO_CONSUMER_SITE_URL;
@@ -19,6 +23,16 @@ const config = {
   description:
     "Standalone Vite + React consumer of the published Folio package.",
   ...(siteUrl ? { siteUrl } : {}),
+  // FOL-027: the site-level default author. Articles with an explicit
+  // frontmatter author must override it; articles without one must use it.
+  ...(seoMode
+    ? {
+        author: {
+          name: "Consumer Default Author",
+          url: "https://example.test/authors/default",
+        },
+      }
+    : {}),
   collections: [
     { path: "/blogs", title: "博客" },
     { path: "/projects", title: "项目" },
@@ -52,7 +66,21 @@ const staticOptions =
             "</main>",
         }),
       }
-    : true;
+    : seoMode
+      ? {
+          // FOL-027 evidence for the explicit per-route sitemap <lastmod>
+          // override (validated and normalized by the installed tarball).
+          home: () => ({
+            title: "Consumer static home",
+            description: "SEO fixture home.",
+            body:
+              '<main class="folio-static-home-seo">' +
+              "<h1>Consumer static home</h1>" +
+              "</main>",
+            lastmod: "2025-05-06T07:08:09Z",
+          }),
+        }
+      : true;
 
 export default defineConfig({
   base,
