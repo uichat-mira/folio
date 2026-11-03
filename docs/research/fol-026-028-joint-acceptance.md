@@ -4,8 +4,9 @@
 - Baseline: `origin/dev @ c828e8a6a00fdf3c0ecdf2f2dd613ad8d68c0be7`
   (merge of `feat/fol-025-content-dates`, PR #139)
 - Integration branch: `feat/integration-fol-026-027-028`; three-feature merge
-  `2bf99e6`, post-review P2-fix merge `f9d97fb`, report updates committed after
-  review. The current branch head contains all of them.
+  `2bf99e6`, initial static-output collision fix `f9d97fb`, and path-prefix
+  fix sync commits `9810d8d`, `57e5c75`, `1fc1d4c`. The current head contains
+  the combined features and both FOL-026 fixes.
 - Status: three independently reviewable Draft PRs + one integration branch.
   **Nothing was merged, closed, promoted or deployed.**
 
@@ -28,10 +29,10 @@ and ran the joint acceptance below.
 
 | Feature | Branch | Head commit | Draft PR | Issue |
 | --- | --- | --- | --- | --- |
-| FOL-026 feeds | `feat/fol-026-rss-atom` | `6f1d654` (P2 fix; features at `6a90499`) | [#142](https://github.com/uichat-mira/folio/pull/142) | #125 |
+| FOL-026 feeds | `feat/fol-026-rss-atom` | `0a39a5a` (P2 + path-prefix fixes; features at `6a90499`) | [#142](https://github.com/uichat-mira/folio/pull/142) | #125 |
 | FOL-027 structured metadata | `feat/fol-027-structured-metadata` | `8dc00e0b197ded5488d990ca595c4e159f56f876` | [#141](https://github.com/uichat-mira/folio/pull/141) | #126 |
 | FOL-028 site indexing | `feat/fol-028-indexing` | `85507f753c161dfbce2ac5b5eba4558d07a51ccd` | [#140](https://github.com/uichat-mira/folio/pull/140) | #127 |
-| Integration | `feat/integration-fol-026-027-028` | `f9d97fb` (merge of the P2 fix) + this report | none (branch only) | — |
+| Integration | `feat/integration-fol-026-027-028` | `1fc1d4c` (combined branch with both FOL-026 fixes) + this report | none (branch only) | — |
 
 All three PRs are `draft`, target `dev`, use `Refs #…` (never `Closes`), carry
 the dsh badge, and were authored from the same baseline.
@@ -46,10 +47,11 @@ the dsh badge, and were authored from the same baseline.
 - Feeds are per route directory, select documents recursively (all doc types),
   and require `config.siteUrl`; without it no feed file and no alternate link
   is produced. Output names are normalized (`./rss.xml`, `rss.xml`, `RSS.XML`
-  are one target) and checked against each other AND against every static
-  output the same build writes: page targets (`<route>/index.html`),
-  `404.html`, `sitemap.xml` and `robots.txt` when enabled. Any collision
-  throws before the first write; disabled fixed outputs release their names.
+  are one target) and checked against each other and every static output the
+  same build writes: page targets (`<route>/index.html`), `404.html`,
+  `sitemap.xml` and `robots.txt` when enabled. Equal paths and ancestor /
+  descendant overlaps at path-segment boundaries throw before the first write;
+  disabled fixed outputs release their names.
 - Every generated page (including `404.html`) gets absolute
   `rel="alternate"` links only for files actually written; pre-existing
   RSS/Atom alternates in a consumer template are stripped first.
@@ -226,18 +228,46 @@ artifact. The fix (branch commit `6f1d654`, merged as `f9d97fb`):
 - `sitemap: false` / `robots: false` release those names, which is covered by
   an explicit positive test.
 
-Regression evidence: `test/feeds.test.mjs` 20/20 (branch + integration), the
-packaged tarball `collision.mjs` (12 rejected names + 1 allowed case, real
-filesystem), full `release:check` on both the branch and the merged tree, and
-the matrix/combined-smoke rebuilds above (`10/10`, `57/57`). No other feature
-was modified; the merge conflicted only in the `static.ts` write-ordering
-block.
+Regression evidence for the first fix: `test/feeds.test.mjs` 20/20 (branch +
+integration), the packaged tarball `collision.mjs` (12 rejected names + 1
+allowed case, real filesystem), full `release:check` on the branch and merged
+tree, and the matrix/combined-smoke rebuilds above (`10/10`, `57/57`). No
+other feature was modified; the merge conflicted only in the `static.ts`
+write-ordering block.
+
+### 6.2 Follow-up: feed/static file-directory prefix conflicts (P2)
+
+A second pass found that exact normalized equality still missed paths where
+one output file would need to be a directory for the other:
+
+- Feed output `blogs` is an ancestor of the generated collection page
+  `blogs/index.html`.
+- Feed output `blogs/index.html/feed.xml` is nested below a generated HTML
+  file.
+- Feed output `sitemap.xml/feed.xml` is nested below the fixed Sitemap file.
+
+`feed.ts` now compares normalized paths at segment boundaries and rejects
+equality or either ancestor/descendant relationship against the reserved
+static-output set. The check remains before the first write. The disabled
+Sitemap / Robots behavior is unchanged.
+
+Regression cases in `feeds.test.mjs` cover both page-path directions and a
+fixed-file descendant; they assert that no route directory, page, fixed output
+or feed is written before rejection. PR #142 current head
+`0a39a5a` passed `npm run release:check` (124/124 tests, package verification
+and isolated tarball consumer) and the Windows `build`, `pack:verify` and
+`pack:consumer` checks (Validate run `41663239416`, both required jobs pass).
+
+The same source, regression and documentation changes were synchronized to
+the combined integration branch as `9810d8d`, `57e5c75`, `1fc1d4c`.
+No new Issue or PR was created, #140 / #141 were not modified, and the full
+10-scenario joint matrix was not rerun.
 
 ## 7. CI status
 
 | Ref | Workflow / jobs | Result |
 | --- | --- | --- |
-| FOL-026 `6f1d654` (PR #142, P2 fix) | Validate: `validate`, `windows-package-check` (push run 41657194786, PR run 41657205256) | pass, pass |
+| FOL-026 `0a39a5a` (PR #142, path-prefix fix) | Validate run 41663239416: `validate`, `windows-package-check` | pass, pass |
 | FOL-027 `8dc00e0` (PR #141) | Validate: `validate`, `windows-package-check` | pass, pass |
 | FOL-028 `85507f7` (PR #140) | Validate: `validate`, `windows-package-check` | pass, pass |
 | Integration `2bf99e6` (branch push) | Validate run 41650121997: `validate`, `windows-package-check` | pass, pass |
@@ -263,8 +293,11 @@ workflows, release scripts, or another feature's implementation.
 ## 9. Authority compliance
 
 - Issues #125, #126, #127 are still **open**.
-- No PR was merged; all three remain draft and open. PR #142 received the
-  `6f1d654` fix commit on its branch (still draft, not merged).
+- No PR was merged; all three remain draft and open. PR #142 received
+  `6f1d654` and `0a39a5a` on its branch (still draft, not merged).
+- The combined integration branch received the matching FOL-026 source,
+  regression and documentation updates; #140 and #141 feature branches were
+  not changed.
 - `origin/dev` is still `c828e8a6a00fdf3c0ecdf2f2dd613ad8d68c0be7`.
 - No change to Project status, milestones or labels.
 - No promotion to `test`/`prod`, no deployment, no npm publish.
@@ -274,9 +307,9 @@ workflows, release scripts, or another feature's implementation.
 
 ## 10. Known limitations and risks
 
-1. The review P2 (feed output name overwriting a page/`404.html`/`sitemap.xml`/
-   `robots.txt`) is fixed in `6f1d654`. Residual scope: names are compared
-   against the outputs Folio itself writes, not against arbitrary files a
+1. Feed output equality and file/directory prefix conflicts against Folio-owned
+   static outputs are fixed in `6f1d654` and `0a39a5a`. Residual scope: names
+   are compared against the outputs Folio itself writes, not arbitrary files a
    consumer drops into the output directory before the plugin runs (for
    example a hand-written `favicon.svg`); those are outside the static writer's
    target set.
