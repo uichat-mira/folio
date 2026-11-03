@@ -17,6 +17,7 @@ const base = process.env.FOLIO_CONSUMER_BASE ?? "/";
 const siteUrl = process.env.FOLIO_CONSUMER_SITE_URL;
 const staticRoutes = process.env.FOLIO_CONSUMER_STATIC === "on";
 const homeMode = process.env.FOLIO_CONSUMER_HOME_MODE ?? "default";
+const feedsMode = process.env.FOLIO_CONSUMER_FEEDS === "on";
 
 // FOL-028: the fixture opts into the site-level indexing policy only through
 // this explicit environment switch. Nothing in the installed package inspects
@@ -73,7 +74,15 @@ const config = {
     : {}),
 };
 
-const staticOptions =
+// FOL-026 feed evidence uses two route directories on purpose: `/docs` already
+// has one dated document, while the configured `/blogs` collection has no
+// documents (zero-item RSS, no Atom because no `<updated>` can be derived).
+const feedOptions = [
+  { path: "/docs", title: "文档", rss: "rss.xml", atom: "atom.xml" },
+  { path: "/blogs", rss: "feeds/blogs.xml", atom: "feeds/blogs.atom.xml" },
+];
+
+const baseStaticOptions =
   homeMode === "override"
     ? {
         home: () => ({
@@ -102,8 +111,15 @@ const staticOptions =
         }
       : true;
 
-// The indexing policy is an independent static option, so it composes with both
-// the default and the home-override fixture instead of replacing them.
+// FOL-026 and FOL-028 are independent static options, so each one composes with
+// the default, home-override and SEO fixtures instead of replacing them.
+const staticOptions = feedsMode
+  ? {
+      ...(typeof baseStaticOptions === "object" ? baseStaticOptions : {}),
+      feeds: feedOptions,
+    }
+  : baseStaticOptions;
+
 const staticOptionsWithIndexing =
   siteIndexing === undefined
     ? staticOptions

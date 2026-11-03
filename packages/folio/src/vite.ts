@@ -20,6 +20,7 @@ export type {
   FolioPluginOptions,
   FolioStaticBuildContext,
   FolioStaticBuildOptions,
+  FolioStaticFeedOptions,
   FolioStaticHomeOverride,
   FolioStaticImageMetadata,
   FolioStaticRoute,
