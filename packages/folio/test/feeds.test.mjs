@@ -841,6 +841,11 @@ test("feed output files cannot duplicate or overlap before any page or feed is w
           title: "Blog post",
           publishedAt: "2025-01-01T00:00:00.000Z",
         }),
+        makeDoc({
+          path: "/docs/post",
+          title: "Docs post",
+          publishedAt: "2025-01-02T00:00:00.000Z",
+        }),
       ];
       assert.throws(
         () =>
