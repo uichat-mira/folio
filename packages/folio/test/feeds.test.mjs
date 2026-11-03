@@ -786,7 +786,7 @@ test("a feed may reuse sitemap.xml or robots.txt only when that output is disabl
   });
 });
 
-test("duplicate feed output names throw before any page or feed is written", () => {
+test("feed output files cannot duplicate or overlap before any page or feed is written", () => {
   const cases = [
     {
       feeds: [{ path: "/blogs" }, { path: "/docs" }],
@@ -814,6 +814,22 @@ test("duplicate feed output names throw before any page or feed is written", () 
         { path: "/docs", rss: "feed.xml.", atom: false },
       ],
       expected: '"feed.xml."',
+    },
+    {
+      // A feed file cannot be the parent directory of another feed file.
+      feeds: [
+        { path: "/blogs", rss: "feeds", atom: false },
+        { path: "/docs", rss: false, atom: "feeds/atom.xml" },
+      ],
+      expected: '"feeds/atom.xml"',
+    },
+    {
+      // Nor can a later feed file become the parent of an earlier feed file.
+      feeds: [
+        { path: "/blogs", rss: "feeds/rss.xml/atom.xml", atom: false },
+        { path: "/docs", rss: false, atom: "feeds/rss.xml" },
+      ],
+      expected: '"feeds/rss.xml"',
     },
   ];
 
@@ -856,6 +872,7 @@ test("duplicate feed output names throw before any page or feed is written", () 
       for (const file of [
         "blogs/index.html",
         "blogs/post/index.html",
+        "feeds",
         "404.html",
         "sitemap.xml",
         "robots.txt",
