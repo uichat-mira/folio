@@ -13,6 +13,7 @@ const base = process.env.FOLIO_CONSUMER_BASE ?? "/";
 const siteUrl = process.env.FOLIO_CONSUMER_SITE_URL;
 const staticRoutes = process.env.FOLIO_CONSUMER_STATIC === "on";
 const homeMode = process.env.FOLIO_CONSUMER_HOME_MODE ?? "default";
+const feedsMode = process.env.FOLIO_CONSUMER_FEEDS === "on";
 
 const config = {
   title: "Folio Vite consumer fixture",
@@ -39,7 +40,15 @@ const config = {
     : {}),
 };
 
-const staticOptions =
+// FOL-026 feed evidence uses two route directories on purpose: `/docs` already
+// has one dated document, while the configured `/blogs` collection has no
+// documents (zero-item RSS, no Atom because no `<updated>` can be derived).
+const feedOptions = [
+  { path: "/docs", title: "文档", rss: "rss.xml", atom: "atom.xml" },
+  { path: "/blogs", rss: "feeds/blogs.xml", atom: "feeds/blogs.atom.xml" },
+];
+
+const baseStaticOptions =
   homeMode === "override"
     ? {
         home: () => ({
@@ -52,6 +61,12 @@ const staticOptions =
             "</main>",
         }),
       }
+    : {};
+
+const staticOptions = feedsMode
+  ? { ...baseStaticOptions, feeds: feedOptions }
+  : homeMode === "override"
+    ? baseStaticOptions
     : true;
 
 export default defineConfig({

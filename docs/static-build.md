@@ -75,6 +75,98 @@ route uses (`config.home` included), and `resolveFolioHome(config, docs)` return
 the platform-neutral model. A React node is never serialized automatically;
 `home` and `renderFolioStaticHome` produce HTML strings only.
 
+## RSS 2.0 and Atom 1.0 feeds
+
+`feeds` declares one or more subscription feeds. Each entry names a **route
+directory** (not a content type, not a fixed blog folder); every document under
+that route — at any depth, regardless of `doc.type` — becomes an entry:
+
+```ts
+const staticBuild: FolioStaticBuildOptions = {
+  feeds: [
+    { path: "/blogs" },
+    { path: "/docs", title: "Documentation", rss: "docs/rss.xml", atom: "docs/atom.xml" },
+    // A feed is RSS-only when atom is false, and vice versa.
+    { path: "/projects", rss: "projects.xml", atom: false },
+  ],
+};
+```
+
+`FolioStaticFeedOptions` fields:
+
+- `path` (required): absolute route directory, for example `/blogs` or
+  `/docs/guide`. Root `/` is not a valid feed path. Descendants are selected
+  recursively with `selectFolioCollectionDocs`, so `/docs` includes
+  `/docs/guide/...` as well.
+- `title`: discovery/channel title. Defaults to the matching configured
+  collection title (`config.collections`), then `config.title`.
+- `description`: channel/subtitle text. Defaults to the matching collection
+  description, then `config.description`; an empty description omits the Atom
+  `<subtitle>`.
+- `rss`: site-root-relative output file, default `rss.xml`. `false` disables RSS.
+- `atom`: site-root-relative output file, default `atom.xml`. `false` disables
+  Atom.
+
+Omitting `feeds` (or passing an empty array) writes no feed and changes no page
+head. Output names are relative to the static site root and use the same
+fixed-name safety layer as `404.html`; duplicate output names across feeds throw
+before any page or feed is written. Existing `<link rel="alternate"
+type="application/rss+xml|application/atom+xml">` elements supplied by a page
+template are removed before Folio injects its own, so a page never advertises a
+duplicate feed.
+
+### URLs, base paths, and discovery
+
+Feeds require `config.siteUrl`. Without it, feed generation and alternate links
+are skipped entirely — a feed with relative URLs would be unusable in a reader.
+With a sub-path deployment such as `siteUrl: "https://example.com"` and
+`base: "/moyu/"`, a document at `/blogs/hello` is published as
+`https://example.com/moyu/blogs/hello/`, the RSS self link is
+`https://example.com/moyu/rss.xml`, and the channel/site link is
+`https://example.com/moyu/`. GUIDs and Atom entry ids equal the article
+permalink; the trailing slash matches `folioAbsoluteRouteUrl`.
+
+Every generated page (home, collection indexes, docs/articles, custom routes,
+and `404.html`) gets a discovery link only for a feed file that was actually
+written:
+
+```html
+<link rel="alternate" type="application/rss+xml" title="Blogs" href="https://example.com/moyu/rss.xml">
+<link rel="alternate" type="application/atom+xml" title="Blogs" href="https://example.com/moyu/atom.xml">
+```
+
+The advertised MIME types are `application/rss+xml` and
+`application/atom+xml`. Files end in `.xml`; serve `.xml` as XML (`application/xml`
+or `text/xml`) from the static host. GitHub Pages does this by extension; a
+custom host must not serve `.xml` as `text/html`.
+
+### Dates and empty sources
+
+Feed dates reuse the frozen FOL-025 provenance instead of guessing:
+
+- RSS `<pubDate>` and Atom `<published>` are emitted only when
+  `dateSources.publishedAt` is `frontmatter` or `legacy-date`. A document without
+  a trusted publication date is still included in RSS, just without
+  `<pubDate>`.
+- Atom requires `<updated>`: it uses a trusted `updatedAt` (`frontmatter` or
+  `git-last-commit`), falling back to the trusted publication date. Entries
+  with neither are excluded from Atom.
+- Atom's feed-level `<updated>` is the latest entry date; it is never the build
+  clock. If no entry has a derivable date, no Atom file is written and no Atom
+  alternate link is emitted.
+- Git first-commit timestamps, file mtimes, and build time are never emitted as
+  publication dates.
+- Atom requires an author when entries do not provide one, so the feed-level
+  author is the site itself (`config.title`); no person is invented.
+
+An empty or missing source directory is deterministic: the RSS file is still
+written with zero `<item>` elements, and Atom is not written because no
+`<updated>` can be derived. Entry order is trusted publication date descending
+(undated entries last), then `order`, then route path, so repeated builds of the
+same content produce the same feed. XML is escaped for text and attributes,
+Chinese and emoji are preserved, and XML-1.0-invalid control characters are
+removed.
+
 ## Folio responsibilities
 
 - Write route HTML into the Vite output directory.
@@ -82,6 +174,7 @@ the platform-neutral model. A React node is never serialized automatically;
 - Inject JSON-LD supplied by the site, or generate a conservative default.
 - Resolve relative social images against the deployment base path.
 - Generate `404.html`, `sitemap.xml`, and `robots.txt`.
+- Generate declared RSS 2.0 / Atom 1.0 feeds and their discovery links.
 
 ## Site responsibilities
 

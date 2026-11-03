@@ -15,11 +15,13 @@
 //   [static:404]      404.html is missing or is not noindex
 //   [static:sitemap]  sitemap.xml is missing or does not describe the routes
 //   [static:robots]   robots.txt is missing or points at the wrong sitemap
+//   [static:feeds]    RSS/Atom files or their HTML discovery links are wrong
 //   [static:control]  the staticRoutes-off control emitted static files
 import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { parseXml, xmlAttribute, xmlElements, xmlText } from "./xml.mjs";
 
 // A fixed, non-production deployment shape: an unrelated test domain plus a
 // non-root base path, so canonical URLs, sitemap entries and internal links
@@ -43,7 +45,11 @@ function readGenerated(stage, path, what) {
   return readFileSync(path, "utf8");
 }
 
-function runBuild(viteCli, appDir, { outDir, staticMode, homeMode = "default" }) {
+function runBuild(
+  viteCli,
+  appDir,
+  { outDir, staticMode, homeMode = "default", feedsMode = false },
+) {
   // Start from nothing so a file can only exist because this build wrote it.
   rmSync(join(appDir, outDir), { recursive: true, force: true });
 
@@ -62,6 +68,7 @@ function runBuild(viteCli, appDir, { outDir, staticMode, homeMode = "default" })
         FOLIO_CONSUMER_SITE_URL: STATIC_SITE_URL,
         FOLIO_CONSUMER_STATIC: staticMode ? "on" : "off",
         FOLIO_CONSUMER_HOME_MODE: homeMode,
+        FOLIO_CONSUMER_FEEDS: feedsMode ? "on" : "off",
       },
     },
   );
@@ -84,6 +91,40 @@ function runBuild(viteCli, appDir, { outDir, staticMode, homeMode = "default" })
 
 function anchorHrefs(html) {
   return [...html.matchAll(/<a\b[^>]*?\bhref="([^"]*)"/g)].map(
+    (match) => match[1],
+  );
+}
+
+function feedChild(node, name) {
+  return xmlElements(node).find((element) => element.name === name);
+}
+
+function feedChildText(node, name) {
+  const element = feedChild(node, name);
+  return element ? xmlText(element) : undefined;
+}
+
+function parseGeneratedFeed(stage, path, what) {
+  const source = readGenerated(stage, path, what);
+  check(
+    stage,
+    (source.match(/<\?xml/g) ?? []).length === 1,
+    `${what} must contain exactly one XML declaration`,
+  );
+  check(
+    stage,
+    source.startsWith('<?xml version="1.0" encoding="UTF-8"?>'),
+    `${what} does not start with a UTF-8 XML declaration`,
+  );
+  try {
+    return parseXml(source);
+  } catch (error) {
+    throw new Error(`[${stage}] FAIL ${what} is not well-formed XML: ${error.message}`);
+  }
+}
+
+function alternateHrefs(html) {
+  return [...html.matchAll(/<link rel="alternate"[^>]*\bhref="([^"]+)"/g)].map(
     (match) => match[1],
   );
 }
@@ -402,6 +443,204 @@ export function verifyStaticConsumer({ consumerDir, appDir, log }) {
     `robots.txt is ${JSON.stringify(robots)}, expected ${JSON.stringify(expectedRobots)}`,
   );
   log("[static]   ok  robots.txt  points at the base-prefixed sitemap");
+
+  // FOL-026 compatibility counter-check: this same build has no `feeds`
+  // configured, so it must produce no feed file and no alternate link.
+  for (const relative of ["rss.xml", "atom.xml", join("feeds", "blogs.xml")]) {
+    check(
+      "static",
+      !existsSync(join(distDir, relative)),
+      `a build without feeds produced ${relative.replace(/\\/g, "/")}`,
+    );
+  }
+  check(
+    "static:home",
+    !staticIndex.includes('rel="alternate"'),
+    "a build without feeds added an alternate discovery link",
+  );
+  log("[static]   ok  no feeds configured: no feed files and no alternate links");
+
+  // FOL-026: the installed tarball enables feeds from consumer config alone.
+  // `/docs` has one dated document; the configured `/blogs` collection has no
+  // documents, so it must still publish a valid zero-item RSS and no Atom.
+  const feedsDir = runBuild(viteCli, appDir, {
+    outDir: "dist-feeds",
+    staticMode: true,
+    feedsMode: true,
+  });
+  const rss = parseGeneratedFeed("static:feeds", join(feedsDir, "rss.xml"), "rss.xml");
+  const rssChannel = feedChild(rss, "channel");
+  check("static:feeds", rss.name === "rss", "rss.xml root element is not <rss>");
+  check(
+    "static:feeds",
+    xmlAttribute(rss, "version") === "2.0",
+    "rss.xml is not RSS 2.0",
+  );
+  check("static:feeds", Boolean(rssChannel), "rss.xml has no <channel>");
+  check(
+    "static:feeds",
+    feedChildText(rssChannel, "title") === "文档",
+    "rss.xml channel title is not the configured feed title",
+  );
+  check(
+    "static:feeds",
+    feedChildText(rssChannel, "link") === "https://example.test/folio-smoke/",
+    "rss.xml channel link is not the base-prefixed site root",
+  );
+  check(
+    "static:feeds",
+    xmlAttribute(feedChild(rssChannel, "atom:link"), "href") ===
+      "https://example.test/folio-smoke/rss.xml",
+    "rss.xml atom:link self is not the absolute feed URL",
+  );
+  const rssItems = xmlElements(rssChannel).filter((element) => element.name === "item");
+  check("static:feeds", rssItems.length === 1, `rss.xml has ${rssItems.length} items, expected 1`);
+  const rssItem = rssItems[0];
+  check(
+    "static:feeds",
+    feedChildText(rssItem, "title") === DOC_TITLE,
+    "rss.xml item title is not the Markdown title",
+  );
+  check(
+    "static:feeds",
+    feedChildText(rssItem, "link") === "https://example.test/folio-smoke/docs/hello/",
+    "rss.xml item link is not the absolute base-prefixed permalink",
+  );
+  const rssGuid = feedChild(rssItem, "guid");
+  check(
+    "static:feeds",
+    xmlAttribute(rssGuid, "isPermaLink") === "true" &&
+      xmlText(rssGuid) === "https://example.test/folio-smoke/docs/hello/",
+    "rss.xml guid is not isPermaLink=true at the article permalink",
+  );
+  check(
+    "static:feeds",
+    feedChildText(rssItem, "pubDate") === "Sat, 07 Jun 2025 00:09:10 GMT",
+    "rss.xml pubDate is not the trusted frontmatter publication date",
+  );
+  log(
+    "[static]   ok  rss.xml  one base-prefixed item, absolute GUID, trusted pubDate",
+  );
+
+  const atom = parseGeneratedFeed(
+    "static:feeds",
+    join(feedsDir, "atom.xml"),
+    "atom.xml",
+  );
+  check("static:feeds", atom.name === "feed", "atom.xml root element is not <feed>");
+  check(
+    "static:feeds",
+    feedChildText(atom, "id") === "https://example.test/folio-smoke/atom.xml",
+    "atom.xml feed id is not the feed self URL",
+  );
+  check(
+    "static:feeds",
+    feedChildText(atom, "title") === "文档",
+    "atom.xml title is not the configured feed title",
+  );
+  check(
+    "static:feeds",
+    feedChildText(atom, "updated") === "2024-01-01T19:04:05.000Z",
+    "atom.xml <updated> is not the trusted Git last-commit modification date",
+  );
+  check(
+    "static:feeds",
+    feedChildText(feedChild(atom, "author"), "name") === CONFIG_TITLE,
+    "atom.xml feed author is not the site title",
+  );
+  const atomEntries = xmlElements(atom).filter((element) => element.name === "entry");
+  check("static:feeds", atomEntries.length === 1, `atom.xml has ${atomEntries.length} entries, expected 1`);
+  const atomEntry = atomEntries[0];
+  check(
+    "static:feeds",
+    feedChildText(atomEntry, "id") === "https://example.test/folio-smoke/docs/hello/",
+    "atom.xml entry id is not the article permalink",
+  );
+  check(
+    "static:feeds",
+    feedChildText(atomEntry, "updated") === "2024-01-01T19:04:05.000Z",
+    "atom.xml entry updated is not the trusted modification date",
+  );
+  check(
+    "static:feeds",
+    feedChildText(atomEntry, "published") === "2025-06-07T00:09:10.000Z",
+    "atom.xml entry published is not the trusted frontmatter publication date",
+  );
+  log(
+    "[static]   ok  atom.xml  permalink ids and trusted updated/published dates only",
+  );
+
+  const blogsRss = parseGeneratedFeed(
+    "static:feeds",
+    join(feedsDir, "feeds", "blogs.xml"),
+    "feeds/blogs.xml",
+  );
+  const blogsChannel = feedChild(blogsRss, "channel");
+  check(
+    "static:feeds",
+    feedChildText(blogsChannel, "title") === "博客",
+    "feeds/blogs.xml does not use the configured collection title",
+  );
+  check(
+    "static:feeds",
+    feedChildText(blogsChannel, "link") === "https://example.test/folio-smoke/",
+    "feeds/blogs.xml channel link lost the deployment base",
+  );
+  check(
+    "static:feeds",
+    xmlElements(blogsChannel).filter((element) => element.name === "item").length === 0,
+    "feeds/blogs.xml is not a valid zero-item feed for an empty route directory",
+  );
+  check(
+    "static:feeds",
+    !existsSync(join(feedsDir, "feeds", "blogs.atom.xml")),
+    "an Atom feed with no derivable <updated> was written",
+  );
+  log(
+    "[static]   ok  feeds/blogs.xml  zero-item RSS for an empty directory, no Atom",
+  );
+
+  const expectedAlternates = [
+    ["application/rss+xml", "文档", "https://example.test/folio-smoke/rss.xml"],
+    ["application/atom+xml", "文档", "https://example.test/folio-smoke/atom.xml"],
+    ["application/rss+xml", "博客", "https://example.test/folio-smoke/feeds/blogs.xml"],
+  ];
+  for (const relative of [
+    "index.html",
+    join("blogs", "index.html"),
+    join("projects", "index.html"),
+    join("docs", "hello", "index.html"),
+    "404.html",
+  ]) {
+    const html = readGenerated(
+      "static:feeds",
+      join(feedsDir, relative),
+      relative.replace(/\\/g, "/"),
+    );
+    const hrefs = alternateHrefs(html);
+    check(
+      "static:feeds",
+      hrefs.length === expectedAlternates.length,
+      `${relative.replace(/\\/g, "/")} has ${hrefs.length} alternate links, expected ${expectedAlternates.length}`,
+    );
+    for (const [type, title, href] of expectedAlternates) {
+      check(
+        "static:feeds",
+        html.includes(
+          `<link rel="alternate" type="${type}" title="${title}" href="${href}">`,
+        ),
+        `${relative.replace(/\\/g, "/")} is missing the ${type} discovery link ${href}`,
+      );
+    }
+    check(
+      "static:feeds",
+      !hrefs.includes("https://example.test/folio-smoke/feeds/blogs.atom.xml"),
+      `${relative.replace(/\\/g, "/")} advertises an Atom feed that was not written`,
+    );
+  }
+  log(
+    "[static]   ok  feeds  three absolute base-prefixed alternate links on every page including 404",
+  );
 
   // FOL-030: the same installed tarball also proves a config-driven home and a
   // static-only home override. Each mode is a separate real Vite build so the

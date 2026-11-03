@@ -151,6 +151,7 @@ export type {
   FolioStaticImageMetadata,
   FolioStaticRoute,
 } from "../static";
+export type { FolioStaticFeedOptions } from "./feed";
 export {
   folioAbsoluteAssetUrl,
   folioAbsoluteRouteUrl,
