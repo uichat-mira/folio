@@ -17,6 +17,11 @@ import {
   resolveFolioIndexingRobots,
 } from "./build/indexing";
 import {
+  buildFolioStaticFeedPlan,
+  type FolioStaticFeedOptions,
+  type FolioStaticFeedPlan,
+} from "./build/feed";
+import {
   normalizeStaticRoute,
   writeFolioStaticOutputs,
   writeFolioStaticRootFile,
@@ -89,6 +94,12 @@ export type FolioStaticBuildOptions = {
   sitemap?: boolean;
   robots?: boolean;
   /**
+   * Declares RSS 2.0 / Atom 1.0 feeds for route directories. Requires
+   * `config.siteUrl`; omitting this field (or passing an empty array) leaves
+   * every existing static output byte-for-byte unchanged.
+   */
+  feeds?: FolioStaticFeedOptions[];
+  /**
    * Site-level indexing policy. Leave it out for the unchanged, indexable
    * default.
    *
@@ -147,6 +158,33 @@ export function folioAbsoluteAssetUrl(
   return `${origin}${normalizeBase(base)}/${assetPath}`;
 }
 
+// One plan serves both stages: HTML discovery renders only alternates for files
+// that are actually publishable, and the write stage writes exactly this plan.
+// Building it before the first page write is also where duplicate feed output
+// names and feed-vs-static-output collisions are rejected.
+function buildStaticFeedPlan(
+  context: FolioStaticBuildContext,
+  options: FolioStaticBuildOptions,
+  reservedOutputs?: readonly string[],
+): FolioStaticFeedPlan {
+  return buildFolioStaticFeedPlan({
+    config: context.config,
+    docs: context.docs,
+    feeds: options.feeds,
+    reservedOutputs,
+    routeUrl: (path) =>
+      folioAbsoluteRouteUrl(context.config.siteUrl!, context.base, path),
+    assetUrl: (name) =>
+      folioAbsoluteAssetUrl(context.config.siteUrl!, context.base, name),
+  });
+}
+
+// A consumer template may already contain feed discovery links. They are
+// removed before our own (absolute) links are injected so a page never
+// advertises two different feeds with the same type.
+const FOLIO_FEED_ALTERNATE_LINK =
+  /<link\b(?=[^>]*\brel\s*=\s*["']alternate["'])(?=[^>]*\btype\s*=\s*["']application\/(?:rss|atom)\+xml["'])[^>]*>\s*/gi;
+
 function resolveImage(
   route: FolioStaticRoute,
   context: FolioStaticBuildContext,
@@ -186,6 +224,12 @@ export function renderFolioStaticHtml(
   const jsonLd =
     route.jsonLd ?? defaultFolioJsonLd(route, context, canonical, image);
   const imageMetadata = options.image ?? {};
+  const alternates = buildStaticFeedPlan(context, options).alternates
+    .map(
+      (alternate) =>
+        `<link rel="alternate" type="${alternate.type}" title="${folioEscapeHtml(alternate.title)}" href="${folioEscapeHtml(alternate.href)}">`,
+    )
+    .join("");
 
   const head = [
     `<meta name="description" content="${folioEscapeHtml(route.description)}">`,
@@ -193,6 +237,7 @@ export function renderFolioStaticHtml(
     canonical
       ? `<link rel="canonical" href="${folioEscapeHtml(canonical)}">`
       : "",
+    alternates,
     `<meta property="og:locale" content="${folioEscapeHtml(options.locale || "en_US")}">`,
     `<meta property="og:title" content="${folioEscapeHtml(pageTitle)}">`,
     `<meta property="og:description" content="${folioEscapeHtml(route.description)}">`,
@@ -227,14 +272,22 @@ export function renderFolioStaticHtml(
   const transformed = options.transformTemplate?.(template, context) ?? template;
   const rootPlaceholder = options.rootPlaceholder || '<div id="root"></div>';
 
-  return transformed
+  let html = transformed
     .replace(/<title>[\s\S]*?<\/title>/i, `<title>${folioEscapeHtml(pageTitle)}</title>`)
     .replace(/<meta name="description"[^>]*>\s*/gi, "")
     .replace(/<meta name="robots"[^>]*>\s*/gi, "")
     .replace(/<link rel="canonical"[^>]*>\s*/gi, "")
     .replace(/<meta property="og:[^"]+"[^>]*>\s*/gi, "")
     .replace(/<meta name="twitter:[^"]+"[^>]*>\s*/gi, "")
-    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>\s*/gi, "")
+    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>\s*/gi, "");
+
+  // Only strip when we have something to inject: with feeds omitted the page
+  // head must stay exactly as the consumer wrote it.
+  if (alternates) {
+    html = html.replace(FOLIO_FEED_ALTERNATE_LINK, "");
+  }
+
+  return html
     .replace("</head>", `${head}</head>`)
     .replace(rootPlaceholder, `<div id="root">${route.body}</div>`);
 }
@@ -612,6 +665,25 @@ function applyStaticHomeOverride(
   return routes;
 }
 
+function staticReservedOutputs(
+  context: FolioStaticBuildContext,
+  options: FolioStaticBuildOptions,
+  routes: readonly FolioStaticRoute[],
+): string[] {
+  // Feed files are written after the pages, 404, sitemap and robots, so a feed
+  // named like any of those targets would silently overwrite it. Derive the
+  // exact file targets from the final route set (after the home override) and
+  // from the fixed outputs this build actually enables.
+  const names = routes.map((route) => {
+    const path = normalizeStaticRoute(route.path);
+    return path === "/" ? "index.html" : `${path.slice(1)}/index.html`;
+  });
+  names.push("404.html");
+  if (context.config.siteUrl && options.sitemap !== false) names.push("sitemap.xml");
+  if (context.config.siteUrl && options.robots !== false) names.push("robots.txt");
+  return names;
+}
+
 export function writeFolioStaticSite(
   context: FolioStaticBuildContext,
   options: FolioStaticBuildOptions = {},
@@ -640,6 +712,14 @@ export function writeFolioStaticSite(
           ]),
         )
       : undefined;
+  // Feed viability (duplicates and feed-vs-static-output collisions) is
+  // decided before the first page/feed write; HTML discovery later uses the
+  // same plan.
+  const feedPlan = buildStaticFeedPlan(
+    context,
+    options,
+    staticReservedOutputs(context, options, overriddenRoutes),
+  );
   // All route destinations are validated (including duplicate and real-target
   // collisions) before the first page is written; see static-output.ts.
   const normalizedRoutes = writeFolioStaticOutputs(
@@ -697,6 +777,12 @@ export function writeFolioStaticSite(
         ),
       }),
     );
+  }
+
+  // Feed names pass through the same fixed-name safety layer as 404.html,
+  // sitemap.xml and robots.txt.
+  for (const file of feedPlan.files) {
+    writeFolioStaticRootFile(context.outDir, file.name, file.content);
   }
 
   return { routes: normalizedRoutes.length };
