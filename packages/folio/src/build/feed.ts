@@ -74,11 +74,11 @@ export type FolioStaticFeedPlanInput = {
   feeds: readonly FolioStaticFeedOptions[] | undefined;
   /**
    * Static output files the same build already writes (pages, `404.html`,
-   * `sitemap.xml`, `robots.txt` when enabled). A feed output name that
-   * normalizes to one of them would silently overwrite it, so it is rejected
-   * before the writer starts. Names are compared case-insensitively with
-   * Windows-ambiguous trailing dots/spaces folded, so every platform behaves
-   * the same.
+   * `sitemap.xml`, `robots.txt` when enabled). A feed output path that is
+   * equal to, an ancestor of, or a descendant of one of these file paths would
+   * make the outputs unable to coexist, so it is rejected before the writer
+   * starts. Paths are compared case-insensitively with Windows-ambiguous
+   * trailing dots/spaces folded, so every platform behaves the same.
    */
   reservedOutputs?: readonly string[];
   /** Absolute article/index URL resolver owned by the static page layer. */
@@ -183,6 +183,18 @@ function comparableOutputKey(name: string): string {
     .map((segment) => segment.replace(/[. ]+$/, ""))
     .join("/")
     .toLowerCase();
+}
+
+// Two output files cannot coexist when one normalized path is the other
+// path itself or a path-segment ancestor of it: one side would need the other
+// file path to be a directory.
+function comparableOutputPathsOverlap(left: string, right: string): boolean {
+  if (!left || !right) return false;
+  return (
+    left === right ||
+    left.startsWith(`${right}/`) ||
+    right.startsWith(`${left}/`)
+  );
 }
 
 function normalizeFeedOutputName(
@@ -429,11 +441,18 @@ function assertNoReservedOutputConflict(
     if (key && !reserved.has(key)) reserved.set(key, name);
   }
   for (const file of files) {
-    const conflict = reserved.get(comparableOutputKey(file.name));
+    const fileKey = comparableOutputKey(file.name);
+    let conflict: string | undefined;
+    for (const [reservedKey, name] of reserved) {
+      if (comparableOutputPathsOverlap(fileKey, reservedKey)) {
+        conflict = name;
+        break;
+      }
+    }
     if (conflict !== undefined) {
       throw new Error(
-        `folio static feed output conflict: ${JSON.stringify(file.name)} would overwrite the static output ${JSON.stringify(conflict)} ` +
-          `(feed ${JSON.stringify(file.feedPath)} ${file.format}); choose a feed file name that no page, 404.html, sitemap.xml or robots.txt uses`,
+        `folio static feed output conflict: ${JSON.stringify(file.name)} would conflict with the static output ${JSON.stringify(conflict)} ` +
+          `(feed ${JSON.stringify(file.feedPath)} ${file.format}); normalized paths must not be equal or overlap at a path-segment boundary`,
       );
     }
   }
@@ -446,9 +465,9 @@ function assertNoReservedOutputConflict(
  * URLs are part of the feed contract, and a feed with relative links would be
  * unusable in a reader. Output names are normalized first, then checked
  * against each other and against `reservedOutputs` (every static page target
- * plus 404.html / sitemap.xml / robots.txt when enabled), so a feed can never
- * overwrite another static artifact. Both checks throw before the static
- * writer has written any page or feed.
+ * plus 404.html / sitemap.xml / robots.txt when enabled). Equal paths and
+ * file/directory prefix conflicts are rejected before the static writer has
+ * written any page or feed.
  */
 export function buildFolioStaticFeedPlan(
   input: FolioStaticFeedPlanInput,
