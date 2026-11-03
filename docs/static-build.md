@@ -263,10 +263,12 @@ path. This rejects both overwrites and file/directory conflicts with generated
 pages (`<route>/index.html`, including `index.html` for `/`), `404.html`,
 `sitemap.xml` or `robots.txt` before the first file is written.
 `sitemap.xml` and `robots.txt` are only reserved while the build actually
-enables them (`sitemap: false` / `robots: false` releases the name). Duplicate
-output names across feeds throw under the same rules. Comparison is
-case-insensitive and folds Windows-ambiguous trailing dots/spaces, so the same
-configuration fails identically on every platform. Existing `<link
+enables them (`sitemap: false` / `robots: false` releases the name). Feed
+output paths are also checked against one another: equal paths and either
+ancestor/descendant overlap at a path-segment boundary are rejected before the
+first write, so two feeds cannot require the same path to be both a file and a
+directory. Comparison is case-insensitive and folds Windows-ambiguous trailing
+dots/spaces, so the same configuration fails identically on every platform. Existing `<link
 rel="alternate" type="application/rss+xml|application/atom+xml">` elements
 supplied by a page template are removed before Folio injects its own, so a page
 never advertises a duplicate feed.
