@@ -75,6 +75,78 @@ route uses (`config.home` included), and `resolveFolioHome(config, docs)` return
 the platform-neutral model. A React node is never serialized automatically;
 `home` and `renderFolioStaticHome` produce HTML strings only.
 
+## Article metadata, authors and sitemap `lastmod`
+
+For every route that does not supply its own `jsonLd`, Folio generates a
+conservative Schema.org object. `route.jsonLd` always wins untouched and is
+never merged with the generated values.
+
+- `/` becomes `WebSite` (`name`, `description`, absolute `url` when `siteUrl` is configured).
+- A route whose normalized path matches a configured `collections[].path` becomes `CollectionPage` (`name`, `description`, absolute `url`).
+- A document becomes `Article` when its type is `article`, otherwise `TechArticle`. It carries `headline`, `description`, the absolute canonical `url`, `image` only when one resolves, a `publisher` organization named after `config.title`, and the optional fields below.
+- Any other custom static route without a document keeps the conservative `WebSite` shape.
+
+Article pages already emit `og:type=article` through the route `type`
+(`doc.type === "article"` maps to `article` in the default route set). Share
+images keep the existing single resolution order — `route.image` >
+`defaultImage` > `config.logo` — and the same `og:image` / `twitter:image`
+output. Folio does not run a second image engine for structured data.
+
+### Author precedence
+
+Set a site-level default once:
+
+```ts
+folio({
+  config: {
+    title: "My site",
+    description: "Documentation",
+    author: { name: "Jane Doe", url: "https://example.com/about" },
+  },
+});
+```
+
+`config.author` accepts one entry or an array; an entry is either a name or
+`{ name, url? }`. For a page, the JSON-LD `author` list is chosen by one rule:
+
+1. the document's explicit frontmatter `author` (an array, or one string split on `|`, `,` or `，`; array entries may also be `{ name, url }` objects);
+2. otherwise `config.author`;
+3. otherwise the `author` property is omitted.
+
+Folio never emits `author: []` and never fabricates a person or organization. A
+`Person` is emitted only for a non-empty name.
+
+### Trustworthy dates
+
+`datePublished` and `dateModified` come only from the verified Folio dates
+(`doc.publishedAt` / `doc.updatedAt`) and their `dateSources` provenance:
+
+| JSON-LD field | Allowed provenance | Value |
+| --- | --- | --- |
+| `datePublished` | `frontmatter`, `legacy-date` | `doc.publishedAt` |
+| `dateModified` | `frontmatter`, `git-last-commit` | `doc.updatedAt` |
+
+`git-first-commit` is never an original publication date: the first commit in
+the current repository may be later than the real publication (for example
+after a migration). Build time, deployment time and file mtimes are never
+used. When a value is not trustworthy, the property is omitted instead of
+emitted as an empty or fabricated date. Documents with no `dateSources` emit
+neither field.
+
+### Sitemap `lastmod`
+
+Each sitemap `<url>` gets a `<lastmod>` only when a trustworthy modification
+date exists, in this order:
+
+1. an explicit `route.lastmod` from the consumer (date-only `YYYY-MM-DD` or a date-time with `Z` / numeric offset; it is normalized to ISO 8601 UTC). An invalid value fails the static build with `folio static route "<path>" lastmod ...` before any page is written;
+2. otherwise the document's trusted `updatedAt` (`frontmatter` or `git-last-commit`);
+3. otherwise no `<lastmod>`.
+
+`publishedAt`, build time and `git-first-commit` are never used as a
+modification date, so home and collection indexes without an explicit
+`route.lastmod` keep only `<loc>`. `404.html` is never listed. `lastmod`
+values and `loc` URLs follow the same base/canonical rules as the pages.
+
 ## Folio responsibilities
 
 - Write route HTML into the Vite output directory.
