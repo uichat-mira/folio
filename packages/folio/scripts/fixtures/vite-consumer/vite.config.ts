@@ -18,6 +18,26 @@ const siteUrl = process.env.FOLIO_CONSUMER_SITE_URL;
 const staticRoutes = process.env.FOLIO_CONSUMER_STATIC === "on";
 const homeMode = process.env.FOLIO_CONSUMER_HOME_MODE ?? "default";
 
+// FOL-028: the fixture opts into the site-level indexing policy only through
+// this explicit environment switch. Nothing in the installed package inspects
+// the host, deployment base, `github.io`, `localhost` or environment names, so
+// a noindex build can only happen because this line said so.
+const rawSiteIndexing = process.env.FOLIO_CONSUMER_SITE_INDEXING;
+if (
+  rawSiteIndexing !== undefined &&
+  rawSiteIndexing !== "" &&
+  rawSiteIndexing !== "index" &&
+  rawSiteIndexing !== "noindex"
+) {
+  throw new Error(
+    `unsupported FOLIO_CONSUMER_SITE_INDEXING ${JSON.stringify(rawSiteIndexing)}; expected "index" or "noindex"`,
+  );
+}
+const siteIndexing =
+  rawSiteIndexing === "index" || rawSiteIndexing === "noindex"
+    ? rawSiteIndexing
+    : undefined;
+
 const config = {
   title: "Folio Vite consumer fixture",
   description:
@@ -82,6 +102,16 @@ const staticOptions =
         }
       : true;
 
+// The indexing policy is an independent static option, so it composes with both
+// the default and the home-override fixture instead of replacing them.
+const staticOptionsWithIndexing =
+  siteIndexing === undefined
+    ? staticOptions
+    : {
+        ...(typeof staticOptions === "object" ? staticOptions : {}),
+        siteIndexing,
+      };
+
 export default defineConfig({
   base,
   plugins: [
@@ -92,7 +122,7 @@ export default defineConfig({
       // Static HTML generation stays off by default so the client-bundle
       // checks keep their original build shape; the static-output check turns
       // it on to prove writeBundle produces the real site files.
-      staticRoutes: staticRoutes ? staticOptions : false,
+      staticRoutes: staticRoutes ? staticOptionsWithIndexing : false,
     }),
   ],
   build: {
