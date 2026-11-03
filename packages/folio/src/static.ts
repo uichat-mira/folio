@@ -161,15 +161,17 @@ export function folioAbsoluteAssetUrl(
 // One plan serves both stages: HTML discovery renders only alternates for files
 // that are actually publishable, and the write stage writes exactly this plan.
 // Building it before the first page write is also where duplicate feed output
-// names are rejected.
+// names and feed-vs-static-output collisions are rejected.
 function buildStaticFeedPlan(
   context: FolioStaticBuildContext,
   options: FolioStaticBuildOptions,
+  reservedOutputs?: readonly string[],
 ): FolioStaticFeedPlan {
   return buildFolioStaticFeedPlan({
     config: context.config,
     docs: context.docs,
     feeds: options.feeds,
+    reservedOutputs,
     routeUrl: (path) =>
       folioAbsoluteRouteUrl(context.config.siteUrl!, context.base, path),
     assetUrl: (name) =>
@@ -663,6 +665,25 @@ function applyStaticHomeOverride(
   return routes;
 }
 
+function staticReservedOutputs(
+  context: FolioStaticBuildContext,
+  options: FolioStaticBuildOptions,
+  routes: readonly FolioStaticRoute[],
+): string[] {
+  // Feed files are written after the pages, 404, sitemap and robots, so a feed
+  // named like any of those targets would silently overwrite it. Derive the
+  // exact file targets from the final route set (after the home override) and
+  // from the fixed outputs this build actually enables.
+  const names = routes.map((route) => {
+    const path = normalizeStaticRoute(route.path);
+    return path === "/" ? "index.html" : `${path.slice(1)}/index.html`;
+  });
+  names.push("404.html");
+  if (context.config.siteUrl && options.sitemap !== false) names.push("sitemap.xml");
+  if (context.config.siteUrl && options.robots !== false) names.push("robots.txt");
+  return names;
+}
+
 export function writeFolioStaticSite(
   context: FolioStaticBuildContext,
   options: FolioStaticBuildOptions = {},
@@ -674,9 +695,6 @@ export function writeFolioStaticSite(
   if (!existsSync(indexPath)) return { routes: 0 };
 
   const template = readFileSync(indexPath, "utf8");
-  // Feed viability (including duplicate output-name rejection) is decided
-  // before the first page/feed write; HTML discovery later uses the same plan.
-  const feedPlan = buildStaticFeedPlan(context, options);
   const routes = options.routes?.(context) ?? defaultRoutes(context);
   const overriddenRoutes = options.home
     ? applyStaticHomeOverride([...routes], context, options.home)
@@ -694,6 +712,14 @@ export function writeFolioStaticSite(
           ]),
         )
       : undefined;
+  // Feed viability (duplicates and feed-vs-static-output collisions) is
+  // decided before the first page/feed write; HTML discovery later uses the
+  // same plan.
+  const feedPlan = buildStaticFeedPlan(
+    context,
+    options,
+    staticReservedOutputs(context, options, overriddenRoutes),
+  );
   // All route destinations are validated (including duplicate and real-target
   // collisions) before the first page is written; see static-output.ts.
   const normalizedRoutes = writeFolioStaticOutputs(

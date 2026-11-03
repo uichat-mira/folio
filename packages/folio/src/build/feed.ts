@@ -72,6 +72,15 @@ export type FolioStaticFeedPlanInput = {
   config: FolioConfig;
   docs: readonly FolioDoc[];
   feeds: readonly FolioStaticFeedOptions[] | undefined;
+  /**
+   * Static output files the same build already writes (pages, `404.html`,
+   * `sitemap.xml`, `robots.txt` when enabled). A feed output name that
+   * normalizes to one of them would silently overwrite it, so it is rejected
+   * before the writer starts. Names are compared case-insensitively with
+   * Windows-ambiguous trailing dots/spaces folded, so every platform behaves
+   * the same.
+   */
+  reservedOutputs?: readonly string[];
   /** Absolute article/index URL resolver owned by the static page layer. */
   routeUrl: (path: string) => string;
   /** Absolute site-root asset URL resolver owned by the static page layer. */
@@ -152,6 +161,61 @@ function entryDate(doc: FolioDoc): TrustedDate | undefined {
   );
 }
 
+// Mirrors the static writer's lexical rule: Windows silently drops trailing
+// dots and spaces from path segments, so ".. " or "..." could become a parent
+// segment. Feed names must never escape the site root even when the writer
+// would reject them later, because the feed plan runs before the first write.
+function isTraversalSegment(segment: string): boolean {
+  const withoutTrailingDotsOrSpaces = segment.replace(/[. ]+$/, "");
+  if (withoutTrailingDotsOrSpaces === "..") return true;
+  return withoutTrailingDotsOrSpaces === "" && segment.includes(".");
+}
+
+// One comparison form for duplicates and reserved outputs: case-folded, with
+// "." segments dropped and Windows-ambiguous trailing dots/spaces removed, so
+// "Sitemap.XML", "./sitemap.xml" and "sitemap.xml." all collide with the real
+// sitemap.xml regardless of the host filesystem.
+function comparableOutputKey(name: string): string {
+  return name
+    .replace(/\\/g, "/")
+    .split("/")
+    .filter((segment) => segment !== "" && segment !== ".")
+    .map((segment) => segment.replace(/[. ]+$/, ""))
+    .join("/")
+    .toLowerCase();
+}
+
+function normalizeFeedOutputName(
+  name: string,
+  feedPath: string,
+  format: FolioStaticFeedFormat,
+): string {
+  if (name.includes("\0") || name.includes("\\")) {
+    throw new Error(
+      `folio static feed ${JSON.stringify(feedPath)} ${format} output name ${JSON.stringify(name)} contains a character that is not valid in a static output path`,
+    );
+  }
+  const segments: string[] = [];
+  for (const segment of name.split("/")) {
+    if (segment === "" || segment === ".") continue;
+    // ":" is invalid in Windows file names and makes an absolute drive or
+    // stream target; reject it here so the failure happens before any write.
+    if (segment.includes(":") || isTraversalSegment(segment)) {
+      throw new Error(
+        `folio static feed ${JSON.stringify(feedPath)} ${format} output name ${JSON.stringify(name)} ${segment.includes(":") ? "contains a character that is not valid in a static output path" : "escapes the static site root"}`,
+      );
+    }
+    segments.push(segment);
+  }
+  const normalized = segments.join("/");
+  if (!normalized) {
+    throw new Error(
+      `folio static feed ${JSON.stringify(feedPath)} ${format} output name ${JSON.stringify(name)} must point at a file inside the static site root`,
+    );
+  }
+  return normalized;
+}
+
 function feedFileName(
   feed: FolioStaticFeedOptions,
   format: FolioStaticFeedFormat,
@@ -165,7 +229,7 @@ function feedFileName(
       `folio static feed ${JSON.stringify(feed.path)} ${format} output name must be a non-empty string or false`,
     );
   }
-  return name;
+  return normalizeFeedOutputName(name, feed.path, format);
 }
 
 function selectFeedRoute(
@@ -340,10 +404,10 @@ function renderAtom(
 function assertUniqueOutputs(files: readonly FolioStaticFeedOutput[]): void {
   const seen = new Map<string, FolioStaticFeedOutput>();
   for (const file of files) {
-    // Windows compares output paths case-insensitively, so a case-only
-    // difference would silently overwrite an earlier feed there.
-    const key =
-      process.platform === "win32" ? file.name.toLowerCase() : file.name;
+    // Compared case-insensitively with Windows-ambiguous trailing dots/spaces
+    // folded: a case-only or dot-only difference would silently overwrite an
+    // earlier feed on Windows and macOS.
+    const key = comparableOutputKey(file.name);
     const previous = seen.get(key);
     if (previous) {
       throw new Error(
@@ -355,13 +419,36 @@ function assertUniqueOutputs(files: readonly FolioStaticFeedOutput[]): void {
   }
 }
 
+function assertNoReservedOutputConflict(
+  files: readonly FolioStaticFeedOutput[],
+  reservedOutputs: readonly string[],
+): void {
+  const reserved = new Map<string, string>();
+  for (const name of reservedOutputs) {
+    const key = comparableOutputKey(name);
+    if (key && !reserved.has(key)) reserved.set(key, name);
+  }
+  for (const file of files) {
+    const conflict = reserved.get(comparableOutputKey(file.name));
+    if (conflict !== undefined) {
+      throw new Error(
+        `folio static feed output conflict: ${JSON.stringify(file.name)} would overwrite the static output ${JSON.stringify(conflict)} ` +
+          `(feed ${JSON.stringify(file.feedPath)} ${file.format}); choose a feed file name that no page, 404.html, sitemap.xml or robots.txt uses`,
+      );
+    }
+  }
+}
+
 /**
  * Decide every feed file that is publishable and render it.
  *
  * No file and no alternate link is produced without `config.siteUrl`: absolute
  * URLs are part of the feed contract, and a feed with relative links would be
- * unusable in a reader. Duplicate output file names throw here, before the
- * static writer has written any page or feed.
+ * unusable in a reader. Output names are normalized first, then checked
+ * against each other and against `reservedOutputs` (every static page target
+ * plus 404.html / sitemap.xml / robots.txt when enabled), so a feed can never
+ * overwrite another static artifact. Both checks throw before the static
+ * writer has written any page or feed.
  */
 export function buildFolioStaticFeedPlan(
   input: FolioStaticFeedPlanInput,
@@ -424,6 +511,7 @@ export function buildFolioStaticFeedPlan(
     }
   }
 
+  assertNoReservedOutputConflict(files, input.reservedOutputs ?? []);
   assertUniqueOutputs(files);
 
   return {

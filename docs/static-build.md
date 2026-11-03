@@ -256,12 +256,19 @@ const staticBuild: FolioStaticBuildOptions = {
   Atom.
 
 Omitting `feeds` (or passing an empty array) writes no feed and changes no page
-head. Output names are relative to the static site root and use the same
-fixed-name safety layer as `404.html`; duplicate output names across feeds throw
-before any page or feed is written. Existing `<link rel="alternate"
-type="application/rss+xml|application/atom+xml">` elements supplied by a page
-template are removed before Folio injects its own, so a page never advertises a
-duplicate feed.
+head. Output names are relative to the static site root and are normalized
+first: `./rss.xml`, `rss.xml` and `RSS.XML` all mean the same target. A feed may
+never overwrite a static artifact: names that resolve to a generated page
+(`<route>/index.html`, including `index.html` for `/`), `404.html`,
+`sitemap.xml` or `robots.txt` are rejected before the first file is written.
+`sitemap.xml` and `robots.txt` are only reserved while the build actually
+enables them (`sitemap: false` / `robots: false` releases the name). Duplicate
+output names across feeds throw under the same rules. Comparison is
+case-insensitive and folds Windows-ambiguous trailing dots/spaces, so the same
+configuration fails identically on every platform. Existing `<link
+rel="alternate" type="application/rss+xml|application/atom+xml">` elements
+supplied by a page template are removed before Folio injects its own, so a page
+never advertises a duplicate feed.
 
 ### URLs, base paths, and discovery
 
