@@ -4,9 +4,9 @@
 - Baseline: `origin/dev @ c828e8a6a00fdf3c0ecdf2f2dd613ad8d68c0be7`
   (merge of `feat/fol-025-content-dates`, PR #139)
 - Integration branch: `feat/integration-fol-026-027-028`; three-feature merge
-  `2bf99e6`, initial static-output collision fix `f9d97fb`, path-prefix
-  fix sync commits `9810d8d`, `57e5c75`, `1fc1d4c`, and report update
-  `f43895b`. The current head contains the combined features and both fixes.
+  `2bf99e6`, initial static-output collision fix `f9d97fb`, and path-prefix
+  fix sync commits `9810d8d`, `57e5c75`, `1fc1d4c`. This report was updated
+  after those code commits; the branch contains the combined features and both fixes.
 - Status: three independently reviewable Draft PRs + one integration branch.
   **Nothing was merged, closed, promoted or deployed.**
 
@@ -32,7 +32,7 @@ and ran the joint acceptance below.
 | FOL-026 feeds | `feat/fol-026-rss-atom` | `0a39a5a` (P2 + path-prefix fixes; features at `6a90499`) | [#142](https://github.com/uichat-mira/folio/pull/142) | #125 |
 | FOL-027 structured metadata | `feat/fol-027-structured-metadata` | `8dc00e0b197ded5488d990ca595c4e159f56f876` | [#141](https://github.com/uichat-mira/folio/pull/141) | #126 |
 | FOL-028 site indexing | `feat/fol-028-indexing` | `85507f753c161dfbce2ac5b5eba4558d07a51ccd` | [#140](https://github.com/uichat-mira/folio/pull/140) | #127 |
-| Integration | `feat/integration-fol-026-027-028` | `f43895b` (combined branch + path-prefix fix report) | none (branch only) | — |
+| Integration | `feat/integration-fol-026-027-028` | `1fc1d4c` (combined code tip; report-only updates follow) | none (branch only) | — |
 
 All three PRs are `draft`, target `dev`, use `Refs #…` (never `Closes`), carry
 the dsh badge, and were authored from the same baseline.
