@@ -1,9 +1,9 @@
 ---
 title: MiraDocs → Folio 迁移状态
 path: /api/guide/migration-status
-description: MiraDocs 品牌、包名、API 与生产链迁移到 Folio 的当前事实。
-group: Folio API · 迁移
-order: 30
+description: MiraDocs 品牌、包名、API 与生产链迁移到 Folio 的事实快照。
+group: 参考 · 迁移
+order: 60
 type: doc
 status: published
 tags:
@@ -12,14 +12,16 @@ tags:
   - Folio
 ---
 
-该页面是 MiraDocs → Folio 的**当前迁移事实投影**，以仓库代码、GitHub Release、发布流水线和消费者依赖为依据。最后核对日期：2026-11-01。
+该页面是 MiraDocs → Folio 的**迁移事实快照**，以仓库代码、GitHub Release、发布流水线和消费者依赖为依据。文档治理核对日期：2026-11-03；本次只核对 `origin` 分支头（`dev=892a66a`、`prod=1393fc1`），发布状态以 GitHub Releases、Actions 和 npm Registry 为准。
+
+日常使用与 API 能力以 [API 文档索引](/api/guide/what-is-folio) 和当前源码为准，本页不重复维护入门说明。
 
 ## 已完成
 
 - 仓库已统一为 `uichat-mira/folio`，公开 npm 包为 `@uichat-mira/folio`，内容虚拟模块为 `virtual:folio/content`；官方站在 `apps/site`，通过 npm workspace 使用 Folio 的公开入口。
 - `0.1.0` 已从接受的 `prod=40db582b` **手动首次发布**到公共 npm Registry，并通过[隔离 Registry 消费者验收](https://github.com/uichat-mira/folio/actions/runs/41247604056)。这次首次 bootstrap 不是 OIDC 发布。
 - `0.1.1` 已由 [GitHub Release `folio-v0.1.1`](https://github.com/uichat-mira/folio/releases/tag/folio-v0.1.1) 触发 [npm Trusted Publishing / OIDC 发布流水线](https://github.com/uichat-mira/folio/actions/runs/41282326983)。Tag 指向 `e4af1f7de3a8d6004f052fcb99f0b412405fcc3c`，属于 `prod` 历史；首次发布命令成功并写入签名 provenance，Registry 在 npm 处理窗口中暂时 404，重跑后确认版本存在并通过真实安装、SRI、严格 TypeScript、Vite 和静态生成验收。没有重复发布 0.1.1。
-- 因此发布工作流已实证支持 Release → OIDC → npm Registry；发布后 Registry 等待窗口已通过 [PR #101–103](https://github.com/uichat-mira/folio/pull/103) 改为最多约 30 分钟并按 `dev → test → prod` 合入。当前 `prod=711c6c6` 的 Linux/Windows 包检查及 Pages 构建部署均成功；原发布 Tag 没有移动。
+- 因此发布工作流已实证支持 Release → OIDC → npm Registry；发布后 Registry 等待窗口已通过 [PR #101–103](https://github.com/uichat-mira/folio/pull/103) 改为最多约 30 分钟并按 `dev → test → prod` 合入。快照时的 `prod=711c6c6` Linux/Windows 包检查及 Pages 构建部署均成功；原发布 Tag 没有移动。
 - 已完成真实 tarball 独立消费、Chrome 默认 UI 候选 23/23 检查、`virtual:folio/content` 类型声明修复和 FOL-013 标题 ID 回归。原始 [FOL-014 研究](https://github.com/uichat-mira/folio/blob/dev/docs/research/fol-014-default-ui-acceptance.md) 中的 `TS2307` 是修复前历史证据，不代表当前包仍缺类型。
 - 官方 GitHub Pages 已完成生产部署，包含 Folio schema 和文档内容。
 

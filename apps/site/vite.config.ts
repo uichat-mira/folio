@@ -10,6 +10,7 @@ import {
   type FolioStaticBuildOptions,
 } from "@uichat-mira/folio/vite";
 import config from "./folio.config";
+import { withFolioBaseLinks } from "./src/content-links";
 
 const base = resolveGithubPagesBase(process.env.GITHUB_REPOSITORY);
 
@@ -70,7 +71,9 @@ const staticBuild: FolioStaticBuildOptions = {
         folioEscapeHtml(doc.description) +
         "</p>" +
         "<article>" +
-        renderFolioMarkdown(doc.body, { removeH1: true }) +
+        renderFolioMarkdown(withFolioBaseLinks(doc.body, context.base), {
+          removeH1: true,
+        }) +
         "</article>" +
         "</main>",
       type: doc.type === "article" ? "article" : "website",

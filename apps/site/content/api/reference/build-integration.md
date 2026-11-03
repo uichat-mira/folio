@@ -2,8 +2,8 @@
 title: Vite 构建集成
 path: /api/reference/build-integration
 description: 使用 @uichat-mira/folio/vite 接管内容发现、热更新与静态输出。
-group: Folio API · Reference
-order: 51
+group: 参考 · API
+order: 42
 type: doc
 status: published
 tags:
@@ -46,7 +46,7 @@ folio({
 import docs, { roots } from "virtual:folio/content";
 ```
 
-正式发布的 `@uichat-mira/folio@0.1.0` 已包含虚拟模块的 TypeScript 声明（`FolioDoc[]`、`string[]`），并通过真实 Registry 独立消费者验收。只在 TS 工程中导入虚拟模块时，须在 `compilerOptions.types` 注册已安装的 `@uichat-mira/folio`；不需要自己写 `declare module`。
+正式发布的 `@uichat-mira/folio@0.1.1` 已包含虚拟模块的 TypeScript 声明（`FolioDoc[]`、`string[]`），并通过真实 Registry 独立消费者验收。只在 TS 工程中导入虚拟模块时，须在 `compilerOptions.types` 注册已安装的 `@uichat-mira/folio`；不需要自己写 `declare module`。
 
 ## staticRoutes
 

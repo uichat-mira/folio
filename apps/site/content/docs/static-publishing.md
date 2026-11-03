@@ -1,8 +1,8 @@
 ---
 title: 静态发布不是只产出一个 SPA 壳
 description: Folio 在 Vite build 阶段生成 route HTML、SEO 元数据、404、sitemap、robots 与机器可读 schema。
-group: 能力
-order: 4
+group: 指南 · 组合
+order: 31
 type: doc
 status: published
 tags:
@@ -34,7 +34,7 @@ dist/
     └── content.schema.json
 ```
 
-这些不是额外的部署脚本拼出来的另一套内容系统，而是同一个 Folio manifest 的静态投影。
+上面只列出入口和代表路由；实际构建会为 `content/` 中的每篇 Markdown 生成 route。它们不是额外的部署脚本拼出来的另一套内容系统，而是同一个 Folio manifest 的静态投影。
 
 ## Route 级元数据
 
@@ -82,3 +82,9 @@ const base = resolveGithubPagesBase(process.env.GITHUB_REPOSITORY);
 库默认的 `staticRoutes: true` 不同：默认文档壳会生成侧栏、页内目录与上一篇/下一篇，链接都指向真实生成的文件，所以无 JavaScript 也能导航。
 
 两种模式的完整对比，以及静态目录 URL 与 React 路由尾斜杠的差异，见[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)。
+
+## 相关文档
+
+- [静态构建与 SEO](/api/reference/seo)：`FolioStaticRoute`、metadata、sitemap、robots 与候选 feed 配置。
+- [Vite 构建集成](/api/reference/build-integration)：内容发现与 `staticRoutes` 阶段。
+- [部署到 GitHub Pages](/api/deployment/github-pages)：项目子路径的构建与发布。

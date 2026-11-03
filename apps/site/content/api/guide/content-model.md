@@ -2,7 +2,7 @@
 title: 内容模型
 path: /api/guide/content-model
 description: Folio 如何把 Markdown、Frontmatter 和路径转换成统一的 FolioDoc。
-group: Folio API · 核心概念
+group: 指南 · 概念
 order: 20
 type: doc
 status: published
@@ -22,8 +22,13 @@ type FolioDoc = {
   title: string
   description: string
   group: string
+  collection?: string
+  section?: string
   order: number
   date?: string
+  publishedAt?: string
+  updatedAt?: string
+  dateSources?: FolioDateSources
   tags: string[]
   status?: string
   cover?: string
@@ -32,6 +37,8 @@ type FolioDoc = {
   data: Record<string, unknown>
 }
 ```
+
+`publishedAt`、`updatedAt` 与 `dateSources` 是 `dev` 源码中的日期契约，尚未包含在已发布的 `0.1.1` 中；发布历史与状态见[迁移状态](/api/guide/migration-status)。
 
 ## data 是扩展边界
 

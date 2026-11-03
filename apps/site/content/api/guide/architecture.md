@@ -2,7 +2,7 @@
 title: 仓库、Consumer 与 Skill 边界
 path: /api/guide/architecture
 description: Folio runtime、下游站点与 UIChat Mira Organization Skill 如何协作。
-group: Folio API · 核心概念
+group: 指南 · 概念
 order: 23
 type: doc
 status: published
@@ -20,7 +20,7 @@ uichat-mira/folio
 ├── packages/folio   @uichat-mira/folio
 ├── apps/site        官方 reference implementation
 ├── schemas          内容与配置 schema
-└── workflows        validate / Pages / publish
+└── .github/workflows  validate / Pages / publish
 ```
 
 ## Consumer
