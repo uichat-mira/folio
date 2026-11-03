@@ -83,6 +83,8 @@ function runBuild(
     config = {},
     feeds,
     routes,
+    sitemap,
+    robots,
     templateHtml = template,
   } = {},
 ) {
@@ -91,6 +93,8 @@ function runBuild(
   const options = {};
   if (feeds !== undefined) options.feeds = feeds;
   if (routes !== undefined) options.routes = routes;
+  if (sitemap !== undefined) options.sitemap = sitemap;
+  if (robots !== undefined) options.robots = robots;
   return writeFolioStaticSite(
     makeContext({ outDir, siteUrl, base, docs, config }),
     options,
@@ -622,6 +626,123 @@ test("rss/atom false and custom nested names control the written files", () =>
     ]);
   }));
 
+test("feed output names cannot overwrite pages, 404, sitemap or robots", () => {
+  const docs = [
+    makeDoc({
+      path: "/blogs/post",
+      title: "Post",
+      publishedAt: "2025-01-01T00:00:00.000Z",
+    }),
+  ];
+  const config = { collections: [{ path: "/blogs", title: "Blogs" }] };
+  const customRoutes = () => [
+    { path: "/", title: "Home" },
+    { path: "/custom/page", title: "Custom page" },
+  ];
+  const cases = [
+    { feeds: [{ path: "/blogs", rss: "index.html", atom: false }], target: "index.html" },
+    { feeds: [{ path: "/blogs", rss: "404.html", atom: false }], target: "404.html" },
+    { feeds: [{ path: "/blogs", rss: "sitemap.xml", atom: false }], target: "sitemap.xml" },
+    { feeds: [{ path: "/blogs", rss: "robots.txt", atom: false }], target: "robots.txt" },
+    { feeds: [{ path: "/blogs", rss: false, atom: "blogs/post/index.html" }], target: "blogs/post/index.html" },
+    { feeds: [{ path: "/blogs", rss: "blogs/index.html", atom: false }], target: "blogs/index.html" },
+    { feeds: [{ path: "/blogs", rss: "./sitemap.xml", atom: false }], target: "sitemap.xml" },
+    { feeds: [{ path: "/blogs", rss: "SITEMAP.XML", atom: false }], target: "sitemap.xml" },
+    { feeds: [{ path: "/blogs", rss: "sitemap.xml.", atom: false }], target: "sitemap.xml" },
+    {
+      feeds: [{ path: "/blogs", rss: "custom/page/index.html", atom: false }],
+      target: "custom/page/index.html",
+      routes: customRoutes,
+    },
+  ];
+
+  for (const scenario of cases) {
+    withSite((outDir) => {
+      assert.throws(
+        () =>
+          runBuild(outDir, {
+            docs,
+            config,
+            feeds: scenario.feeds,
+            routes: scenario.routes,
+          }),
+        (error) => {
+          assert.match(error.message, /folio static feed output conflict/);
+          assert.ok(
+            error.message.includes(scenario.target),
+            `error must name ${scenario.target}, got: ${error.message}`,
+          );
+          return true;
+        },
+      );
+
+      // The conflict is rejected before any page, fixed output or feed is
+      // written: the existing template is untouched and no file appeared.
+      assert.equal(
+        readFileSync(resolve(outDir, "index.html"), "utf8"),
+        template,
+      );
+      for (const file of [
+        "blogs/index.html",
+        "blogs/post/index.html",
+        "404.html",
+        "sitemap.xml",
+        "robots.txt",
+        "rss.xml",
+        "atom.xml",
+        "custom/page/index.html",
+      ]) {
+        assert.equal(
+          existsSync(resolve(outDir, file)),
+          false,
+          `no partial output after a feed/static-output conflict: ${file}`,
+        );
+      }
+    });
+  }
+});
+
+test("a feed may reuse sitemap.xml or robots.txt only when that output is disabled", () => {
+  const docs = [
+    makeDoc({
+      path: "/blogs/post",
+      title: "Post",
+      publishedAt: "2025-01-01T00:00:00.000Z",
+    }),
+  ];
+  const config = { collections: [{ path: "/blogs", title: "Blogs" }] };
+
+  withSite((outDir) => {
+    runBuild(outDir, {
+      docs,
+      config,
+      feeds: [{ path: "/blogs", rss: "sitemap.xml", atom: false }],
+      sitemap: false,
+    });
+    assert.ok(
+      readFileSync(resolve(outDir, "sitemap.xml"), "utf8").startsWith(
+        '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"',
+      ),
+    );
+    assert.equal(existsSync(resolve(outDir, "robots.txt")), true);
+  });
+
+  withSite((outDir) => {
+    runBuild(outDir, {
+      docs,
+      config,
+      feeds: [{ path: "/blogs", rss: "robots.txt", atom: false }],
+      robots: false,
+    });
+    assert.ok(
+      readFileSync(resolve(outDir, "robots.txt"), "utf8").startsWith(
+        '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"',
+      ),
+    );
+    assert.equal(existsSync(resolve(outDir, "sitemap.xml")), true);
+  });
+});
+
 test("duplicate feed output names throw before any page or feed is written", () => {
   const cases = [
     {
@@ -634,6 +755,22 @@ test("duplicate feed output names throw before any page or feed is written", () 
         { path: "/docs", rss: false, atom: false },
       ],
       expected: '"feed.xml"',
+    },
+    {
+      // "./feed.xml" normalizes to the same output as "feed.xml".
+      feeds: [
+        { path: "/blogs", rss: "./feed.xml", atom: false },
+        { path: "/docs", rss: "feed.xml", atom: false },
+      ],
+      expected: '"feed.xml"',
+    },
+    {
+      // Case and Windows-ambiguous trailing dots must not hide a duplicate.
+      feeds: [
+        { path: "/blogs", rss: "Feed.XML", atom: false },
+        { path: "/docs", rss: "feed.xml.", atom: false },
+      ],
+      expected: '"feed.xml."',
     },
   ];
 
@@ -877,7 +1014,7 @@ test("the structural XML helper rejects malformed documents", () => {
   assert.throws(() => parseXml("<a>\u0001</a>"), /invalid control character/);
 });
 
-test("an invalid feed output name is rejected by the static-output safety path", () => {
+test("an invalid feed output name is rejected before any static file is written", () => {
   const base = mkdtempSync(resolve(tmpdir(), "folio-feed-escape-"));
   const outDir = resolve(base, "out");
   const outside = resolve(base, "outside");
@@ -894,13 +1031,42 @@ test("an invalid feed output name is rejected by the static-output safety path",
           feeds: [{ path: "/blogs", rss: "../escape.xml", atom: false }],
         }),
       (error) => {
-        assert.match(error.message, /folio static output "\.\.\/escape\.xml"/);
-        assert.match(error.message, /escapes the output directory/);
+        assert.match(
+          error.message,
+          /folio static feed "\/blogs" rss output name "\.\.\/escape\.xml"/,
+        );
+        assert.match(error.message, /escapes the static site root/);
         return true;
       },
     );
 
     assert.equal(readFileSync(sentinel, "utf8"), "sentinel");
+    assert.equal(
+      readFileSync(resolve(outDir, "index.html"), "utf8"),
+      template,
+      "no page is written before the invalid feed name is rejected",
+    );
+    assert.equal(existsSync(resolve(outDir, "rss.xml")), false);
+
+    // A drive-letter name would resolve outside outDir on Windows; it is
+    // rejected by the same preflight instead of after the pages are written.
+    assert.throws(
+      () =>
+        runBuild(outDir, {
+          docs: [makeDoc({ path: "/blogs/post", title: "Blog post" })],
+          feeds: [{ path: "/blogs", rss: "C:/escape.xml", atom: false }],
+        }),
+      (error) => {
+        assert.match(error.message, /not valid in a static output path/);
+        return true;
+      },
+    );
+    assert.equal(
+      readFileSync(resolve(outDir, "index.html"), "utf8"),
+      template,
+      "no page is written before the drive-letter name is rejected",
+    );
+    assert.equal(existsSync(resolve(outDir, "rss.xml")), false);
   } finally {
     rmSync(base, { recursive: true, force: true });
   }
