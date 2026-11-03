@@ -103,6 +103,36 @@ export function verifyViteConsumer({ consumerDir, fixtureDir, typescriptCli, log
   );
   writeFileSync(markdownPath, markdown.replaceAll(MARKER_PLACEHOLDER, marker));
 
+  // FOL-025: turn the copied app into a real Git repository so the installed
+  // tarball must read local history itself. The committer date is fixed, making
+  // the expected metadata deterministic; only `publishedAt` is explicit in the
+  // frontmatter, so `updatedAt` can only come from this commit.
+  const gitFixtureDate = "2024-01-02T03:04:05+08:00";
+  const git = (args) => {
+    const result = spawnSync("git", args, {
+      cwd: appDir,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        GIT_AUTHOR_DATE: gitFixtureDate,
+        GIT_COMMITTER_DATE: gitFixtureDate,
+      },
+    });
+    if (result.status !== 0) {
+      throw new Error(
+        `[fixture] FAIL git ${args.join(" ")}: ${(result.stderr ?? "").trim()}`,
+      );
+    }
+    return result.stdout;
+  };
+  git(["init", "-q"]);
+  git(["config", "user.name", "Folio Tarball Consumer"]);
+  git(["config", "user.email", "folio-consumer@example.test"]);
+  git(["config", "commit.gpgsign", "false"]);
+  git(["config", "core.autocrlf", "false"]);
+  git(["add", "-A"]);
+  git(["commit", "-q", "-m", "consumer fixture"]);
+
   // Strict Bundler-mode consumer check, independent of any workspace or local
   // virtual-module declaration. Compile against only the installed tarball.
   const types = spawnSync(process.execPath, [typescriptCli, "-p", "tsconfig.json"], {
@@ -178,6 +208,25 @@ export function verifyViteConsumer({ consumerDir, fixtureDir, typescriptCli, log
   );
   log(
     `[content]  ok  ${marker} and "${KNOWN_TITLE}" reached the client bundle (${positiveBundle.files.length} JS assets)`,
+  );
+
+  // FOL-025: the same virtual-module data must carry the frozen date contract
+  // through the installed tarball: the explicit frontmatter value wins, and the
+  // Git commit made above supplies updatedAt (committer date normalized to UTC).
+  assert.ok(
+    positiveBundle.text.includes("2025-06-07T00:09:10.000Z"),
+    "[content] FAIL the explicit publishedAt override is missing from the client bundle",
+  );
+  assert.ok(
+    positiveBundle.text.includes("2024-01-01T19:04:05.000Z"),
+    "[content] FAIL the Git-derived updatedAt is missing from the client bundle",
+  );
+  assert.ok(
+    positiveBundle.text.includes("git-last-commit"),
+    "[content] FAIL the Git date provenance is missing from the client bundle",
+  );
+  log(
+    "[content]  ok  publishedAt override and Git-derived updatedAt reached the client bundle",
   );
 
   // FOL-020: the fixture imports the public `@uichat-mira/folio/styles.css`

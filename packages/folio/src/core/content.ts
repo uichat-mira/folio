@@ -1,7 +1,8 @@
 import { parse as parseYaml } from "yaml";
 import { marked } from "marked";
-import type { FolioDoc, FolioHeading } from "../types";
+import type { FolioDateSource, FolioDoc, FolioHeading } from "../types";
 import { createHeadingIdAllocator } from "./heading-ids";
+import { normalizeFolioDate } from "./dates";
 
 const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/;
 
@@ -218,6 +219,25 @@ export function parseFolioDoc(sourcePath: string, raw: string): FolioDoc {
   const inferredType =
     root === "blogs" ? "article" : root === "projects" ? "project" : "doc";
 
+  // Priority is frozen here and completed by the Build layer:
+  //   explicit publishedAt > valid legacy date > Git first commit > unknown
+  // Explicit updatedAt > Git last commit > unknown.
+  // Invalid explicit values are not "explicit" for priority purposes: they are
+  // ignored so a trustworthy lower-priority source can still fill the field.
+  const explicitPublishedAt = normalizeFolioDate(data.publishedAt);
+  const legacyPublishedAt = normalizeFolioDate(data.date);
+  const explicitUpdatedAt = normalizeFolioDate(data.updatedAt);
+
+  const publishedAt = explicitPublishedAt ?? legacyPublishedAt;
+  const publishedAtSource: FolioDateSource = explicitPublishedAt
+    ? "frontmatter"
+    : legacyPublishedAt
+      ? "legacy-date"
+      : "unknown";
+  const updatedAtSource: FolioDateSource = explicitUpdatedAt
+    ? "frontmatter"
+    : "unknown";
+
   return {
     id: text(data.id) || slugify(path) || "home",
     path: path.startsWith("/") ? path : `/${path}`,
@@ -237,6 +257,12 @@ export function parseFolioDoc(sourcePath: string, raw: string): FolioDoc {
     section: data.section ? text(data.section) : undefined,
     order: Number(data.order ?? 99),
     date: data.date ? text(data.date) : undefined,
+    publishedAt,
+    updatedAt: explicitUpdatedAt,
+    dateSources: {
+      publishedAt: publishedAtSource,
+      updatedAt: updatedAtSource,
+    },
     tags: list(data.tags),
     status: data.status ? text(data.status) : undefined,
     cover: data.cover ? text(data.cover) : undefined,

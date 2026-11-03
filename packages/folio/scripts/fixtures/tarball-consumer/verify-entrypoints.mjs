@@ -88,7 +88,28 @@ const checks = [
         "---\ntitle: Consumer\ndescription: tarball entry\n---\n# Consumer\n",
       );
       assert.equal(doc.title, "Consumer", "parseFolioDoc did not run through the tarball build");
-      return `${installedReal} (FolioApp, parseFolioDoc)`;
+
+      // FOL-025: the date contract itself must survive packaging.
+      const dated = entry.parseFolioDoc(
+        "docs/dated.md",
+        "---\ntitle: Dated\npublishedAt: 2025-01-02T03:04:05+08:00\nupdatedAt: 2025-02-03\n---\n# Dated\n",
+      );
+      assert.equal(
+        dated.publishedAt,
+        "2025-01-01T19:04:05.000Z",
+        "the tarball did not normalize publishedAt to UTC",
+      );
+      assert.equal(
+        dated.updatedAt,
+        "2025-02-03T00:00:00.000Z",
+        "the tarball did not normalize the updatedAt date",
+      );
+      assert.deepEqual(
+        dated.dateSources,
+        { publishedAt: "frontmatter", updatedAt: "frontmatter" },
+        "the tarball lost the date provenance contract",
+      );
+      return `${installedReal} (FolioApp, parseFolioDoc, dates)`;
     },
   },
   {

@@ -11,6 +11,7 @@ import {
 import { relative, resolve } from "node:path";
 import type { Plugin } from "vite";
 import { compareFolioDocs, parseFolioDoc } from "../core/content";
+import { applyFolioGitDates, readFolioGitDates } from "./git-dates";
 import {
   writeFolioStaticSite,
   type FolioStaticBuildOptions,
@@ -49,12 +50,22 @@ function readManifest(
   contentDir: string,
   options: FolioPluginOptions,
 ): FolioContentManifest {
+  // One bounded history read serves the whole manifest; no per-document Git
+  // subprocess is spawned. Missing content or a non-Git directory yields no
+  // history and leaves every date unknown instead of failing the build.
+  const gitDates = existsSync(contentDir)
+    ? readFolioGitDates(contentDir)
+    : undefined;
+
   const docs = markdownFiles(contentDir)
     .map((file) => {
       const sourcePath = relative(contentDir, file).replace(/\\/g, "/");
       if (options.exclude?.(sourcePath)) return undefined;
 
-      const doc = parseFolioDoc(sourcePath, readFileSync(file, "utf8"));
+      const doc = applyFolioGitDates(
+        parseFolioDoc(sourcePath, readFileSync(file, "utf8")),
+        gitDates,
+      );
       const path = options.route?.(sourcePath, doc) ?? doc.path;
       return { ...doc, path: normalizeStaticRoute(path) };
     })
