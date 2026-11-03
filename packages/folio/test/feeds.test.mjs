@@ -626,7 +626,7 @@ test("rss/atom false and custom nested names control the written files", () =>
     ]);
   }));
 
-test("feed output names cannot overwrite pages, 404, sitemap or robots", () => {
+test("feed output paths cannot conflict with pages, 404, sitemap or robots", () => {
   const docs = [
     makeDoc({
       path: "/blogs/post",
@@ -646,6 +646,12 @@ test("feed output names cannot overwrite pages, 404, sitemap or robots", () => {
     { feeds: [{ path: "/blogs", rss: "robots.txt", atom: false }], target: "robots.txt" },
     { feeds: [{ path: "/blogs", rss: false, atom: "blogs/post/index.html" }], target: "blogs/post/index.html" },
     { feeds: [{ path: "/blogs", rss: "blogs/index.html", atom: false }], target: "blogs/index.html" },
+    // A feed file cannot be an ancestor of a generated page file.
+    { feeds: [{ path: "/blogs", rss: "blogs", atom: false }], target: "blogs/index.html" },
+    // Nor can it be nested below a generated page file.
+    { feeds: [{ path: "/blogs", rss: false, atom: "blogs/index.html/feed.xml" }], target: "blogs/index.html" },
+    // Fixed outputs such as sitemap.xml are files too, not directories.
+    { feeds: [{ path: "/blogs", rss: "sitemap.xml/feed.xml", atom: false }], target: "sitemap.xml" },
     { feeds: [{ path: "/blogs", rss: "./sitemap.xml", atom: false }], target: "sitemap.xml" },
     { feeds: [{ path: "/blogs", rss: "SITEMAP.XML", atom: false }], target: "sitemap.xml" },
     { feeds: [{ path: "/blogs", rss: "sitemap.xml.", atom: false }], target: "sitemap.xml" },
@@ -682,11 +688,18 @@ test("feed output names cannot overwrite pages, 404, sitemap or robots", () => {
         readFileSync(resolve(outDir, "index.html"), "utf8"),
         template,
       );
+      assert.equal(
+        existsSync(resolve(outDir, "blogs")),
+        false,
+        "no route directory is created before a path-prefix conflict is rejected",
+      );
       for (const file of [
         "blogs/index.html",
+        "blogs/index.html/feed.xml",
         "blogs/post/index.html",
         "404.html",
         "sitemap.xml",
+        "sitemap.xml/feed.xml",
         "robots.txt",
         "rss.xml",
         "atom.xml",
