@@ -1,4 +1,6 @@
 import type { FolioDoc } from "@uichat-mira/folio";
+import config from "../folio.config";
+import { buildShowcaseHome } from "./home-model";
 
 type HomePageProps = {
   docs: FolioDoc[];
@@ -11,102 +13,140 @@ function href(basePath: string, path: string): string {
   return route ? base + route : base;
 }
 
-const CAPABILITIES = [
-  ["CONTENT", "统一内容模型", "Markdown、Frontmatter、heading 与自定义字段进入同一个 FolioDoc。"],
-  ["VITE", "Virtual manifest", "通过 virtual:folio/content 提供可热更新的内容清单。"],
-  ["REACT", "可组合运行时", "默认壳直接可用，也能通过 slots 交给 consumer 自己表达。"],
-  ["STATIC", "静态发布", "为真实 route 生成 HTML、404、sitemap、robots 与 schema。"],
-  ["SEO", "Route metadata", "canonical、Open Graph、Twitter Card 与 JSON-LD 跟随内容生成。"],
-  ["DEPLOY", "Pages aware", "同一套构建契约支持根域与 GitHub Pages 项目子路径。"],
-] as const;
+const TYPE_COUNT_LABEL: Record<string, string> = {
+  doc: "连续阅读",
+  article: "长文专题",
+  project: "项目档案",
+  page: "独立参考",
+};
 
 export function HomePage({ docs, basePath }: HomePageProps) {
-  const headingCount = docs.reduce((sum, doc) => sum + doc.headings.length, 0);
-  const tags = [...new Set(docs.flatMap((doc) => doc.tags))];
-  const groups = [...new Set(docs.map((doc) => doc.group).filter(Boolean))].length;
-  const featured = docs
-    .filter((doc) => doc.path !== "/")
-    .sort((a, b) => a.order - b.order)
-    .slice(0, 6);
+  const model = buildShowcaseHome(config, docs);
+  const counts = new Map<string, number>();
+  for (const doc of docs) counts.set(doc.type, (counts.get(doc.type) ?? 0) + 1);
 
   return (
     <main className="showcase-home">
       <section className="showcase-hero">
         <div className="showcase-hero__copy">
-          <span className="showcase-eyebrow">Git-native content runtime</span>
-          <h1>内容留在 Git。<br />站点保持可组合。</h1>
+          <span className="showcase-eyebrow">Reference implementation · dev</span>
+          <h1>先体验内容组织。<br />再判断 Folio 能做什么。</h1>
           <p>
-            Folio 为 Vite 与 React 提供内容模型、运行时与静态发布契约。
-            这个官网本身只使用 Folio 的公开 API，是一份持续运行的 reference implementation。
+            这个官网只消费 Folio 的公开 package entrypoints。
+            首页、文档、文章、项目档案、独立页面与集合索引全部来自同一份
+            {" "}<code>virtual:folio/content</code> manifest，没有第二套内容数据库。
           </p>
           <div className="showcase-actions">
-            <a className="showcase-btn showcase-btn--primary" href={href(basePath, "/docs/introduction")}>
-              开始使用
+            <a className="showcase-btn showcase-btn--primary" href={href(basePath, "/showcase")}>
+              进入能力展厅
             </a>
-            <a className="showcase-btn showcase-btn--secondary" href={href(basePath, "/api/guide/what-is-folio")}>
-              API Reference
+            <a className="showcase-btn showcase-btn--secondary" href={href(basePath, "/showcase/content-map")}>
+              查看内容图谱
             </a>
           </div>
           <div className="showcase-trust">
             <span>Public API only</span>
-            <span>Git as source of truth</span>
-            <span>Static output included</span>
+            <span>Manifest-driven entries</span>
+            <span>Static HTML + React</span>
           </div>
         </div>
 
         <div className="showcase-code-card">
           <div className="showcase-code-card__bar">
-            <span>consumer.tsx</span>
-            <small>public API</small>
+            <span>home-model.ts</span>
+            <small>docs -&gt; entries</small>
           </div>
-          <pre><code>{`import { FolioApp } from "@uichat-mira/folio";
-import docs from "virtual:folio/content";
+          <pre><code>{`import docs from "virtual:folio/content";
+import { folioCollectionIndexes } from "@uichat-mira/folio";
 
-<FolioApp
-  config={config}
-  docs={docs}
-  slots={{ home, headerActions }}
-/>`}</code></pre>
+const collections = folioCollectionIndexes(config);
+const guides = docs.filter((doc) => doc.type === "doc");
+const articles = docs.filter((doc) => doc.type === "article");`}</code></pre>
         </div>
       </section>
 
       <section className="showcase-stats" aria-label="Live Folio content metrics">
-        <div><strong>{docs.length}</strong><span>内容条目</span></div>
-        <div><strong>{groups}</strong><span>内容分组</span></div>
-        <div><strong>{headingCount}</strong><span>提取标题</span></div>
-        <div><strong>{tags.length}</strong><span>Frontmatter 标签</span></div>
+        <div><strong>{model.stats.docs}</strong><span>内容条目</span></div>
+        <div><strong>{model.stats.collections}</strong><span>集合索引</span></div>
+        <div><strong>{model.stats.headings}</strong><span>提取标题</span></div>
+        <div><strong>{model.stats.tags}</strong><span>Frontmatter 标签</span></div>
       </section>
 
-      <section className="showcase-section">
+      <section className="showcase-section" aria-labelledby="content-types">
         <div className="showcase-section__head">
-          <span className="showcase-eyebrow">Core capabilities</span>
-          <h2>一套很薄，但完整的内容与发布契约。</h2>
-          <p>Folio 不替 consumer 决定品牌，也不把 GitHub、CMS 或部署平台塞进 runtime。</p>
+          <span className="showcase-eyebrow">Four content types</span>
+          <h2 id="content-types">四类内容，四种阅读方式。</h2>
+          <p>
+            类型不是标签。文档进入带侧边导航的文档壳，文章按日期排序并出现页内目录，
+            项目档案记录范围与决策，独立页面承担图谱和参考入口。
+          </p>
         </div>
-        <div className="showcase-capability-grid">
-          {CAPABILITIES.map(([label, title, copy]) => (
-            <article key={label}>
-              <span>{label}</span>
-              <h3>{title}</h3>
-              <p>{copy}</p>
+        <div className="showcase-type-grid">
+          {model.groups.map((group) => (
+            <article className={"showcase-type-card showcase-type-card--" + group.type} key={group.type}>
+              <header>
+                <code>{group.type}</code>
+                <span>{counts.get(group.type) ?? 0} 条 · {TYPE_COUNT_LABEL[group.type]}</span>
+              </header>
+              <h3>{group.label}</h3>
+              <p>{group.purpose}</p>
+              <ul>
+                {group.docs.map((doc) => (
+                  <li key={doc.path}>
+                    <a href={href(basePath, doc.path)}>{doc.title}</a>
+                    <small>{doc.description}</small>
+                  </li>
+                ))}
+              </ul>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="showcase-section showcase-section--soft">
+      <section className="showcase-section showcase-section--soft" aria-labelledby="reader-paths">
         <div className="showcase-section__head">
-          <span className="showcase-eyebrow">Reference content</span>
-          <h2>这个站点本身就是文档、案例和内容模型的样本。</h2>
-          <p>首页不维护第二份内容数据库，下面的条目直接来自 Folio manifest。</p>
+          <span className="showcase-eyebrow">Reader paths</span>
+          <h2 id="reader-paths">不要只看卡片，沿着路径走一遍。</h2>
+          <p>下面三条路径的每一步都指向真实内容 route，而不是首页临时拼出来的假链接。</p>
         </div>
-        <div className="showcase-content-grid">
-          {featured.map((doc) => (
-            <a href={href(basePath, doc.path)} key={doc.path}>
-              <span>{doc.group}</span>
-              <h3>{doc.title}</h3>
-              <p>{doc.description}</p>
-              <small>打开内容 →</small>
+        <ol className="showcase-path-list">
+          {model.paths.map((path) => (
+            <li key={path.label}>
+              <span>{path.label}</span>
+              <div>
+                {path.docs.map((doc, index) => (
+                  <span className="showcase-path-step" key={doc.path}>
+                    {index > 0 ? <b aria-hidden="true">→</b> : null}
+                    <a href={href(basePath, doc.path)}>{doc.title}</a>
+                  </span>
+                ))}
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="showcase-section" aria-labelledby="collections">
+        <div className="showcase-section__head">
+          <span className="showcase-eyebrow">Collections</span>
+          <h2 id="collections">集合索引来自配置，而不是另写一份列表。</h2>
+          <p>
+            这些入口由 <code>folio.config.ts</code> 的 <code>collections</code> 生成，
+            按路由前缀递归收录内容。点进去可以看到该路径下的全部条目。
+          </p>
+        </div>
+        <div className="showcase-collection-grid">
+          {model.collections.map((collection) => (
+            <a href={href(basePath, collection.path)} key={collection.path}>
+              <code>{collection.path}</code>
+              <h3>{collection.title}</h3>
+              <p>{collection.description}</p>
+              <ul>
+                {collection.docs.map((doc) => (
+                  <li key={doc.path}>{doc.title}</li>
+                ))}
+              </ul>
+              <small>打开集合 →</small>
             </a>
           ))}
         </div>
@@ -114,27 +154,32 @@ import docs from "virtual:folio/content";
 
       <section className="showcase-dark">
         <div>
-          <span className="showcase-eyebrow showcase-eyebrow--dark">Consumer freedom</span>
-          <h2>默认可用，也允许完全换皮。</h2>
+          <span className="showcase-eyebrow showcase-eyebrow--dark">Boundary</span>
+          <h2>站点可以换皮，运行时不必 fork。</h2>
           <p>
-            Folio 负责内容、route 和 build contract；站点可以保留自己的布局、品牌与交互，
-            而不需要 fork runtime。
+            首页、文章尾部与静态 route body 都由站点层组合。
+            Folio 继续负责内容模型、集合、路由与构建契约。当前页面没有从
+            <code> packages/folio/src </code> 导入任何内部实现。
           </p>
         </div>
         <div className="showcase-layer-list">
           <div><span>01</span><strong>Git + Markdown</strong><small>source of truth</small></div>
           <div><span>02</span><strong>Folio contract</strong><small>content · route · build</small></div>
-          <div><span>03</span><strong>Consumer layer</strong><small>brand · layout · interaction</small></div>
+          <div><span>03</span><strong>apps/site</strong><small>brand · layout · entry</small></div>
         </div>
       </section>
 
       <section className="showcase-cta">
         <div>
-          <span className="showcase-eyebrow">Reference implementation</span>
-          <h2>先看内容，再看它如何被 Folio 组织起来。</h2>
+          <span className="showcase-eyebrow">Boundaries are visible</span>
+          <h2>支持什么、缺失什么，都写在真实页面里。</h2>
+          <p>
+            搜索、TOC、集合索引和静态输出可以亲自验证；标签聚合、搜索分面和 Mermaid
+            无 JS 图形则明确记录为未实现，不用假交互凑数。
+          </p>
         </div>
-        <a className="showcase-btn showcase-btn--primary" href={href(basePath, "/api/examples/product-design-system")}>
-          查看设计系统
+        <a className="showcase-btn showcase-btn--primary" href={href(basePath, "/showcase/from-file-to-page")}>
+          跟踪一条内容链路
         </a>
       </section>
     </main>
