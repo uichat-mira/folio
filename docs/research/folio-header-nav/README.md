@@ -14,7 +14,7 @@
 npm ci --no-audit --no-fund
 npm run build -w @uichat-mira/folio
 npm run dev -w apps/site                      # http://localhost:5173/
-GITHUB_REPOSITORY=uichat-mira/folio npm run dev -w apps/site   # http://localhost:5174/folio/
+GITHUB_REPOSITORY=uichat-mira/folio npm run dev -w apps/site   # http://localhost:5173/folio/
 ```
 
 验证脚本需要 Playwright 与一份 Chromium。若本机没有与 Playwright 版本匹配的浏览器，

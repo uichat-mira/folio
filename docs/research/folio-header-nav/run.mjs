@@ -9,7 +9,7 @@
 //   npm run dev -w apps/site                       # or: GITHUB_REPOSITORY=uichat-mira/folio npm run dev -w apps/site
 //   FOLIO_BASE=http://localhost:5173 node docs/research/folio-header-nav/run.mjs
 //
-// Set FOLIO_BASE to the served base (`http://localhost:5174/folio/` when
+// Set FOLIO_BASE to the served base (`http://localhost:5173/folio/` when
 // GITHUB_REPOSITORY is set) to verify the deployed base path. Set
 // PLAYWRIGHT_CHROMIUM_EXECUTABLE to use an already-downloaded Chromium instead
 // of the one matching this Playwright version. Screenshots and results.json are
