@@ -1,0 +1,166 @@
+[
+  {
+    "check": "desktop 1440 layout",
+    "headerHeight": 64,
+    "wrapPadding": "0px 28px",
+    "brandLeftGap": 28,
+    "navClusterRightGap": 28,
+    "gapNavToActions": 16,
+    "topLevelItems": 8,
+    "navIsRightOfBrand": true,
+    "horizontalOverflow": 0
+  },
+  {
+    "check": "dropdown opens on hover",
+    "visibility": "visible",
+    "opacity": "1",
+    "transition": "0.15s, 0.15s, 0.15s",
+    "entries": 18,
+    "ariaExpanded": "true",
+    "fullyInViewport": true
+  },
+  {
+    "check": "panel survives the pointer gap",
+    "anyVisible": true,
+    "openPanels": 1
+  },
+  {
+    "check": "escape closes",
+    "visible": "hidden"
+  },
+  {
+    "check": "click opens",
+    "expanded": "true"
+  },
+  {
+    "check": "outside click closes",
+    "visible": "hidden"
+  },
+  {
+    "check": "panel entry navigates and closes the panel",
+    "target": "/docs/introduction",
+    "landed": "/docs/introduction",
+    "heading": "Folio 是什么",
+    "panelVisible": "hidden",
+    "activeItem": "开始"
+  },
+  {
+    "check": "client routing keeps the header instance",
+    "path": "/api/guide/getting-started",
+    "sameNode": true,
+    "activeItem": "安装"
+  },
+  {
+    "check": "sticky header and docs chrome unaffected",
+    "headerTop": 0,
+    "tocLinks": 4,
+    "docNavLinks": 19
+  },
+  {
+    "check": "dark mode",
+    "theme": "dark",
+    "headerPixels": [
+      {
+        "label": "header",
+        "rgb": [
+          24,
+          23,
+          21
+        ]
+      }
+    ]
+  },
+  {
+    "check": "all panels stay on screen at 1440px",
+    "panels": 5,
+    "offscreen": 0
+  },
+  {
+    "check": "all panels stay on screen at 1024px",
+    "panels": 5,
+    "offscreen": 0
+  },
+  {
+    "check": "all panels stay on screen at 900px",
+    "panels": 5,
+    "offscreen": 0
+  },
+  {
+    "check": "all panels stay on screen at 820px",
+    "panels": 5,
+    "offscreen": 0
+  },
+  {
+    "check": "all panels stay on screen at 781px",
+    "panels": 5,
+    "offscreen": 0
+  },
+  {
+    "check": "tablet 820",
+    "horizontalOverflow": 0,
+    "desktopNavVisible": true,
+    "searchLabelVisible": false,
+    "truncatedItems": 0
+  },
+  {
+    "check": "phone 390",
+    "closed": {
+      "headerHeight": 64,
+      "desktopNavHidden": true,
+      "menuButtonVisible": true,
+      "horizontalOverflow": 0,
+      "brandOverlapsActions": false
+    },
+    "opened": {
+      "visibility": "visible",
+      "top": 64,
+      "width": 390,
+      "accordionTriggers": 5,
+      "plainLinks": 3,
+      "desktopPanelInsideMobile": 0
+    },
+    "accordion": {
+      "expanded": "true",
+      "childVisible": true,
+      "navigatedTo": "/docs/introduction",
+      "panelClosedAfterNavigation": true
+    }
+  },
+  {
+    "check": "phone 320",
+    "closed": {
+      "headerHeight": 64,
+      "desktopNavHidden": true,
+      "menuButtonVisible": true,
+      "horizontalOverflow": 0,
+      "brandOverlapsActions": false
+    },
+    "opened": {
+      "visibility": "visible",
+      "top": 64,
+      "width": 320,
+      "accordionTriggers": 5,
+      "plainLinks": 3,
+      "desktopPanelInsideMobile": 0
+    },
+    "accordion": {
+      "expanded": "true",
+      "childVisible": true,
+      "navigatedTo": "/docs/introduction",
+      "panelClosedAfterNavigation": true
+    }
+  },
+  {
+    "check": "prefers-reduced-motion disables header motion",
+    "panel": "0s",
+    "mobilePanel": "0s",
+    "chevron": "0s"
+  },
+  {
+    "check": "keyboard opens and reaches the panel",
+    "expanded": "true",
+    "panelVisible": true,
+    "focusedElement": "A",
+    "focusedIsEntry": true
+  }
+]
