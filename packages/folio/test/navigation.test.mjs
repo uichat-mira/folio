@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import {
   folioNavHref,
   isFolioNavItemActive,
+  groupEntries,
   resolveFolioNavigation,
 } from "../dist/index.js";
 
@@ -195,4 +196,95 @@ test("the built types expose the new navigation fields", () => {
   ]) {
     assert.ok(declaration.includes(token), `dist/index.d.ts is missing ${token}`);
   }
+});
+
+test("a menu without groups stays one flat run, as before", () => {
+  const [item] = resolveFolioNavigation([
+    {
+      label: "开始",
+      href: "/docs/introduction",
+      children: [
+        { label: "内容协议", href: "/docs/content-contract" },
+        { label: "运行时", href: "/docs/runtime-composition" },
+      ],
+    },
+  ]);
+  assert.equal(item.groups.length, 1);
+  assert.equal(item.groups[0].label, undefined);
+  assert.equal(item.groups[0].entries.length, 3, "overview entry is included");
+});
+
+test("grouped entries split into reading tasks in first-seen order", () => {
+  const [item] = resolveFolioNavigation([
+    {
+      label: "文档",
+      href: "/docs/",
+      children: [
+        { label: "快速开始", href: "/a", group: "快速开始" },
+        { label: "编写内容", href: "/b", group: "编写与配置" },
+        { label: "内容模型", href: "/c", group: "编写与配置" },
+        { label: "构建集成", href: "/d", group: "参考资料" },
+      ],
+    },
+  ]);
+  assert.deepEqual(
+    item.groups.map((group) => group.label),
+    [undefined, "快速开始", "编写与配置", "参考资料"],
+  );
+  assert.deepEqual(
+    item.groups.map((group) => group.entries.length),
+    [1, 1, 2, 1],
+    "the ungrouped overview entry is hoisted ahead of the labelled runs",
+  );
+});
+
+test("entries stay flat on `entries` so group-agnostic consumers keep working", () => {
+  const [item] = resolveFolioNavigation([
+    {
+      label: "文档",
+      href: "/docs/",
+      children: [
+        { label: "A", href: "/a", group: "One" },
+        { label: "B", href: "/b", group: "Two" },
+      ],
+    },
+  ]);
+  assert.deepEqual(
+    item.entries.map((entry) => entry.label),
+    ["全部文档", "A", "B"],
+  );
+  assert.equal(
+    item.groups.reduce((total, group) => total + group.entries.length, 0),
+    item.entries.length,
+    "groups and entries never disagree about the panel contents",
+  );
+});
+
+test("group headings are trimmed and blank groups are ignored", () => {
+  const [item] = resolveFolioNavigation([
+    {
+      label: "文档",
+      href: "/docs/",
+      children: [
+        { label: "A", href: "/a", group: "  参考资料  " },
+        { label: "B", href: "/b", group: "   " },
+      ],
+    },
+  ]);
+  const labels = item.groups.map((group) => group.label);
+  assert.ok(labels.includes("参考资料"));
+  assert.ok(
+    item.groups.some((group) => group.label === undefined && group.entries.some((e) => e.label === "B")),
+    "a whitespace-only group is treated as ungrouped",
+  );
+});
+
+test("groupEntries is exported and tolerates an empty list", () => {
+  assert.deepEqual(groupEntries([]), []);
+});
+
+test("a plain entry is unaffected by the grouping feature", () => {
+  const [item] = resolveFolioNavigation([{ label: "展厅", href: "/showcase" }]);
+  assert.equal(item.kind, "link");
+  assert.equal(item.groups, undefined, "links carry no panel groups");
 });

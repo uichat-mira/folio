@@ -320,22 +320,42 @@ const config = defineFolioConfig({
       label: "文档",
       href: "/docs/introduction",
       children: [
-        { label: "介绍", href: "/docs/introduction", icon: "compass", description: "Folio 要解决什么问题。" },
-        { label: "内容协议", href: "/docs/content-contract", icon: "file", description: "Frontmatter 与目录即路由。" },
+        {
+          label: "快速开始",
+          href: "/docs/introduction",
+          group: "快速开始",
+          icon: "compass",
+          description: "Folio 要解决什么问题。",
+        },
+        {
+          label: "内容协议",
+          href: "/docs/content-contract",
+          group: "编写与配置",
+          icon: "file",
+          description: "Frontmatter 与目录即路由。",
+        },
       ],
       panel: {
         eyebrow: "HANDBOOK",
-        title: "从零到第一篇文档",
-        description: "四篇连续手册。",
-        overviewLabel: "全部手册",
+        title: "按要做的任务读",
+        description: "四类阅读任务。更细的知识层级在文档侧边栏里。",
+        overviewLabel: "文档目录",
       },
     },
   ],
 });
 ```
 
-- `children` entries take `label`, `href`, and optional `icon` / `description`.
-  A menu is rendered when at least one child survives validation.
+- `children` entries take `label`, `href`, and optional `icon` / `description` /
+  `group`. A menu is rendered when at least one child survives validation.
+- `group` names a reading task, so children that answer the same question render
+  together under one heading. Groups appear in first-seen order; children with
+  no group are collected into one unlabelled run ahead of them. A panel with no
+  groups at all renders exactly as it did before this field existed, which is
+  what keeps the feature backwards compatible.
+- The default header renders two levels inside a panel: reading-task headings,
+  then the links in each. Deeper hierarchy belongs in the document sidebar, not
+  in a header dropdown.
 - `panel` takes optional `eyebrow`, `title`, `description` and `overviewLabel`.
   `title` defaults to the navigation label; `overviewLabel` defaults to
   `全部{label}`.
@@ -354,7 +374,11 @@ const config = defineFolioConfig({
   separate expandable accordion, never the desktop panel compressed.
 - `resolveFolioNavigation()` and `isFolioNavItemActive()` are exported so a
   consumer building its own header gets the same normalization and active-route
-  rules rather than reimplementing them.
+  rules rather than reimplementing them. `groupEntries()` is exported too, for a
+  consumer that wants the grouping without the default header.
+- Every resolved menu carries both `entries` (flat, always) and `groups` (the
+  same links split into runs). They never disagree about panel contents, so a
+  consumer that ignores grouping keeps working unchanged.
 - Backwards compatible: existing `{label, href}` configurations compile and
   render unchanged.
 

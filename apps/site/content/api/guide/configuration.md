@@ -29,6 +29,8 @@ type FolioConfig = {
       href: string
       icon?: string
       description?: string
+      /** 阅读任务分组；省略时面板保持旧版的扁平结构。 */
+      group?: string
     }[]
     panel?: {
       eyebrow?: string

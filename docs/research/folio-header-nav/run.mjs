@@ -102,8 +102,42 @@ const browser = await chromium.launch(
     }),
   );
 
+  record(
+    "top-level navigation expresses content categories",
+    await page.evaluate(() => ({
+      entries: [...document.querySelectorAll(".folio-desktop-nav__list > li")].map((item) =>
+        item.querySelector(".folio-nav-menu__trigger, a")?.textContent.trim(),
+      ),
+      menuCount: document.querySelectorAll(".folio-nav-menu").length,
+      plainLinkCount: document.querySelectorAll(
+        ".folio-desktop-nav__list > li > a:not(.folio-nav-menu__trigger)",
+      ).length,
+    })),
+  );
+
   await page.locator(".folio-nav-menu__trigger").first().hover();
   await page.waitForTimeout(320);
+  record(
+    "dropdown expresses reading tasks",
+    await page.evaluate(() => {
+      const panel = [...document.querySelectorAll(".folio-nav-menu__panel")].find(
+        (element) => getComputedStyle(element).visibility === "visible",
+      );
+      const box = panel.getBoundingClientRect();
+      return {
+        title: panel.querySelector(".folio-nav-menu__head strong")?.textContent,
+        groups: [...panel.querySelectorAll(".folio-nav-menu__group-label")].map(
+          (element) => element.textContent,
+        ),
+        entriesPerGroup: [...panel.querySelectorAll(".folio-nav-menu__group")].map((group) => ({
+          label: group.querySelector(".folio-nav-menu__group-label")?.textContent ?? "(overview)",
+          count: group.querySelectorAll(".folio-nav-menu__entry").length,
+        })),
+        fitsViewport: box.left >= 0 && box.right <= innerWidth && box.bottom <= innerHeight,
+        size: [Math.round(box.width), Math.round(box.height)],
+      };
+    }),
+  );
   record(
     "dropdown opens on hover",
     await page.evaluate(() => {
@@ -170,11 +204,16 @@ const browser = await chromium.launch(
   // A real navigation through a panel entry.
   await page.locator(".folio-nav-menu__trigger").first().hover();
   await page.waitForTimeout(280);
-  const target = await page
-    .locator(".folio-nav-menu__entries a")
+  // Click a grouped entry, not the overview row: the overview points at the
+  // collection index, which has no docs chrome to check afterwards.
+  const startLink = page
+    .locator(".folio-nav-menu__group")
+    .filter({ has: page.locator(".folio-nav-menu__group-label") })
     .first()
-    .getAttribute("href");
-  await page.locator(".folio-nav-menu__entries a").first().click();
+    .locator("a")
+    .first();
+  const target = await startLink.getAttribute("href");
+  await startLink.click();
   await page.waitForLoadState("networkidle");
   await page.waitForTimeout(400);
   record("panel entry navigates and closes the panel", {
@@ -233,7 +272,11 @@ const browser = await chromium.launch(
   for (const width of [1440, 1024, 900, 820, 781]) {
     const page = await browser.newPage({ viewport: { width, height: 900 } });
     await page.goto(BASE, { waitUntil: "networkidle" });
-    const count = await page.locator(".folio-nav-menu__trigger").count();
+    const navVisible = await page.evaluate(() => {
+      const element = document.querySelector(".folio-desktop-nav");
+      return element ? getComputedStyle(element).display !== "none" : false;
+    });
+    const count = navVisible ? await page.locator(".folio-nav-menu__trigger").count() : 0;
     const panels = [];
     for (let index = 0; index < count; index += 1) {
       await page.locator(".folio-nav-menu__trigger").nth(index).hover();
@@ -318,6 +361,11 @@ for (const width of [390, 320]) {
       accordionTriggers: document.querySelectorAll(".folio-mobile-group__trigger").length,
       plainLinks: document.querySelectorAll(".folio-mobile-panel nav > a").length,
       desktopPanelInsideMobile: document.querySelectorAll(".folio-mobile-panel .folio-nav-menu__panel").length,
+      // The reading-task grouping has to survive the mobile treatment; a flat
+      // list there would mean the structure only exists on desktop.
+      groupLabelsInAccordion: document.querySelectorAll(
+        ".folio-mobile-panel .folio-mobile-group__label",
+      ).length,
     };
   });
   await page.screenshot({ path: join(shots, `04-phone-${width}-panel.png`) });
@@ -326,7 +374,14 @@ for (const width of [390, 320]) {
   if (opened.accordionTriggers > 0) {
     await page.locator(".folio-mobile-group__trigger").first().tap();
     await page.waitForTimeout(320);
-    const firstChild = page.locator(".folio-mobile-group__inner a").first();
+    // A labelled task section, not the overview row, so the tap proves a real
+    // task link is reachable on a phone.
+    const firstChild = page
+      .locator(".folio-mobile-group__section")
+      .filter({ has: page.locator(".folio-mobile-group__label") })
+      .first()
+      .locator("a")
+      .first();
     accordion = {
       expanded: await page
         .locator(".folio-mobile-group__trigger")

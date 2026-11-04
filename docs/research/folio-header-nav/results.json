@@ -6,16 +6,64 @@
     "brandLeftGap": 28,
     "navClusterRightGap": 28,
     "gapNavToActions": 16,
-    "topLevelItems": 8,
+    "topLevelItems": 4,
     "navIsRightOfBrand": true,
     "horizontalOverflow": 0
+  },
+  {
+    "check": "top-level navigation expresses content categories",
+    "entries": [
+      "文档",
+      "展厅",
+      "文章",
+      "项目"
+    ],
+    "menuCount": 1,
+    "plainLinkCount": 3
+  },
+  {
+    "check": "dropdown expresses reading tasks",
+    "title": "按要做的任务读",
+    "groups": [
+      "快速开始",
+      "编写与配置",
+      "参考资料",
+      "部署发布"
+    ],
+    "entriesPerGroup": [
+      {
+        "label": "(overview)",
+        "count": 1
+      },
+      {
+        "label": "快速开始",
+        "count": 2
+      },
+      {
+        "label": "编写与配置",
+        "count": 3
+      },
+      {
+        "label": "参考资料",
+        "count": 4
+      },
+      {
+        "label": "部署发布",
+        "count": 2
+      }
+    ],
+    "fitsViewport": true,
+    "size": [
+      880,
+      450
+    ]
   },
   {
     "check": "dropdown opens on hover",
     "visibility": "visible",
     "opacity": "1",
     "transition": "0.15s, 0.15s, 0.15s",
-    "entries": 18,
+    "entries": 12,
     "ariaExpanded": "true",
     "fullyInViewport": true
   },
@@ -38,17 +86,17 @@
   },
   {
     "check": "panel entry navigates and closes the panel",
-    "target": "/docs/introduction",
-    "landed": "/docs/introduction",
-    "heading": "Folio 是什么",
+    "target": "/api/guide/getting-started",
+    "landed": "/api/guide/getting-started",
+    "heading": "快速开始",
     "panelVisible": "hidden",
-    "activeItem": "开始"
+    "activeItem": "文档"
   },
   {
     "check": "client routing keeps the header instance",
     "path": "/api/guide/getting-started",
     "sameNode": true,
-    "activeItem": "安装"
+    "activeItem": "文档"
   },
   {
     "check": "sticky header and docs chrome unaffected",
@@ -72,27 +120,27 @@
   },
   {
     "check": "all panels stay on screen at 1440px",
-    "panels": 5,
+    "panels": 1,
     "offscreen": 0
   },
   {
     "check": "all panels stay on screen at 1024px",
-    "panels": 5,
+    "panels": 1,
     "offscreen": 0
   },
   {
     "check": "all panels stay on screen at 900px",
-    "panels": 5,
+    "panels": 1,
     "offscreen": 0
   },
   {
     "check": "all panels stay on screen at 820px",
-    "panels": 5,
+    "panels": 1,
     "offscreen": 0
   },
   {
     "check": "all panels stay on screen at 781px",
-    "panels": 5,
+    "panels": 1,
     "offscreen": 0
   },
   {
@@ -115,14 +163,15 @@
       "visibility": "visible",
       "top": 64,
       "width": 390,
-      "accordionTriggers": 5,
+      "accordionTriggers": 1,
       "plainLinks": 3,
-      "desktopPanelInsideMobile": 0
+      "desktopPanelInsideMobile": 0,
+      "groupLabelsInAccordion": 4
     },
     "accordion": {
       "expanded": "true",
       "childVisible": true,
-      "navigatedTo": "/docs/introduction",
+      "navigatedTo": "/api/guide/getting-started",
       "panelClosedAfterNavigation": true
     }
   },
@@ -139,14 +188,15 @@
       "visibility": "visible",
       "top": 64,
       "width": 320,
-      "accordionTriggers": 5,
+      "accordionTriggers": 1,
       "plainLinks": 3,
-      "desktopPanelInsideMobile": 0
+      "desktopPanelInsideMobile": 0,
+      "groupLabelsInAccordion": 4
     },
     "accordion": {
       "expanded": "true",
       "childVisible": true,
-      "navigatedTo": "/docs/introduction",
+      "navigatedTo": "/api/guide/getting-started",
       "panelClosedAfterNavigation": true
     }
   },

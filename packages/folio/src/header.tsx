@@ -190,21 +190,36 @@ export function FolioHeader({
           {item.panel.description ? <p>{item.panel.description}</p> : null}
         </div>
         <div className="folio-nav-menu__entries">
-          {item.entries.map((entry) => (
-            <Link
-              className="folio-nav-menu__entry"
-              to={entry.href}
-              key={entry.href + entry.label}
-              onClick={closeMenu}
+          {item.groups.map((group) => (
+            <div
+              className={
+                "folio-nav-menu__group" +
+                (group.label ? "" : " folio-nav-menu__group--overview")
+              }
+              key={group.label ?? "__ungrouped"}
             >
-              <span className="folio-nav-menu__icon" aria-hidden="true">
-                <NavIcon name={entry.icon} />
-              </span>
-              <span className="folio-nav-menu__copy">
-                <strong>{entry.label}</strong>
-                {entry.description ? <small>{entry.description}</small> : null}
-              </span>
-            </Link>
+              {group.label ? (
+                <span className="folio-nav-menu__group-label">{group.label}</span>
+              ) : null}
+              <div className="folio-nav-menu__group-entries">
+                {group.entries.map((entry) => (
+                  <Link
+                    className="folio-nav-menu__entry"
+                    to={entry.href}
+                    key={entry.href + entry.label}
+                    onClick={closeMenu}
+                  >
+                    <span className="folio-nav-menu__icon" aria-hidden="true">
+                      <NavIcon name={entry.icon} />
+                    </span>
+                    <span className="folio-nav-menu__copy">
+                      <strong>{entry.label}</strong>
+                      {entry.description ? <small>{entry.description}</small> : null}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -397,18 +412,28 @@ export function FolioHeader({
                   id={groupId}
                 >
                   <div className="folio-mobile-group__inner">
-                    {item.entries.map((entry) => (
-                      <Link
-                        key={entry.href + entry.label}
-                        to={entry.href}
-                        onClick={() => {
-                          setMobileOpen(false);
-                          setMobileGroup(null);
-                        }}
+                    {item.groups.map((group) => (
+                      <div
+                        className="folio-mobile-group__section"
+                        key={group.label ?? "__ungrouped"}
                       >
-                        <span>{entry.label}</span>
-                        {entry.description ? <small>{entry.description}</small> : null}
-                      </Link>
+                        {group.label ? (
+                          <span className="folio-mobile-group__label">{group.label}</span>
+                        ) : null}
+                        {group.entries.map((entry) => (
+                          <Link
+                            key={entry.href + entry.label}
+                            to={entry.href}
+                            onClick={() => {
+                              setMobileOpen(false);
+                              setMobileGroup(null);
+                            }}
+                          >
+                            <span>{entry.label}</span>
+                            {entry.description ? <small>{entry.description}</small> : null}
+                          </Link>
+                        ))}
+                      </div>
                     ))}
                   </div>
                 </div>

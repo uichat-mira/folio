@@ -109,6 +109,13 @@ export type FolioNavigationChild = {
   icon?: string;
   /** One short line under the label. */
   description?: string;
+  /**
+   * Optional reading-task group inside the dropdown. Entries sharing a group
+   * render together under one small heading, in first-seen order. Entries
+   * without a group render first, ungrouped. Leaving this out keeps the
+   * previously flat panel exactly as it was.
+   */
+  group?: string;
 };
 
 /**

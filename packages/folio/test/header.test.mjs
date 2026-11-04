@@ -90,6 +90,32 @@ test("a structured entry renders a disclosure trigger and its panel", () => {
   assert.match(html, /全部开始/, "generated overview entry is present");
 });
 
+test("group headings render when children declare reading tasks", () => {
+  const html = render({
+    navigation: [
+      {
+        label: "文档",
+        href: "/docs/",
+        children: [
+          { label: "快速开始", href: "/a", group: "快速开始" },
+          { label: "编写内容", href: "/b", group: "编写与配置" },
+          { label: "内容模型", href: "/c", group: "编写与配置" },
+        ],
+        panel: { title: "按要做的任务读" },
+      },
+    ],
+  });
+
+  assert.match(html, /class="folio-nav-menu__group-label">快速开始</);
+  assert.match(html, /class="folio-nav-menu__group-label">编写与配置</);
+  assert.match(html, /folio-nav-menu__group--overview/, "the section root is marked");
+});
+
+test("an ungrouped panel renders no group headings", () => {
+  const html = render({ navigation: structured });
+  assert.doesNotMatch(html, /folio-nav-menu__group-label/);
+});
+
 test("the panel does not claim to be open on first render", () => {
   const html = render({ navigation: structured });
   assert.doesNotMatch(html, /aria-expanded="true"/);

@@ -16,11 +16,13 @@ export { resolveFolioHome } from "./core/home";
 export {
   folioNavHref,
   isFolioNavItemActive,
+  groupEntries,
   resolveFolioNavigation,
 } from "./core/navigation";
 export type {
   FolioNavLinkItem,
   FolioNavMenuEntry,
+  FolioNavMenuGroup,
   FolioNavMenuItem,
   FolioResolvedNavItem,
 } from "./core/navigation";

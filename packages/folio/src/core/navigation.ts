@@ -21,6 +21,18 @@ export type FolioNavMenuEntry = {
   href: string;
   icon?: string;
   description?: string;
+  /** Reading-task group this entry belongs to, when one was configured. */
+  group?: string;
+};
+
+/**
+ * A run of dropdown entries that share a reading-task group. Consumers that do
+ * not care about grouping can read `menu.entries`, which is always flat.
+ */
+export type FolioNavMenuGroup = {
+  /** Group heading. Absent for entries that were configured without a group. */
+  label?: string;
+  entries: FolioNavMenuEntry[];
 };
 
 /** A top-level entry that opens a structured dropdown. */
@@ -34,6 +46,12 @@ export type FolioNavMenuItem = {
     description?: string;
   };
   entries: FolioNavMenuEntry[];
+  /**
+   * The same entries as `entries`, split into configured reading-task groups.
+   * A menu configured without groups yields a single unlabelled group, so the
+   * two views never disagree about what is in the panel.
+   */
+  groups: FolioNavMenuGroup[];
 };
 
 export type FolioResolvedNavItem = FolioNavLinkItem | FolioNavMenuItem;
@@ -66,6 +84,10 @@ function resolveEntries(
       description:
         typeof child.description === "string" && child.description.trim()
           ? child.description.trim()
+          : undefined,
+      group:
+        typeof child.group === "string" && child.group.trim()
+          ? child.group.trim()
           : undefined,
     });
   }
@@ -126,12 +148,59 @@ export function resolveFolioNavigation(
         : `全部${label}`;
 
     if (!entries.some((entry) => entry.href === href)) {
+      // The overview entry is deliberately ungrouped: it is the section root,
+      // not a step in any reading task.
       entries.unshift({ label: overviewLabel, href });
     }
 
-    resolved.push({ kind: "menu", label, href, panel, entries });
+    resolved.push({
+      kind: "menu",
+      label,
+      href,
+      panel,
+      entries,
+      groups: groupEntries(entries),
+    });
   }
   return resolved;
+}
+
+/**
+ * Split entries into reading-task groups, preserving first-seen order.
+ *
+ * Ungrouped entries are hoisted to the front in one unlabelled run, so a
+ * configuration that only labels some children still reads top-down instead of
+ * scattering stray links between headings. A panel with no groups at all comes
+ * back as exactly one unlabelled group, which is what renders when a consumer
+ * never adopts `group`.
+ */
+export function groupEntries(
+  entries: readonly FolioNavMenuEntry[],
+): FolioNavMenuGroup[] {
+  const ungrouped: FolioNavMenuEntry[] = [];
+  const order: string[] = [];
+  const buckets = new Map<string, FolioNavMenuEntry[]>();
+
+  for (const entry of entries) {
+    if (!entry.group) {
+      ungrouped.push(entry);
+      continue;
+    }
+    let bucket = buckets.get(entry.group);
+    if (!bucket) {
+      bucket = [];
+      buckets.set(entry.group, bucket);
+      order.push(entry.group);
+    }
+    bucket.push(entry);
+  }
+
+  const groups: FolioNavMenuGroup[] = [];
+  if (ungrouped.length > 0) groups.push({ entries: ungrouped });
+  for (const label of order) {
+    groups.push({ label, entries: buckets.get(label) ?? [] });
+  }
+  return groups;
 }
 
 /**

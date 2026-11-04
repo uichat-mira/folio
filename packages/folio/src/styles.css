@@ -111,6 +111,7 @@ button, input { font: inherit; }
    carries `margin-left: auto`; the utility buttons follow it directly so the
    two read as a single block instead of being separated by dead space. */
 .folio-header__nav {
+  position: relative;
   display: flex;
   min-width: 0;
   flex: 1;
@@ -119,13 +120,16 @@ button, input { font: inherit; }
   gap: 16px;
 }
 
-/* The panel is positioned against the nav rail, not against each trigger. A
-   panel anchored to a left-hand trigger would hang off the viewport at narrow
+/* The panel is positioned against the nav container, not against each trigger
+   and not against the nav rail. Anchor it to a trigger and a panel wider than
+   that item hangs off the viewport; anchor it to the rail and a nav with few
+   entries squeezes the panel into one column. The container is as wide as the
+   chrome allows while still ending at the right padding, so a fixed panel width
+   derived from the viewport always lands inside it. A panel anchored to a left-hand trigger would hang off the viewport at narrow
    desktop widths; spanning the rail keeps every panel on screen, keeps it
    horizontally over every trigger (so the pointer can always travel straight
    down into it), and removes the need to tune individual items. */
 .folio-desktop-nav {
-  position: relative;
   display: flex;
   min-width: 0;
   align-items: center;
@@ -195,11 +199,20 @@ button, input { font: inherit; }
   opacity: 1;
 }
 
+/* Anchored to the right edge of the nav rail and sized by its own content, so
+   the panel does not inherit the rail's width: that width comes from the number
+   of top-level entries, and a nav with few entries would otherwise squeeze the
+   panel into one narrow column. The minimum keeps the columns readable; the
+   maximum keeps it on screen at every supported width. */
 .folio-nav-menu__panel {
   position: absolute;
   top: calc(100% + 14px);
   right: 0;
-  left: 0;
+  left: auto;
+  /* Explicit, not content-sized: `max-content` plus fractional tracks produces
+     tracks that grow without bound, which pushed the panel past the left edge
+     of the viewport. 56px keeps the panel clear of both 28px page paddings. */
+  width: min(880px, calc(100vw - 56px));
   z-index: 50;
   padding: 16px;
   border: 1px solid var(--folio-hairline);
@@ -258,18 +271,66 @@ button, input { font: inherit; }
   line-height: 1.55;
 }
 
+/* Explicit column counts rather than auto-fit: auto-fit decides per available
+   width, so a given configuration silently reflows from four task columns to
+   three plus a wrapped row. Two columns is the honest default; wide viewports
+   get one column per reading task. */
 .folio-nav-menu__entries {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 4px;
-  margin-top: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 22px;
+  margin-top: 14px;
+}
+
+/* Four task columns need 786px of panel interior: 4 x 180px plus three 22px
+   gaps. The panel is `min(880px, 100vw - 56px)` with 32px of padding, so that
+   interior width arrives at exactly 874px of viewport. Below it the panel goes
+   to two columns rather than shrinking entries into unreadable slivers. */
+@media (min-width: 874px) {
+  .folio-nav-menu__entries {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Two levels only: reading-task headings, then the links inside them. Deeper
+   structure belongs to the docs sidebar, not to a header dropdown. */
+.folio-nav-menu__group {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+}
+
+/* The ungrouped run holds the section root ("all docs"), which is not a reading
+   task. Spanning the full width keeps it out of the task columns instead of
+   consuming a column and forcing the groups onto a second row. */
+.folio-nav-menu__group--overview {
+  grid-column: 1 / -1;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--folio-hairline);
+}
+
+.folio-nav-menu__group--overview .folio-nav-menu__group-entries {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.folio-nav-menu__group-label {
+  padding: 0 12px 6px;
+  color: var(--folio-muted);
+  font: 500 10.5px/1.4 var(--folio-font-mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.folio-nav-menu__group-entries {
+  display: grid;
+  gap: 2px;
 }
 
 .folio-nav-menu__entry {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 8px 12px;
   border: 1px solid transparent;
   border-radius: var(--folio-radius-sm);
   transition: border-color .15s ease, background-color .15s ease;
@@ -312,6 +373,10 @@ button, input { font: inherit; }
 }
 
 .folio-nav-menu__copy small {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   color: var(--folio-muted);
   font-size: 12px;
   line-height: 1.45;
@@ -500,6 +565,23 @@ button, input { font: inherit; }
   gap: 2px;
   min-height: 0;
   overflow: hidden;
+}
+
+.folio-mobile-group__section {
+  display: grid;
+  gap: 2px;
+}
+
+.folio-mobile-group__section + .folio-mobile-group__section {
+  margin-top: 8px;
+}
+
+.folio-mobile-group__label {
+  padding: 8px 0 2px 12px;
+  color: var(--folio-muted);
+  font: 500 10.5px/1.4 var(--folio-font-mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
 }
 
 .folio-mobile-group__inner a {

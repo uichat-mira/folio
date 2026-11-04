@@ -41,14 +41,19 @@ navigation: [
   { label: "文章", href: "/blogs" },
   {
     label: "文档",
-    href: "/docs/introduction",
+    href: "/docs/",
     children: [
-      { label: "内容协议", href: "/docs/content-contract", icon: "file", description: "Frontmatter 与目录即路由。" },
+      { label: "快速开始", href: "/api/guide/getting-started", group: "快速开始", icon: "terminal", description: "装依赖、接插件、跑通第一篇文档。" },
+      { label: "内容协议", href: "/docs/content-contract", group: "编写与配置", icon: "file", description: "Frontmatter 与目录即路由。" },
+      { label: "Frontmatter 参考", href: "/api/reference/frontmatter", group: "参考资料", icon: "code", description: "字段、默认值与扩展规则。" },
     ],
-    panel: { eyebrow: "HANDBOOK", title: "从零到第一篇文档" },
+    panel: { eyebrow: "HANDBOOK", title: "按要做的任务读", overviewLabel: "文档目录" },
   },
 ]
 ```
+
+- `group` 标记阅读任务：回答同一个问题的条目渲染在同一标题下。分组按首次出现顺序排列，未分组的条目汇总为一段无标题内容排在最前。完全不写 `group` 时面板与旧版逐像素一致，这是向后兼容的关键。
+- 面板内部只有两级：阅读任务标题，以及该任务下的链接。更深的层级属于文档侧边栏，不应塞进 header 下拉。
 
 - 触发器的普通点击用于展开面板，因此 header 会自动补一条指向该条目自身 `href` 的入口（`panel.overviewLabel`，默认 `全部{label}`）；如果 `children` 里已经有同一路由，就不重复添加。
 - `icon` 是普通字符串而非 React 组件：`types.ts` 属于 Core 层，不能引入 React。内置键为 `book`、`compass`、`layers`、`sparkles`、`code`、`file`、`archive`、`link`、`terminal`、`info`、`search`，其他值渲染为中性链接图标。
