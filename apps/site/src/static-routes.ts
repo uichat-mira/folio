@@ -12,7 +12,7 @@ import {
   type FolioStaticBuildContext,
   type FolioStaticRoute,
 } from "@uichat-mira/folio/vite";
-import { withSiteBaseLinks } from "./base-links";
+import { withFolioBaseLinks } from "./content-links";
 import { buildShowcaseHome } from "./home-model";
 
 const TYPE_LABEL: Record<string, string> = {
@@ -29,7 +29,7 @@ function href(base: string, path: string): string {
 }
 
 function markdown(doc: FolioDoc, base: string): string {
-  return renderFolioMarkdown(withSiteBaseLinks(doc.body, base), { removeH1: true });
+  return renderFolioMarkdown(withFolioBaseLinks(doc.body, base), { removeH1: true });
 }
 
 function renderToc(doc: FolioDoc): string {

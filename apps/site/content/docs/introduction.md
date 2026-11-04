@@ -26,9 +26,9 @@ vite module    virtual:folio/content
 runtime        FolioApp
 ```
 
-新的 npm package line 从 `0.1.0` 开始。当前仓库已经完成包名、API、目录与发布链迁移；npm 首发是独立的 release 步骤，不把“代码已经准备好”和“registry 已经发布”混成一件事。
+当前公开版本是 `0.1.1`，通过 GitHub Release 与 npm Trusted Publishing 发布。`dev` 分支可能已经包含尚未发布的候选契约；官方文档会单独标注这些能力，不把源码状态写成已发布行为。
 
-发布后消费者使用：
+消费者使用：
 
 ```bash
 npm install @uichat-mira/folio
@@ -56,6 +56,19 @@ Folio 不是托管 CMS，不重新封装 GitHub API，也不强迫消费者使�
 
 这个官方站就是边界证明：同一个 runtime，本体保持很薄，consumer 仍然可以做出完整产品面。
 
-## 下一步阅读
+## 推荐阅读路径
 
-先看 [内容协议](./content-contract)，再看 [只用公开 API 如何组合站点](./runtime-composition) 与 [静态发布契约](./static-publishing)。
+1. [内容协议](/docs/content-contract)：先理解 Markdown、Frontmatter 与 `FolioDoc` 的基本约定。
+2. [快速开始](/api/guide/getting-started)：在仓库内运行官方站，或在 consumer 项目中安装 package。
+3. [编写内容](/api/guide/authoring) 与 [内容模型](/api/guide/content-model)：创建页面、文章、项目和自定义 entry。
+4. [站点配置与扩展](/api/guide/configuration) 与 [导航与内容清单](/api/guide/navigation)：配置导航、分组、排序和首页。
+5. [只用公开 API 组合站点](/docs/runtime-composition)：理解 runtime 与 consumer 的表达边界。
+6. [静态发布](/docs/static-publishing) 与 [静态构建与 SEO](/api/reference/seo)：生成 route HTML、metadata、sitemap 与 robots。
+7. [部署到 GitHub Pages](/api/deployment/github-pages)：处理项目子路径与发布工作流。
+8. [API 文档索引](/api/guide/what-is-folio)：按任务查找 API、参考、示例、部署与附录。
+
+API Reference、Examples、Deployment、Appendix、博客和项目状态各有独立入口；它们不再重复入门说明。
+
+## 参与维护
+
+新增或修改官方文档前，先读 [官方站点内容维护约定](/docs/content-maintenance)。其中记录了页面类型、Frontmatter、内部链接、事实核对来源，以及 26 篇既有内容的逐篇审阅结论。

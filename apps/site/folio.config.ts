@@ -8,12 +8,13 @@ export default defineFolioConfig({
   github: "https://github.com/uichat-mira/folio",
   navigation: [
     { label: "开始", href: "/docs/introduction" },
+    { label: "安装", href: "/api/guide/getting-started" },
+    { label: "编写", href: "/api/guide/authoring" },
     { label: "API", href: "/api/guide/what-is-folio" },
-    { label: "组合", href: "/docs/runtime-composition" },
-    { label: "静态发布", href: "/docs/static-publishing" },
     { label: "展厅", href: "/showcase" },
     { label: "文章", href: "/blogs" },
-    { label: "案例", href: "/reference/site" },
+    { label: "项目", href: "/projects" },
+    { label: "部署", href: "/api/deployment/github-pages" },
   ],
   collections: [
     {

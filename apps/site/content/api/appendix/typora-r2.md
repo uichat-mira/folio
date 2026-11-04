@@ -2,7 +2,7 @@
 title: 在 Typora 中自动将图片上传到 Cloudflare R2
 path: /api/appendix/typora-r2
 description: 从旧 MiraDocs 入口迁入的写作工具附录：粘贴图片时自动转 WebP、上传 R2 并回写 Markdown。
-group: 附录 · 写作工具
+group: 参考 · 附录
 order: 70
 type: page
 status: reference

@@ -1,7 +1,12 @@
 const MARKDOWN_ROOT_LINK = /(\]\(\s*)(\/(?!\/)[^)\s]*)/g;
 const HTML_ROOT_LINK = /(\b(?:href|src)\s*=\s*["'])(\/(?!\/)[^"']*)/gi;
 
-export function withSiteBaseLinks(source: string, basePath: string): string {
+/**
+ * Prefix root-relative links and assets in Markdown with the deployment base.
+ * Both the React runtime and the custom static route bodies render Markdown
+ * directly, so the official site owns this GitHub Pages project-path mapping.
+ */
+export function withFolioBaseLinks(source: string, basePath: string): string {
   const base = basePath.replace(/\/+$/, "");
   if (!base) return source;
 

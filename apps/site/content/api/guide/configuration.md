@@ -2,8 +2,8 @@
 title: 站点配置与扩展
 path: /api/guide/configuration
 description: FolioConfig、Vite plugin options 与 React slots 的公共契约。
-group: Folio API · 核心概念
-order: 22
+group: 指南 · 概念
+order: 21
 type: doc
 status: published
 tags:
@@ -17,6 +17,7 @@ tags:
 type FolioConfig = {
   title: string
   description: string
+  author?: FolioAuthor | FolioAuthor[]
   logo?: string
   siteUrl?: string
   base?: string
@@ -32,6 +33,10 @@ type FolioConfig = {
   github?: string
 }
 ```
+
+`title` 与 `description` 是必填项。`author` 是生成 Article/TechArticle JSON-LD 时的默认作者；文档 Frontmatter 的 `author` 优先，两者都缺失时不生成作者字段。`siteUrl` 也是 canonical、sitemap、robots 与 feed URL 的前置条件。
+
+本页描述当前 `dev` 源码。`collections`、`home` 与 `author` 属于尚未包含在已发布 `0.1.1` 中的候选契约；已发布包的能力边界以[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)为准。
 
 ## 内置首页配置
 
@@ -71,6 +76,8 @@ type FolioPluginOptions = {
   route?: (sourcePath: string, doc: FolioDoc) => string
 }
 ```
+
+`contentDir` 默认是 `content`。`exclude` 在解析后过滤文件，`route` 用于 consumer 级 URL 兼容。`staticRoutes` 的完整字段、SEO、索引策略与 feed 配置见 [静态构建与 SEO](/api/reference/seo)。
 
 ## React slots
 

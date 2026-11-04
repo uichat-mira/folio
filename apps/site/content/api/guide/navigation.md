@@ -2,8 +2,8 @@
 title: 导航与内容清单
 path: /api/guide/navigation
 description: Folio 如何通过 virtual manifest、group 与 consumer 配置生成导航。
-group: Folio API · 核心概念
-order: 21
+group: 指南 · 概念
+order: 22
 type: doc
 status: published
 tags:

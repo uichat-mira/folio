@@ -2,8 +2,8 @@
 title: 部署到 GitHub Pages
 path: /api/deployment/github-pages
 description: 使用 Folio、Vite 与 GitHub Actions 发布项目路径站点。
-group: Folio API · 部署
-order: 40
+group: 参考 · 部署
+order: 50
 type: doc
 status: published
 tags:
@@ -36,18 +36,22 @@ checkout
 → setup Node
 → npm ci
 → build
-→ configure-pages
-→ upload-pages-artifact
-→ deploy-pages
+→ configure-pages（仅 prod）
+→ upload-pages-artifact（仅 prod）
+→ deploy-pages（仅 prod）
 ```
 
-权限：
+仓库的 Pages 工作流在 `dev`、`test`、`prod` 的 PR 上构建；只有 `prod` 的 push 或手动运行会部署。workflow 级只读内容，部署 job 额外获得 Pages 权限：
 
 ```yaml
 permissions:
   contents: read
-  pages: write
-  id-token: write
+
+jobs:
+  deploy:
+    permissions:
+      pages: write
+      id-token: write
 ```
 
 ## base path
