@@ -1,7 +1,7 @@
 ---
 title: Folio 项目
 path: /projects/folio
-description: 当前产品边界、已完成迁移与下一阶段工作。
+description: 当前产品边界、发布状态与下一阶段工作。
 group: 项目
 order: 1
 type: project
@@ -22,6 +22,7 @@ Folio 已经从原 MiraDocs 身份完成仓库级品牌迁移，并进入 Mira O
 - public API：`Folio* / folio()`；
 - Vite module：`virtual:folio/content`；
 - branch flow：`feat/* → dev → test → prod`；
+- `0.1.0` 手动 bootstrap、`0.1.1` GitHub Release + npm OIDC 发布；
 - GitHub Pages production deployment；
 - schema 随 Pages artifact 一起发布；
 - 官方站只消费公开 API。
@@ -41,8 +42,7 @@ Folio 已经从原 MiraDocs 身份完成仓库级品牌迁移，并进入 Mira O
 
 接下来的主线不是继续往 runtime 塞“官网特权”，而是：
 
-- 完成 `@uichat-mira/folio@0.1.0` npm 首发；
-- 配置 npm Trusted Publisher；
 - 迁移 UIChat Mira 官网这个下游 consumer；
 - 在真实 consumer 迁移后，再决定旧 `@uichat-mira/docs` 的 deprecation 时点；
-- 持续用 reference site 暴露 runtime 公共边界不足。
+- 继续用 reference site 暴露 runtime 公共边界不足；
+- 保持官方文档与当前 `dev` 源码、公开 API 和发布包状态一致。

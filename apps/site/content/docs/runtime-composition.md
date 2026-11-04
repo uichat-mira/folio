@@ -1,8 +1,8 @@
 ---
 title: 只用公开 API，也能把站做成自己的样子
 description: Folio 负责稳定契约，consumer 负责品牌、布局与交互；官方站本身就是这条边界的参考实现。
-group: 能力
-order: 3
+group: 指南 · 组合
+order: 30
 type: doc
 status: published
 tags:
@@ -63,3 +63,10 @@ Consumer 可以自由拥有：
 > Runtime 拥有契约，consumer 拥有表达。
 
 这个官网存在的意义，就是持续证明这句话不是 README 里的愿望。
+
+## 相关文档
+
+- [站点配置与扩展](/api/guide/configuration)：`FolioConfig`、Vite plugin 与 slots 的字段。
+- [导航与内容清单](/api/guide/navigation)：导航与 sidebar 如何从内容生成。
+- [静态发布](/docs/static-publishing)：同一份内容如何变成静态 HTML。
+- [案例：这个站就是 Folio 的测试用例](/reference/site)：官方站遵守的公开 API 边界。

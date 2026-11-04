@@ -3,9 +3,9 @@ title: 这个站就是 Folio 的测试用例
 path: /reference/site
 description: 官方 reference implementation 如何在不访问 runtime 私有源码的前提下，把 Folio 的核心能力组合成完整产品站。
 group: 案例
-order: 1
+order: 60
 type: page
-status: live
+status: published
 tags:
   - Reference
   - Dogfood
