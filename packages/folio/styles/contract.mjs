@@ -142,8 +142,10 @@ export const REQUIRED_SELECTOR_FAMILIES = [
     selectors: [
       ".folio-header",
       ".folio-header__wrap",
+      ".folio-header__nav",
       ".folio-brand",
       ".folio-desktop-nav",
+      ".folio-desktop-nav__list",
       ".folio-header-actions",
       ".folio-consumer-header-actions",
       ".folio-search-trigger",
@@ -151,6 +153,29 @@ export const REQUIRED_SELECTOR_FAMILIES = [
       ".folio-mobile-menu-button",
       ".folio-mobile-panel",
       ".folio-github-link",
+    ],
+  },
+  // The structured navigation panel is its own family: it is the only part of
+  // the header with an internal hierarchy (masthead, entries, icons) and it is
+  // what the mobile accordion has to stay consistent with.
+  {
+    id: "header-nav-menu",
+    selectors: [
+      ".folio-nav-item",
+      ".folio-nav-menu__trigger",
+      ".folio-nav-menu__panel",
+      ".folio-nav-menu__panel::before",
+      ".folio-nav-menu__head",
+      ".folio-nav-menu__eyebrow",
+      ".folio-nav-menu__entries",
+      ".folio-nav-menu__entry",
+      ".folio-nav-menu__icon",
+      ".folio-nav-menu__copy",
+      ".folio-mobile-group",
+      ".folio-mobile-group__trigger",
+      ".folio-mobile-group__panel",
+      ".folio-mobile-group__inner",
+      ".folio-mobile-panel__actions",
     ],
   },
   {
@@ -228,6 +253,9 @@ export const REQUIRED_DECLARATIONS = {
   ".folio-page-nav": "display: grid",
   ".folio-prerender": "width: min(900px",
   ".folio-static-doc-menu__panel": "position: fixed",
+  // The dropdown panel must stay anchored to its nav item; losing this rule
+  // would silently turn the panel into a full-width block in the header flow.
+  ".folio-nav-menu__panel": "position: absolute",
 };
 
 // Cascade relations the aggregated file must keep. Tokens come first, then the

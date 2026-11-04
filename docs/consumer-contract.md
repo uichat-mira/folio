@@ -307,6 +307,62 @@ The three boundaries above come from merged research, not from documentation inf
 
 The research files are evidence for these behavior claims. They are not a browser security test and do not prove that a given site is safe.
 
+## Structured navigation (header dropdowns)
+
+`navigation` entries accept `children` and `panel` in addition to `label` and
+`href`. Both are optional; an entry without them renders exactly as before.
+
+```ts
+const config = defineFolioConfig({
+  navigation: [
+    { label: "博客", href: "/blogs" },
+    {
+      label: "文档",
+      href: "/docs/introduction",
+      children: [
+        { label: "介绍", href: "/docs/introduction", icon: "compass", description: "Folio 要解决什么问题。" },
+        { label: "内容协议", href: "/docs/content-contract", icon: "file", description: "Frontmatter 与目录即路由。" },
+      ],
+      panel: {
+        eyebrow: "HANDBOOK",
+        title: "从零到第一篇文档",
+        description: "四篇连续手册。",
+        overviewLabel: "全部手册",
+      },
+    },
+  ],
+});
+```
+
+- `children` entries take `label`, `href`, and optional `icon` / `description`.
+  A menu is rendered when at least one child survives validation.
+- `panel` takes optional `eyebrow`, `title`, `description` and `overviewLabel`.
+  `title` defaults to the navigation label; `overviewLabel` defaults to
+  `全部{label}`.
+- The header adds a generated entry pointing at the item's own `href`, so the
+  section root stays reachable even though a plain click on the trigger opens
+  the panel instead of navigating. That entry is skipped when a child already
+  targets the same `href`.
+- `icon` is a plain string, not a React component, because `types.ts` is Core
+  and must not import React. The built-in keys are `book`, `compass`, `layers`,
+  `sparkles`, `code`, `file`, `archive`, `link`, `terminal`, `info` and
+  `search`; any other value renders the neutral link glyph.
+- Menu structure is **data-driven**. There is no route-specific behavior and no
+  built-in knowledge of `/about` or `/blogs`: any route can become a menu.
+- Desktop opens on hover, click and keyboard activation; Escape and
+  outside-click close it, and a route change closes it. Mobile renders a
+  separate expandable accordion, never the desktop panel compressed.
+- `resolveFolioNavigation()` and `isFolioNavItemActive()` are exported so a
+  consumer building its own header gets the same normalization and active-route
+  rules rather than reimplementing them.
+- Backwards compatible: existing `{label, href}` configurations compile and
+  render unchanged.
+
+Scope note: the static (no-JS) prerendered document shell has never rendered
+the top header nav, only its sidebar. Structured navigation is a React-header
+feature and does not change that. A consumer that needs no-JS top navigation
+must supply it in `staticRoutes`, as before.
+
 ## Route-directory collections (FOL-022 candidate; not in published 0.1.1)
 
 A consumer declares collection **routes**. Folio discovers entries recursively

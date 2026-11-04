@@ -78,9 +78,71 @@ export type FolioDoc = {
   data: Record<string, unknown>;
 };
 
+/**
+ * Built-in icon keys for structured navigation entries. This is a convenience
+ * for editor autocomplete, not a closed set: `icon` accepts any other string
+ * too and simply renders without an icon. Keeping the value a plain string is
+ * what lets this module stay React-free for Core and Build consumers.
+ */
+export type FolioNavigationIconName =
+  | "book"
+  | "compass"
+  | "layers"
+  | "sparkles"
+  | "code"
+  | "file"
+  | "archive"
+  | "link"
+  | "terminal"
+  | "info"
+  | "search";
+
+/**
+ * One link inside a structured navigation dropdown. The icon and description
+ * are presentation hints for the default header only; they do not affect
+ * routing.
+ */
+export type FolioNavigationChild = {
+  label: string;
+  href: string;
+  /** Built-in icon key (`FolioNavigationIconName`) or any other string. */
+  icon?: string;
+  /** One short line under the label. */
+  description?: string;
+};
+
+/**
+ * Optional chrome around a navigation dropdown. Every field is optional: an
+ * item with `children` but no `panel` still renders a titled panel derived
+ * from the navigation label.
+ */
+export type FolioNavigationPanel = {
+  /** Small uppercase eyebrow above the title, for example "FOLIO HANDBOOK". */
+  eyebrow?: string;
+  /** Panel heading. Defaults to the navigation item label. */
+  title?: string;
+  /** Supporting sentence under the heading. */
+  description?: string;
+  /**
+   * Label for the generated entry pointing at the navigation item's own
+   * `href`. Defaults to `全部{label}`. The entry is skipped when a child
+   * already links to that `href`.
+   */
+  overviewLabel?: string;
+};
+
+/**
+ * One top-level navigation entry. `{ label, href }` keeps working exactly as
+ * before and renders a plain link; adding `children` turns the entry into a
+ * structured dropdown in the default header.
+ */
 export type FolioNavigationItem = {
   label: string;
   href: string;
+  /** Structured dropdown entries. Omitted or empty renders a plain link. */
+  children?: FolioNavigationChild[];
+  /** Optional dropdown panel heading and description. */
+  panel?: FolioNavigationPanel;
 };
 
 export type FolioCollectionConfig = {

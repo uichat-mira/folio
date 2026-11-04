@@ -87,15 +87,15 @@ button, input { font: inherit; }
   height: 64px;
   margin: 0 auto;
   align-items: center;
-  gap: 28px;
+  gap: 24px;
   padding: 0 24px;
 }
 
 .folio-brand {
   display: flex;
+  flex: none;
   align-items: center;
   gap: 10px;
-  flex: none;
   font-family: var(--folio-font-display);
   font-size: 19px;
   font-weight: 600;
@@ -107,34 +107,217 @@ button, input { font: inherit; }
   object-fit: contain;
 }
 
+/* Brand stays left, everything else forms one right-aligned cluster. The nav
+   carries `margin-left: auto`; the utility buttons follow it directly so the
+   two read as a single block instead of being separated by dead space. */
+.folio-header__nav {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
 .folio-desktop-nav {
   display: flex;
-  gap: 6px;
+  min-width: 0;
   align-items: center;
 }
 
-.folio-desktop-nav a {
-  padding: 7px 10px;
-  border-radius: var(--folio-radius-md);
-  color: var(--folio-body);
-  font-size: 14px;
-  font-weight: 500;
+.folio-desktop-nav__list {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+  gap: 2px;
+  list-style: none;
 }
 
-.folio-desktop-nav a:hover {
+.folio-nav-item { position: relative; }
+
+.folio-desktop-nav a,
+.folio-nav-menu__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: var(--folio-radius-md);
+  color: var(--folio-muted);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition: color .15s ease, background-color .15s ease;
+}
+
+.folio-desktop-nav a:hover,
+.folio-nav-menu__trigger:hover,
+.folio-nav-menu.is-open .folio-nav-menu__trigger {
   background: var(--folio-surface-soft);
   color: var(--folio-ink);
 }
 
-.folio-desktop-nav a.active {
+/* Active is a typographic signal, not furniture: colour plus weight, no pill
+   and no underline. A fill here would collide with the hover fill on the same
+   element and make the open state and the current-page state indistinguishable. */
+.folio-desktop-nav a.active,
+.folio-nav-menu__trigger.active {
   color: var(--folio-primary-active);
-  background: color-mix(in srgb, var(--folio-primary) 9%, transparent);
+  font-weight: 600;
+}
+
+.folio-desktop-nav a.active:hover,
+.folio-nav-menu__trigger.active:hover,
+.folio-nav-menu.is-open .folio-nav-menu__trigger.active {
+  color: var(--folio-primary-active);
+}
+
+.folio-nav-menu__trigger svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: .7;
+  transition: transform .18s ease, opacity .15s ease;
+}
+
+.folio-nav-menu.is-open .folio-nav-menu__trigger svg {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+
+/* The panel is absolutely positioned against the whole nav item, so the
+   trigger keeps its own box and the panel can hang from the header rail. */
+.folio-nav-menu__panel {
+  position: absolute;
+  top: calc(100% + 14px);
+  right: -10px;
+  z-index: 50;
+  width: min(460px, calc(100vw - 48px));
+  padding: 16px;
+  border: 1px solid var(--folio-hairline);
+  border-radius: var(--folio-radius-lg);
+  background: var(--folio-canvas);
+  box-shadow: 0 18px 48px color-mix(in srgb, var(--folio-ink) 14%, transparent);
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity .15s ease, transform .15s ease, visibility .15s;
+}
+
+/* Transparent bridge across the 14px gap: without it, moving the pointer from
+   the trigger to the panel leaves the item and closes it mid-travel. */
+.folio-nav-menu__panel::before {
+  content: "";
+  position: absolute;
+  top: -15px;
+  right: 0;
+  left: 0;
+  height: 15px;
+}
+
+.folio-nav-menu__panel.is-open,
+.folio-nav-menu.is-open .folio-nav-menu__panel {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.folio-nav-menu__head {
+  display: grid;
+  gap: 5px;
+  padding: 2px 2px 14px;
+  border-bottom: 1px solid var(--folio-hairline);
+}
+
+.folio-nav-menu__eyebrow {
+  color: var(--folio-primary-active);
+  font: 500 10px/1.4 var(--folio-font-mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.folio-nav-menu__head strong {
+  color: var(--folio-ink);
+  font: 600 18px/1.25 var(--folio-font-display);
+}
+
+.folio-nav-menu__head p {
+  margin: 0;
+  color: var(--folio-muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.folio-nav-menu__entries {
+  display: grid;
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.folio-nav-menu__entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--folio-radius-sm);
+  transition: border-color .15s ease, background-color .15s ease;
+}
+
+.folio-nav-menu__entry:hover,
+.folio-nav-menu__entry:focus-visible {
+  border-color: var(--folio-hairline);
+  background: var(--folio-surface-soft);
+}
+
+.folio-nav-menu__icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--folio-primary-active);
+}
+
+.folio-nav-menu__icon svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.folio-nav-menu__copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.folio-nav-menu__copy strong {
+  color: var(--folio-ink);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.folio-nav-menu__copy small {
+  color: var(--folio-muted);
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .folio-header-actions {
   display: flex;
   min-width: 0;
-  margin-left: auto;
+  flex: none;
   align-items: center;
   gap: 8px;
 }
@@ -214,6 +397,8 @@ button, input { font: inherit; }
 
 .folio-mobile-menu-button { display: none; }
 
+/* The mobile panel is always mounted so it can animate; the closed state uses
+   `visibility: hidden`, which also takes it out of the tab order. */
 .folio-mobile-panel {
   position: fixed;
   top: 64px;
@@ -223,10 +408,21 @@ button, input { font: inherit; }
   display: none;
   max-height: calc(100vh - 64px);
   overflow-y: auto;
-  padding: 18px 20px 24px;
+  padding: 14px 20px 24px;
   border-bottom: 1px solid var(--folio-hairline);
+  border-top: 1px solid var(--folio-hairline);
   background: var(--folio-canvas);
   box-shadow: 0 12px 24px rgba(20, 20, 19, .1);
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity .18s ease, transform .18s ease, visibility .18s;
+}
+
+.folio-mobile-panel.is-open {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .folio-mobile-panel nav {
@@ -236,13 +432,91 @@ button, input { font: inherit; }
 
 .folio-mobile-panel nav a {
   display: flex;
-  min-height: 40px;
+  min-height: 44px;
   align-items: center;
   color: var(--folio-body);
   font-size: 14px;
 }
 
-.folio-mobile-panel > div {
+.folio-mobile-panel nav a.active {
+  color: var(--folio-primary-active);
+  font-weight: 600;
+}
+
+.folio-mobile-group { display: grid; }
+
+.folio-mobile-group__trigger {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--folio-body);
+  font-size: 14px;
+  text-align: left;
+}
+
+.folio-mobile-group__trigger.active {
+  color: var(--folio-primary-active);
+  font-weight: 600;
+}
+
+.folio-mobile-group__trigger svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: .7;
+  transition: transform .18s ease;
+}
+
+.folio-mobile-group__trigger[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+/* Height animation without a JS measurement: the grid row collapses from
+   auto to zero, which stays correct no matter how many entries there are. */
+.folio-mobile-group__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  overflow: hidden;
+  transition: grid-template-rows .18s ease;
+}
+
+.folio-mobile-group__panel.is-open { grid-template-rows: 1fr; }
+
+.folio-mobile-group__inner {
+  display: grid;
+  gap: 2px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.folio-mobile-group__inner a {
+  display: grid;
+  gap: 2px;
+  min-height: 40px;
+  align-content: center;
+  padding: 6px 0 6px 12px;
+  border-left: 1px solid var(--folio-hairline);
+  color: var(--folio-body);
+  font-size: 13.5px;
+}
+
+.folio-mobile-group__inner a small {
+  color: var(--folio-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.folio-mobile-panel__actions {
   display: flex;
   gap: 8px;
   margin-top: 16px;
@@ -251,12 +525,13 @@ button, input { font: inherit; }
 }
 
 .folio-mobile-panel button,
-.folio-mobile-panel > div > a {
+.folio-mobile-panel__actions > a {
   display: inline-flex;
-  min-height: 36px;
+  min-height: 40px;
   flex: 1;
   align-items: center;
   justify-content: center;
+  gap: 4px;
   border: 1px solid var(--folio-hairline);
   border-radius: var(--folio-radius-md);
   background: var(--folio-canvas);
@@ -264,9 +539,14 @@ button, input { font: inherit; }
   font-size: 13px;
 }
 
-.folio-mobile-panel nav a.active {
-  color: var(--folio-primary-active);
-  font-weight: 600;
+.folio-mobile-panel__actions > a svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .folio-content { min-width: 0; }
@@ -836,8 +1116,25 @@ button, input { font: inherit; }
   margin: 80px auto;
 }
 
+/* Between the desktop and mobile layouts the right-hand cluster still has to
+   fit: shed the search label and shortcut hint before anything can collide. */
+@media (max-width: 1080px) {
+  .folio-header__wrap { gap: 16px; padding: 0 18px; }
+  .folio-header__nav { gap: 10px; }
+  .folio-desktop-nav__list { gap: 0; }
+  .folio-desktop-nav a,
+  .folio-nav-menu__trigger { padding: 8px 8px; font-size: 13.5px; }
+  .folio-search-trigger kbd { display: none; }
+}
+
+@media (max-width: 900px) {
+  .folio-search-trigger span { display: none; }
+  .folio-search-trigger { width: 34px; justify-content: center; padding: 0; }
+}
+
 @media (max-width: 780px) {
   .folio-header__wrap { padding: 0 16px; gap: 12px; }
+  .folio-header__nav { flex: none; }
   .folio-desktop-nav,
   .folio-search-trigger,
   .folio-theme-toggle,
@@ -1205,6 +1502,28 @@ button, input { font: inherit; }
 
 @media (prefers-reduced-motion: reduce) {
   .folio-editorial-home a span { transition: none; }
+}
+
+/* Header surfaces communicate state through transitions, so the reduced-motion
+   contract has to cover them explicitly: the panels still open and close, they
+   just stop travelling and fading. */
+@media (prefers-reduced-motion: reduce) {
+  .folio-nav-menu__panel,
+  .folio-nav-menu__panel.is-open,
+  .folio-mobile-panel,
+  .folio-mobile-panel.is-open,
+  .folio-mobile-group__panel,
+  .folio-nav-menu__trigger svg,
+  .folio-mobile-group__trigger svg,
+  .folio-desktop-nav a,
+  .folio-nav-menu__entry,
+  .folio-nav-menu__trigger {
+    transition: none;
+  }
+  .folio-nav-menu__panel,
+  .folio-mobile-panel,
+  .folio-nav-menu__panel.is-open,
+  .folio-mobile-panel.is-open { transform: none; }
 }
 
 /* Syntax highlighting and diagram enhancement */

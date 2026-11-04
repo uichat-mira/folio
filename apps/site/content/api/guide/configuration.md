@@ -21,7 +21,22 @@ type FolioConfig = {
   logo?: string
   siteUrl?: string
   base?: string
-  navigation?: { label: string; href: string }[]
+  navigation?: {
+    label: string
+    href: string
+    children?: {
+      label: string
+      href: string
+      icon?: string
+      description?: string
+    }[]
+    panel?: {
+      eyebrow?: string
+      title?: string
+      description?: string
+      overviewLabel?: string
+    }
+  }[]
   collections?: {
     path: string
     title?: string

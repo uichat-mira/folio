@@ -36,10 +36,6 @@ body {
   background: color-mix(in srgb, var(--site-canvas) 94%, transparent);
 }
 
-.folio-header__wrap {
-  padding: 0 28px;
-}
-
 .folio-brand {
   gap: 10px;
   font-size: 16px;
@@ -60,20 +56,10 @@ body {
   font-style: italic;
 }
 
-.folio-header nav { gap: 6px; }
-
-.folio-header nav a {
-  padding: 7px 10px;
-  border-radius: 8px;
-  color: var(--site-body);
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.folio-header nav a:hover {
-  background: var(--site-surface-soft);
-  color: var(--site-ink);
-}
+/* Base header typography already matches the brand here; only the brand mark
+   and the rail width are site-specific. Nav spacing comes from the package so
+   the demo never drifts from what consumers get. */
+.folio-header__wrap { padding: 0 28px; }
 
 .site-header-action {
   display: inline-flex;
@@ -185,7 +171,7 @@ body {
 }
 
 @media (max-width: 780px) {
-  .folio-header { padding: 0 18px; }
+  .folio-header__wrap { padding: 0 18px; }
 
   .folio-doc-page {
     width: min(100% - 32px, 820px);

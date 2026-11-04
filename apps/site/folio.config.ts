@@ -6,15 +6,152 @@ export default defineFolioConfig({
     "Git-native content and static publishing runtime for Vite and React.",
   siteUrl: "https://uichat-mira.github.io",
   github: "https://github.com/uichat-mira/folio",
+  // Eight top-level entries would overflow a 390px header even collapsed, and
+  // they are not eight peers: the docs flow, the reference material and the
+  // deployment paths are three groups. Grouping them keeps the rail short
+  // without hiding any route — every previous destination is one level down.
   navigation: [
-    { label: "开始", href: "/docs/introduction" },
-    { label: "安装", href: "/api/guide/getting-started" },
-    { label: "编写", href: "/api/guide/authoring" },
-    { label: "API", href: "/api/guide/what-is-folio" },
+    {
+      label: "开始",
+      href: "/docs/introduction",
+      children: [
+        {
+          label: "介绍",
+          href: "/docs/introduction",
+          icon: "compass",
+          description: "Folio 要解决的问题与整体形态。",
+        },
+        {
+          label: "快速安装",
+          href: "/api/guide/getting-started",
+          icon: "terminal",
+          description: "装依赖、接入 Vite 插件、写出第一篇文档。",
+        },
+        {
+          label: "内容协议",
+          href: "/docs/content-contract",
+          icon: "file",
+          description: "Frontmatter 字段与目录即路由的约定。",
+        },
+        {
+          label: "运行时组合",
+          href: "/docs/runtime-composition",
+          icon: "layers",
+          description: "把内容、路由和界面装配成一个站点。",
+        },
+      ],
+      panel: {
+        eyebrow: "FOLIO HANDBOOK",
+        title: "从零到第一篇文档",
+        description: "四篇连续的手册，按顺序读完后可以独立发布一个 Folio 站点。",
+        overviewLabel: "全部手册",
+      },
+    },
+    {
+      label: "编写",
+      href: "/api/guide/authoring",
+      children: [
+        {
+          label: "写作指南",
+          href: "/api/guide/authoring",
+          icon: "file",
+          description: "Markdown 结构、标题层级与自定义块。",
+        },
+        {
+          label: "内容模型",
+          href: "/api/guide/content-model",
+          icon: "layers",
+          description: "文档、集合与首页信息如何被解析。",
+        },
+        {
+          label: "导航配置",
+          href: "/api/guide/navigation",
+          icon: "compass",
+          description: "顶层导航、侧边栏分组与集合目录。",
+        },
+        {
+          label: "Markdown 运行时",
+          href: "/api/guide/markdown-runtime",
+          icon: "code",
+          description: "渲染管线、代码高亮与图表增强。",
+        },
+      ],
+      panel: {
+        eyebrow: "AUTHORING",
+        title: "把内容写成结构",
+        description: "Folio 只约定结构，排版与表达由你自己的样式决定。",
+        overviewLabel: "全部编写指南",
+      },
+    },
+    {
+      label: "API",
+      href: "/api/guide/what-is-folio",
+      children: [
+        {
+          label: "配置项参考",
+          href: "/api/guide/configuration",
+          icon: "info",
+          description: "defineFolioConfig 的完整字段。",
+        },
+        {
+          label: "Frontmatter",
+          href: "/api/reference/frontmatter",
+          icon: "file",
+          description: "每篇文档可用的元数据字段。",
+        },
+        {
+          label: "构建集成",
+          href: "/api/reference/build-integration",
+          icon: "terminal",
+          description: "Vite 插件、虚拟模块与产物结构。",
+        },
+        {
+          label: "SEO",
+          href: "/api/reference/seo",
+          icon: "search",
+          description: "标题、站点地图与 robots 的生成方式。",
+        },
+      ],
+      panel: {
+        eyebrow: "REFERENCE",
+        title: "API 与配置参考",
+        description: "按主题查证，而不是按顺序阅读。",
+        overviewLabel: "全部 API 参考",
+      },
+    },
     { label: "展厅", href: "/showcase" },
     { label: "文章", href: "/blogs" },
     { label: "项目", href: "/projects" },
-    { label: "部署", href: "/api/deployment/github-pages" },
+    {
+      label: "部署",
+      href: "/api/deployment/github-pages",
+      children: [
+        {
+          label: "GitHub Pages",
+          href: "/api/deployment/github-pages",
+          icon: "link",
+          description: "base 路径解析与分支发布流程。",
+        },
+        {
+          label: "Cloudflare Pages",
+          href: "/api/deployment/cloudflare-pages",
+          icon: "sparkles",
+          description: "另一种静态托管方式与差异说明。",
+        },
+        {
+          label: "静态发布原理",
+          href: "/docs/static-publishing",
+          icon: "archive",
+          description: "预渲染产物如何生成与校验。",
+        },
+      ],
+      panel: {
+        eyebrow: "SHIPPING",
+        title: "把站点发出去",
+        description: "两条已验证的托管路径，以及它们背后的静态产物。",
+        overviewLabel: "全部部署说明",
+      },
+    },
   ],
   collections: [
     {
