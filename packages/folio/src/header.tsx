@@ -216,7 +216,7 @@ export function FolioHeader({
 
     if (item.kind === "link") {
       return (
-        <li className="folio-nav-item" key={item.href + item.label}>
+        <li key={item.href + item.label}>
           <Link
             className={active ? "active" : ""}
             aria-current={active ? "page" : undefined}
@@ -230,10 +230,7 @@ export function FolioHeader({
 
     return (
       <li
-        className={
-          "folio-nav-item folio-nav-menu" +
-          (openMenu === item.label ? " is-open" : "")
-        }
+        className={"folio-nav-menu" + (openMenu === item.label ? " is-open" : "")}
         key={item.href + item.label}
         onPointerEnter={(event) => {
           if (event.pointerType !== "mouse") return;

@@ -6,10 +6,11 @@ export default defineFolioConfig({
     "Git-native content and static publishing runtime for Vite and React.",
   siteUrl: "https://uichat-mira.github.io",
   github: "https://github.com/uichat-mira/folio",
-  // Eight top-level entries would overflow a 390px header even collapsed, and
-  // they are not eight peers: the docs flow, the reference material and the
-  // deployment paths are three groups. Grouping them keeps the rail short
-  // without hiding any route — every previous destination is one level down.
+  // All eight original top-level entries, in their original order, each still
+  // pointing at its original route. Four of them now also carry a dropdown so
+  // the demo exercises the structured-menu path with routes that really exist.
+  // A plain entry stays a plain entry (展厅 / 文章 / 项目) — the feature has to
+  // work for both shapes, not just for menus.
   navigation: [
     {
       label: "开始",
@@ -22,10 +23,10 @@ export default defineFolioConfig({
           description: "Folio 要解决的问题与整体形态。",
         },
         {
-          label: "快速安装",
-          href: "/api/guide/getting-started",
-          icon: "terminal",
-          description: "装依赖、接入 Vite 插件、写出第一篇文档。",
+          label: "撰写与维护",
+          href: "/docs/content-maintenance",
+          icon: "file",
+          description: "日常更新、日期来源与内容维护流程。",
         },
         {
           label: "内容协议",
@@ -45,6 +46,42 @@ export default defineFolioConfig({
         title: "从零到第一篇文档",
         description: "四篇连续的手册，按顺序读完后可以独立发布一个 Folio 站点。",
         overviewLabel: "全部手册",
+      },
+    },
+    {
+      label: "安装",
+      href: "/api/guide/getting-started",
+      children: [
+        {
+          label: "快速开始",
+          href: "/api/guide/getting-started",
+          icon: "terminal",
+          description: "装依赖、接入 Vite 插件、写出第一篇文档。",
+        },
+        {
+          label: "配置项参考",
+          href: "/api/guide/configuration",
+          icon: "info",
+          description: "defineFolioConfig 的完整字段。",
+        },
+        {
+          label: "构建集成",
+          href: "/api/reference/build-integration",
+          icon: "layers",
+          description: "Vite 插件、虚拟模块与产物结构。",
+        },
+        {
+          label: "迁移状态",
+          href: "/api/guide/migration-status",
+          icon: "archive",
+          description: "当前实现与已发布版本的差异。",
+        },
+      ],
+      panel: {
+        eyebrow: "GETTING STARTED",
+        title: "把 Folio 跑起来",
+        description: "从安装到第一次成功构建，只需要几步。",
+        overviewLabel: "全部安装说明",
       },
     },
     {
@@ -88,22 +125,16 @@ export default defineFolioConfig({
       href: "/api/guide/what-is-folio",
       children: [
         {
-          label: "配置项参考",
-          href: "/api/guide/configuration",
+          label: "Folio 是什么",
+          href: "/api/guide/what-is-folio",
           icon: "info",
-          description: "defineFolioConfig 的完整字段。",
+          description: "定位、边界与整体架构。",
         },
         {
           label: "Frontmatter",
           href: "/api/reference/frontmatter",
           icon: "file",
           description: "每篇文档可用的元数据字段。",
-        },
-        {
-          label: "构建集成",
-          href: "/api/reference/build-integration",
-          icon: "terminal",
-          description: "Vite 插件、虚拟模块与产物结构。",
         },
         {
           label: "SEO",

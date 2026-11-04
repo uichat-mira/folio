@@ -65,7 +65,7 @@ test("the header keeps its shell, brand and right-hand cluster", () => {
 
 test("plain navigation entries still render as ordinary links", () => {
   const html = render();
-  assert.match(html, /<li class="folio-nav-item">/);
+  assert.match(html, /<li><a class="" href="\/blogs"/);
   assert.match(html, /href="\/blogs"/);
   assert.doesNotMatch(html, /aria-haspopup/, "a plain entry must not become a menu");
 });
@@ -139,7 +139,7 @@ test("navigation defaults to the config's own navigation", () => {
 test("no navigation config renders no nav items but keeps the header", () => {
   const html = render({ config: { title: "Empty", description: "" } });
   assert.match(html, /class="folio-header"/);
-  assert.doesNotMatch(html, /<li class="folio-nav-item">/);
+  assert.doesNotMatch(html, /class="folio-nav-menu"/);
 });
 
 test("a consumer render prop still reaches the header actions", () => {

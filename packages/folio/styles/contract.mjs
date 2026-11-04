@@ -161,7 +161,6 @@ export const REQUIRED_SELECTOR_FAMILIES = [
   {
     id: "header-nav-menu",
     selectors: [
-      ".folio-nav-item",
       ".folio-nav-menu__trigger",
       ".folio-nav-menu__panel",
       ".folio-nav-menu__panel::before",
