@@ -14,7 +14,7 @@ tags:
 
 该页面是 MiraDocs → Folio 的**迁移事实快照**，以仓库代码、GitHub Release、发布流水线和消费者依赖为依据。文档治理核对日期：2026-11-03；本次只核对 `origin` 分支头（`dev=892a66a`、`prod=1393fc1`），发布状态以 GitHub Releases、Actions 和 npm Registry 为准。
 
-日常使用与 API 能力以 [API 文档索引](/reference/overview) 和当前源码为准，本页不重复维护入门说明。
+日常使用与 API 能力以 [参考索引](/reference/overview) 和当前源码为准，本页不重复维护入门说明。
 
 ## 已完成
 

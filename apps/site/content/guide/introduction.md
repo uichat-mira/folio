@@ -66,9 +66,9 @@ Folio 不是托管 CMS，不重新封装 GitHub API，也不强迫消费者使�
 5. [只用公开 API 组合站点](/guide/runtime-composition)：理解 runtime 与 consumer 的表达边界。
 6. [静态发布](/guide/static-publishing) 与 [静态构建与 SEO](/reference/seo)：生成 route HTML、metadata、sitemap 与 robots。
 7. [部署到 GitHub Pages](/reference/github-pages)：处理项目子路径与发布工作流。
-8. [API 文档索引](/reference/overview)：按任务查找 API、参考、示例、部署与附录。
+8. [参考索引](/reference/overview)：查 Frontmatter 字段、构建阶段、部署条件、案例与附录。
 
-API Reference、Examples、Deployment、Appendix、博客和项目状态各有独立入口；它们不再重复入门说明。
+参考侧、博客和项目状态各有独立入口；它们不再重复入门说明。读完这一页，你应该知道「要按顺序学」走指南，「要查一个具体事实」走参考。
 
 ## 参与维护
 

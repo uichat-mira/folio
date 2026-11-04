@@ -66,7 +66,7 @@ Folio 站点不是把文章堆在一个列表里。当前官方站同时使用�
 
 1. **观察内容组织**：本页 → [为示例站设计内容组织](/showcase/guides/organize-content) → [启用集合索引与导航](/showcase/guides/collections-and-navigation) → `/showcase` 集合索引。
 2. **阅读设计专题**：文章集合 → [为什么内容要留在 Git](/blogs/content-stays-in-git) → [同一份 Markdown 如何进入页面与静态输出](/blogs/one-markdown-many-surfaces) → 项目档案。
-3. **理解运行时**：入门文档 → API 参考 → Frontmatter 参考 → 静态构建与 SEO。
+3. **理解运行时**：入门文档 → 参考索引 → Frontmatter 参考 → 静态构建与 SEO。
 
 ## 不在这张图里的东西
 
