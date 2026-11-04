@@ -13,6 +13,19 @@ export { searchFolioDocs } from "./core/search";
 export { normalizeFolioCollectionPath, selectFolioCollectionDocs, folioCollectionIndexes, assertNoFolioCollectionConflicts } from "./core/collection-index";
 export type { FolioCollectionIndex } from "./core/collection-index";
 export { resolveFolioHome } from "./core/home";
+export {
+  folioNavHref,
+  isFolioNavItemActive,
+  groupEntries,
+  resolveFolioNavigation,
+} from "./core/navigation";
+export type {
+  FolioNavLinkItem,
+  FolioNavMenuEntry,
+  FolioNavMenuGroup,
+  FolioNavMenuItem,
+  FolioResolvedNavItem,
+} from "./core/navigation";
 export type {
   FolioHomeAboutSection,
   FolioHomeCollectionsSection,
@@ -57,7 +70,10 @@ export type {
   FolioHomeSectionType,
   FolioEntryType,
   FolioHeading,
+  FolioNavigationChild,
+  FolioNavigationIconName,
   FolioNavigationItem,
+  FolioNavigationPanel,
 } from "./types";
 export type {
   FolioAppProps,

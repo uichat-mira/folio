@@ -6,26 +6,46 @@ export default defineFolioConfig({
     "Git-native content and static publishing runtime for Vite and React.",
   siteUrl: "https://uichat-mira.github.io",
   github: "https://github.com/uichat-mira/folio",
+  // 指南 / 参考 are ordinary links, not dropdowns.
+  //
+  // Each is a reading mode with its own sidebar, so each one lands the reader in
+  // a document view directly: the docs shell supplies the left navigation and
+  // the in-page TOC. A dropdown would only add a click in front of a destination
+  // that already exists.
+  //
+  // The rule this site follows:
+  //
+  //     navigation entry == route root == collection prefix == content folder
+  //
+  // 指南 -> /guide/* (content/guide), 参考 -> /reference/* (content/reference).
+  // Which page belongs to which side is still decided by `collection:` in the
+  // page's own frontmatter, not by this config. Keeping the folder, the route
+  // root and the collection name aligned is what makes that field and the route
+  // agree instead of contradicting each other.
+  //
+  // `href` points at a landing page *inside* the root, so the entry still has to
+  // claim the root explicitly: prefix matching only covers the landing page's own
+  // subtree, which would leave /guide/content-model with nothing lit. `activeMatch`
+  // names the root once, and because the roots are disjoint no page can match
+  // both entries. (Round 3 needed a per-page list precisely because the directory
+  // itself was shared; here the directory is the section, so one prefix is enough.)
   navigation: [
-    { label: "开始", href: "/docs/introduction" },
-    { label: "安装", href: "/api/guide/getting-started" },
-    { label: "编写", href: "/api/guide/authoring" },
-    { label: "API", href: "/api/guide/what-is-folio" },
+    { label: "指南", href: "/guide/introduction", activeMatch: ["/guide"] },
+    { label: "参考", href: "/reference/overview", activeMatch: ["/reference"] },
     { label: "展厅", href: "/showcase" },
     { label: "文章", href: "/blogs" },
     { label: "项目", href: "/projects" },
-    { label: "部署", href: "/api/deployment/github-pages" },
   ],
   collections: [
     {
-      path: "/docs",
-      title: "手册",
-      description: "从入门、内容协议到运行时组合与静态发布的连续手册。",
+      path: "/guide",
+      title: "指南",
+      description: "从定位、内容协议到运行时组合与静态发布的连续阅读路径。",
     },
     {
-      path: "/api",
-      title: "API 参考",
-      description: "递归收录 /api 下的指南、Reference、部署与迁移记录。",
+      path: "/reference",
+      title: "参考",
+      description: "Frontmatter 字段、构建阶段、部署条件、案例与附录的查阅入口。",
     },
     {
       path: "/blogs",

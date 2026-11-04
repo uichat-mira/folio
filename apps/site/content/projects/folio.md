@@ -1,6 +1,5 @@
 ---
 title: Folio 项目
-path: /projects/folio
 description: 当前产品边界、发布状态与下一阶段工作。
 group: 项目
 order: 1

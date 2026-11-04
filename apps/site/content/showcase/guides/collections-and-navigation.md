@@ -1,6 +1,5 @@
 ---
 title: 启用集合索引与导航
-path: /showcase/guides/collections-and-navigation
 description: 操作型示例：配置 collections、验证递归收录、处理路由冲突，并让集合入口同时出现在 React 与静态输出中。
 group: 能力展厅 · 操作示例
 collection: 能力展厅
@@ -21,8 +20,8 @@ Folio 的集合索引是一个“按路由目录递归收录”的页面，不�
 ```ts
 export default defineFolioConfig({
   collections: [
-    { path: "/docs", title: "手册" },
-    { path: "/api", title: "API 参考" },
+    { path: "/guide", title: "指南" },
+    { path: "/reference", title: "参考" },
     { path: "/showcase", title: "能力展厅" },
   ],
 });
@@ -32,12 +31,12 @@ export default defineFolioConfig({
 
 ## 递归收录意味着什么
 
-集合选择的是“路径前缀匹配”的内容。配置 `/api` 后，`/api/guide/*`、`/api/reference/*` 和更深层路径都会被收录；配置 `/docs` 则不会自动包含 `/api`。这与文档壳里的 `collection` 字段是两套不同机制：
+集合选择的是“路径前缀匹配”的内容。配置 `/reference` 后，`/reference/examples/*` 和更深层路径都会被收录；配置 `/guide` 则不会自动包含 `/reference`。这与文档壳里的 `collection` 字段是两套不同机制：
 
 - 集合索引按 **route 前缀** 选择页面；
 - 文档导航按 **Frontmatter collection** 分组。
 
-因此一篇 `type: doc` 的页面既可能出现在某个集合索引里，也可能同时出现在文档壳的某个集合中。二者不冲突，但需要分别验证。
+因此一篇 `type: doc` 的页面既可能出现在某个集合索引里，也可能同时出现在文档壳的某个集合中。二者不冲突，但需要分别验证。把内容目录、集合前缀和一级导航对齐到同一个根，可以让这两套机制通常指向同一批页面，减少“路由在一处、侧边栏在另一处”的解释成本。
 
 ## 避免路由冲突
 
@@ -77,4 +76,4 @@ ls dist/showcase/guides/organize-content/index.html
 
 如果维护者希望这些能力进入下一阶段，应该作为新的工作项评估，而不是在内容里写成“已经支持”。
 
-回到 [内容组织图谱](/showcase/content-map) 或继续阅读 [静态构建与 SEO](/api/reference/seo)。
+回到 [内容组织图谱](/showcase/content-map) 或继续阅读 [静态构建与 SEO](/reference/seo)。

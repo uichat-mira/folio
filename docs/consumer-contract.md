@@ -307,6 +307,169 @@ The three boundaries above come from merged research, not from documentation inf
 
 The research files are evidence for these behavior claims. They are not a browser security test and do not prove that a given site is safe.
 
+## Structured navigation (header dropdowns)
+
+`navigation` entries accept `children` and `panel` in addition to `label` and
+`href`. Both are optional; an entry without them renders exactly as before.
+
+```ts
+const config = defineFolioConfig({
+  navigation: [
+    { label: "博客", href: "/blogs" },
+    {
+      label: "文档",
+      href: "/guide/introduction",
+      children: [
+        {
+          label: "快速开始",
+          href: "/guide/introduction",
+          group: "快速开始",
+          icon: "compass",
+          description: "Folio 要解决什么问题。",
+        },
+        {
+          label: "内容协议",
+          href: "/guide/content-contract",
+          group: "编写与配置",
+          icon: "file",
+          description: "Frontmatter 与目录即路由。",
+        },
+      ],
+      panel: {
+        eyebrow: "HANDBOOK",
+        title: "按要做的任务读",
+        description: "四类阅读任务。更细的知识层级在文档侧边栏里。",
+        overviewLabel: "文档目录",
+      },
+    },
+  ],
+});
+```
+
+- `children` entries take `label`, `href`, and optional `icon` / `description` /
+  `group`. A menu is rendered when at least one child survives validation.
+- `group` names a reading task, so children that answer the same question render
+  together under one heading. Groups appear in first-seen order; children with
+  no group are collected into one unlabelled run ahead of them. A panel with no
+  groups at all renders exactly as it did before this field existed, which is
+  what keeps the feature backwards compatible.
+- The default header renders two levels inside a panel: reading-task headings,
+  then the links in each. Deeper hierarchy belongs in the document sidebar, not
+  in a header dropdown.
+- `panel` takes optional `eyebrow`, `title`, `description` and `overviewLabel`.
+  `title` defaults to the navigation label; `overviewLabel` defaults to
+  `全部{label}`.
+- The header adds a generated entry pointing at the item's own `href`, so the
+  section root stays reachable even though a plain click on the trigger opens
+  the panel instead of navigating. That entry is skipped when a child already
+  targets the same `href`.
+- `icon` is a plain string, not a React component, because `types.ts` is Core
+  and must not import React. The built-in keys are `book`, `compass`, `layers`,
+  `sparkles`, `code`, `file`, `archive`, `link`, `terminal`, `info` and
+  `search`; any other value renders the neutral link glyph.
+- Menu structure is **data-driven**. There is no route-specific behavior and no
+  built-in knowledge of `/about` or `/blogs`: any route can become a menu.
+- Desktop opens on hover, click and keyboard activation; Escape and
+  outside-click close it, and a route change closes it. Mobile renders a
+  separate expandable accordion, never the desktop panel compressed.
+- `resolveFolioNavigation()` and `isFolioNavItemActive()` are exported so a
+  consumer building its own header gets the same normalization and active-route
+  rules rather than reimplementing them. `groupEntries()` is exported too, for a
+  consumer that wants the grouping without the default header.
+- Every resolved menu carries both `entries` (flat, always) and `groups` (the
+  same links split into runs). They never disagree about panel contents, so a
+  consumer that ignores grouping keeps working unchanged.
+- Backwards compatible: existing `{label, href}` configurations compile and
+  render unchanged.
+
+### Entries spanning several route directories (`activeMatch`)
+
+An entry is current when the pathname equals its `href` or sits under it. That
+is enough for a section that owns one route directory, but not for one whose
+pages are spread across several. A section navigated as a single top-level link
+may well be assembled from more than one directory.
+
+```ts
+navigation: [
+  {
+    label: "指南",
+    href: "/handbook/introduction",
+    activeMatch: ["/recipes/authoring", "/recipes/content-model"],
+  },
+];
+```
+
+`activeMatch` lists extra route prefixes that also mark the entry current. It is
+optional; omitted means an empty list, so existing entries are unaffected. The
+entry stays a plain link — `activeMatch` changes highlighting, never rendering
+shape. Prefixes are normalized through `folioNavHref()`, blank and duplicate
+values are dropped, and a prefix equal to `href` is redundant rather than an
+error.
+
+Choosing an explicit list over a broad directory prefix is deliberate: a wider
+prefix would highlight two different top-level sections on the same page. If one
+directory genuinely mixes sections, list the pages rather than claiming the
+whole subtree.
+
+Note the trade-off: `activeMatch` fixes the highlight, but the section still
+lives in more than one directory, so the route, the content folder and the
+sidebar `collection` can disagree. When you control the content layout, prefer
+giving each reading mode one route root (see the next section) and keep
+`activeMatch` for URL spaces you cannot reshape — published routes with inbound
+links, or content owned by another team.
+
+A one-route-per-section layout does not make `activeMatch` obsolete, because the
+entry's `href` is usually a landing page *inside* the root. Prefix matching only
+covers that page's own subtree, so siblings stay unlit. Claim the root once:
+
+```ts
+navigation: [
+  { label: "指南", href: "/guide/introduction", activeMatch: ["/guide"] },
+  { label: "参考", href: "/reference/overview", activeMatch: ["/reference"] },
+];
+```
+
+That is one prefix per section rather than one entry per page — safe here only
+because the roots do not overlap, so no page can match two entries.
+
+### Splitting the document sidebar (`collection`)
+
+The docs sidebar is grouped by the `collection` frontmatter field, **not** by
+`config.collections`. A page without it falls back to the literal 文档, so a
+site can have one flat sidebar or several without moving a single Markdown file:
+
+```yaml
+---
+title: 内容模型
+group: 概念
+collection: 指南
+---
+```
+
+`collection` sets the sidebar's heading and decides which pages appear in it.
+`config.collections` is unrelated: it declares URL directories that get a
+collection index page. Use `collection` when the split is about which docs
+belong together, and `config.collections` when the split is about routes.
+
+The two mechanisms are independent, which is exactly why they can be made to
+agree: when the content folder, the route root, the `config.collections` path and
+the `collection` value all use the same name, a reader who lands on `/guide/...`
+sees the 指南 sidebar, the 指南 index, and the 指南 navigation entry lit — one
+partition, four places that cannot drift apart. The official site does this;
+`group` there holds only the section name (`开始`, `概念`, …) because the
+collection already supplies the heading.
+
+Because the boundary lives in the content, it stays visible to whoever edits the
+Markdown and survives a navigation rewrite. Renaming a section is then a
+navigation change, not a content migration.
+
+Scope note: the static (no-JS) prerendered document shell has never rendered
+the top header nav, only its sidebar. Structured navigation is a React-header
+feature and does not change that. A consumer that needs no-JS top navigation
+must supply it in `staticRoutes`, as before. The `collection` split, by
+contrast, **does** apply to the static shell, because it is applied when the
+sidebar is rendered rather than in the React header.
+
 ## Route-directory collections (FOL-022 candidate; not in published 0.1.1)
 
 A consumer declares collection **routes**. Folio discovers entries recursively

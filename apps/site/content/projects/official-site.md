@@ -75,4 +75,4 @@ tags:
 - [内容组织图谱](/showcase/content-map)
 - [从一个内容文件到最终静态页面](/showcase/from-file-to-page)
 - [为什么内容要留在 Git](/blogs/content-stays-in-git)
-- [发布到 GitHub Pages](/api/deployment/github-pages)
+- [发布到 GitHub Pages](/reference/github-pages)

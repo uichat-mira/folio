@@ -77,8 +77,8 @@ const PATHS: Array<{ label: string; paths: string[] }> = [
     ],
   },
   {
-    label: "从入门文档进入 API 参考与约束说明",
-    paths: ["/docs/introduction", "/api/guide/what-is-folio", "/api/reference/frontmatter"],
+    label: "从入门文档进入参考索引与字段说明",
+    paths: ["/guide/introduction", "/reference/overview", "/reference/frontmatter"],
   },
 ];
 
