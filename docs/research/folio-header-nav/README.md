@@ -204,6 +204,19 @@ content/reference/  -> /reference/*    collection: 参考    config.collections:
 
 `npm test` 189/189 通过，`npm run typecheck -w apps/site` 与 `npm run build -w apps/site` 均通过。
 
+### 2.7 脚本现在会失败
+
+一个真实教训：`run.mjs` 原先只 `record()`、不 `expect()`——无论页面有没有高亮、有没有溢出，
+它都写一份 `results.json` 然后以 `0` 退出。**第四轮那个「7/9 深链接丢失高亮」的缺陷，
+就是这样读完一份"全绿"结果后才发现的。**
+
+现在尾部加了断言层，覆盖导航形态、每页唯一激活项、侧边栏归属、9 条深链接、客户端路由、
+换区、10 档宽度、移动端 390/320、减弱动效与键盘路径；任一不满足即打印清单并 `exit 1`。
+
+反向验证过断言不是装饰：故意删掉「指南」的根前缀后跑，脚本报
+`FAILED (2): deep links with wrong active count: 4 / client routing active entries: []` 并以 `1` 退出；
+恢复后回到 `all assertions passed`。**能失败的检查才算检查。**
+
 ## 3. 右对齐
 
 `1440px` 实测：header `64px`；brand 距左 `28px`；右侧功能区距右 `28px`；
