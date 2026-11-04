@@ -382,10 +382,64 @@ const config = defineFolioConfig({
 - Backwards compatible: existing `{label, href}` configurations compile and
   render unchanged.
 
+### Entries spanning several route directories (`activeMatch`)
+
+An entry is current when the pathname equals its `href` or sits under it. That
+is enough for a section that owns one route directory, but not for one whose
+pages are spread across several. A section navigated as a single top-level link
+may well be assembled from more than one directory.
+
+```ts
+navigation: [
+  {
+    label: "指南",
+    href: "/docs/introduction",
+    activeMatch: ["/api/guide/authoring", "/api/guide/content-model"],
+  },
+];
+```
+
+`activeMatch` lists extra route prefixes that also mark the entry current. It is
+optional; omitted means an empty list, so existing entries are unaffected. The
+entry stays a plain link — `activeMatch` changes highlighting, never rendering
+shape. Prefixes are normalized through `folioNavHref()`, blank and duplicate
+values are dropped, and a prefix equal to `href` is redundant rather than an
+error.
+
+Choosing an explicit list over a broad directory prefix is deliberate: a wider
+prefix would highlight two different top-level sections on the same page. If one
+directory genuinely mixes sections, list the pages rather than claiming the
+whole subtree.
+
+### Splitting the document sidebar (`collection`)
+
+The docs sidebar is grouped by the `collection` frontmatter field, **not** by
+`config.collections`. A page without it falls back to the literal 文档, so a
+site can have one flat sidebar or several without moving a single Markdown file:
+
+```yaml
+---
+title: 内容模型
+group: 指南 · 概念
+collection: 指南
+---
+```
+
+`collection` sets the sidebar's heading and decides which pages appear in it.
+`config.collections` is unrelated: it declares URL directories that get a
+collection index page. Use `collection` when the split is about which docs
+belong together, and `config.collections` when the split is about routes.
+
+Because the boundary lives in the content, it stays visible to whoever edits the
+Markdown and survives a navigation rewrite. Renaming a section is then a
+navigation change, not a content migration.
+
 Scope note: the static (no-JS) prerendered document shell has never rendered
 the top header nav, only its sidebar. Structured navigation is a React-header
 feature and does not change that. A consumer that needs no-JS top navigation
-must supply it in `staticRoutes`, as before.
+must supply it in `staticRoutes`, as before. The `collection` split, by
+contrast, **does** apply to the static shell, because it is applied when the
+sidebar is rendered rather than in the React header.
 
 ## Route-directory collections (FOL-022 candidate; not in published 0.1.1)
 

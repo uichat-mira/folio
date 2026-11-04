@@ -3,6 +3,7 @@ title: MiraDocs → Folio 迁移状态
 path: /api/guide/migration-status
 description: MiraDocs 品牌、包名、API 与生产链迁移到 Folio 的事实快照。
 group: 参考 · 迁移
+collection: 参考
 order: 60
 type: doc
 status: published

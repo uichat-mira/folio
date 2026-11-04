@@ -13,6 +13,8 @@ export type FolioNavLinkItem = {
   kind: "link";
   label: string;
   href: string;
+  /** Extra route prefixes that also mark this entry current. */
+  activeMatch: string[];
 };
 
 /** One link inside a resolved dropdown. */
@@ -40,6 +42,8 @@ export type FolioNavMenuItem = {
   kind: "menu";
   label: string;
   href: string;
+  /** Extra route prefixes that also mark this entry current. */
+  activeMatch: string[];
   panel: {
     eyebrow?: string;
     title: string;
@@ -62,6 +66,21 @@ export type FolioResolvedNavItem = FolioNavLinkItem | FolioNavMenuItem;
  */
 export function folioNavHref(path: string): string {
   return path === "/" ? "/" : path.replace(/\/$/, "");
+}
+
+/** Normalize configured extra match prefixes, dropping blanks and duplicates. */
+function resolveActiveMatch(item: FolioNavigationItem, href: string): string[] {
+  if (!Array.isArray(item.activeMatch)) return [];
+  const seen = new Set<string>([href]);
+  const prefixes: string[] = [];
+  for (const value of item.activeMatch) {
+    if (typeof value !== "string" || !value.trim()) continue;
+    const prefix = folioNavHref(value.trim());
+    if (seen.has(prefix)) continue;
+    seen.add(prefix);
+    prefixes.push(prefix);
+  }
+  return prefixes;
 }
 
 function resolveEntries(
@@ -135,9 +154,10 @@ export function resolveFolioNavigation(
     const href = folioNavHref(item.href.trim());
     if (!label || !href) continue;
 
+    const activeMatch = resolveActiveMatch(item, href);
     const entries = resolveEntries(item.children);
     if (entries.length === 0) {
-      resolved.push({ kind: "link", label, href });
+      resolved.push({ kind: "link", label, href, activeMatch });
       continue;
     }
 
@@ -157,6 +177,7 @@ export function resolveFolioNavigation(
       kind: "menu",
       label,
       href,
+      activeMatch,
       panel,
       entries,
       groups: groupEntries(entries),
@@ -217,5 +238,8 @@ export function isFolioNavItemActive(
     current === href || (href !== "/" && current.startsWith(`${href}/`));
 
   if (matches(item.href)) return true;
+  // A consumer may build a resolved item by hand; treat a missing list as empty
+  // rather than throwing inside a render.
+  if (item.activeMatch?.some((prefix) => matches(prefix))) return true;
   return item.kind === "menu" && item.entries.some((entry) => matches(entry.href));
 }

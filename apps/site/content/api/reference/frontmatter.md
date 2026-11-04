@@ -3,6 +3,7 @@ title: Frontmatter 参考
 path: /api/reference/frontmatter
 description: Folio 标准字段、默认值、YAML 解析、日期来源与 consumer 扩展规则。
 group: 参考 · API
+collection: 参考
 order: 41
 type: doc
 status: published

@@ -3,6 +3,7 @@ title: 站点配置与扩展
 path: /api/guide/configuration
 description: FolioConfig、Vite plugin options 与 React slots 的公共契约。
 group: 指南 · 概念
+collection: 指南
 order: 21
 type: doc
 status: published
@@ -24,6 +25,8 @@ type FolioConfig = {
   navigation?: {
     label: string
     href: string
+    /** 额外的路由前缀，命中即视为当前页；只影响高亮，不改变渲染形态。 */
+    activeMatch?: string[]
     children?: {
       label: string
       href: string

@@ -2,6 +2,7 @@
 title: Folio 是什么
 description: 一个由 Git 管理、可被 Skill 操作、能发布为公开站点的内容与静态构建运行时。
 group: 开始
+collection: 指南
 order: 1
 type: doc
 status: published

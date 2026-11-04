@@ -3,6 +3,7 @@ title: 快速开始
 path: /api/guide/getting-started
 description: 从 Folio 仓库开发到 package consumer 接入的最短路径。
 group: 指南 · 入门
+collection: 指南
 order: 10
 type: doc
 status: published

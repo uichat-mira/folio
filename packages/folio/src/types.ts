@@ -146,6 +146,13 @@ export type FolioNavigationPanel = {
 export type FolioNavigationItem = {
   label: string;
   href: string;
+  /**
+   * Extra route prefixes that should mark this entry as current, in addition to
+   * `href` itself. A section whose pages live under more than one route
+   * directory needs this: prefix matching alone would leave the entry
+   * unhighlighted on the pages outside `href`.
+   */
+  activeMatch?: string[];
   /** Structured dropdown entries. Omitted or empty renders a plain link. */
   children?: FolioNavigationChild[];
   /** Optional dropdown panel heading and description. */

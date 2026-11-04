@@ -2,6 +2,7 @@
 title: 只用公开 API，也能把站做成自己的样子
 description: Folio 负责稳定契约，consumer 负责品牌、布局与交互；官方站本身就是这条边界的参考实现。
 group: 指南 · 组合
+collection: 指南
 order: 30
 type: doc
 status: published

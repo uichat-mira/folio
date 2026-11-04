@@ -3,6 +3,7 @@ title: 静态构建与 SEO
 path: /api/reference/seo
 description: Folio 的静态 route、metadata、JSON-LD、sitemap 与 robots 契约。
 group: 参考 · API
+collection: 参考
 order: 43
 type: doc
 status: published

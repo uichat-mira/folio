@@ -3,6 +3,7 @@ title: 仓库、Consumer 与 Skill 边界
 path: /api/guide/architecture
 description: Folio runtime、下游站点与 UIChat Mira Organization Skill 如何协作。
 group: 指南 · 概念
+collection: 指南
 order: 23
 type: doc
 status: published

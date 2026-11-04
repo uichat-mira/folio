@@ -2,6 +2,7 @@
 title: 静态发布不是只产出一个 SPA 壳
 description: Folio 在 Vite build 阶段生成 route HTML、SEO 元数据、404、sitemap、robots 与机器可读 schema。
 group: 指南 · 组合
+collection: 指南
 order: 31
 type: doc
 status: published

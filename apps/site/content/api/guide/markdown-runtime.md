@@ -3,6 +3,7 @@ title: Markdown Runtime
 path: /api/guide/markdown-runtime
 description: Folio 自带的 GFM、代码高亮、Callout、表格与 Mermaid 渲染能力。
 group: 指南 · 入门
+collection: 指南
 order: 12
 type: doc
 status: published

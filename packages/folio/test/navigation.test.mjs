@@ -17,7 +17,9 @@ import {
 
 test("a plain {label, href} entry resolves to a plain link", () => {
   const items = resolveFolioNavigation([{ label: "文章", href: "/blogs" }]);
-  assert.deepEqual(items, [{ kind: "link", label: "文章", href: "/blogs" }]);
+  assert.deepEqual(items, [
+    { kind: "link", label: "文章", href: "/blogs", activeMatch: [] },
+  ]);
 });
 
 test("navigation is data-driven, not route-specific", () => {
@@ -287,4 +289,41 @@ test("a plain entry is unaffected by the grouping feature", () => {
   const [item] = resolveFolioNavigation([{ label: "展厅", href: "/showcase" }]);
   assert.equal(item.kind, "link");
   assert.equal(item.groups, undefined, "links carry no panel groups");
+});
+
+test("activeMatch lets one entry cover several route directories", () => {
+  // A section whose pages live under more than one route directory (指南 spans
+  // /docs and /api/guide) would otherwise lose its highlight off-prefix.
+  const [item] = resolveFolioNavigation([
+    {
+      label: "指南",
+      href: "/docs/introduction",
+      activeMatch: ["/api/guide/authoring", "/docs/introduction", "  ", 42],
+    },
+  ]);
+  assert.deepEqual(item.activeMatch, ["/api/guide/authoring"]);
+});
+
+test("an entry with activeMatch is still a plain link with no dropdown", () => {
+  const [item] = resolveFolioNavigation([
+    { label: "指南", href: "/docs/introduction", activeMatch: ["/api/guide/authoring"] },
+  ]);
+  assert.equal(item.kind, "link");
+  assert.equal(item.children, undefined);
+});
+
+test("a plain entry without activeMatch carries an empty list, not undefined", () => {
+  const [item] = resolveFolioNavigation([{ label: "文章", href: "/blogs" }]);
+  assert.deepEqual(item.activeMatch, []);
+});
+
+test("activeMatch marks the entry current on its extra prefixes", () => {
+  const [item] = resolveFolioNavigation([
+    { label: "指南", href: "/docs/introduction", activeMatch: ["/api/guide/authoring"] },
+  ]);
+  assert.equal(isFolioNavItemActive(item, "/docs/introduction"), true);
+  assert.equal(isFolioNavItemActive(item, "/api/guide/authoring"), true);
+  assert.equal(isFolioNavItemActive(item, "/api/guide/authoring/deeper"), true);
+  assert.equal(isFolioNavItemActive(item, "/api/reference/seo"), false);
+  assert.equal(isFolioNavItemActive(item, "/blogs"), false);
 });

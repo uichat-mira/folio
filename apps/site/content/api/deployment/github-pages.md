@@ -3,6 +3,7 @@ title: 部署到 GitHub Pages
 path: /api/deployment/github-pages
 description: 使用 Folio、Vite 与 GitHub Actions 发布项目路径站点。
 group: 参考 · 部署
+collection: 参考
 order: 50
 type: doc
 status: published

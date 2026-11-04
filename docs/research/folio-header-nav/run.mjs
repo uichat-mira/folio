@@ -1,4 +1,4 @@
-// Header redesign verification (FOL header first-pass).
+// Header / documentation-navigation verification.
 //
 // Real-browser checks against a running dev server. Nothing here reads source
 // text or trusts CI: every assertion comes from a live DOM, a computed style, or
@@ -14,6 +14,12 @@
 // PLAYWRIGHT_CHROMIUM_EXECUTABLE to use an already-downloaded Chromium instead
 // of the one matching this Playwright version. Screenshots and results.json are
 // written next to this file.
+//
+// The official site intentionally configures no dropdown, so this script cannot
+// exercise panel interaction any more. Structured dropdowns are still exported
+// and covered by packages/folio/test/header.test.mjs (markup) and
+// packages/folio/test/navigation.test.mjs (resolution, grouping, active rules).
+// See README.md for why browser-level panel checks no longer apply here.
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -40,11 +46,6 @@ const record = (name, data) => {
   }
 };
 
-const visiblePanel = () =>
-  [...document.querySelectorAll(".folio-nav-menu__panel")].find(
-    (element) => getComputedStyle(element).visibility === "visible",
-  );
-
 // Sample painted pixels so the surface checks do not need a human eye.
 async function sample(page, points) {
   const base64 = (await page.screenshot()).toString("base64");
@@ -66,6 +67,24 @@ async function sample(page, points) {
     { base64, points },
   );
 }
+
+// Read the docs chrome of the current page. The sidebar heading is the real
+// proof that a top-level link lands in its own document view.
+const docsChrome = (page) =>
+  page.evaluate(() => ({
+    path: location.pathname,
+    heading: document.querySelector("h1")?.textContent.trim().slice(0, 36) ?? null,
+    sidebarCollection:
+      document.querySelector(".folio-docnav__collection")?.textContent.trim() ?? null,
+    sidebarSections: [...document.querySelectorAll(".folio-docnav section > h2")].map((element) =>
+      element.textContent.trim(),
+    ),
+    sidebarLinks: document.querySelectorAll(".folio-docnav a").length,
+    tocLinks: document.querySelectorAll(".folio-toc a").length,
+    activeTopLevel: [...document.querySelectorAll(".folio-desktop-nav .active")].map((element) =>
+      element.textContent.trim(),
+    ),
+  }));
 
 const browser = await chromium.launch(
   process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
@@ -103,143 +122,110 @@ const browser = await chromium.launch(
   );
 
   record(
-    "top-level navigation expresses content categories",
-    await page.evaluate(() => ({
-      entries: [...document.querySelectorAll(".folio-desktop-nav__list > li")].map((item) =>
-        item.querySelector(".folio-nav-menu__trigger, a")?.textContent.trim(),
-      ),
-      menuCount: document.querySelectorAll(".folio-nav-menu").length,
-      plainLinkCount: document.querySelectorAll(
-        ".folio-desktop-nav__list > li > a:not(.folio-nav-menu__trigger)",
-      ).length,
-    })),
-  );
-
-  await page.locator(".folio-nav-menu__trigger").first().hover();
-  await page.waitForTimeout(320);
-  record(
-    "dropdown expresses reading tasks",
+    "top-level navigation is five plain links",
     await page.evaluate(() => {
-      const panel = [...document.querySelectorAll(".folio-nav-menu__panel")].find(
-        (element) => getComputedStyle(element).visibility === "visible",
-      );
-      const box = panel.getBoundingClientRect();
+      const items = [...document.querySelectorAll(".folio-desktop-nav__list > li")];
       return {
-        title: panel.querySelector(".folio-nav-menu__head strong")?.textContent,
-        groups: [...panel.querySelectorAll(".folio-nav-menu__group-label")].map(
-          (element) => element.textContent,
-        ),
-        entriesPerGroup: [...panel.querySelectorAll(".folio-nav-menu__group")].map((group) => ({
-          label: group.querySelector(".folio-nav-menu__group-label")?.textContent ?? "(overview)",
-          count: group.querySelectorAll(".folio-nav-menu__entry").length,
-        })),
-        fitsViewport: box.left >= 0 && box.right <= innerWidth && box.bottom <= innerHeight,
-        size: [Math.round(box.width), Math.round(box.height)],
+        entries: items.map((item) => item.querySelector("a")?.textContent.trim()),
+        hrefs: items.map((item) => item.querySelector("a")?.getAttribute("href")),
+        menuTriggers: document.querySelectorAll(".folio-nav-menu__trigger").length,
+        dropdownPanels: document.querySelectorAll(".folio-nav-menu__panel").length,
+        // A plain link must not carry the disclosure affordance.
+        chevrons: items.filter((item) => item.querySelector("a svg")).length,
+        accordions: document.querySelectorAll(".folio-mobile-group__trigger").length,
       };
     }),
   );
-  record(
-    "dropdown opens on hover",
-    await page.evaluate(() => {
-      const panel = document.querySelector(".folio-nav-menu__panel");
-      const box = panel.getBoundingClientRect();
-      return {
-        visibility: getComputedStyle(panel).visibility,
-        opacity: getComputedStyle(panel).opacity,
-        transition: getComputedStyle(panel).transitionDuration,
-        entries: document.querySelectorAll(".folio-nav-menu__entries a").length,
-        ariaExpanded: document
-          .querySelector(".folio-nav-menu__trigger")
-          .getAttribute("aria-expanded"),
-        fullyInViewport:
-          box.left >= 0 && box.right <= innerWidth && box.bottom <= innerHeight,
-      };
-    }),
-  );
-  await page.screenshot({ path: join(shots, "01-desktop-dropdown.png") });
+  await page.screenshot({ path: join(shots, "01-desktop-header.png") });
 
-  // Cross the 14px gap straight down the trigger's own column. A diagonal path
-  // legitimately switches to the neighbouring item, so the assertion is on the
-  // panel of the item under the pointer, not on DOM order.
-  const triggerBox = await page.locator(".folio-nav-menu__trigger").first().boundingBox();
-  const panelBox = await page.locator(".folio-nav-menu__panel").first().boundingBox();
-  await page.mouse.move(triggerBox.x + triggerBox.width / 2, panelBox.y + 40, { steps: 20 });
-  await page.waitForTimeout(400);
-  record(
-    "panel survives the pointer gap",
-    await page.evaluate((fn) => {
-      const open = eval(`(${fn})`)();
-      return {
-        anyVisible: Boolean(open),
-        openPanels: document.querySelectorAll(".folio-nav-menu.is-open").length,
-      };
-    }, visiblePanel.toString()),
-  );
+  // 指南 and 参考 must each open their own document view: sidebar + TOC.
+  const sections = [];
+  for (const [label, expected] of [
+    ["指南", "指南"],
+    ["参考", "参考"],
+  ]) {
+    await page.goto(BASE, { waitUntil: "networkidle" });
+    await page
+      .locator(".folio-desktop-nav__list > li > a")
+      .filter({ hasText: new RegExp(`^${label}$`) })
+      .click();
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(400);
+    sections.push({ clicked: label, expected, ...(await docsChrome(page)) });
+  }
+  record("指南 and 参考 open their own document views", sections);
+  await page.screenshot({ path: join(shots, "02-guide-docs-view.png") });
 
-  await page.keyboard.press("Escape");
-  await page.waitForTimeout(320);
-  record("escape closes", {
-    visible: await page.evaluate(
-      () => getComputedStyle(document.querySelector(".folio-nav-menu__panel")).visibility,
-    ),
+  // Deep links inside each section, including the pages that do not sit under
+  // the section's own `href` directory.
+  const deep = [];
+  for (const path of [
+    "/docs/introduction",
+    "/docs/content-contract",
+    "/docs/runtime-composition",
+    "/api/guide/content-model",
+    "/api/guide/architecture",
+    "/api/guide/what-is-folio",
+    "/api/reference/frontmatter",
+    "/api/deployment/github-pages",
+    "/docs/content-maintenance",
+  ]) {
+    const response = await page.goto(BASE + path, { waitUntil: "networkidle" });
+    deep.push({ path, status: response?.status(), ...(await docsChrome(page)) });
+  }
+  record("deep links keep the right sidebar and a single active entry", {
+    pages: deep.length,
+    // Every page must show exactly one active top-level entry; two would mean
+    // the sections over-claimed one another's routes.
+    pagesWithWrongActiveCount: deep.filter((entry) => entry.activeTopLevel.length !== 1).length,
+    withoutSidebar: deep.filter((entry) => !entry.sidebarCollection).length,
+    withoutToc: deep.filter((entry) => entry.tocLinks === 0).length,
+    sidebarByCollection: deep.reduce((accumulator, entry) => {
+      const key = entry.sidebarCollection ?? "(none)";
+      accumulator[key] = (accumulator[key] ?? 0) + 1;
+      return accumulator;
+    }, {}),
   });
 
-  await page.locator(".folio-nav-menu__trigger").first().click();
-  await page.waitForTimeout(300);
-  record("click opens", {
-    expanded: await page
-      .locator(".folio-nav-menu__trigger")
-      .first()
-      .getAttribute("aria-expanded"),
-  });
-
-  await page.mouse.click(700, 500);
-  await page.waitForTimeout(300);
-  record("outside click closes", {
-    visible: await page.evaluate(
-      () => getComputedStyle(document.querySelector(".folio-nav-menu__panel")).visibility,
-    ),
-  });
-
-  // A real navigation through a panel entry.
-  await page.locator(".folio-nav-menu__trigger").first().hover();
-  await page.waitForTimeout(280);
-  // Click a grouped entry, not the overview row: the overview points at the
-  // collection index, which has no docs chrome to check afterwards.
-  const startLink = page
-    .locator(".folio-nav-menu__group")
-    .filter({ has: page.locator(".folio-nav-menu__group-label") })
-    .first()
-    .locator("a")
-    .first();
-  const target = await startLink.getAttribute("href");
-  await startLink.click();
-  await page.waitForLoadState("networkidle");
-  await page.waitForTimeout(400);
-  record("panel entry navigates and closes the panel", {
-    target,
-    landed: new URL(page.url()).pathname,
-    heading: (await page.locator("h1").first().textContent())?.trim().slice(0, 40),
-    panelVisible: await page.evaluate(
-      () => getComputedStyle(document.querySelector(".folio-nav-menu__panel")).visibility,
-    ),
-    activeItem: await page.evaluate(
-      () => document.querySelector(".folio-desktop-nav .active")?.textContent.trim() ?? null,
-    ),
-  });
-
-  // Client-side routing must not remount the header.
+  // Client-side routing must not remount the header, and the sidebar must
+  // follow the route change.
+  await page.goto(BASE + "/docs/introduction", { waitUntil: "networkidle" });
   await page.evaluate(() => {
     window.__header = document.querySelector(".folio-header");
   });
-  await page.locator(".folio-docnav a").nth(2).click();
+  await page.locator('.folio-docnav a[href$="/api/guide/content-model"]').first().click();
+  await page.waitForLoadState("networkidle");
   await page.waitForTimeout(600);
   record(
-    "client routing keeps the header instance",
+    "client routing keeps the header and swaps the sidebar",
     await page.evaluate(() => ({
       path: location.pathname,
-      sameNode: window.__header === document.querySelector(".folio-header"),
-      activeItem: document.querySelector(".folio-desktop-nav .active")?.textContent.trim() ?? null,
+      sameHeaderNode: window.__header === document.querySelector(".folio-header"),
+      sidebarCollection: document.querySelector(".folio-docnav__collection")?.textContent.trim(),
+      activeTopLevel: [...document.querySelectorAll(".folio-desktop-nav .active")].map((element) =>
+        element.textContent.trim(),
+      ),
+    })),
+  );
+
+  // Switching sections through the header must swap the whole sidebar.
+  await page
+    .locator(".folio-desktop-nav__list > li > a")
+    .filter({ hasText: /^参考$/ })
+    .click();
+  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(600);
+  record(
+    "header switch replaces the sidebar contents",
+    await page.evaluate(() => ({
+      path: location.pathname,
+      sidebarCollection: document.querySelector(".folio-docnav__collection")?.textContent.trim(),
+      sidebarLinks: [...document.querySelectorAll(".folio-docnav a")].map((element) =>
+        element.textContent.trim().slice(0, 18),
+      ),
+      activeTopLevel: [...document.querySelectorAll(".folio-desktop-nav .active")].map((element) =>
+        element.textContent.trim(),
+      ),
     })),
   );
 
@@ -267,46 +253,90 @@ const browser = await chromium.launch(
   await page.close();
 }
 
+// ------------------------------------------------------- non-docs surfaces ---
+{
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const pages = [];
+  for (const path of ["/", "/blogs", "/projects", "/showcase"]) {
+    const response = await page.goto(BASE + path, { waitUntil: "networkidle" });
+    pages.push({
+      path,
+      status: response?.status(),
+      heading: await page.evaluate(() =>
+        document.querySelector("h1")?.textContent.trim().slice(0, 30),
+      ),
+      hasDocsSidebar: await page.evaluate(() => Boolean(document.querySelector(".folio-docnav"))),
+      activeTopLevel: await page.evaluate(() =>
+        [...document.querySelectorAll(".folio-desktop-nav .active")].map((element) =>
+          element.textContent.trim(),
+        ),
+      ),
+      horizontalOverflow: await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      ),
+    });
+  }
+  record("home, 展厅, 文章 and 项目 are untouched", pages);
+  await page.screenshot({ path: join(shots, "03-home.png") });
+  await page.close();
+}
+
+// ------------------------------------------------------------ search (JS) ---
+{
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  await page.goto(BASE, { waitUntil: "networkidle" });
+  await page.locator(".folio-search-trigger").click();
+  await page.waitForTimeout(400);
+  await page.keyboard.type("导航");
+  await page.waitForTimeout(700);
+  record(
+    "search still finds documents across both sections",
+    await page.evaluate(() => {
+      const options = [...document.querySelectorAll("[role=option]")];
+      return {
+        results: options.length,
+        sample: options.slice(0, 3).map((option) => option.textContent.trim().slice(0, 44)),
+      };
+    }),
+  );
+  await page.screenshot({ path: join(shots, "04-search.png") });
+  await page.close();
+}
+
 // ------------------------------------------------------ horizontal sweeps ---
 {
-  for (const width of [1440, 1024, 900, 820, 781]) {
+  const sweeps = [];
+  for (const width of [1440, 1280, 1024, 960, 900, 820, 781, 768, 390, 320]) {
     const page = await browser.newPage({ viewport: { width, height: 900 } });
     await page.goto(BASE, { waitUntil: "networkidle" });
-    const navVisible = await page.evaluate(() => {
-      const element = document.querySelector(".folio-desktop-nav");
-      return element ? getComputedStyle(element).display !== "none" : false;
-    });
-    const count = navVisible ? await page.locator(".folio-nav-menu__trigger").count() : 0;
-    const panels = [];
-    for (let index = 0; index < count; index += 1) {
-      await page.locator(".folio-nav-menu__trigger").nth(index).hover();
-      await page.waitForTimeout(260);
-      panels.push(
-        await page.evaluate(() => {
-          const open = [...document.querySelectorAll(".folio-nav-menu__panel")].find(
-            (element) => getComputedStyle(element).visibility === "visible",
-          );
-          if (!open) return { missing: true };
-          const box = open.getBoundingClientRect();
-          return {
-            label: open
-              .closest("li")
-              .querySelector(".folio-nav-menu__trigger")
-              .textContent.trim()
-              .slice(0, 8),
-            fullyInViewport: box.left >= 0 && box.right <= innerWidth,
-          };
-        }),
-      );
-      await page.mouse.move(2, 500);
-      await page.waitForTimeout(160);
-    }
-    record(`all panels stay on screen at ${width}px`, {
-      panels: panels.length,
-      offscreen: panels.filter((panel) => panel.missing || !panel.fullyInViewport).length,
-    });
+    sweeps.push(
+      await page.evaluate(() => {
+        const desktop = document.querySelector(".folio-desktop-nav");
+        const desktopVisible = desktop ? getComputedStyle(desktop).display !== "none" : false;
+        const items = [...document.querySelectorAll(".folio-desktop-nav__list > li > a")];
+        return {
+          width: innerWidth,
+          desktopVisible,
+          items: items.length,
+          truncated: items.filter(
+            (element) => element.scrollWidth > element.clientWidth + 1,
+          ).length,
+          overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        };
+      }),
+    );
     await page.close();
   }
+  record("no width overflows and no item truncates", {
+    widths: sweeps.length,
+    overflowing: sweeps.filter((entry) => entry.overflow > 0).length,
+    truncated: sweeps.filter((entry) => entry.truncated > 0).length,
+    rows: sweeps.map((entry) => ({
+      width: entry.width,
+      desktop: entry.desktopVisible,
+      overflow: entry.overflow,
+    })),
+  });
 }
 
 // ------------------------------------------------------------------ tablet ---
@@ -317,14 +347,16 @@ const browser = await chromium.launch(
     "tablet 820",
     await page.evaluate(() => ({
       horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-      desktopNavVisible: getComputedStyle(document.querySelector(".folio-desktop-nav")).display !== "none",
+      desktopNavVisible:
+        getComputedStyle(document.querySelector(".folio-desktop-nav")).display !== "none",
       searchLabelVisible:
         getComputedStyle(document.querySelector(".folio-search-trigger span")).display !== "none",
-      truncatedItems: [...document.querySelectorAll(".folio-desktop-nav__list > li > a, .folio-nav-menu__trigger")]
-        .filter((element) => element.scrollWidth > element.clientWidth + 1).length,
+      truncatedItems: [...document.querySelectorAll(".folio-desktop-nav__list > li > a")].filter(
+        (element) => element.scrollWidth > element.clientWidth + 1,
+      ).length,
     })),
   );
-  await page.screenshot({ path: join(shots, "02-tablet-820.png") });
+  await page.screenshot({ path: join(shots, "05-tablet-820.png") });
   await page.close();
 }
 
@@ -342,13 +374,15 @@ for (const width of [390, 320]) {
     const actions = document.querySelector(".folio-header-actions").getBoundingClientRect();
     return {
       headerHeight: document.querySelector(".folio-header").getBoundingClientRect().height,
-      desktopNavHidden: getComputedStyle(document.querySelector(".folio-desktop-nav")).display === "none",
-      menuButtonVisible: getComputedStyle(document.querySelector(".folio-mobile-menu-button")).display !== "none",
+      desktopNavHidden:
+        getComputedStyle(document.querySelector(".folio-desktop-nav")).display === "none",
+      menuButtonVisible:
+        getComputedStyle(document.querySelector(".folio-mobile-menu-button")).display !== "none",
       horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       brandOverlapsActions: brand.right > actions.left,
     };
   });
-  await page.screenshot({ path: join(shots, `03-phone-${width}-closed.png`) });
+  await page.screenshot({ path: join(shots, `06-phone-${width}-closed.png`) });
 
   await page.locator(".folio-mobile-menu-button").tap();
   await page.waitForTimeout(320);
@@ -358,48 +392,32 @@ for (const width of [390, 320]) {
       visibility: getComputedStyle(panel).visibility,
       top: Math.round(panel.getBoundingClientRect().top),
       width: Math.round(panel.getBoundingClientRect().width),
+      links: [...panel.querySelectorAll("nav a")].map((element) => element.textContent.trim()),
       accordionTriggers: document.querySelectorAll(".folio-mobile-group__trigger").length,
-      plainLinks: document.querySelectorAll(".folio-mobile-panel nav > a").length,
-      desktopPanelInsideMobile: document.querySelectorAll(".folio-mobile-panel .folio-nav-menu__panel").length,
-      // The reading-task grouping has to survive the mobile treatment; a flat
-      // list there would mean the structure only exists on desktop.
-      groupLabelsInAccordion: document.querySelectorAll(
-        ".folio-mobile-panel .folio-mobile-group__label",
+      desktopPanelInsideMobile: document.querySelectorAll(
+        ".folio-mobile-panel .folio-nav-menu__panel",
       ).length,
     };
   });
-  await page.screenshot({ path: join(shots, `04-phone-${width}-panel.png`) });
+  await page.screenshot({ path: join(shots, `07-phone-${width}-panel.png`) });
 
-  let accordion = null;
-  if (opened.accordionTriggers > 0) {
-    await page.locator(".folio-mobile-group__trigger").first().tap();
-    await page.waitForTimeout(320);
-    // A labelled task section, not the overview row, so the tap proves a real
-    // task link is reachable on a phone.
-    const firstChild = page
-      .locator(".folio-mobile-group__section")
-      .filter({ has: page.locator(".folio-mobile-group__label") })
-      .first()
-      .locator("a")
-      .first();
-    accordion = {
-      expanded: await page
-        .locator(".folio-mobile-group__trigger")
-        .first()
-        .getAttribute("aria-expanded"),
-      childVisible: await firstChild.isVisible(),
-    };
-    await page.screenshot({ path: join(shots, `05-phone-${width}-accordion.png`) });
+  // A phone tap must reach the document view, not just close the panel.
+  await page
+    .locator(".folio-mobile-panel nav a")
+    .filter({ hasText: /^指南$/ })
+    .first()
+    .tap();
+  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(500);
+  const navigated = await page.evaluate(() => ({
+    path: location.pathname,
+    sidebarCollection: document.querySelector(".folio-docnav__collection")?.textContent.trim(),
+    tocLinks: document.querySelectorAll(".folio-toc a").length,
+    panelClosed:
+      getComputedStyle(document.querySelector(".folio-mobile-panel")).visibility === "hidden",
+  }));
 
-    await firstChild.tap();
-    await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(300);
-    accordion.navigatedTo = new URL(page.url()).pathname;
-    accordion.panelClosedAfterNavigation = await page.evaluate(
-      () => getComputedStyle(document.querySelector(".folio-mobile-panel")).visibility === "hidden",
-    );
-  }
-  record(`phone ${width}`, { closed, opened, accordion });
+  record(`phone ${width}`, { closed, opened, navigated });
   await page.close();
 }
 
@@ -414,9 +432,10 @@ for (const width of [390, 320]) {
   record(
     "prefers-reduced-motion disables header motion",
     await page.evaluate(() => ({
-      panel: getComputedStyle(document.querySelector(".folio-nav-menu__panel")).transitionDuration,
+      navLink: getComputedStyle(document.querySelector(".folio-desktop-nav__list a"))
+        .transitionDuration,
       mobilePanel: getComputedStyle(document.querySelector(".folio-mobile-panel")).transitionDuration,
-      chevron: getComputedStyle(document.querySelector(".folio-nav-menu__trigger svg"))
+      themeToggle: getComputedStyle(document.querySelector(".folio-theme-toggle"))
         .transitionDuration,
     })),
   );
@@ -427,22 +446,36 @@ for (const width of [390, 320]) {
 {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   await page.goto(BASE, { waitUntil: "networkidle" });
-  await page.keyboard.press("Tab");
-  await page.keyboard.press("Tab");
+  // Tab through the header until focus lands on a top-level nav link, then
+  // activate it: keyboard users must be able to enter the docs view too.
+  let reached = null;
+  for (let step = 0; step < 12; step += 1) {
+    await page.keyboard.press("Tab");
+    const state = await page.evaluate(() => {
+      const active = document.activeElement;
+      return {
+        tag: active?.tagName,
+        text: active?.textContent?.trim().slice(0, 12),
+        href: active?.getAttribute?.("href") ?? null,
+        insideNav: Boolean(active?.closest(".folio-desktop-nav__list")),
+      };
+    });
+    if (state.insideNav) {
+      reached = state;
+      break;
+    }
+  }
   await page.keyboard.press("Enter");
-  await page.waitForTimeout(300);
-  await page.keyboard.press("Tab");
-  record(
-    "keyboard opens and reaches the panel",
-    await page.evaluate(() => ({
-      expanded: document.querySelector(".folio-nav-menu__trigger")?.getAttribute("aria-expanded"),
-      panelVisible:
-        getComputedStyle(document.querySelector(".folio-nav-menu__panel")).visibility === "visible",
-      focusedElement: document.activeElement.tagName,
-      focusedIsEntry: document.activeElement.classList.contains("folio-nav-menu__entry"),
-    })),
-  );
-  await page.screenshot({ path: join(shots, "06-keyboard-panel.png") });
+  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(400);
+  record("keyboard can reach and enter a section", {
+    focused: reached,
+    landedPath: await page.evaluate(() => location.pathname),
+    sidebarCollection: await page.evaluate(
+      () => document.querySelector(".folio-docnav__collection")?.textContent.trim() ?? null,
+    ),
+  });
+  await page.screenshot({ path: join(shots, "08-keyboard.png") });
   await page.close();
 }
 

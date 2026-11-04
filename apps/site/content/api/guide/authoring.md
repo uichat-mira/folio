@@ -3,6 +3,7 @@ title: 编写内容
 path: /api/guide/authoring
 description: 使用 Folio 创建文档、文章、项目和自定义页面。
 group: 指南 · 入门
+collection: 指南
 order: 11
 type: doc
 status: published

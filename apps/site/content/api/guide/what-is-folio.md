@@ -3,6 +3,7 @@ title: API 文档索引
 path: /api/guide/what-is-folio
 description: 按任务查找 Folio 公共 API、内容模型、静态构建、部署、示例与附录。
 group: 参考 · API
+collection: 参考
 order: 40
 type: doc
 status: published

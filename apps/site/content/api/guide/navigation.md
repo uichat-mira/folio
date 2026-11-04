@@ -3,6 +3,7 @@ title: 导航与内容清单
 path: /api/guide/navigation
 description: Folio 如何通过 virtual manifest、group 与 consumer 配置生成导航。
 group: 指南 · 概念
+collection: 指南
 order: 22
 type: doc
 status: published
@@ -60,6 +61,41 @@ navigation: [
 - 菜单结构完全由配置驱动，没有按路由硬编码的分支：任何路由都可以成为菜单。
 - 桌面端支持悬停、点击与键盘展开；`Escape` 与点击面板外关闭，路由变化也会关闭。移动端使用独立的可展开手风琴，而不是把桌面面板压缩后塞进窄屏。
 - 需要自己实现 header 的 consumer 可以复用导出的 `resolveFolioNavigation()` 与 `isFolioNavItemActive()`，保持同一套归一化与激活判断。
+
+## 让一个条目覆盖多个路由目录
+
+条目在自身 `href` 相同或位于其下方时才算当前页。如果一个顶层条目其实横跨多个路由目录，仅靠前缀匹配就会在目录之外丢失高亮。
+
+```ts
+navigation: [
+  {
+    label: "指南",
+    href: "/docs/introduction",
+    activeMatch: ["/api/guide/authoring", "/api/guide/content-model"],
+  },
+]
+```
+
+- `activeMatch` 是额外的路由前缀，命中即视为当前页。它可选，省略等价于空列表，已有条目不受影响。
+- 它只影响高亮，不影响渲染形态：带 `activeMatch` 的条目仍然是普通链接。
+- 前缀会经 `folioNavHref()` 归一化，空白与重复值被丢弃，与 `href` 相同的前缀只是冗余而非错误。
+- 这里刻意用显式清单而不是整个目录前缀：更宽的前缀会让同一页同时点亮两个一级条目。若一个目录确实混装两类内容，就逐个列出页面。
+
+## 拆分文档侧边栏
+
+文档侧边栏按 frontmatter 的 `collection` 字段分组，而不是按 `config.collections`。没写的页面回落到字面量「文档」，因此一个站点可以只有一个侧边栏，也可以有多个，且不需要移动任何 Markdown 文件。
+
+```yaml
+---
+title: 内容模型
+group: 指南 · 概念
+collection: 指南
+---
+```
+
+`collection` 决定侧边栏标题，也决定哪些页面出现在其中。`config.collections` 与此无关：它声明的是「要生成集合索引页的 URL 目录」。所以，「哪些文档该放在一起读」用 `collection`，「哪条路由该有索引页」用 `config.collections`。
+
+把边界放在内容里，改导航时就不必改动内容结构；反过来，重命名一个栏目只是导航改动，不是一次内容迁移。
 
 ## 兼容旧 URL
 

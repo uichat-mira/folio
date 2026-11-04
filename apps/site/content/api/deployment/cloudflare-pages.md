@@ -3,6 +3,7 @@ title: 下游案例：Cloudflare Pages
 path: /api/deployment/cloudflare-pages
 description: UIChat Mira 旧文档站如何把 Folio/MiraDocs 类静态产物发布到 Cloudflare Pages。
 group: 参考 · 部署
+collection: 参考
 order: 51
 type: doc
 status: reference

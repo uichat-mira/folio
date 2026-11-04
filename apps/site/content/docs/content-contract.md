@@ -2,6 +2,7 @@
 title: 内容协议
 description: Markdown、YAML Frontmatter 与 FolioDoc 共同依赖的最小稳定契约。
 group: 开始
+collection: 指南
 order: 2
 type: doc
 status: published

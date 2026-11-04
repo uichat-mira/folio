@@ -3,6 +3,7 @@ title: Vite 构建集成
 path: /api/reference/build-integration
 description: 使用 @uichat-mira/folio/vite 接管内容发现、热更新与静态输出。
 group: 参考 · API
+collection: 参考
 order: 42
 type: doc
 status: published

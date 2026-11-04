@@ -3,6 +3,7 @@ title: 官方站点内容维护约定
 path: /docs/content-maintenance
 description: 官方站点文档的页面类型、Frontmatter、链接、事实核对规则与 26 篇既有内容审阅清单。
 group: 维护
+collection: 参考
 order: 90
 type: doc
 status: published

@@ -6,103 +6,113 @@
     "brandLeftGap": 28,
     "navClusterRightGap": 28,
     "gapNavToActions": 16,
-    "topLevelItems": 4,
+    "topLevelItems": 5,
     "navIsRightOfBrand": true,
     "horizontalOverflow": 0
   },
   {
-    "check": "top-level navigation expresses content categories",
+    "check": "top-level navigation is five plain links",
     "entries": [
-      "文档",
+      "指南",
+      "参考",
       "展厅",
       "文章",
       "项目"
     ],
-    "menuCount": 1,
-    "plainLinkCount": 3
+    "hrefs": [
+      "/docs/introduction",
+      "/api/guide/what-is-folio",
+      "/showcase",
+      "/blogs",
+      "/projects"
+    ],
+    "menuTriggers": 0,
+    "dropdownPanels": 0,
+    "chevrons": 0,
+    "accordions": 0
   },
   {
-    "check": "dropdown expresses reading tasks",
-    "title": "按要做的任务读",
-    "groups": [
-      "快速开始",
-      "编写与配置",
-      "参考资料",
-      "部署发布"
-    ],
-    "entriesPerGroup": [
-      {
-        "label": "(overview)",
-        "count": 1
-      },
-      {
-        "label": "快速开始",
-        "count": 2
-      },
-      {
-        "label": "编写与配置",
-        "count": 3
-      },
-      {
-        "label": "参考资料",
-        "count": 4
-      },
-      {
-        "label": "部署发布",
-        "count": 2
-      }
-    ],
-    "fitsViewport": true,
-    "size": [
-      880,
-      450
+    "0": {
+      "clicked": "指南",
+      "expected": "指南",
+      "path": "/docs/introduction",
+      "heading": "Folio 是什么",
+      "sidebarCollection": "指南",
+      "sidebarSections": [
+        "开始",
+        "指南 · 入门",
+        "指南 · 概念",
+        "指南 · 组合"
+      ],
+      "sidebarLinks": 11,
+      "tocLinks": 5,
+      "activeTopLevel": [
+        "指南"
+      ]
+    },
+    "1": {
+      "clicked": "参考",
+      "expected": "参考",
+      "path": "/api/guide/what-is-folio",
+      "heading": "API 文档索引",
+      "sidebarCollection": "参考",
+      "sidebarSections": [
+        "参考 · API",
+        "参考 · 部署",
+        "参考 · 迁移",
+        "维护"
+      ],
+      "sidebarLinks": 8,
+      "tocLinks": 4,
+      "activeTopLevel": [
+        "参考"
+      ]
+    },
+    "check": "指南 and 参考 open their own document views"
+  },
+  {
+    "check": "deep links keep the right sidebar and a single active entry",
+    "pages": 9,
+    "pagesWithWrongActiveCount": 0,
+    "withoutSidebar": 0,
+    "withoutToc": 0,
+    "sidebarByCollection": {
+      "指南": 5,
+      "参考": 4
+    }
+  },
+  {
+    "check": "client routing keeps the header and swaps the sidebar",
+    "path": "/api/guide/content-model",
+    "sameHeaderNode": true,
+    "sidebarCollection": "指南",
+    "activeTopLevel": [
+      "指南"
     ]
   },
   {
-    "check": "dropdown opens on hover",
-    "visibility": "visible",
-    "opacity": "1",
-    "transition": "0.15s, 0.15s, 0.15s",
-    "entries": 12,
-    "ariaExpanded": "true",
-    "fullyInViewport": true
-  },
-  {
-    "check": "panel survives the pointer gap",
-    "anyVisible": true,
-    "openPanels": 1
-  },
-  {
-    "check": "escape closes",
-    "visible": "hidden"
-  },
-  {
-    "check": "click opens",
-    "expanded": "true"
-  },
-  {
-    "check": "outside click closes",
-    "visible": "hidden"
-  },
-  {
-    "check": "panel entry navigates and closes the panel",
-    "target": "/api/guide/getting-started",
-    "landed": "/api/guide/getting-started",
-    "heading": "快速开始",
-    "panelVisible": "hidden",
-    "activeItem": "文档"
-  },
-  {
-    "check": "client routing keeps the header instance",
-    "path": "/api/guide/getting-started",
-    "sameNode": true,
-    "activeItem": "文档"
+    "check": "header switch replaces the sidebar contents",
+    "path": "/api/guide/what-is-folio",
+    "sidebarCollection": "参考",
+    "sidebarLinks": [
+      "API 文档索引",
+      "Frontmatter 参考",
+      "Vite 构建集成",
+      "静态构建与 SEO",
+      "部署到 GitHub Pages",
+      "下游案例：Cloudflare Pa",
+      "MiraDocs → Folio 迁",
+      "官方站点内容维护约定"
+    ],
+    "activeTopLevel": [
+      "参考"
+    ]
   },
   {
     "check": "sticky header and docs chrome unaffected",
     "headerTop": 0,
     "tocLinks": 4,
-    "docNavLinks": 19
+    "docNavLinks": 8
   },
   {
     "check": "dark mode",
@@ -119,29 +129,112 @@
     ]
   },
   {
-    "check": "all panels stay on screen at 1440px",
-    "panels": 1,
-    "offscreen": 0
+    "0": {
+      "path": "/",
+      "status": 200,
+      "heading": "先体验内容组织。再判断 Folio 能做什么。",
+      "hasDocsSidebar": false,
+      "activeTopLevel": [],
+      "horizontalOverflow": 0
+    },
+    "1": {
+      "path": "/blogs",
+      "status": 200,
+      "heading": "文章与专题",
+      "hasDocsSidebar": false,
+      "activeTopLevel": [
+        "文章"
+      ],
+      "horizontalOverflow": 0
+    },
+    "2": {
+      "path": "/projects",
+      "status": 200,
+      "heading": "项目档案",
+      "hasDocsSidebar": false,
+      "activeTopLevel": [
+        "项目"
+      ],
+      "horizontalOverflow": 0
+    },
+    "3": {
+      "path": "/showcase",
+      "status": 200,
+      "heading": "能力展厅",
+      "hasDocsSidebar": false,
+      "activeTopLevel": [
+        "展厅"
+      ],
+      "horizontalOverflow": 0
+    },
+    "check": "home, 展厅, 文章 and 项目 are untouched"
   },
   {
-    "check": "all panels stay on screen at 1024px",
-    "panels": 1,
-    "offscreen": 0
+    "check": "search still finds documents across both sections",
+    "results": 8,
+    "sample": [
+      "导航与内容清单指南 · 概念 · Folio 如何通过 virtual manifest",
+      "Folio 是什么开始 · 一个由 Git 管理、可被 Skill 操作、能发布为公开站",
+      "内容组织图谱展厅 · 用一张可点击的地图说明 Folio 的四类内容、五条集合路径、文档"
+    ]
   },
   {
-    "check": "all panels stay on screen at 900px",
-    "panels": 1,
-    "offscreen": 0
-  },
-  {
-    "check": "all panels stay on screen at 820px",
-    "panels": 1,
-    "offscreen": 0
-  },
-  {
-    "check": "all panels stay on screen at 781px",
-    "panels": 1,
-    "offscreen": 0
+    "check": "no width overflows and no item truncates",
+    "widths": 10,
+    "overflowing": 0,
+    "truncated": 0,
+    "rows": [
+      {
+        "width": 1440,
+        "desktop": true,
+        "overflow": 0
+      },
+      {
+        "width": 1280,
+        "desktop": true,
+        "overflow": 0
+      },
+      {
+        "width": 1024,
+        "desktop": true,
+        "overflow": 0
+      },
+      {
+        "width": 960,
+        "desktop": true,
+        "overflow": 0
+      },
+      {
+        "width": 900,
+        "desktop": true,
+        "overflow": 0
+      },
+      {
+        "width": 820,
+        "desktop": true,
+        "overflow": 0
+      },
+      {
+        "width": 781,
+        "desktop": true,
+        "overflow": 0
+      },
+      {
+        "width": 768,
+        "desktop": false,
+        "overflow": 0
+      },
+      {
+        "width": 390,
+        "desktop": false,
+        "overflow": 0
+      },
+      {
+        "width": 320,
+        "desktop": false,
+        "overflow": 0
+      }
+    ]
   },
   {
     "check": "tablet 820",
@@ -163,16 +256,21 @@
       "visibility": "visible",
       "top": 64,
       "width": 390,
-      "accordionTriggers": 1,
-      "plainLinks": 3,
-      "desktopPanelInsideMobile": 0,
-      "groupLabelsInAccordion": 4
+      "links": [
+        "指南",
+        "参考",
+        "展厅",
+        "文章",
+        "项目"
+      ],
+      "accordionTriggers": 0,
+      "desktopPanelInsideMobile": 0
     },
-    "accordion": {
-      "expanded": "true",
-      "childVisible": true,
-      "navigatedTo": "/api/guide/getting-started",
-      "panelClosedAfterNavigation": true
+    "navigated": {
+      "path": "/docs/introduction",
+      "sidebarCollection": "指南",
+      "tocLinks": 5,
+      "panelClosed": true
     }
   },
   {
@@ -188,29 +286,38 @@
       "visibility": "visible",
       "top": 64,
       "width": 320,
-      "accordionTriggers": 1,
-      "plainLinks": 3,
-      "desktopPanelInsideMobile": 0,
-      "groupLabelsInAccordion": 4
+      "links": [
+        "指南",
+        "参考",
+        "展厅",
+        "文章",
+        "项目"
+      ],
+      "accordionTriggers": 0,
+      "desktopPanelInsideMobile": 0
     },
-    "accordion": {
-      "expanded": "true",
-      "childVisible": true,
-      "navigatedTo": "/api/guide/getting-started",
-      "panelClosedAfterNavigation": true
+    "navigated": {
+      "path": "/docs/introduction",
+      "sidebarCollection": "指南",
+      "tocLinks": 5,
+      "panelClosed": true
     }
   },
   {
     "check": "prefers-reduced-motion disables header motion",
-    "panel": "0s",
+    "navLink": "0s",
     "mobilePanel": "0s",
-    "chevron": "0s"
+    "themeToggle": "0s"
   },
   {
-    "check": "keyboard opens and reaches the panel",
-    "expanded": "true",
-    "panelVisible": true,
-    "focusedElement": "A",
-    "focusedIsEntry": true
+    "check": "keyboard can reach and enter a section",
+    "focused": {
+      "tag": "A",
+      "text": "指南",
+      "href": "/docs/introduction",
+      "insideNav": true
+    },
+    "landedPath": "/docs/introduction",
+    "sidebarCollection": "指南"
   }
 ]

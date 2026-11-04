@@ -3,6 +3,7 @@ title: 内容模型
 path: /api/guide/content-model
 description: Folio 如何把 Markdown、Frontmatter 和路径转换成统一的 FolioDoc。
 group: 指南 · 概念
+collection: 指南
 order: 20
 type: doc
 status: published
