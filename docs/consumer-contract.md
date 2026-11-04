@@ -318,18 +318,18 @@ const config = defineFolioConfig({
     { label: "博客", href: "/blogs" },
     {
       label: "文档",
-      href: "/docs/introduction",
+      href: "/guide/introduction",
       children: [
         {
           label: "快速开始",
-          href: "/docs/introduction",
+          href: "/guide/introduction",
           group: "快速开始",
           icon: "compass",
           description: "Folio 要解决什么问题。",
         },
         {
           label: "内容协议",
-          href: "/docs/content-contract",
+          href: "/guide/content-contract",
           group: "编写与配置",
           icon: "file",
           description: "Frontmatter 与目录即路由。",
@@ -393,8 +393,8 @@ may well be assembled from more than one directory.
 navigation: [
   {
     label: "指南",
-    href: "/docs/introduction",
-    activeMatch: ["/api/guide/authoring", "/api/guide/content-model"],
+    href: "/handbook/introduction",
+    activeMatch: ["/recipes/authoring", "/recipes/content-model"],
   },
 ];
 ```
@@ -411,6 +411,27 @@ prefix would highlight two different top-level sections on the same page. If one
 directory genuinely mixes sections, list the pages rather than claiming the
 whole subtree.
 
+Note the trade-off: `activeMatch` fixes the highlight, but the section still
+lives in more than one directory, so the route, the content folder and the
+sidebar `collection` can disagree. When you control the content layout, prefer
+giving each reading mode one route root (see the next section) and keep
+`activeMatch` for URL spaces you cannot reshape — published routes with inbound
+links, or content owned by another team.
+
+A one-route-per-section layout does not make `activeMatch` obsolete, because the
+entry's `href` is usually a landing page *inside* the root. Prefix matching only
+covers that page's own subtree, so siblings stay unlit. Claim the root once:
+
+```ts
+navigation: [
+  { label: "指南", href: "/guide/introduction", activeMatch: ["/guide"] },
+  { label: "参考", href: "/reference/overview", activeMatch: ["/reference"] },
+];
+```
+
+That is one prefix per section rather than one entry per page — safe here only
+because the roots do not overlap, so no page can match two entries.
+
 ### Splitting the document sidebar (`collection`)
 
 The docs sidebar is grouped by the `collection` frontmatter field, **not** by
@@ -420,7 +441,7 @@ site can have one flat sidebar or several without moving a single Markdown file:
 ```yaml
 ---
 title: 内容模型
-group: 指南 · 概念
+group: 概念
 collection: 指南
 ---
 ```
@@ -429,6 +450,14 @@ collection: 指南
 `config.collections` is unrelated: it declares URL directories that get a
 collection index page. Use `collection` when the split is about which docs
 belong together, and `config.collections` when the split is about routes.
+
+The two mechanisms are independent, which is exactly why they can be made to
+agree: when the content folder, the route root, the `config.collections` path and
+the `collection` value all use the same name, a reader who lands on `/guide/...`
+sees the 指南 sidebar, the 指南 index, and the 指南 navigation entry lit — one
+partition, four places that cannot drift apart. The official site does this;
+`group` there holds only the section name (`开始`, `概念`, …) because the
+collection already supplies the heading.
 
 Because the boundary lives in the content, it stays visible to whoever edits the
 Markdown and survives a navigation rewrite. Renaming a section is then a

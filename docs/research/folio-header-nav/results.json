@@ -20,8 +20,8 @@
       "项目"
     ],
     "hrefs": [
-      "/docs/introduction",
-      "/api/guide/what-is-folio",
+      "/guide/introduction",
+      "/reference/overview",
       "/showcase",
       "/blogs",
       "/projects"
@@ -35,14 +35,14 @@
     "0": {
       "clicked": "指南",
       "expected": "指南",
-      "path": "/docs/introduction",
+      "path": "/guide/introduction",
       "heading": "Folio 是什么",
       "sidebarCollection": "指南",
       "sidebarSections": [
         "开始",
-        "指南 · 入门",
-        "指南 · 概念",
-        "指南 · 组合"
+        "入门",
+        "概念",
+        "组合"
       ],
       "sidebarLinks": 11,
       "tocLinks": 5,
@@ -53,17 +53,17 @@
     "1": {
       "clicked": "参考",
       "expected": "参考",
-      "path": "/api/guide/what-is-folio",
-      "heading": "API 文档索引",
+      "path": "/reference/overview",
+      "heading": "参考索引",
       "sidebarCollection": "参考",
       "sidebarSections": [
-        "参考 · API",
-        "参考 · 部署",
-        "参考 · 迁移",
+        "API",
+        "部署",
+        "迁移",
         "维护"
       ],
       "sidebarLinks": 8,
-      "tocLinks": 4,
+      "tocLinks": 5,
       "activeTopLevel": [
         "参考"
       ]
@@ -83,7 +83,7 @@
   },
   {
     "check": "client routing keeps the header and swaps the sidebar",
-    "path": "/api/guide/content-model",
+    "path": "/guide/content-model",
     "sameHeaderNode": true,
     "sidebarCollection": "指南",
     "activeTopLevel": [
@@ -92,10 +92,10 @@
   },
   {
     "check": "header switch replaces the sidebar contents",
-    "path": "/api/guide/what-is-folio",
+    "path": "/reference/overview",
     "sidebarCollection": "参考",
     "sidebarLinks": [
-      "API 文档索引",
+      "参考索引",
       "Frontmatter 参考",
       "Vite 构建集成",
       "静态构建与 SEO",
@@ -111,7 +111,7 @@
   {
     "check": "sticky header and docs chrome unaffected",
     "headerTop": 0,
-    "tocLinks": 4,
+    "tocLinks": 5,
     "docNavLinks": 8
   },
   {
@@ -173,7 +173,7 @@
     "check": "search still finds documents across both sections",
     "results": 8,
     "sample": [
-      "导航与内容清单指南 · 概念 · Folio 如何通过 virtual manifest",
+      "导航与内容清单概念 · Folio 如何通过 virtual manifest、grou",
       "Folio 是什么开始 · 一个由 Git 管理、可被 Skill 操作、能发布为公开站",
       "内容组织图谱展厅 · 用一张可点击的地图说明 Folio 的四类内容、五条集合路径、文档"
     ]
@@ -267,7 +267,7 @@
       "desktopPanelInsideMobile": 0
     },
     "navigated": {
-      "path": "/docs/introduction",
+      "path": "/guide/introduction",
       "sidebarCollection": "指南",
       "tocLinks": 5,
       "panelClosed": true
@@ -297,7 +297,7 @@
       "desktopPanelInsideMobile": 0
     },
     "navigated": {
-      "path": "/docs/introduction",
+      "path": "/guide/introduction",
       "sidebarCollection": "指南",
       "tocLinks": 5,
       "panelClosed": true
@@ -314,10 +314,10 @@
     "focused": {
       "tag": "A",
       "text": "指南",
-      "href": "/docs/introduction",
+      "href": "/guide/introduction",
       "insideNav": true
     },
-    "landedPath": "/docs/introduction",
+    "landedPath": "/guide/introduction",
     "sidebarCollection": "指南"
   }
 ]

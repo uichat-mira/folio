@@ -13,57 +13,39 @@ export default defineFolioConfig({
   // the in-page TOC. A dropdown would only add a click in front of a destination
   // that already exists.
   //
-  // Which page belongs to which side is decided by `collection:` in the page's
-  // own frontmatter, not by this config. That keeps the boundary in the content
-  // where the doc author can see it, and it is also what splits the sidebar.
+  // The rule this site follows:
   //
-  // The pages for one side live under several route directories (指南 spans
-  // /docs and /api/guide), which is why these entries carry `activeMatch`: with
-  // prefix matching alone, 指南 would lose its current-page highlight on the
-  // /api/guide pages.
+  //     navigation entry == route root == collection prefix == content folder
+  //
+  // 指南 -> /guide/* (content/guide), 参考 -> /reference/* (content/reference).
+  // Which page belongs to which side is still decided by `collection:` in the
+  // page's own frontmatter, not by this config. Keeping the folder, the route
+  // root and the collection name aligned is what makes that field and the route
+  // agree instead of contradicting each other.
+  //
+  // `href` points at a landing page *inside* the root, so the entry still has to
+  // claim the root explicitly: prefix matching only covers the landing page's own
+  // subtree, which would leave /guide/content-model with nothing lit. `activeMatch`
+  // names the root once, and because the roots are disjoint no page can match
+  // both entries. (Round 3 needed a per-page list precisely because the directory
+  // itself was shared; here the directory is the section, so one prefix is enough.)
   navigation: [
-    {
-      label: "指南",
-      href: "/docs/introduction",
-      activeMatch: [
-        "/docs/introduction",
-        "/docs/content-contract",
-        "/docs/runtime-composition",
-        "/docs/static-publishing",
-        "/api/guide/getting-started",
-        "/api/guide/authoring",
-        "/api/guide/markdown-runtime",
-        "/api/guide/content-model",
-        "/api/guide/navigation",
-        "/api/guide/configuration",
-        "/api/guide/architecture",
-      ],
-    },
-    {
-      label: "参考",
-      href: "/api/guide/what-is-folio",
-      activeMatch: [
-        "/api/reference",
-        "/api/deployment",
-        "/api/guide/migration-status",
-        "/api/guide/what-is-folio",
-        "/docs/content-maintenance",
-      ],
-    },
+    { label: "指南", href: "/guide/introduction", activeMatch: ["/guide"] },
+    { label: "参考", href: "/reference/overview", activeMatch: ["/reference"] },
     { label: "展厅", href: "/showcase" },
     { label: "文章", href: "/blogs" },
     { label: "项目", href: "/projects" },
   ],
   collections: [
     {
-      path: "/docs",
-      title: "手册",
-      description: "从入门、内容协议到运行时组合与静态发布的连续手册。",
+      path: "/guide",
+      title: "指南",
+      description: "从定位、内容协议到运行时组合与静态发布的连续阅读路径。",
     },
     {
-      path: "/api",
-      title: "API 参考",
-      description: "递归收录 /api 下的指南、Reference、部署与迁移记录。",
+      path: "/reference",
+      title: "参考",
+      description: "Frontmatter 字段、构建阶段、部署条件、案例与附录的查阅入口。",
     },
     {
       path: "/blogs",

@@ -63,7 +63,7 @@ Git 不是万能的。它对二进制大文件、多人实时协作、非技术�
 
 现在的官方站已经把这套顺序跑通了：
 
-- [内容协议](/docs/content-contract) 定义了 Skill 与运行时共同依赖的最小字段；
+- [内容协议](/guide/content-contract) 定义了 Skill 与运行时共同依赖的最小字段；
 - [从一个内容文件到最终静态页面](/showcase/from-file-to-page) 展示了文件如何经过解析、清单和静态输出；
 - [官方站项目档案](/projects/official-site) 记录了本项目当前的边界与未完成项。
 

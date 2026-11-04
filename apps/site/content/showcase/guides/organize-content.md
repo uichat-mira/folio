@@ -1,6 +1,5 @@
 ---
 title: 为示例站设计内容组织
-path: /showcase/guides/organize-content
 description: 操作型示例：先定义读者路径，再选择内容类型、集合、section、order 与交叉链接，而不是先堆文章。
 group: 能力展厅 · 操作示例
 collection: 能力展厅

@@ -160,15 +160,15 @@ const browser = await chromium.launch(
   // the section's own `href` directory.
   const deep = [];
   for (const path of [
-    "/docs/introduction",
-    "/docs/content-contract",
-    "/docs/runtime-composition",
-    "/api/guide/content-model",
-    "/api/guide/architecture",
-    "/api/guide/what-is-folio",
-    "/api/reference/frontmatter",
-    "/api/deployment/github-pages",
-    "/docs/content-maintenance",
+    "/guide/introduction",
+    "/guide/content-contract",
+    "/guide/runtime-composition",
+    "/guide/content-model",
+    "/guide/architecture",
+    "/reference/overview",
+    "/reference/frontmatter",
+    "/reference/github-pages",
+    "/reference/content-maintenance",
   ]) {
     const response = await page.goto(BASE + path, { waitUntil: "networkidle" });
     deep.push({ path, status: response?.status(), ...(await docsChrome(page)) });
@@ -189,11 +189,11 @@ const browser = await chromium.launch(
 
   // Client-side routing must not remount the header, and the sidebar must
   // follow the route change.
-  await page.goto(BASE + "/docs/introduction", { waitUntil: "networkidle" });
+  await page.goto(BASE + "/guide/introduction", { waitUntil: "networkidle" });
   await page.evaluate(() => {
     window.__header = document.querySelector(".folio-header");
   });
-  await page.locator('.folio-docnav a[href$="/api/guide/content-model"]').first().click();
+  await page.locator('.folio-docnav a[href$="/guide/content-model"]').first().click();
   await page.waitForLoadState("networkidle");
   await page.waitForTimeout(600);
   record(
