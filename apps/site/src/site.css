@@ -178,3 +178,70 @@ body {
     padding-top: 48px;
   }
 }
+
+/* Demonstration of the reusable utility popover using real Folio releases. */
+.site-version-popover .folio-utility-popover__trigger {
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.site-version-popover .folio-utility-popover__trigger > svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.site-version-popover .folio-utility-popover__panel {
+  min-width: 192px;
+  padding: 6px;
+}
+
+.site-version-popover .folio-utility-popover__panel > a,
+.site-version-popover__current {
+  display: flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 13px;
+}
+
+.site-version-popover .folio-utility-popover__panel > a {
+  color: var(--folio-body);
+}
+
+.site-version-popover .folio-utility-popover__panel > a:hover {
+  background: var(--folio-surface-soft);
+  color: var(--folio-ink);
+}
+
+.site-version-popover__current {
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--folio-hairline);
+  border-radius: 0;
+  color: var(--folio-muted);
+  font-size: 12px;
+}
+
+.site-version-popover__current strong {
+  color: var(--folio-ink);
+  font-size: 13px;
+}
+
+.site-version-popover__current svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--folio-primary-active);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

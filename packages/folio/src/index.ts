@@ -1,5 +1,7 @@
 export { FolioApp } from "./app";
 export { FolioHeader } from "./header";
+export { FolioUtilityPopover } from "./utility-popover";
+export type { FolioUtilityPopoverProps } from "./utility-popover";
 export { FolioDocsShell } from "./docs-shell";
 export { FolioToc } from "./toc";
 export type { FolioTocProps } from "./toc";

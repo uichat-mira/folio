@@ -358,6 +358,7 @@ export function FolioHeader({
         id={mobilePanelId}
         ref={mobilePanelRef}
       >
+        {actions ? <div className="folio-mobile-panel__custom-actions">{actions}</div> : null}
         <nav aria-label="移动端主导航">
           {items.map((item, index) => {
             const active = isFolioNavItemActive(item, location.pathname);

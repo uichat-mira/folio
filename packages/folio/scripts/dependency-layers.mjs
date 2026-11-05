@@ -42,6 +42,7 @@ export const UI_ROOT_MODULES = [
   "app.tsx",
   "docs-shell.tsx",
   "header.tsx",
+  "utility-popover.tsx",
   "icons.tsx",
   "share.tsx",
   "markdown-react.tsx",

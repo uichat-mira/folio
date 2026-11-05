@@ -5,6 +5,7 @@ import "@uichat-mira/folio/styles.css";
 import docs from "virtual:folio/content";
 import config from "../folio.config";
 import { HomePage } from "./HomePage";
+import { HeaderVersionPopover } from "./HeaderVersionPopover";
 import { withFolioBaseLinks } from "./content-links";
 import "./site.css";
 import "./showcase.css";
@@ -34,6 +35,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       slots={{
         home: <HomePage docs={content} basePath={basePath} />,
         articleFooter,
+        headerActions: <HeaderVersionPopover />,
       }}
     />
   </React.StrictMode>,

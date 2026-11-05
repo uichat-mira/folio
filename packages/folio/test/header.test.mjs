@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import {
   FolioHeader,
+  FolioUtilityPopover,
   FolioShareButton,
   resolveFolioNavigation,
 } from "../dist/index.js";
@@ -202,4 +203,27 @@ test("mobile panel tools are icon-only but keep accessible labels", () => {
   }
   assert.equal((tools.match(/<svg/g) ?? []).length, 4);
   assert.doesNotMatch(tools, />搜索<|>暗色模式<|>GitHub</, "visual labels are icons rather than text");
+});
+
+test("header utility popover exposes an accessible compact disclosure", () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      FolioUtilityPopover,
+      { label: "版本", trigger: "v0.1.1" },
+      createElement("a", { href: "/versions" }, "发布记录"),
+    ),
+  );
+  assert.match(html, /folio-utility-popover__trigger/);
+  assert.match(html, /aria-label="版本"/);
+  assert.match(html, /aria-expanded="false"/);
+  assert.match(html, /aria-controls="/);
+  assert.match(html, /class="folio-utility-popover__panel"/);
+  assert.ok(html.includes('href="/versions"'));
+});
+
+test("header consumer actions stay accessible from the mobile panel", () => {
+  const html = render({ actions: createElement("button", { type: "button" }, "版本") });
+  const mobile = html.slice(html.indexOf('class="folio-mobile-panel"'));
+  assert.match(mobile, /folio-mobile-panel__custom-actions/);
+  assert.ok(mobile.includes(">版本</button>"));
 });
