@@ -226,4 +226,12 @@ test("header consumer actions stay accessible from the mobile panel", () => {
   const mobile = html.slice(html.indexOf('class="folio-mobile-panel"'));
   assert.match(mobile, /folio-mobile-panel__custom-actions/);
   assert.ok(mobile.includes(">版本</button>"));
+  assert.ok(
+    mobile.indexOf('class="folio-mobile-panel__custom-actions"') > mobile.indexOf("</nav>"),
+    "consumer utilities follow navigation on mobile, never precede it",
+  );
+  assert.ok(
+    mobile.indexOf('class="folio-mobile-panel__custom-actions"') < mobile.indexOf('class="folio-mobile-panel__actions"'),
+    "utility disclosures appear before the bottom icon toolbar",
+  );
 });

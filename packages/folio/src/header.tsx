@@ -358,7 +358,6 @@ export function FolioHeader({
         id={mobilePanelId}
         ref={mobilePanelRef}
       >
-        {actions ? <div className="folio-mobile-panel__custom-actions">{actions}</div> : null}
         <nav aria-label="移动端主导航">
           {items.map((item, index) => {
             const active = isFolioNavItemActive(item, location.pathname);
@@ -430,6 +429,7 @@ export function FolioHeader({
             );
           })}
         </nav>
+        {actions ? <div className="folio-mobile-panel__custom-actions">{actions}</div> : null}
         <div className="folio-mobile-panel__actions" aria-label="页面工具">
           {searchEnabled && onSearch ? (
             <button type="button" onClick={openSearch} aria-label="搜索" title="搜索">

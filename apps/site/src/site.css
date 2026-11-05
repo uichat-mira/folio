@@ -245,3 +245,25 @@ body {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+@media (max-width: 780px) {
+  /* The mobile section owns the +/- indicator; do not repeat the desktop chevron. */
+  .site-version-popover .folio-utility-popover__trigger > svg {
+    display: none;
+  }
+
+  .site-version-popover .folio-utility-popover__panel {
+    padding-left: 12px;
+  }
+
+  .site-version-popover .site-version-popover__current {
+    display: none;
+  }
+
+  .site-version-popover .folio-utility-popover__panel > a {
+    min-height: 36px;
+    padding: 6px 0;
+    border-radius: 0;
+    font-size: 13px;
+  }
+}
