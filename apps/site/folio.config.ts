@@ -32,7 +32,49 @@ export default defineFolioConfig({
   navigation: [
     { label: "指南", href: "/guide/introduction", activeMatch: ["/guide"] },
     { label: "参考", href: "/reference/overview", activeMatch: ["/reference"] },
-    { label: "展厅", href: "/showcase" },
+    {
+      label: "展厅",
+      href: "/showcase",
+      activeMatch: ["/showcase"],
+      panel: {
+        eyebrow: "SHOWCASE",
+        title: "能力展厅",
+        description: "查看真实的内容组织、渲染链路与操作示例。",
+        overviewLabel: "浏览全部展厅",
+      },
+      // The two groups mirror existing content: standalone reference pages
+      // (type: page) and hands-on docs (section: 操作示例).
+      children: [
+        {
+          label: "内容组织图谱",
+          href: "/showcase/content-map",
+          icon: "layers",
+          group: "独立参考页",
+          description: "四种内容类型、集合路由与交叉阅读入口。",
+        },
+        {
+          label: "从文件到页面",
+          href: "/showcase/from-file-to-page",
+          icon: "file",
+          group: "独立参考页",
+          description: "Markdown 解析、运行时路由和静态发布链路。",
+        },
+        {
+          label: "内容组织实践",
+          href: "/showcase/guides/organize-content",
+          icon: "compass",
+          group: "操作示例",
+          description: "用现有字段组织读者路径与内容层级。",
+        },
+        {
+          label: "集合与导航",
+          href: "/showcase/guides/collections-and-navigation",
+          icon: "book",
+          group: "操作示例",
+          description: "配置集合索引、递归收录与导航入口。",
+        },
+      ],
+    },
     { label: "文章", href: "/blogs" },
     { label: "项目", href: "/projects" },
   ],

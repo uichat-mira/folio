@@ -296,6 +296,8 @@ export function FolioHeader({
           </nav>
 
           <div className="folio-header-actions">
+            {actions ? <div className="folio-consumer-header-actions">{actions}</div> : null}
+
             <button
               type="button"
               className="folio-mobile-menu-button"
@@ -345,7 +347,6 @@ export function FolioHeader({
               </a>
             ) : null}
 
-            {actions ? <div className="folio-consumer-header-actions">{actions}</div> : null}
           </div>
         </div>
       </div>

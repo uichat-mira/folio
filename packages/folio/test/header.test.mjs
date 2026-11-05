@@ -169,10 +169,17 @@ test("no navigation config renders no nav items but keeps the header", () => {
   assert.doesNotMatch(html, /class="folio-nav-menu"/);
 });
 
-test("a consumer render prop still reaches the header actions", () => {
-  const html = render({ actions: createElement("span", { id: "x" }, "custom") });
+test("a consumer render prop precedes desktop theme actions", () => {
+  const html = render({
+    actions: createElement("span", { id: "x" }, "custom"),
+    onToggleTheme: () => {},
+  });
   assert.match(html, /class="folio-consumer-header-actions"/);
   assert.match(html, /<span id="x">custom<\/span>/);
+  assert.ok(
+    html.indexOf('class="folio-consumer-header-actions"') < html.indexOf('class="folio-icon-button folio-theme-toggle"'),
+    "consumer utilities such as a version picker precede the theme switch",
+  );
 });
 
 test("mobile share lives only inside the expanded-menu tool rail", () => {
