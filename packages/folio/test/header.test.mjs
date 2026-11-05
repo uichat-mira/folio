@@ -174,10 +174,32 @@ test("a consumer render prop still reaches the header actions", () => {
   assert.match(html, /<span id="x">custom<\/span>/);
 });
 
-test("the share button hides until there is a current document", () => {
+test("mobile share lives only inside the expanded-menu tool rail", () => {
   const withoutDoc = render();
-  assert.doesNotMatch(withoutDoc, /folio-share-button/);
+  assert.doesNotMatch(withoutDoc, /folio-mobile-tool-share/);
 
   const withDoc = render({ currentDoc: { title: "介绍", description: "一个文档" } });
-  assert.match(withDoc, /folio-mobile-doc-share/);
+  const headerActions = withDoc.slice(
+    withDoc.indexOf('class="folio-header-actions"'),
+    withDoc.indexOf('class="folio-mobile-panel"'),
+  );
+  const mobileTools = withDoc.slice(withDoc.indexOf('class="folio-mobile-panel__actions"'));
+  assert.doesNotMatch(headerActions, /folio-mobile-tool-share/, "top header shows only the menu button");
+  assert.match(mobileTools, /class="folio-mobile-tool-share"/);
+  assert.match(mobileTools, /aria-label="分享"/);
+  assert.equal((withDoc.match(/folio-mobile-tool-share/g) ?? []).length, 1);
+
+  const disabledShare = render({ currentDoc: { title: "介绍" }, shareEnabled: false });
+  assert.doesNotMatch(disabledShare, /folio-mobile-tool-share/);
+});
+
+test("mobile panel tools are icon-only but keep accessible labels", () => {
+  const html = render({ currentDoc: { title: "介绍" }, onSearch: () => {}, onToggleTheme: () => {} });
+  const tools = html.slice(html.indexOf('class="folio-mobile-panel__actions"'));
+  assert.match(tools, /aria-label="页面工具"/);
+  for (const label of ["搜索", "切换到暗色模式", "分享", "GitHub"]) {
+    assert.match(tools, new RegExp(`aria-label="${label}"`));
+  }
+  assert.equal((tools.match(/<svg/g) ?? []).length, 4);
+  assert.doesNotMatch(tools, />搜索<|>暗色模式<|>GitHub</, "visual labels are icons rather than text");
 });

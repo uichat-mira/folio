@@ -211,7 +211,7 @@ export const REQUIRED_SELECTOR_FAMILIES = [
   },
   {
     id: "share",
-    selectors: [".folio-share-button", ".folio-mobile-doc-share"],
+    selectors: [".folio-share-button", ".folio-mobile-panel__actions"],
   },
   {
     id: "docs-shell",

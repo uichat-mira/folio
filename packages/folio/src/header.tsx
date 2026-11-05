@@ -11,7 +11,6 @@ import {
 import { Link, useLocation } from "react-router-dom";
 import { FolioShareButton } from "./share";
 import {
-  ArrowUpRightIcon,
   ChevronDownIcon,
   GithubIcon,
   MenuIcon,
@@ -297,17 +296,6 @@ export function FolioHeader({
           </nav>
 
           <div className="folio-header-actions">
-            {shareEnabled && currentDoc ? (
-              <div className="folio-mobile-doc-share">
-                <FolioShareButton
-                  title={currentDoc.title}
-                  text={currentDoc.description}
-                  className="folio-icon-button folio-mobile-share-button"
-                  compact
-                />
-              </div>
-            ) : null}
-
             <button
               type="button"
               className="folio-mobile-menu-button"
@@ -441,18 +429,33 @@ export function FolioHeader({
             );
           })}
         </nav>
-        <div className="folio-mobile-panel__actions">
+        <div className="folio-mobile-panel__actions" aria-label="页面工具">
           {searchEnabled && onSearch ? (
-            <button type="button" onClick={openSearch}>搜索</button>
-          ) : null}
-          {themeEnabled && onToggleTheme ? (
-            <button type="button" onClick={onToggleTheme}>
-              {darkMode ? "浅色模式" : "暗色模式"}
+            <button type="button" onClick={openSearch} aria-label="搜索" title="搜索">
+              <SearchIcon />
             </button>
           ) : null}
+          {themeEnabled && onToggleTheme ? (
+            <button
+              type="button"
+              onClick={onToggleTheme}
+              aria-label={darkMode ? "切换到浅色模式" : "切换到暗色模式"}
+              title={darkMode ? "浅色模式" : "暗色模式"}
+            >
+              <ThemeIcon dark={darkMode} />
+            </button>
+          ) : null}
+          {shareEnabled && currentDoc ? (
+            <FolioShareButton
+              title={currentDoc.title}
+              text={currentDoc.description}
+              className="folio-mobile-tool-share"
+              compact
+            />
+          ) : null}
           {config.github ? (
-            <a href={config.github}>
-              GitHub <ArrowUpRightIcon />
+            <a href={config.github} aria-label="GitHub" title="GitHub">
+              <GithubIcon />
             </a>
           ) : null}
         </div>
