@@ -5,129 +5,30 @@ import {
 } from "react";
 import { Link } from "react-router-dom";
 import { FolioMarkdown } from "./markdown-react";
-import { FolioShareButton } from "./share";
+import { FolioToc, type FolioTocProps } from "./ui/toc";
+import { FolioDocNav, type FolioDocNavProps } from "./ui/doc-nav";
 import {
   findFolioDocCollection,
   getFolioDocNeighbors,
-} from "./docs-structure";
+} from "./core/docs-structure";
 import type { FolioDoc } from "./types";
 
 export type FolioDocsShellProps = {
   doc: FolioDoc;
   docs: FolioDoc[];
   footer?: ReactNode;
+  /** @deprecated The documentation toolbar was removed; this option is kept for source compatibility. */
   share?: boolean;
   children?: ReactNode;
+  /** Overrides both desktop and mobile document navigation renderings. */
+  renderNav?: (props: FolioDocNavProps) => ReactNode;
+  /** Overrides both desktop and mobile page TOCs. */
+  renderToc?: (props: FolioTocProps) => ReactNode;
+  /** Optional directory-based previous/next ordering for portal trees. */
+  pageNeighbors?: { previous?: FolioDoc; next?: FolioDoc };
+  /** Accessible drawer name for different reading contexts. */
+  menuLabel?: string;
 };
-
-function useActiveHeading(doc: FolioDoc): string {
-  const [activeHeading, setActiveHeading] = useState("");
-
-  useEffect(() => {
-    const nodes = doc.headings
-      .map((heading) => document.getElementById(heading.id))
-      .filter((node): node is HTMLElement => Boolean(node));
-
-    if (!nodes.length) {
-      setActiveHeading("");
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort(
-            (left, right) =>
-              left.boundingClientRect.top - right.boundingClientRect.top,
-          );
-        if (visible[0]) setActiveHeading(visible[0].target.id);
-      },
-      {
-        rootMargin: "-96px 0px -65% 0px",
-        threshold: [0, 1],
-      },
-    );
-
-    nodes.forEach((node) => observer.observe(node));
-    return () => observer.disconnect();
-  }, [doc.path, doc.headings]);
-
-  return activeHeading;
-}
-
-function FolioDocNav({
-  doc,
-  docs,
-  onNavigate,
-}: {
-  doc: FolioDoc;
-  docs: FolioDoc[];
-  onNavigate?: () => void;
-}) {
-  const collection = findFolioDocCollection(docs, doc);
-  if (!collection) return null;
-
-  return (
-    <nav className="folio-docnav" aria-label="文档目录">
-      <div className="folio-docnav__collection">{collection.title}</div>
-      {collection.sections.map((section) => (
-        <section key={section.id}>
-          <h2>{section.title}</h2>
-          <ul>
-            {section.docs.map((item) => (
-              <li key={item.path}>
-                <Link
-                  className={item.path === doc.path ? "active" : ""}
-                  aria-current={item.path === doc.path ? "page" : undefined}
-                  to={item.path}
-                  onClick={onNavigate}
-                >
-                  {item.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
-    </nav>
-  );
-}
-
-function FolioToc({
-  doc,
-  activeHeading,
-  onNavigate,
-}: {
-  doc: FolioDoc;
-  activeHeading: string;
-  onNavigate?: () => void;
-}) {
-  if (!doc.headings.length) return null;
-
-  return (
-    <aside className="folio-toc" aria-label="本页目录">
-      <h2>本页目录</h2>
-      <ul>
-        {doc.headings.map((heading) => (
-          <li
-            key={heading.id}
-            className={"folio-toc-depth-" + heading.depth}
-          >
-            <a
-              className={activeHeading === heading.id ? "active" : ""}
-              aria-current={activeHeading === heading.id ? "location" : undefined}
-              href={"#" + heading.id}
-              onClick={onNavigate}
-            >
-              {heading.text}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </aside>
-  );
-}
 
 function FolioPager({
   previous,
@@ -160,13 +61,26 @@ export function FolioDocsShell({
   doc,
   docs,
   footer,
-  share = true,
   children,
+  renderNav,
+  renderToc,
+  pageNeighbors,
+  menuLabel = "文档菜单",
 }: FolioDocsShellProps) {
-  const activeHeading = useActiveHeading(doc);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileTocOpen, setMobileTocOpen] = useState(false);
-  const neighbors = getFolioDocNeighbors(docs, doc);
+  const neighbors = pageNeighbors ?? getFolioDocNeighbors(docs, doc);
+
+  // The same public components back desktop and mobile, while consumer render
+  // functions receive route-specific data and close callbacks on mobile.
+  const navigation = (onNavigate?: () => void) => {
+    const props: FolioDocNavProps = { doc, docs, onNavigate };
+    return renderNav ? renderNav(props) : <FolioDocNav {...props} />;
+  };
+  const toc = (onNavigate?: () => void) => {
+    const props: FolioTocProps = { headings: doc.headings, onNavigate };
+    return renderToc ? renderToc(props) : <FolioToc {...props} />;
+  };
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -206,18 +120,14 @@ export function FolioDocsShell({
             if (event.target === event.currentTarget) setMobileMenuOpen(false);
           }}
         >
-          <aside className="folio-docs-drawer" aria-label="文档菜单">
+          <aside className="folio-docs-drawer" aria-label={menuLabel}>
             <div className="folio-docs-drawer__head">
               <span>菜单</span>
               <button type="button" onClick={() => setMobileMenuOpen(false)}>
                 关闭
               </button>
             </div>
-            <FolioDocNav
-              doc={doc}
-              docs={docs}
-              onNavigate={() => setMobileMenuOpen(false)}
-            />
+            {navigation(() => setMobileMenuOpen(false))}
           </aside>
         </div>
       ) : null}
@@ -230,27 +140,14 @@ export function FolioDocsShell({
               关闭
             </button>
           </div>
-          <FolioToc
-            doc={doc}
-            activeHeading={activeHeading}
-            onNavigate={() => setMobileTocOpen(false)}
-          />
+          {toc(() => setMobileTocOpen(false))}
         </div>
       ) : null}
 
       <div className="folio-docs-shell">
-        <FolioDocNav doc={doc} docs={docs} />
+        {navigation()}
 
         <main className="folio-doc-main">
-          <div className="folio-doc-toolbar">
-            <div className="folio-eyebrow">{doc.group}</div>
-            {share ? (
-              <FolioShareButton
-                title={doc.title}
-                text={doc.description}
-              />
-            ) : null}
-          </div>
           <h1>{doc.title}</h1>
           {doc.description ? (
             <p className="folio-lede">{doc.description}</p>
@@ -268,10 +165,7 @@ export function FolioDocsShell({
           />
         </main>
 
-        <FolioToc
-          doc={doc}
-          activeHeading={activeHeading}
-        />
+        {toc()}
       </div>
     </div>
   );

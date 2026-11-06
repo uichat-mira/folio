@@ -40,6 +40,33 @@ test("empty search returns visible content in document order", () => {
   );
 });
 
+test("empty search excludes the home document at /", () => {
+  const withHome = [
+    {
+      ...docs[0],
+      id: "home",
+      path: "/",
+      sourcePath: "index.md",
+      title: "Home",
+      order: 0,
+    },
+    ...docs,
+  ];
+  assert.deepEqual(
+    searchFolioDocs(withHome, "").map((doc) => doc.id),
+    ["intro", "search"],
+  );
+});
+
+test("empty search clamps zero and negative limits", () => {
+  assert.deepEqual(searchFolioDocs(docs, "", 0), []);
+  assert.deepEqual(searchFolioDocs(docs, "", -3), []);
+  assert.deepEqual(
+    searchFolioDocs(docs, "", 1).map((doc) => doc.id),
+    ["intro"],
+  );
+});
+
 test("search matches title, description, tags, and body", () => {
   assert.equal(searchFolioDocs(docs, "search")[0].id, "search");
   assert.equal(searchFolioDocs(docs, "keyboard")[0].id, "search");

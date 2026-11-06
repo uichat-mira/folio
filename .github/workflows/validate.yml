@@ -25,6 +25,10 @@ jobs:
           cache: npm
       - run: npm ci --no-audit --no-fund
       - run: npm run release:check
+      - name: Validate generated RSS and Atom with an independent reader
+        if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'feat/fol-026-')
+        run: |
+          npm exec --yes --package=@rowanmanning/feed-parser@2.1.5 -- sh -c 'NODE_PATH="$(dirname "${PATH%%:*}")" FOLIO_EXTERNAL_FEED_READER=1 node --test packages/folio/test/feeds.test.mjs'
       - run: node --test scripts/ai-review/review.test.mjs
 
   windows-package-check:

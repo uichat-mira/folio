@@ -1,0 +1,89 @@
+/* A hierarchical view of the same content tree used for static navigation.
+   Inherits sticky column dimensions and tokens from public FolioDocNav. */
+.folio-tree-nav__groups {
+  display: grid;
+  gap: 20px;
+}
+
+.folio-tree-nav__group {
+  min-width: 0;
+}
+
+.folio-tree-nav__overview {
+  display: block;
+  padding: 8px 10px;
+  border-radius: var(--folio-radius-sm);
+  color: var(--folio-body);
+  text-decoration: none;
+}
+
+.folio-tree-nav__overview:hover,
+.folio-tree-nav__overview.active {
+  background: var(--folio-surface-card);
+  color: var(--folio-ink);
+}
+
+.folio-tree-nav__overview--directory {
+  cursor: default;
+}
+
+.folio-tree-nav__eyebrow {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--folio-muted-soft);
+  font: 10.5px/1.4 var(--folio-font-mono);
+  letter-spacing: .035em;
+}
+
+.folio-tree-nav__title {
+  display: block;
+  color: inherit;
+  font-size: 13.5px;
+  line-height: 1.48;
+  overflow-wrap: anywhere;
+}
+
+.folio-tree-nav__children {
+  margin: 3px 0 4px 12px !important;
+  padding: 0 0 0 10px !important;
+  border-left: 1px solid var(--folio-hairline);
+  list-style: none;
+}
+
+.folio-tree-nav__children > li {
+  min-width: 0;
+}
+
+.folio-tree-nav__children a {
+  display: block;
+  padding: 6px 8px;
+  border-radius: var(--folio-radius-sm);
+  color: var(--folio-body);
+  font-size: 12.5px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.folio-tree-nav__children a:hover,
+.folio-tree-nav__children a.active {
+  background: var(--folio-surface-card);
+  color: var(--folio-ink);
+}
+
+.folio-tree-nav__children a.active {
+  font-weight: 650;
+}
+
+.folio-tree-nav__directory {
+  display: block;
+  padding: 7px 8px 3px;
+  color: var(--folio-muted-soft);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.folio-tree-nav a:focus-visible {
+  outline: 2px solid var(--folio-primary-active);
+  outline-offset: 2px;
+}

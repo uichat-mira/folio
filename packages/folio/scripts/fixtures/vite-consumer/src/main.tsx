@@ -1,4 +1,5 @@
 import { createRoot } from "react-dom/client";
+import "@uichat-mira/folio/styles.css";
 import { defineFolioConfig } from "@uichat-mira/folio";
 import docs, { roots } from "virtual:folio/content";
 

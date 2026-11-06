@@ -1,0 +1,49 @@
+/* Public page TOC used by documentation and articles. Layout-specific overrides remain in content.css. */
+.folio-toc h2 {
+  margin: 0 0 8px;
+  color: var(--folio-muted-soft);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.folio-toc ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.folio-toc {
+  position: sticky;
+  top: 88px;
+  align-self: start;
+  height: max-content;
+  padding: 32px 20px;
+}
+
+.folio-toc li a {
+  display: block;
+  padding: 4px 0 4px 10px;
+  border-left: 2px solid transparent;
+  color: var(--folio-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.folio-toc li a:hover,
+.folio-toc li a.active {
+  border-left-color: var(--folio-primary);
+  color: var(--folio-ink);
+}
+
+.folio-toc-depth-3 a {
+  padding-left: 18px !important;
+  font-size: 12.5px !important;
+}
+
+.folio-toc-depth-4 a {
+  padding-left: 26px !important;
+  font-size: 12px !important;
+}
+

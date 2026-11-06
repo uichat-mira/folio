@@ -1,0 +1,87 @@
+.folio-mobile-panel__custom-actions { display: none; }
+
+@media (max-width: 780px) {
+  .folio-mobile-panel__custom-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+  }
+}
+
+/* Mobile header disclosures are sections of the navigation, not floating cards.
+   Mega-menu descriptions are omitted here; the full information stays on desktop. */
+@media (max-width: 780px) {
+  .folio-mobile-panel nav > a,
+  .folio-mobile-panel .folio-mobile-group__trigger {
+    border-bottom: 1px solid var(--folio-hairline);
+  }
+
+  .folio-mobile-group__inner a small {
+    display: none;
+  }
+
+  .folio-mobile-panel__custom-actions {
+    display: block;
+    margin: 0;
+    border-bottom: 1px solid var(--folio-hairline);
+  }
+
+  /* A section has one divider: below its final visible row, not its trigger. */
+  .folio-mobile-panel__actions {
+    border-top: 0;
+  }
+
+  .folio-mobile-panel__custom-actions .folio-utility-popover {
+    display: block;
+    width: 100%;
+  }
+
+  .folio-mobile-panel__custom-actions .folio-utility-popover__trigger {
+    display: flex;
+    width: 100%;
+    min-height: 48px;
+    justify-content: space-between;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--folio-body);
+    font-size: 14px;
+  }
+
+  .folio-mobile-panel__custom-actions .folio-utility-popover__trigger::after {
+    content: "+";
+    font: 400 18px/1 var(--folio-font-sans);
+    color: var(--folio-muted);
+  }
+
+  .folio-mobile-panel__custom-actions .folio-utility-popover__trigger[aria-expanded="true"]::after {
+    content: "×";
+    color: var(--folio-primary-active);
+  }
+
+  .folio-mobile-panel__custom-actions .folio-utility-popover__panel {
+    position: static;
+    display: none;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    padding: 6px 0 10px 12px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    visibility: hidden;
+    opacity: 0;
+    transform: none;
+    pointer-events: none;
+    transition: none;
+  }
+
+  .folio-mobile-panel__custom-actions .folio-utility-popover__panel.is-open {
+    display: block;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+}

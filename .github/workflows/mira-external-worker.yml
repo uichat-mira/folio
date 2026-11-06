@@ -10,6 +10,14 @@ on:
         description: Open Folio Issue number to execute
         required: true
         type: string
+      timeout_minutes:
+        description: Paid Worker maximum execution time (minutes)
+        required: true
+        default: "60"
+        type: choice
+        options:
+          - "60"
+          - "90"
 
 permissions:
   contents: read
@@ -125,7 +133,7 @@ jobs:
     with:
       issue_number: ${{ fromJSON(needs.enrollment.outputs.issue_number) }}
       base_branch: dev
-      timeout_minutes: 60
+      timeout_minutes: ${{ fromJSON(inputs.timeout_minutes || '60') }}
       free_mode: false
       provider: opencode-go
       model: deepseek-v4.1-flash

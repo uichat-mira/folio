@@ -14,19 +14,32 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import { normalizeBasePath } from "./config";
-import { FolioHeader } from "./header";
+import { normalizeBasePath } from "./core/config";
+import { FolioHeader } from "./ui/header";
+import { FolioFooter } from "./ui/footer";
 import { FolioDocsShell } from "./docs-shell";
+import { FolioTreeNav } from "./ui/tree-nav";
+import { getFolioTreeNeighbors, resolveFolioProjectTree } from "./core/content-tree";
+
 import { SearchIcon } from "./icons";
 import { FolioShareButton } from "./share";
 import { FolioMarkdown } from "./markdown-react";
-import { searchFolioDocs } from "./search";
+import { FolioToc } from "./ui/toc";
+import { searchFolioDocs } from "./core/search";
+import {
+  folioCollectionIndexes,
+  selectFolioCollectionDocs,
+  assertNoFolioCollectionConflicts,
+  type FolioCollectionIndex,
+} from "./core/collection-index";
+import { resolveFolioHome, type FolioHomeSection } from "./core/home";
+import type { FolioDoc, FolioConfig } from "./types";
 import type {
   FolioAppProps,
-  FolioDoc,
+  FolioSlots,
   FolioThemePreference,
   FolioUiOptions,
-} from "./types";
+} from "./ui-types";
 
 function href(path: string): string {
   return path === "/" ? "/" : path.replace(/\/$/, "");
@@ -49,50 +62,389 @@ function DocumentPage({
   footer?: ReactNode;
   share: boolean;
 }) {
-  return (
-    <main className="folio-doc-page">
-      <div className="folio-doc-toolbar">
-        <div className="folio-eyebrow">{doc.group}</div>
-        {share ? <FolioShareButton title={doc.title} text={doc.description} /> : null}
-      </div>
+  const articleToc = doc.type === "article" && doc.headings.length > 0;
+  const mobileTocRef = useRef<HTMLDetailsElement>(null);
+  const body = (
+    <main className={"folio-doc-page" + (articleToc ? " folio-article-main" : "")}>
+      {doc.type !== "doc" ? (
+        <div className="folio-doc-toolbar">
+          <div className="folio-eyebrow">{doc.group}</div>
+          {share ? <FolioShareButton title={doc.title} text={doc.description} /> : null}
+        </div>
+      ) : null}
       <h1>{doc.title}</h1>
       {doc.description && <p className="folio-lede">{doc.description}</p>}
       <FolioMarkdown source={doc.body} options={{ removeH1: true }} />
       {footer}
     </main>
   );
+
+  if (!articleToc) return body;
+  return (
+    <div className="folio-article-layout">
+      <details ref={mobileTocRef} className="folio-article-mobile-toc">
+        <summary>本页目录</summary>
+        <FolioToc headings={doc.headings} onNavigate={() => {
+          if (mobileTocRef.current) mobileTocRef.current.open = false;
+        }} />
+      </details>
+      {body}
+      <FolioToc headings={doc.headings} />
+    </div>
+  );
+}
+
+/**
+ * Project routes use the standard reading shell but a directory-derived tree.
+ * The tree is built when this route is mounted, not for every static route
+ * declaration or on every parent re-render.
+ */
+function ProjectPage({
+  doc,
+  docs,
+  footer,
+  slots,
+}: {
+  doc: FolioDoc;
+  docs: FolioDoc[];
+  footer?: ReactNode;
+  slots?: FolioSlots;
+}) {
+  const tree = useMemo(() => resolveFolioProjectTree(docs, doc), [docs, doc]);
+  const neighbors = useMemo(
+    () => getFolioTreeNeighbors(tree, doc.path),
+    [tree, doc.path],
+  );
+
+  return (
+    <FolioDocsShell
+      doc={doc}
+      docs={docs}
+      footer={footer}
+      menuLabel="项目菜单"
+      pageNeighbors={neighbors}
+      renderToc={slots?.docToc}
+      renderNav={({ onNavigate }) => {
+        const props = { tree, currentPath: doc.path, onNavigate };
+        return slots?.projectNav
+          ? slots.projectNav(props)
+          : <FolioTreeNav {...props} />;
+      }}
+    />
+  );
+}
+
+function EntryList({
+  entries,
+  headingLevel,
+}: {
+  entries: FolioDoc[];
+  headingLevel: "h2" | "h3";
+}) {
+  const Heading = headingLevel;
+  return (
+    <div className="folio-entry-list">
+      {entries.map((doc, index) => (
+        <Link to={href(doc.path)} className="folio-entry" key={doc.path}>
+          <span className="folio-entry-number" aria-hidden="true">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          <div className="folio-entry-copy">
+            {doc.date ? <time className="folio-entry-date" dateTime={doc.date}>{doc.date}</time> : null}
+            <Heading className="folio-entry-title">{doc.title}</Heading>
+            {doc.description ? <p className="folio-entry-description">{doc.description}</p> : null}
+          </div>
+          <span className="folio-entry-arrow" aria-hidden="true">↗</span>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+function DefaultHome({
+  docs,
+  config,
+}: {
+  docs: FolioDoc[];
+  config: FolioConfig;
+}) {
+  const collections = folioCollectionIndexes(config);
+  const primary = collections[0];
+  const primaryDocs = primary
+    ? selectFolioCollectionDocs(docs, primary.path)
+    : docs.filter((doc) => doc.type !== "page");
+  const featured = primaryDocs[0];
+  const recent = primaryDocs.slice(1, 5);
+  const about = docs.find((doc) => doc.type === "page");
+
+  return (
+    <main className="folio-home folio-journal-home folio-editorial-home">
+      <div className="folio-editorial-meta" aria-label="站点首页">
+        <span>PERSONAL JOURNAL <span aria-hidden="true">✳</span></span>
+        <span>READ · COLLECT · REMEMBER</span>
+      </div>
+      <section className="folio-editorial-lead" aria-label="小站介绍与精选文章">
+        <div className="folio-editorial-intro">
+          <div className="folio-editorial-kicker">
+            <span className="folio-editorial-kicker-line" aria-hidden="true" />
+            写给生活的零碎记录
+          </div>
+          <h1>{config.title}</h1>
+          <p>{config.description}</p>
+          {primary && (
+            <Link className="folio-editorial-hero-link" to={primary.path}>
+              浏览{primary.title} <span aria-hidden="true">↗</span>
+            </Link>
+          )}
+        </div>
+        {featured && (
+          <Link className="folio-editorial-feature" to={href(featured.path)}>
+            <span className="folio-editorial-feature-label">
+              <span aria-hidden="true">✳</span> FEATURED STORY
+            </span>
+            <span className="folio-editorial-feature-body">
+              <span className="folio-editorial-feature-no">01 / {String(primaryDocs.length).padStart(2, "0")}</span>
+              <h2>{featured.title}</h2>
+              {featured.description && <p>{featured.description}</p>}
+            </span>
+            <span className="folio-editorial-feature-bottom">
+              开始阅读 <span aria-hidden="true">↗</span>
+            </span>
+          </Link>
+        )}
+      </section>
+      <div className="folio-editorial-rule">
+        <span>THE NOTEBOOK</span>
+        <span>{String(primaryDocs.length).padStart(2, "0")} ENTRIES</span>
+      </div>
+      <div className="folio-editorial-lower">
+        <section className="folio-editorial-recent" aria-label="文章选读">
+          <div className="folio-editorial-section-heading">
+            <div>
+              <span className="folio-editorial-section-label">01 / READING</span>
+              <h2>{primary?.title ?? "近期内容"}</h2>
+            </div>
+            {primary && (
+              <Link to={primary.path} className="folio-editorial-view-all">
+                全部{primary.title} <span aria-hidden="true">↗</span>
+              </Link>
+            )}
+          </div>
+          {recent.length ? (
+            <EntryList entries={recent} headingLevel="h3" />
+          ) : !featured ? (
+            <p className="folio-collection-empty">这里还没有内容。</p>
+          ) : (
+            <p className="folio-editorial-endnote">更多记录，正在慢慢写下。</p>
+          )}
+        </section>
+        <div className="folio-editorial-aside">
+          {collections.slice(1).map((collection, index) => {
+            const entries = selectFolioCollectionDocs(docs, collection.path).slice(0, 3);
+            return (
+              <section className="folio-editorial-side-section" key={collection.path}>
+                <div className="folio-editorial-section-heading">
+                  <div>
+                    <span className="folio-editorial-section-label">
+                      {String(index + 2).padStart(2, "0")} / COLLECTION
+                    </span>
+                    <h2>{collection.title}</h2>
+                  </div>
+                  <Link to={collection.path} className="folio-editorial-view-all" aria-label={"全部" + collection.title}>
+                    ↗
+                  </Link>
+                </div>
+                {entries.length ? (
+                  <EntryList entries={entries} headingLevel="h3" />
+                ) : (
+                  <p className="folio-collection-empty">{collection.emptyMessage}</p>
+                )}
+              </section>
+            );
+          })}
+          {about && (
+            <aside className="folio-editorial-about">
+              <span className="folio-editorial-section-label">A LITTLE ABOUT</span>
+              <h2>{about.title}</h2>
+              <p>{about.description || config.description}</p>
+              <Link to={href(about.path)}>读读关于小站 <span aria-hidden="true">↗</span></Link>
+            </aside>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function ConfiguredHome({
+  docs,
+  config,
+}: {
+  docs: FolioDoc[];
+  config: FolioConfig;
+}) {
+  const model = resolveFolioHome(config, docs);
+
+  function renderSection(section: FolioHomeSection, index: number) {
+    switch (section.type) {
+      case "intro":
+        return (
+          <section className="folio-editorial-lead folio-editorial-lead--single" key={"intro-" + index}>
+            <div className="folio-editorial-intro">
+              <div className="folio-editorial-kicker">
+                <span className="folio-editorial-kicker-line" aria-hidden="true" />
+                {section.kicker}
+              </div>
+              <h1>{section.title}</h1>
+              <p>{section.description}</p>
+              {section.collection && (
+                <Link className="folio-editorial-hero-link" to={section.collection.path}>
+                  浏览{section.collection.title} <span aria-hidden="true">↗</span>
+                </Link>
+              )}
+            </div>
+          </section>
+        );
+      case "featured":
+        return (
+          <section className="folio-editorial-lead folio-editorial-lead--single" key={"featured-" + index}>
+            <Link className="folio-editorial-feature" to={href(section.doc.path)}>
+              <span className="folio-editorial-feature-label">
+                <span aria-hidden="true">✳</span> {section.label}
+              </span>
+              <span className="folio-editorial-feature-body">
+                <span className="folio-editorial-feature-no">
+                  {String(section.number).padStart(2, "0")} / {String(section.total).padStart(2, "0")}
+                </span>
+                <h2>{section.doc.title}</h2>
+                {section.doc.description && <p>{section.doc.description}</p>}
+              </span>
+              <span className="folio-editorial-feature-bottom">
+                {section.readLabel} <span aria-hidden="true">↗</span>
+              </span>
+            </Link>
+          </section>
+        );
+      case "recent":
+        return (
+          <section className="folio-editorial-lower folio-editorial-lower--single" key={"recent-" + index}>
+            <section className="folio-editorial-recent" aria-label="文章选读">
+              <div className="folio-editorial-section-heading">
+                <div>
+                  <span className="folio-editorial-section-label">{section.label}</span>
+                  <h2>{section.title}</h2>
+                </div>
+                {section.collection && (
+                  <Link to={section.collection.path} className="folio-editorial-view-all">
+                    全部{section.collection.title} <span aria-hidden="true">↗</span>
+                  </Link>
+                )}
+              </div>
+              {section.docs.length ? (
+                <EntryList entries={section.docs} headingLevel="h3" />
+              ) : section.hadEntries ? (
+                <p className="folio-editorial-endnote">{section.endMessage}</p>
+              ) : (
+                <p className="folio-collection-empty">{section.emptyMessage}</p>
+              )}
+            </section>
+          </section>
+        );
+      case "collections":
+        return (
+          <section className="folio-editorial-lower folio-editorial-lower--single" key={"collections-" + index}>
+            <div className="folio-editorial-aside">
+              {section.collections.map((entry, entryIndex) => (
+                <section className="folio-editorial-side-section" key={entry.collection.path}>
+                  <div className="folio-editorial-section-heading">
+                    <div>
+                      <span className="folio-editorial-section-label">
+                        {String(entryIndex + 2).padStart(2, "0")} / COLLECTION
+                      </span>
+                      <h2>{entry.collection.title}</h2>
+                    </div>
+                    <Link
+                      to={entry.collection.path}
+                      className="folio-editorial-view-all"
+                      aria-label={"全部" + entry.collection.title}
+                    >
+                      ↗
+                    </Link>
+                  </div>
+                  {entry.docs.length ? (
+                    <EntryList entries={entry.docs} headingLevel="h3" />
+                  ) : (
+                    <p className="folio-collection-empty">{entry.emptyMessage}</p>
+                  )}
+                </section>
+              ))}
+            </div>
+          </section>
+        );
+      case "about":
+        return (
+          <section className="folio-editorial-lower folio-editorial-lower--single" key={"about-" + index}>
+            <aside className="folio-editorial-about">
+              <span className="folio-editorial-section-label">A LITTLE ABOUT</span>
+              <h2>{section.title}</h2>
+              <p>{section.description}</p>
+              <Link to={href(section.doc.path)}>
+                {section.linkLabel} <span aria-hidden="true">↗</span>
+              </Link>
+            </aside>
+          </section>
+        );
+    }
+  }
+
+  return (
+    <main className="folio-home folio-journal-home folio-editorial-home">
+      {model.meta && (
+        <div className="folio-editorial-meta" aria-label="站点首页">
+          <span>{model.meta.left}</span>
+          <span>{model.meta.right}</span>
+        </div>
+      )}
+      {model.sections.map(renderSection)}
+    </main>
+  );
 }
 
 function Home({
   docs,
-  title,
-  description,
+  config,
   custom,
 }: {
   docs: FolioDoc[];
-  title: string;
-  description: string;
+  config: FolioConfig;
   custom?: ReactNode;
 }) {
   if (custom) return <>{custom}</>;
-  const featured = docs.filter((doc) => doc.path !== "/").slice(0, 8);
+  return config.home
+    ? <ConfiguredHome docs={docs} config={config} />
+    : <DefaultHome docs={docs} config={config} />;
+}
 
+function CollectionIndex({
+  docs,
+  collection,
+}: {
+  docs: FolioDoc[];
+  collection: FolioCollectionIndex;
+}) {
+  const entries = selectFolioCollectionDocs(docs, collection.path);
   return (
-    <main className="folio-home">
-      <section className="folio-hero">
-        <div className="folio-eyebrow">FOLIO</div>
-        <h1>{title}</h1>
-        <p>{description}</p>
-      </section>
-      <section className="folio-card-grid">
-        {featured.map((doc) => (
-          <Link key={doc.path} to={href(doc.path)} className="folio-card">
-            <span>{doc.group}</span>
-            <h2>{doc.title}</h2>
-            <p>{doc.description}</p>
-          </Link>
-        ))}
-      </section>
+    <main className="folio-home folio-collection-page">
+      <header className="folio-journal-hero folio-collection-hero">
+        <span className="folio-journal-kicker">COLLECTION</span>
+        <h1>{collection.title}</h1>
+        {collection.description ? <p>{collection.description}</p> : null}
+      </header>
+      {entries.length ? (
+        <EntryList entries={entries} headingLevel="h2" />
+      ) : (
+        <p className="folio-collection-empty">{collection.emptyMessage}</p>
+      )}
     </main>
   );
 }
@@ -203,6 +555,7 @@ function Shell({
   slots,
   ui,
 }: Omit<FolioAppProps, "basePath">) {
+  assertNoFolioCollectionConflicts(docs, config);
   const location = useLocation();
   const current = docs.find((doc) => href(doc.path) === href(location.pathname));
   const navigation = config.navigation ?? [
@@ -214,6 +567,7 @@ function Shell({
   const themeEnabled = ui?.theme !== false;
   const shareEnabled = ui?.share !== false;
   const docsShellEnabled = ui?.docsShell !== false;
+  const showSiteFooter = current?.type !== "doc" || ui?.footerOnDocs !== false;
   const themePreference = ui?.defaultTheme ?? "system";
   const [searchOpen, setSearchOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">(
@@ -275,28 +629,47 @@ function Shell({
             element={
               <Home
                 docs={docs}
-                title={config.title}
-                description={config.description}
+                config={config}
                 custom={slots?.home}
               />
             }
           />
+          {folioCollectionIndexes(config).map((collection) => (
+            <Route
+              key={collection.path}
+              path={collection.path}
+              element={
+                <CollectionIndex
+                  docs={docs}
+                  collection={collection}
+                />
+              }
+            />
+          ))}
           {docs.map((doc) => (
             <Route
               key={doc.path}
               path={href(doc.path)}
               element={
-                docsShellEnabled && doc.type === "doc" ? (
-                  <FolioDocsShell
+                docsShellEnabled && doc.type === "project" ? (
+                  <ProjectPage
                     doc={doc}
                     docs={docs}
                     footer={slots?.articleFooter}
-                    share={shareEnabled}
+                    slots={slots}
+                  />
+                ) : docsShellEnabled && doc.type === "doc" ? (
+                  <FolioDocsShell
+                    doc={doc}
+                    docs={docs}
+                    footer={ui?.footerOnDocs === false ? undefined : slots?.articleFooter}
+                    renderNav={slots?.docNav}
+                    renderToc={slots?.docToc}
                   />
                 ) : (
                   <DocumentPage
                     doc={doc}
-                    footer={slots?.articleFooter}
+                    footer={doc.type === "doc" && ui?.footerOnDocs === false ? undefined : slots?.articleFooter}
                     share={shareEnabled}
                   />
                 )
@@ -313,9 +686,11 @@ function Shell({
             }
           />
         </Routes>
-        <footer className="folio-footer">
-          {config.footer ?? "Built with Folio."}
-        </footer>
+        {showSiteFooter ? (
+          slots?.footer !== undefined ? slots.footer : (
+            <FolioFooter footer={config.footer} siteTitle={config.title} />
+          )
+        ) : null}
       </div>
 
       {searchOpen ? <SearchOverlay docs={docs} onClose={() => setSearchOpen(false)} /> : null}
