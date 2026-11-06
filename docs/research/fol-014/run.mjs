@@ -506,7 +506,15 @@ const MEASURE = String.raw`(() => {
       markdownExcerpt: article ? (article.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 160) : null,
     },
     mobileMenu: {
-      panelPresent: Boolean(document.querySelector('.folio-mobile-panel')),
+      panelPresent: (() => {
+        // A new Header keeps its animated mobile panel mounted while closed.
+        // The acceptance contract is visibility, not DOM node existence.
+        const panel = document.querySelector('.folio-mobile-panel');
+        if (!panel) return false;
+        const style = getComputedStyle(panel);
+        return style.display !== 'none' && style.visibility !== 'hidden' &&
+          panel.getBoundingClientRect().height > 0;
+      })(),
       drawer: document.querySelector('.folio-docs-drawer') ? { rect: rect(document.querySelector('.folio-docs-drawer')), links: Array.from(document.querySelectorAll('.folio-docs-drawer a')).map((a) => ({ text: (a.textContent || '').trim(), href: a.getAttribute('href') })), closeButton: rect(document.querySelector('.folio-docs-drawer__head button')) } : null,
       mobileToc: document.querySelector('.folio-mobile-toc') ? { rect: rect(document.querySelector('.folio-mobile-toc')), links: Array.from(document.querySelectorAll('.folio-mobile-toc a')).map((a) => ({ text: (a.textContent || '').trim(), href: a.getAttribute('href') })), closeButton: rect(document.querySelector('.folio-mobile-toc__head button')) } : null,
       overlay: document.querySelector('.folio-docs-overlay') ? { rect: rect(document.querySelector('.folio-docs-overlay')), background: getComputedStyle(document.querySelector('.folio-docs-overlay')).backgroundColor } : null,
@@ -1089,7 +1097,10 @@ async function main() {
           if (!visible(menu)) return { via: null, reason: 'no theme control found' };
           menu.click();
           await new Promise((r) => setTimeout(r, 300));
-          const button = Array.from(document.querySelectorAll('.folio-mobile-panel button')).find((b) => /暗色|浅色/.test(b.textContent || ''));
+          // Old consumer headers render visible text; current public Header exposes
+          // the icon-only action by accessible name. Click the actual control.
+          const button = Array.from(document.querySelectorAll('.folio-mobile-panel button'))
+            .find((b) => /暗色|浅色/.test([b.getAttribute('aria-label'), b.textContent].filter(Boolean).join(' ')));
           if (!button) return { via: 'mobile-panel', reason: 'theme button missing in mobile panel' };
           button.click();
           await new Promise((r) => setTimeout(r, 350));
