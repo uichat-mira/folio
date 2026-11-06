@@ -45,6 +45,129 @@ export default defineConfig({
 
 The plugin discovers Markdown, parses YAML Frontmatter, and exposes content through `virtual:folio/content`. It can also generate route-level HTML, canonical and social metadata, JSON-LD, `404.html`, `sitemap.xml`, and `robots.txt`.
 
+## Home page customization
+
+The built-in home page has three supported levels. Without any configuration the
+current default editorial home, navigation, SEO metadata and static HTML stay
+as they are. `FolioConfig.collections` remains the only source for collection
+routes; home sections do not hardcode `/blogs` or `/projects`.
+
+1. **Use the default home.** Set no `home` and no `slots.home`.
+2. **Configure the built-in home.** `FolioConfig.home` controls block order,
+   visibility, the featured/recent collection source, limits and the small
+   amount of copy the default design needs. React and the default static build
+   consume the same resolved model.
+3. **Take full control.** `slots.home` replaces only the React `/` route.
+   `staticRoutes.home` replaces only the generated static `/` route body and
+   metadata; it does not require copying every other static route. For a fully
+   custom static route list, `renderFolioStaticHome({ config, docs, ... })`
+   exposes the same configured body and `resolveFolioHome()` exposes the
+   platform-neutral model.
+
+```ts
+const config = defineFolioConfig({
+  title: "Field notes",
+  description: "A small journal",
+  collections: [
+    { path: "/notes", title: "Notes" },
+    { path: "/projects", title: "Projects" },
+  ],
+  home: {
+    sections: [
+      { type: "intro", title: "Notes from the workshop" },
+      { type: "featured", collection: "/notes" },
+      { type: "recent", collection: "/notes", limit: 3 },
+      { type: "collections", paths: ["/projects"], limit: 2 },
+      { type: "about", path: "/info/about", linkLabel: "Read more" },
+    ],
+  },
+});
+```
+
+Section order is the array order. Omitting `home.sections` keeps the default
+`intro`, `featured`, `recent`, `collections`, `about` order; an empty array
+renders only the optional meta strip. Empty collections produce an explicit
+empty state, a featured/recent block without entries is omitted or shows the
+empty/end message, and a configured `path` that does not match a document fails
+the build instead of silently falling back.
+
+For static-only customization, keep the default route set and override `/`:
+
+```ts
+const staticBuild: FolioStaticBuildOptions = {
+  home: () => ({
+    title: "My home",
+    description: "The same site, with a custom static home",
+    body: '<main><h1>My home</h1><a href="/notes/">Read the notes</a></main>',
+  }),
+};
+```
+
+`staticRoutes.home` is an explicit HTML contract. A React node in `slots.home`
+is not serialized into static HTML automatically, and Folio does not add an SSR
+renderer for it. Consumers who server-render React own that integration; they
+can reuse `resolveFolioHome()` for selection and ordering. When a consumer
+supplies a complete `staticRoutes.routes` array, that array remains
+authoritative for every route; `home` patches only the `/` route and requires
+that array to contain `/`.
+The published `0.1.1` package has a built-in home and `slots.home`, but does not
+expose the `home` configuration or `staticRoutes.home` contract described here.
+See the [consumer contract](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md).
+
+## Documentation navigation components
+
+FolioDocNav and FolioToc are public React components, bundled through Folio's
+existing single CSS entry. FolioDocNav takes the current doc and docs, groups
+entries by collection/section and generates router-aware links. FolioToc
+takes parsed headings and tracks active anchors on scroll. Both support
+className and onNavigate. They are used by FolioDocsShell or independently.
+
+For route-aware site customization use slots.docNav and slots.docToc, each a
+render function receiving the public component props for the active document.
+The same callback works on desktop and mobile; forward onNavigate when
+composing custom mobile menus. React slots do not modify the static HTML
+renderer, which continues to emit its default navigation for no-JS reading.
+
+## Path-derived project hierarchy
+
+Project content can follow a folder convention without a separate navigation
+manifest or a parent field:
+
+- projects/alpha/index.md -> /projects/alpha (project overview)
+- projects/alpha/story/index.md -> /projects/alpha/story (child article)
+- projects/alpha/story/notes/index.md -> /projects/alpha/story/notes (nested article)
+
+With type: project, FolioApp automatically renders the project tree in the
+standard reading shell. The overview is a clickable parent and children are
+ordered by frontmatter order. Missing overview pages become non-clickable
+directory labels instead of broken links. The route path is authoritative:
+explicit frontmatter path overrides also change inferred navigation ancestry.
+
+Consumers can call buildFolioContentTree(docs, { rootPath: "/projects" }) for
+any content type, use the public FolioTreeNav component, or customize the
+project reading navigation with slots.projectNav(props). Its props include the
+tree, currentPath and the mobile drawer's onNavigate callback. Unlike
+slots.docNav, this slot applies to project pages.
+
+The static build uses the same Core content tree. Custom staticRoutes consumers
+can call renderFolioStaticProjectShell(context, doc, markdownHtml?) from the
+published vite entry. The default static builder uses it automatically for
+type: project routes. No separate static project metadata is maintained.
+
+## Site footer
+
+The built-in FolioApp footer remains backward compatible with the original
+string config and the no-config default. The structured footer config provides
+optional brand identity (including a logo), link groups, copyright,
+registration links, and legal destinations. Set footer to false to hide the
+default footer, or use slots.footer for full React markup replacement.
+The public FolioFooter component can also be composed directly inside a router.
+
+The official site uses this structured API, including deployment-base-aware
+logo assets; no organization branding or filing claims are baked into the
+package. Static route prerendering covers route bodies and does not automatically
+render the React app-shell footer.
+
 ## React runtime
 
 Use the default lightweight runtime:
@@ -77,6 +200,7 @@ It preserves `::: html` blocks, renders `::: tip` blocks, escapes fenced code, p
 ## What the package owns
 
 - Content parsing and normalized entry types
+- Configurable built-in home selection, ordering and static home override
 - Vite content discovery and hot updates
 - Stable route and navigation data
 - Markdown and HTML heading extraction

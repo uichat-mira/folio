@@ -1,0 +1,69 @@
+{
+  "label": "fol-019",
+  "expectedTitles": [
+    "安装真实 tarball",
+    "默认文档界面",
+    "定制与边界",
+    "长篇阅读样张"
+  ],
+  "startPath": "/docs/second",
+  "interactions": {
+    "desktopToc": {
+      "selector": ".folio-toc a[href=\"#页面结构\"]",
+      "label": "desktop: TOC link to 页面结构"
+    },
+    "desktopSidebar": {
+      "selector": ".folio-docnav a[href=\"/docs/intro\"]",
+      "label": "desktop: sidebar link to /docs/intro"
+    },
+    "drawerDoc": {
+      "selector": ".folio-docs-drawer a[href=\"/docs/third\"]",
+      "label": "mobile: select doc from drawer",
+      "expectedPath": "/docs/third"
+    },
+    "mobileTocLink": {
+      "selector": ".folio-mobile-toc .folio-toc a",
+      "label": "mobile: select heading from 页面导航"
+    }
+  },
+  "search": {
+    "trigger": ".folio-search-trigger",
+    "overlay": ".folio-search-overlay",
+    "input": ".folio-search-dialog input",
+    "query": "安装",
+    "minResults": 1
+  },
+  "static": {
+    "enabled": true,
+    "buildEnv": {
+      "FOLIO019_STATIC": "1"
+    },
+    "startPath": "/docs/second/",
+    "expectedClasses": [
+      "folio-docs-runtime--static",
+      "folio-docnav",
+      "folio-toc",
+      "folio-page-nav",
+      "folio-markdown"
+    ],
+    "routes": [
+      {
+        "path": "/",
+        "text": ["Folio 默认文档站消费者基线"],
+        "classes": ["folio-prerender"]
+      },
+      {
+        "path": "/docs/second/",
+        "text": ["默认文档界面", "页面结构", "侧栏与目录的分工"]
+      },
+      {
+        "path": "/docs/third/",
+        "text": ["定制与边界", "可定制的表面"]
+      },
+      {
+        "path": "/docs/long-form/",
+        "text": ["长篇阅读样张", "代码块与长行", "引用与嵌套列表"]
+      }
+    ]
+  }
+}

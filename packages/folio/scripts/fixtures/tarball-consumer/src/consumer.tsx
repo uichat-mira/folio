@@ -1,22 +1,93 @@
 import {
   FolioApp,
+  FolioDocNav,
+  FolioToc,
+  FolioTreeNav,
+  buildFolioContentTree,
+  resolveFolioProjectTree,
+  getFolioTreeNeighbors,
   buildFolioDocStructure,
   defineFolioConfig,
   getFolioDocNeighbors,
   parseFolioDoc,
   renderFolioMarkdown,
+  resolveFolioHome,
   resolveGithubPagesBase,
   searchFolioDocs,
+  type FolioAppProps,
   type FolioConfig,
+  type FolioDateSource,
+  type FolioDateSources,
   type FolioDoc,
+  type FolioDocCollection,
+  type FolioDocSection,
+  type FolioDocsShellProps,
+  type FolioDocNavProps,
+  type FolioTocProps,
+  type FolioContentTree,
+  type FolioTreeNavProps,
+  type FolioDocStructure,
+  type FolioEntryType,
+  type FolioHeaderProps,
+  type FolioHeading,
+  type FolioHomeConfig,
+  type FolioHomeModel,
+  type FolioHomeSectionConfig,
+  type FolioHomeSectionType,
+  type FolioMarkdownProps,
+  type FolioMarkdownRenderOptions,
+  type FolioNavigationItem,
+  type FolioShareButtonProps,
+  type FolioSlots,
+  type FolioThemePreference,
+  type FolioUiOptions,
 } from "@uichat-mira/folio";
 import virtualDocs, { roots as virtualRoots } from "virtual:folio/content";
 import {
   folio,
   folioEscapeHtml,
   folioVirtualModule,
+  renderFolioStaticHome,
   type FolioPluginOptions,
+  type FolioStaticHomeOverride,
 } from "@uichat-mira/folio/vite";
+
+// Every published type name must resolve from the tarball root entry. This is
+// a type-only surface: it proves the declarations exist and are structurally
+// usable, without adding runtime code to the consumer.
+type PublicTypeSurface = {
+  appProps: FolioAppProps;
+  docsShellProps: FolioDocsShellProps;
+  docNavProps: FolioDocNavProps;
+  tocProps: FolioTocProps;
+  tree: FolioContentTree;
+  treeNavProps: FolioTreeNavProps;
+  headerProps: FolioHeaderProps;
+  shareButtonProps: FolioShareButtonProps;
+  markdownProps: FolioMarkdownProps;
+  markdownOptions: FolioMarkdownRenderOptions;
+  collection: FolioDocCollection;
+  section: FolioDocSection;
+  structure: FolioDocStructure;
+  doc: FolioDoc;
+  config: FolioConfig;
+  navigationItem: FolioNavigationItem;
+  slots: FolioSlots;
+  themePreference: FolioThemePreference;
+  uiOptions: FolioUiOptions;
+  entryType: FolioEntryType;
+  heading: FolioHeading;
+  dateSource: FolioDateSource;
+  dateSources: FolioDateSources;
+  homeConfig: FolioHomeConfig;
+  homeSectionConfig: FolioHomeSectionConfig;
+  homeSectionType: FolioHomeSectionType;
+  homeModel: FolioHomeModel;
+  staticHome: FolioStaticHomeOverride;
+};
+
+export type { PublicTypeSurface };
+
 
 // A standalone TypeScript consumer of the installed tarball. It only uses the
 // package's public entrypoints and its own installed peer dependency types.
@@ -25,6 +96,12 @@ const config: FolioConfig = defineFolioConfig({
   description: "Standalone type check of the published package shape.",
   base: resolveGithubPagesBase("uichat-mira/folio"),
   navigation: [{ label: "Docs", href: "/docs" }],
+  home: {
+    sections: [
+      { type: "intro", title: "Home" },
+      { type: "recent", limit: 2 },
+    ],
+  },
 });
 
 const docs: FolioDoc[] = [
@@ -34,16 +111,32 @@ const docs: FolioDoc[] = [
   ),
 ];
 
+// FOL-025: the date contract is part of the published types, and a strict
+// consumer can read and narrow the provenance values.
+const dateSource: FolioDateSource = "git-first-commit";
+const dateSources: FolioDateSources = {
+  publishedAt: "frontmatter",
+  updatedAt: "unknown",
+  historyComplete: true,
+};
+
+// @ts-expect-error FolioDateSource only accepts the frozen provenance values.
+const fabricatedDateSource: FolioDateSource = "file-mtime";
+
+const staticHome: FolioStaticHomeOverride = ({ base }) => ({
+  body: '<main><a href="' + base + 'docs/intro/">Intro</a></main>',
+});
 const pluginOptions: FolioPluginOptions = {
   config,
   contentDir: "content",
-  staticRoutes: false,
+  staticRoutes: { home: staticHome },
 };
 
 const structure = buildFolioDocStructure(docs);
 const neighbors = getFolioDocNeighbors(docs, docs[0]);
 const results = searchFolioDocs(docs, "intro");
 const html: string = renderFolioMarkdown("# Intro");
+const homeModel: FolioHomeModel = resolveFolioHome(config, docs);
 const escaped: string = folioEscapeHtml("<script>");
 const virtualModule: string = folioVirtualModule;
 // Strict NodeNext check: both virtual exports must be provided by the packed
@@ -51,7 +144,19 @@ const virtualModule: string = folioVirtualModule;
 const typedVirtualDocs: FolioDoc[] = virtualDocs;
 const typedVirtualRoots: string[] = virtualRoots;
 const plugin = folio(pluginOptions);
-const app = <FolioApp config={config} docs={docs} />;
+const app = <FolioApp config={config} docs={docs}
+  slots={{
+    docNav: (props) => <FolioDocNav {...props} />,
+    docToc: (props) => <FolioToc {...props} />,
+    projectNav: (props) => <FolioTreeNav {...props} />,
+  }}
+/>;
+const standaloneNav = <FolioDocNav doc={docs[0]} docs={docs} ariaLabel="Consumer docs" />;
+const standaloneToc = <FolioToc headings={docs[0].headings} />;
+const contentTree = buildFolioContentTree(docs);
+const projectTree = resolveFolioProjectTree(docs, docs[0]);
+const standaloneTree = <FolioTreeNav tree={contentTree} currentPath={docs[0].path} />;
+const treeNeighbors = getFolioTreeNeighbors(projectTree, docs[0].path);
 
 // @ts-expect-error FolioConfig requires both title and description.
 const missingDescription: FolioConfig = { title: "Only a title" };
@@ -66,11 +171,20 @@ export function consumerSurface(): unknown[] {
     results,
     html,
     escaped,
+    homeModel,
+    dateSource,
+    dateSources,
+    fabricatedDateSource,
+    renderFolioStaticHome instanceof Function,
     virtualModule,
     typedVirtualDocs,
     typedVirtualRoots,
     plugin,
     app,
+    standaloneNav,
+    standaloneToc,
+    standaloneTree,
+    treeNeighbors,
     missingDescription,
     missingConfig,
   ];

@@ -67,6 +67,11 @@ const checks = [
 
       const entry = await import("@uichat-mira/folio");
       assert.equal(typeof entry.FolioApp, "function", "root entry does not export FolioApp");
+      assert.equal(typeof entry.FolioDocNav, "function", "root entry does not export FolioDocNav");
+      assert.equal(typeof entry.FolioToc, "function", "root entry does not export FolioToc");
+      assert.equal(typeof entry.FolioTreeNav, "function", "root entry does not export FolioTreeNav");
+      assert.equal(typeof entry.buildFolioContentTree, "function", "root entry does not export buildFolioContentTree");
+      assert.equal(typeof entry.resolveFolioProjectTree, "function", "root entry does not export resolveFolioProjectTree");
       assert.equal(
         typeof entry.parseFolioDoc,
         "function",
@@ -77,13 +82,39 @@ const checks = [
         "function",
         "root entry does not export defineFolioConfig",
       );
+      assert.equal(
+        typeof entry.resolveFolioHome,
+        "function",
+        "root entry does not export resolveFolioHome",
+      );
 
       const doc = entry.parseFolioDoc(
         "docs/consumer.md",
         "---\ntitle: Consumer\ndescription: tarball entry\n---\n# Consumer\n",
       );
       assert.equal(doc.title, "Consumer", "parseFolioDoc did not run through the tarball build");
-      return `${installedReal} (FolioApp, parseFolioDoc)`;
+
+      // FOL-025: the date contract itself must survive packaging.
+      const dated = entry.parseFolioDoc(
+        "docs/dated.md",
+        "---\ntitle: Dated\npublishedAt: 2025-01-02T03:04:05+08:00\nupdatedAt: 2025-02-03\n---\n# Dated\n",
+      );
+      assert.equal(
+        dated.publishedAt,
+        "2025-01-01T19:04:05.000Z",
+        "the tarball did not normalize publishedAt to UTC",
+      );
+      assert.equal(
+        dated.updatedAt,
+        "2025-02-03T00:00:00.000Z",
+        "the tarball did not normalize the updatedAt date",
+      );
+      assert.deepEqual(
+        dated.dateSources,
+        { publishedAt: "frontmatter", updatedAt: "frontmatter" },
+        "the tarball lost the date provenance contract",
+      );
+      return `${installedReal} (FolioApp, parseFolioDoc, dates)`;
     },
   },
   {
@@ -100,10 +131,16 @@ const checks = [
 
       const entry = await import("@uichat-mira/folio/vite");
       assert.equal(typeof entry.folio, "function", "vite entry does not export folio()");
+      assert.equal(typeof entry.renderFolioStaticProjectShell, "function", "vite entry lacks project renderer");
       assert.equal(
         entry.folioVirtualModule,
         "virtual:folio/content",
         "vite entry exported an unexpected virtual module id",
+      );
+      assert.equal(
+        typeof entry.renderFolioStaticHome,
+        "function",
+        "vite entry does not export renderFolioStaticHome",
       );
 
       const plugin = entry.folio({
@@ -132,6 +169,9 @@ const checks = [
         css.includes("--folio-primary"),
         "styles.css does not contain the Folio custom properties",
       );
+      assert.ok(css.includes(".folio-docnav"), "styles.css lacks document navigation");
+      assert.ok(css.includes(".folio-toc"), "styles.css lacks page TOC");
+      assert.ok(css.includes(".folio-tree-nav"), "styles.css lacks project tree navigation");
       return `${entryFile} (${css.length} bytes)`;
     },
   },

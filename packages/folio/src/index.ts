@@ -1,20 +1,57 @@
 export { FolioApp } from "./app";
-export { FolioHeader } from "./header";
+export { FolioHeader } from "./ui/header";
+export { FolioFooter } from "./ui/footer";
+export type { FolioFooterProps } from "./ui/footer";
+export { FolioUtilityPopover } from "./ui/popover";
+export type { FolioUtilityPopoverProps } from "./ui/popover";
 export { FolioDocsShell } from "./docs-shell";
+export { FolioTreeNav } from "./ui/tree-nav";
+export type { FolioTreeNavProps } from "./ui/tree-nav";
+export { FolioDocNav } from "./ui/doc-nav";
+export type { FolioDocNavProps } from "./ui/doc-nav";
+export { FolioToc } from "./ui/toc";
+export type { FolioTocProps } from "./ui/toc";
 export type { FolioDocsShellProps } from "./docs-shell";
-export type { FolioHeaderProps } from "./header";
+export type { FolioHeaderProps } from "./ui/header";
 export { FolioShareButton } from "./share";
 export type { FolioShareButtonProps } from "./share";
 export { FolioMarkdown } from "./markdown-react";
 export type { FolioMarkdownProps } from "./markdown-react";
-export { searchFolioDocs } from "./search";
-export { buildFolioDocStructure, findFolioDocCollection, getFolioDocNeighbors } from "./docs-structure";
-export type { FolioDocCollection, FolioDocSection, FolioDocStructure } from "./docs-structure";
+export { searchFolioDocs } from "./core/search";
+export { normalizeFolioCollectionPath, selectFolioCollectionDocs, folioCollectionIndexes, assertNoFolioCollectionConflicts } from "./core/collection-index";
+export type { FolioCollectionIndex } from "./core/collection-index";
+export { resolveFolioHome } from "./core/home";
+export {
+  folioNavHref,
+  isFolioNavItemActive,
+  groupEntries,
+  resolveFolioNavigation,
+} from "./core/navigation";
+export type {
+  FolioNavLinkItem,
+  FolioNavMenuEntry,
+  FolioNavMenuGroup,
+  FolioNavMenuItem,
+  FolioResolvedNavItem,
+} from "./core/navigation";
+export type {
+  FolioHomeAboutSection,
+  FolioHomeCollectionsSection,
+  FolioHomeFeaturedSection,
+  FolioHomeIntroSection,
+  FolioHomeModel,
+  FolioHomeRecentSection,
+  FolioHomeSection,
+} from "./core/home";
+export { buildFolioDocStructure, findFolioDocCollection, getFolioDocNeighbors } from "./core/docs-structure";
+export { buildFolioContentTree, resolveFolioProjectTree, getFolioTreeNeighbors, folioTreeDisplayLabel } from "./core/content-tree";
+export type { FolioContentTree, FolioContentTreeNode, FolioContentTreeOptions } from "./core/content-tree";
+export type { FolioDocCollection, FolioDocSection, FolioDocStructure } from "./core/docs-structure";
 export {
   defineFolioConfig,
   normalizeBasePath,
   resolveGithubPagesBase,
-} from "./config";
+} from "./core/config";
 export {
   compareFolioDocs,
   extractHeadings,
@@ -22,17 +59,40 @@ export {
   parseFolioDoc,
   slugify,
   sourcePathToRoute,
-} from "./content";
-export { renderFolioMarkdown } from "./markdown";
-export type { FolioMarkdownRenderOptions } from "./markdown";
+} from "./core/content";
+export { renderFolioMarkdown } from "./core/markdown";
+export type { FolioMarkdownRenderOptions } from "./core/markdown";
 export type {
-  FolioDoc,
-  FolioAppProps,
+  FolioAuthor,
   FolioConfig,
+  FolioCollectionConfig,
+  FolioDateSource,
+  FolioDateSources,
+  FolioFooterBrand,
+  FolioFooterConfig,
+  FolioFooterGroup,
+  FolioFooterLegal,
+  FolioFooterLink,
+  FolioDoc,
+  FolioHomeAboutSectionConfig,
+  FolioHomeCollectionsSectionConfig,
+  FolioHomeConfig,
+  FolioHomeFeaturedSectionConfig,
+  FolioHomeIntroSectionConfig,
+  FolioHomeMetaConfig,
+  FolioHomeRecentSectionConfig,
+  FolioHomeSectionConfig,
+  FolioHomeSectionType,
+  FolioEntryType,
+  FolioHeading,
+  FolioNavigationChild,
+  FolioNavigationIconName,
   FolioNavigationItem,
+  FolioNavigationPanel,
+} from "./types";
+export type {
+  FolioAppProps,
   FolioSlots,
   FolioThemePreference,
   FolioUiOptions,
-  FolioEntryType,
-  FolioHeading,
-} from "./types";
+} from "./ui-types";

@@ -5,12 +5,13 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   rmSync,
   symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { resolve } from "node:path";
+import { relative, resolve } from "node:path";
 import test from "node:test";
 import {
   renderFolioStaticHtml,
@@ -277,6 +278,46 @@ test("distinct normalized static routes still publish pages and metadata", () =>
   }
 });
 
+test("static site writer emits exactly the expected output files for a multi-page build", () => {
+  const base = mkdtempSync(resolve(tmpdir(), "folio-file-list-"));
+  const outDir = resolve(base, "out");
+  try {
+    mkdirSync(outDir, { recursive: true });
+    writeFileSync(resolve(outDir, "index.html"), template, "utf8");
+
+    const result = writeFolioStaticSite(context(outDir), {
+      routes: () => [
+        { path: "/", title: "Home", description: "Home", body: "<main>Home</main>" },
+        { path: "/guide/intro", title: "Intro", description: "Intro", body: "<main>Intro</main>" },
+        { path: "/docs/reference/", title: "Reference", description: "Reference", body: "<main>Reference</main>" },
+      ],
+    });
+
+    assert.equal(result.routes, 3);
+    const files = [];
+    const walk = (dir) => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const path = resolve(dir, entry.name);
+        if (entry.isDirectory()) walk(path);
+        else files.push(relative(outDir, path).replace(/\\/g, "/"));
+      }
+    };
+    walk(outDir);
+    // The generated file set is part of the static contract: route pages plus
+    // 404.html, sitemap.xml and robots.txt, and no routable 404/index.html.
+    assert.deepEqual(files.sort(), [
+      "404.html",
+      "docs/reference/index.html",
+      "guide/intro/index.html",
+      "index.html",
+      "robots.txt",
+      "sitemap.xml",
+    ]);
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
 test("default document routes use the documentation structure shell", () => {
   const outDir = mkdtempSync(resolve(tmpdir(), "folio-doc-shell-"));
   try {
@@ -491,7 +532,14 @@ test("static site writer refuses escapes that only appear after normalization", 
 test("static site writer refuses ambiguous Windows path segments", () => {
   const { base, outDir, sentinel } = escapeFixture("folio-escape-windows-");
   try {
-    for (const path of ["/..\\\\outside", "/...", "/.. "]) {
+    for (const path of [
+      "/..\\\\outside",
+      "/...",
+      "/.. ",
+      "/. ",
+      "/guide/.. ",
+      "/docs/\0outside",
+    ]) {
       assert.throws(
         () =>
           writeFolioStaticSite(context(outDir), {
@@ -675,6 +723,52 @@ test("static site writer refuses an existing symlink at the target file", (t) =>
           ],
         }),
       /existing target .* is a symbolic link/,
+    );
+
+    assert.equal(readFileSync(sentinel, "utf8"), "sentinel");
+  } finally {
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test("static site writer refuses fixed-name outputs redirected through a symlink", (t) => {
+  if (!supportsLinks("file")) {
+    t.skip("this platform cannot create a file symlink here");
+    return;
+  }
+
+  const base = mkdtempSync(resolve(tmpdir(), "folio-escape-root-file-link-"));
+  const outDir = resolve(base, "out");
+  const outside = resolve(base, "outside");
+  try {
+    mkdirSync(outDir, { recursive: true });
+    mkdirSync(outside, { recursive: true });
+    writeFileSync(resolve(outDir, "index.html"), template, "utf8");
+
+    // 404.html, sitemap.xml and robots.txt are fixed names, but they are still
+    // written by the same safety layer: an existing link must not redirect them
+    // outside outDir.
+    const sentinel = resolve(outside, "404.html");
+    writeFileSync(sentinel, "sentinel", "utf8");
+    symlinkSync(sentinel, resolve(outDir, "404.html"), "file");
+
+    assert.throws(
+      () =>
+        writeFolioStaticSite(context(outDir), {
+          routes: () => [
+            {
+              path: "/",
+              title: "Home",
+              description: "Home page",
+              body: "<main>Home</main>",
+            },
+          ],
+        }),
+      (error) => {
+        assert.match(error.message, /folio static output "404\.html"/);
+        assert.match(error.message, /existing target .* is a symbolic link/);
+        return true;
+      },
     );
 
     assert.equal(readFileSync(sentinel, "utf8"), "sentinel");

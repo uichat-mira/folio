@@ -1,0 +1,56 @@
+<div id="root"><div class="folio-shell"><header class="folio-header"><div class="folio-header__wrap"><a class="folio-brand" href="/" data-discover="true"><span>Folio 默认文档站消费者基线</span></a><nav class="folio-desktop-nav" aria-label="主导航"><a class="active" aria-current="page" href="/docs" data-discover="true">文档</a></nav><div class="folio-header-actions"><div class="folio-mobile-doc-share"><button type="button" class="folio-icon-button folio-mobile-share-button" aria-label="分享" title="分享"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="19" r="2.5"></circle><path d="m8.2 10.8 7.5-4.3M8.2 13.2l7.5 4.3"></path></svg></button></div><button type="button" class="folio-mobile-menu-button" aria-label="打开导航" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path></svg></button><button type="button" class="folio-icon-button folio-theme-toggle" aria-label="切换到暗色模式" title="暗色模式"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.4A8.5 8.5 0 0 1 8.6 4 8.5 8.5 0 1 0 20 15.4Z"></path></svg></button><button type="button" class="folio-search-trigger"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg><span>搜索</span><kbd>⌘K</kbd></button></div></div></header><div class="folio-content"><div class="folio-docs-runtime"><div class="folio-docs-mobile-bar"><button type="button">菜单</button><button type="button" aria-expanded="false">页面导航</button></div><div class="folio-docs-overlay" role="presentation"><aside class="folio-docs-drawer" aria-label="文档菜单"><div class="folio-docs-drawer__head"><span>菜单</span><button type="button">关闭</button></div><nav class="folio-docnav" aria-label="文档目录"><div class="folio-docnav__collection">消费者验收指南</div><section><h2>开始</h2><ul><li><a class="" href="/docs/intro" data-discover="true">安装真实 tarball</a></li><li><a class="active" aria-current="page" href="/docs/second" data-discover="true">默认文档界面</a></li></ul></section><section><h2>进阶</h2><ul><li><a class="" href="/docs/third" data-discover="true">定制与边界</a></li><li><a class="" href="/docs/long-form" data-discover="true">长篇阅读样张</a></li></ul></section></nav></aside></div><div class="folio-docs-shell"><nav class="folio-docnav" aria-label="文档目录"><div class="folio-docnav__collection">消费者验收指南</div><section><h2>开始</h2><ul><li><a class="" href="/docs/intro" data-discover="true">安装真实 tarball</a></li><li><a class="active" aria-current="page" href="/docs/second" data-discover="true">默认文档界面</a></li></ul></section><section><h2>进阶</h2><ul><li><a class="" href="/docs/third" data-discover="true">定制与边界</a></li><li><a class="" href="/docs/long-form" data-discover="true">长篇阅读样张</a></li></ul></section></nav><main class="folio-doc-main"><div class="folio-doc-toolbar"><div class="folio-eyebrow">文档</div><button type="button" class="folio-share-button" aria-label="分享" title="分享">分享</button></div><h1>默认文档界面</h1><p class="folio-lede">不加载任何官方站样式时，FolioApp 提供的默认阅读界面。</p><article class="folio-markdown"><p>这一页是 FOL-014 浏览器验收的主场景。页面里的所有结构都来自
+<code>@uichat-mira/folio</code> 的默认实现，消费者只写了入口文件与三篇 Markdown。</p>
+<h2 id="页面结构">页面结构<a class="md-anchor" href="#页面结构" aria-label="链接到 页面结构">#</a></h2>
+<p>默认界面把一次文档阅读拆成固定的几块：</p>
+<ul>
+<li>顶部是品牌、主导航、主题切换与搜索入口；</li>
+<li>左侧是当前文档集合的目录，按 <code>section</code> 分组；</li>
+<li>中间是标题、正文与上一篇/下一篇分页；</li>
+<li>右侧是当前页的标题大纲，随滚动高亮当前位置。</li>
+</ul>
+<h3 id="侧栏与目录的分工">侧栏与目录的分工<a class="md-anchor" href="#侧栏与目录的分工" aria-label="链接到 侧栏与目录的分工">#</a></h3>
+<p>侧栏回答“我在文档集合的哪里”，页内目录回答“我在这一页的哪里”。两者都来自同一份
+内容清单：侧栏用 <code>collection</code> 与 <code>section</code> 分组，页内目录来自正文里的二到四级标题。</p>
+<p>窄屏下这两个导航都会被折叠：侧栏变成抽屉，页内目录变成可展开面板，入口固定在正文
+上方的移动工具条上。</p>
+<h3 id="正文排版">正文排版<a class="md-anchor" href="#正文排版" aria-label="链接到 正文排版">#</a></h3>
+<p>默认样式对正文提供标题层级、段落间距、列表、引用、表格与代码块的基线排版。下面这些
+块用来观察这些基线在桌面与手机两档视口下的实际表现。</p>
+<blockquote>
+<p>引用块用于验证默认排版的强调样式，同时确认长段中文在窄视口下不会顶破容器。</p>
+</blockquote>
+<p>代码块：</p>
+<pre><code class="hljs language-ts"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">FolioApp</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">"@uichat-mira/folio"</span>;
+<span class="hljs-keyword">import</span> docs <span class="hljs-keyword">from</span> <span class="hljs-string">"virtual:folio/content"</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> app = <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">FolioApp</span> <span class="hljs-attr">config</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">title:</span> "<span class="hljs-attr">Docs</span>", <span class="hljs-attr">description:</span> "<span class="hljs-attr">Docs</span>" }} <span class="hljs-attr">docs</span>=<span class="hljs-string">{docs}</span> /&gt;</span></span>;</code></pre><p>表格：</p>
+<table>
+<thead>
+<tr>
+<th>视口</th>
+<th>宽度</th>
+<th>期望</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>桌面</td>
+<td>1440 px</td>
+<td>侧栏、正文、页内目录三栏同时可见</td>
+</tr>
+<tr>
+<td>手机</td>
+<td>375 px</td>
+<td>侧栏折叠为抽屉，页内目录折叠为面板</td>
+</tr>
+</tbody></table>
+<h2 id="明暗两种主题">明暗两种主题<a class="md-anchor" href="#明暗两种主题" aria-label="链接到 明暗两种主题">#</a></h2>
+<p>主题切换写在 <code>&lt;html&gt;</code> 的 <code>data-folio-theme</code> 上，并同步写入 <code>localStorage</code>。默认跟随
+系统偏好，用户手动切换后以用户选择为准。本页会在亮色与暗色下各被测量一次。</p>
+<h2 id="分页与相邻文档">分页与相邻文档<a class="md-anchor" href="#分页与相邻文档" aria-label="链接到 分页与相邻文档">#</a></h2>
+<p>正文末尾的分页来自同一集合内的排序结果。点“下一篇”或“上一篇”会做客户端路由跳转，
+不会整页刷新，这一点在验收里通过 URL 与标题的联动变化确认。</p>
+<h2 id="可读性观察点">可读性观察点<a class="md-anchor" href="#可读性观察点" aria-label="链接到 可读性观察点">#</a></h2>
+<p>判断默认 UI 是否“清晰可读”时，本页记录的是可复核的数值：正文字号、行高比、文字与
+背景的对比度、标题与正文的间距，以及页面是否出现异常水平溢出。最终的视觉判断仍然交给
+维护者。</p>
+</article><nav class="folio-page-nav" aria-label="文档分页"><a class="folio-page-nav__previous" href="/docs/intro" data-discover="true"><span>上一篇</span><strong>安装真实 tarball</strong></a><a class="folio-page-nav__next" href="/docs/third" data-discover="true"><span>下一篇</span><strong>定制与边界</strong></a></nav></main><aside class="folio-toc" aria-label="本页目录"><h2>本页目录</h2><ul><li class="folio-toc-depth-2"><a class="" href="#页面结构">页面结构</a></li><li class="folio-toc-depth-3"><a class="" href="#侧栏与目录的分工">侧栏与目录的分工</a></li><li class="folio-toc-depth-3"><a class="" href="#正文排版">正文排版</a></li><li class="folio-toc-depth-2"><a class="" href="#明暗两种主题">明暗两种主题</a></li><li class="folio-toc-depth-2"><a class="" href="#分页与相邻文档">分页与相邻文档</a></li><li class="folio-toc-depth-2"><a class="" href="#可读性观察点">可读性观察点</a></li></ul></aside></div></div><footer class="folio-footer">FOL-019 · 独立消费者默认 UI 基线</footer></div></div></div>
