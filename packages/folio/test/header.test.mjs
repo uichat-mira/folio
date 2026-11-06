@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import {
   FolioHeader,
+  FolioUtilityPopover,
   FolioShareButton,
   resolveFolioNavigation,
 } from "../dist/index.js";
@@ -63,6 +64,15 @@ test("the header keeps its shell, brand and right-hand cluster", () => {
   assert.match(html, /class="folio-desktop-nav"/);
 });
 
+test("header frame follows the current route without changing navigation API", () => {
+  const home = render({}, "/");
+  const interior = render({}, "/guide/introduction");
+  assert.match(home, /^<header class="folio-header">/);
+  assert.match(interior, /^<header class="folio-header folio-header--interior">/);
+  assert.match(home, /class="folio-header__wrap"/);
+  assert.match(interior, /class="folio-header__wrap"/);
+});
+
 test("plain navigation entries still render as ordinary links", () => {
   const html = render();
   assert.match(html, /<li><a class="" href="\/blogs"/);
@@ -108,7 +118,9 @@ test("group headings render when children declare reading tasks", () => {
 
   assert.match(html, /class="folio-nav-menu__group-label">快速开始</);
   assert.match(html, /class="folio-nav-menu__group-label">编写与配置</);
-  assert.match(html, /folio-nav-menu__group--overview/, "the section root is marked");
+  assert.doesNotMatch(html, /folio-nav-menu__group--overview/, "the desktop panel has no synthetic root card");
+  const desktop = html.slice(html.indexOf('class="folio-nav-menu__panel"'), html.indexOf('class="folio-mobile-panel"'));
+  assert.match(desktop, /href="\/docs"/, "the panel heading links to its root");
 });
 
 test("an ungrouped panel renders no group headings", () => {
@@ -168,16 +180,76 @@ test("no navigation config renders no nav items but keeps the header", () => {
   assert.doesNotMatch(html, /class="folio-nav-menu"/);
 });
 
-test("a consumer render prop still reaches the header actions", () => {
-  const html = render({ actions: createElement("span", { id: "x" }, "custom") });
+test("a consumer render prop precedes desktop theme actions", () => {
+  const html = render({
+    actions: createElement("span", { id: "x" }, "custom"),
+    onToggleTheme: () => {},
+  });
   assert.match(html, /class="folio-consumer-header-actions"/);
   assert.match(html, /<span id="x">custom<\/span>/);
+  assert.ok(
+    html.indexOf('class="folio-consumer-header-actions"') < html.indexOf('class="folio-icon-button folio-theme-toggle"'),
+    "consumer utilities such as a version picker precede the theme switch",
+  );
 });
 
-test("the share button hides until there is a current document", () => {
+test("mobile share lives only inside the expanded-menu tool rail", () => {
   const withoutDoc = render();
-  assert.doesNotMatch(withoutDoc, /folio-share-button/);
+  assert.doesNotMatch(withoutDoc, /folio-mobile-tool-share/);
 
   const withDoc = render({ currentDoc: { title: "介绍", description: "一个文档" } });
-  assert.match(withDoc, /folio-mobile-doc-share/);
+  const headerActions = withDoc.slice(
+    withDoc.indexOf('class="folio-header-actions"'),
+    withDoc.indexOf('class="folio-mobile-panel"'),
+  );
+  const mobileTools = withDoc.slice(withDoc.indexOf('class="folio-mobile-panel__actions"'));
+  assert.doesNotMatch(headerActions, /folio-mobile-tool-share/, "top header shows only the menu button");
+  assert.match(mobileTools, /class="folio-mobile-tool-share"/);
+  assert.match(mobileTools, /aria-label="分享"/);
+  assert.equal((withDoc.match(/folio-mobile-tool-share/g) ?? []).length, 1);
+
+  const disabledShare = render({ currentDoc: { title: "介绍" }, shareEnabled: false });
+  assert.doesNotMatch(disabledShare, /folio-mobile-tool-share/);
+});
+
+test("mobile panel tools are icon-only but keep accessible labels", () => {
+  const html = render({ currentDoc: { title: "介绍" }, onSearch: () => {}, onToggleTheme: () => {} });
+  const tools = html.slice(html.indexOf('class="folio-mobile-panel__actions"'));
+  assert.match(tools, /aria-label="页面工具"/);
+  for (const label of ["搜索", "切换到暗色模式", "分享", "GitHub"]) {
+    assert.match(tools, new RegExp(`aria-label="${label}"`));
+  }
+  assert.equal((tools.match(/<svg/g) ?? []).length, 4);
+  assert.doesNotMatch(tools, />搜索<|>暗色模式<|>GitHub</, "visual labels are icons rather than text");
+});
+
+test("header utility popover exposes an accessible compact disclosure", () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      FolioUtilityPopover,
+      { label: "版本", trigger: "v0.1.1" },
+      createElement("a", { href: "/versions" }, "发布记录"),
+    ),
+  );
+  assert.match(html, /folio-utility-popover__trigger/);
+  assert.match(html, /aria-label="版本"/);
+  assert.match(html, /aria-expanded="false"/);
+  assert.match(html, /aria-controls="/);
+  assert.match(html, /class="folio-utility-popover__panel"/);
+  assert.ok(html.includes('href="/versions"'));
+});
+
+test("header consumer actions stay accessible from the mobile panel", () => {
+  const html = render({ actions: createElement("button", { type: "button" }, "版本") });
+  const mobile = html.slice(html.indexOf('class="folio-mobile-panel"'));
+  assert.match(mobile, /folio-mobile-panel__custom-actions/);
+  assert.ok(mobile.includes(">版本</button>"));
+  assert.ok(
+    mobile.indexOf('class="folio-mobile-panel__custom-actions"') > mobile.indexOf("</nav>"),
+    "consumer utilities follow navigation on mobile, never precede it",
+  );
+  assert.ok(
+    mobile.indexOf('class="folio-mobile-panel__custom-actions"') < mobile.indexOf('class="folio-mobile-panel__actions"'),
+    "utility disclosures appear before the bottom icon toolbar",
+  );
 });

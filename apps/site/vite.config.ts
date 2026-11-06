@@ -13,10 +13,14 @@ const base = resolveGithubPagesBase(process.env.GITHUB_REPOSITORY);
 const staticBuild: FolioStaticBuildOptions = {
   locale: "zh_CN",
   siteName: "Folio",
-  twitterCard: "summary",
+  // Reuse the approved brand kit social card on all routes unless a document
+  // provides an explicit cover image. Folio resolves the deployed base path.
+  defaultImage: "folio-og-1200x630.png",
+  image: { type: "image/png", width: 1200, height: 630 },
+  twitterCard: "summary_large_image",
   title: (route) =>
     route.path === "/"
-      ? "Folio · Git-native content runtime"
+      ? "Folio · 内容与门户发布引擎"
       : route.title + " · Folio",
   routes: buildShowcaseStaticRoutes,
   notFound: () => ({

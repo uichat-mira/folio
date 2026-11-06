@@ -1,4 +1,7 @@
 :root {
+  /* Official Folio brand kit v1; consumer sites keep their own tokens. */
+  --folio-primary: #BE6240;
+  --folio-primary-active: #A65333;
   --site-primary: var(--folio-primary);
   --site-primary-active: var(--folio-primary-active);
   --site-ink: var(--folio-ink);
@@ -15,6 +18,11 @@
   --site-display: var(--folio-font-display);
   --site-sans: var(--folio-font-sans);
   --site-mono: var(--folio-font-mono);
+}
+
+[data-folio-theme="dark"] {
+  --folio-primary: #BE6240;
+  --folio-primary-active: #E1A38A;
 }
 
 html { scroll-behavior: smooth; }
@@ -37,28 +45,39 @@ body {
 }
 
 .folio-brand {
-  gap: 10px;
-  font-size: 16px;
-  font-weight: 700;
+  flex: none;
+  gap: 0;
 }
 
+/* The complete approved wordmark replaces the prototype "F" tile.
+   Both SVG variants are real paths; the inverse is not produced by a filter. */
 .folio-brand::before {
-  content: "F";
-  display: grid;
-  width: 30px;
-  height: 30px;
-  place-items: center;
-  border-radius: 8px;
-  background: var(--site-primary);
-  color: #fff;
-  font-family: var(--site-display);
-  font-size: 19px;
-  font-style: italic;
+  content: "";
+  display: block;
+  width: 94px;
+  height: 40px;
+  flex: none;
+  background: url("/folio-logo.svg") center / contain no-repeat;
 }
 
-/* Base header typography already matches the brand here; only the brand mark
-   and the rail width are site-specific. Nav spacing comes from the package so
-   the demo never drifts from what consumers get. */
+[data-folio-theme="dark"] .folio-brand::before {
+  background-image: url("/folio-logo-inverse.svg");
+}
+
+/* Keep the accessible anchor name without repeating the wordmark visually. */
+.folio-brand > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The brand identity and rail width are site-specific; the navigation
+   layout stays in Folio so consumers do not need a second Header. */
 .folio-header__wrap { padding: 0 28px; }
 
 .site-header-action {
@@ -172,9 +191,99 @@ body {
 
 @media (max-width: 780px) {
   .folio-header__wrap { padding: 0 18px; }
+  .folio-brand::before { width: 86px; height: 36px; }
 
   .folio-doc-page {
     width: min(100% - 32px, 820px);
     padding-top: 48px;
+  }
+}
+
+/* Demonstration of the reusable utility popover using real Folio releases. */
+.site-version-popover .folio-utility-popover__trigger {
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.site-version-popover .folio-utility-popover__trigger > svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.site-version-popover .folio-utility-popover__panel {
+  min-width: 192px;
+  padding: 6px;
+}
+
+.site-version-popover .folio-utility-popover__panel > a,
+.site-version-popover__current {
+  display: flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 13px;
+}
+
+.site-version-popover .folio-utility-popover__panel > a {
+  color: var(--folio-body);
+}
+
+.site-version-popover .folio-utility-popover__panel > a:hover {
+  background: var(--folio-surface-soft);
+  color: var(--folio-ink);
+}
+
+.site-version-popover__current {
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--folio-hairline);
+  border-radius: 0;
+  color: var(--folio-muted);
+  font-size: 12px;
+}
+
+.site-version-popover__current strong {
+  color: var(--folio-ink);
+  font-size: 13px;
+}
+
+.site-version-popover__current svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--folio-primary-active);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (max-width: 780px) {
+  /* The mobile section owns the +/- indicator; do not repeat the desktop chevron. */
+  .site-version-popover .folio-utility-popover__trigger > svg {
+    display: none;
+  }
+
+  .site-version-popover .folio-utility-popover__panel {
+    padding-left: 12px;
+  }
+
+  .site-version-popover .site-version-popover__current {
+    display: none;
+  }
+
+  .site-version-popover .folio-utility-popover__panel > a {
+    min-height: 36px;
+    padding: 6px 0;
+    border-radius: 0;
+    font-size: 13px;
   }
 }

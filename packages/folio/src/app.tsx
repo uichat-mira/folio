@@ -15,12 +15,16 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { normalizeBasePath } from "./core/config";
-import { FolioHeader } from "./header";
+import { FolioHeader } from "./ui/header";
+import { FolioFooter } from "./ui/footer";
 import { FolioDocsShell } from "./docs-shell";
+import { FolioTreeNav } from "./ui/tree-nav";
+import { getFolioTreeNeighbors, resolveFolioProjectTree } from "./core/content-tree";
+
 import { SearchIcon } from "./icons";
 import { FolioShareButton } from "./share";
 import { FolioMarkdown } from "./markdown-react";
-import { FolioToc } from "./toc";
+import { FolioToc } from "./ui/toc";
 import { searchFolioDocs } from "./core/search";
 import {
   folioCollectionIndexes,
@@ -32,6 +36,7 @@ import { resolveFolioHome, type FolioHomeSection } from "./core/home";
 import type { FolioDoc, FolioConfig } from "./types";
 import type {
   FolioAppProps,
+  FolioSlots,
   FolioThemePreference,
   FolioUiOptions,
 } from "./ui-types";
@@ -61,10 +66,12 @@ function DocumentPage({
   const mobileTocRef = useRef<HTMLDetailsElement>(null);
   const body = (
     <main className={"folio-doc-page" + (articleToc ? " folio-article-main" : "")}>
-      <div className="folio-doc-toolbar">
-        <div className="folio-eyebrow">{doc.group}</div>
-        {share ? <FolioShareButton title={doc.title} text={doc.description} /> : null}
-      </div>
+      {doc.type !== "doc" ? (
+        <div className="folio-doc-toolbar">
+          <div className="folio-eyebrow">{doc.group}</div>
+          {share ? <FolioShareButton title={doc.title} text={doc.description} /> : null}
+        </div>
+      ) : null}
       <h1>{doc.title}</h1>
       {doc.description && <p className="folio-lede">{doc.description}</p>}
       <FolioMarkdown source={doc.body} options={{ removeH1: true }} />
@@ -84,6 +91,46 @@ function DocumentPage({
       {body}
       <FolioToc headings={doc.headings} />
     </div>
+  );
+}
+
+/**
+ * Project routes use the standard reading shell but a directory-derived tree.
+ * The tree is built when this route is mounted, not for every static route
+ * declaration or on every parent re-render.
+ */
+function ProjectPage({
+  doc,
+  docs,
+  footer,
+  slots,
+}: {
+  doc: FolioDoc;
+  docs: FolioDoc[];
+  footer?: ReactNode;
+  slots?: FolioSlots;
+}) {
+  const tree = useMemo(() => resolveFolioProjectTree(docs, doc), [docs, doc]);
+  const neighbors = useMemo(
+    () => getFolioTreeNeighbors(tree, doc.path),
+    [tree, doc.path],
+  );
+
+  return (
+    <FolioDocsShell
+      doc={doc}
+      docs={docs}
+      footer={footer}
+      menuLabel="项目菜单"
+      pageNeighbors={neighbors}
+      renderToc={slots?.docToc}
+      renderNav={({ onNavigate }) => {
+        const props = { tree, currentPath: doc.path, onNavigate };
+        return slots?.projectNav
+          ? slots.projectNav(props)
+          : <FolioTreeNav {...props} />;
+      }}
+    />
   );
 }
 
@@ -520,6 +567,7 @@ function Shell({
   const themeEnabled = ui?.theme !== false;
   const shareEnabled = ui?.share !== false;
   const docsShellEnabled = ui?.docsShell !== false;
+  const showSiteFooter = current?.type !== "doc" || ui?.footerOnDocs !== false;
   const themePreference = ui?.defaultTheme ?? "system";
   const [searchOpen, setSearchOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">(
@@ -603,17 +651,25 @@ function Shell({
               key={doc.path}
               path={href(doc.path)}
               element={
-                docsShellEnabled && doc.type === "doc" ? (
-                  <FolioDocsShell
+                docsShellEnabled && doc.type === "project" ? (
+                  <ProjectPage
                     doc={doc}
                     docs={docs}
                     footer={slots?.articleFooter}
-                    share={shareEnabled}
+                    slots={slots}
+                  />
+                ) : docsShellEnabled && doc.type === "doc" ? (
+                  <FolioDocsShell
+                    doc={doc}
+                    docs={docs}
+                    footer={ui?.footerOnDocs === false ? undefined : slots?.articleFooter}
+                    renderNav={slots?.docNav}
+                    renderToc={slots?.docToc}
                   />
                 ) : (
                   <DocumentPage
                     doc={doc}
-                    footer={slots?.articleFooter}
+                    footer={doc.type === "doc" && ui?.footerOnDocs === false ? undefined : slots?.articleFooter}
                     share={shareEnabled}
                   />
                 )
@@ -630,9 +686,11 @@ function Shell({
             }
           />
         </Routes>
-        <footer className="folio-footer">
-          {config.footer ?? "Built with Folio."}
-        </footer>
+        {showSiteFooter ? (
+          slots?.footer !== undefined ? slots.footer : (
+            <FolioFooter footer={config.footer} siteTitle={config.title} />
+          )
+        ) : null}
       </div>
 
       {searchOpen ? <SearchOverlay docs={docs} onClose={() => setSearchOpen(false)} /> : null}

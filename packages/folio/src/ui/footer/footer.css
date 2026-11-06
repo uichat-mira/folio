@@ -1,0 +1,166 @@
+.folio-footer {
+  padding: 28px;
+  border-top: 1px solid var(--folio-hairline);
+  background: var(--folio-surface-soft);
+  color: var(--folio-muted);
+  text-align: center;
+  font-size: 13px;
+}
+
+/* Structured portal footer. The legacy plain-text rule above is intentionally
+   unchanged for existing consumers. Only configured portals opt into the grid. */
+.folio-footer--structured {
+  padding: 0 24px;
+  text-align: left;
+}
+
+.folio-footer__inner {
+  width: 100%;
+  max-width: var(--folio-home-frame-width, 1440px);
+  margin: 0 auto;
+}
+
+.folio-footer__main {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) minmax(0, 1.45fr);
+  gap: clamp(30px, 5vw, 90px);
+  padding: 48px 0 42px;
+}
+
+.folio-footer__main:has(> :only-child) {
+  grid-template-columns: 1fr;
+}
+
+.folio-footer__identity {
+  min-width: 0;
+}
+
+.folio-footer__brand {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  color: var(--folio-ink);
+}
+
+.folio-footer__brand:hover {
+  color: var(--folio-primary-active);
+}
+
+.folio-footer__brand:focus-visible,
+.folio-footer__groups a:focus-visible,
+.folio-footer__legal a:focus-visible {
+  outline: 2px solid var(--folio-primary-active);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.folio-footer__brand-text {
+  font-family: var(--folio-font-display);
+  font-size: 27px;
+  font-weight: 650;
+  letter-spacing: -.025em;
+}
+
+.folio-footer__logo {
+  display: block;
+  width: auto;
+  max-width: min(100%, 120px);
+  max-height: 50px;
+  object-fit: contain;
+}
+
+/* Only one logo variant participates in layout and the accessibility tree. */
+.folio-footer__logo--dark { display: none; }
+[data-folio-theme="dark"] .folio-footer__logo--light { display: none; }
+[data-folio-theme="dark"] .folio-footer__logo--dark { display: block; }
+
+.folio-footer__description {
+  max-width: 370px;
+  margin: 12px 0 0;
+  color: var(--folio-muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.folio-footer__groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  gap: 28px 34px;
+}
+
+.folio-footer__group {
+  min-width: 0;
+}
+
+.folio-footer__group h2 {
+  margin: 0 0 16px;
+  color: var(--folio-ink);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.folio-footer__group ul {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.folio-footer__group a,
+.folio-footer__legal a {
+  color: var(--folio-muted);
+  font-size: 12.5px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  transition: color .16s ease;
+}
+
+.folio-footer__group a:hover,
+.folio-footer__legal a:hover {
+  color: var(--folio-primary-active);
+}
+
+.folio-footer__legal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px 26px;
+  padding: 22px 0 26px;
+  border-top: 1px solid var(--folio-hairline);
+  color: var(--folio-muted);
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+
+.folio-footer__copyright {
+  margin-right: auto;
+}
+
+.folio-footer__registrations,
+.folio-footer__legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+
+.folio-footer__legal a {
+  font-size: inherit;
+}
+
+@media (max-width: 780px) {
+  .folio-footer--structured { padding: 0 18px; }
+  .folio-footer__main { grid-template-columns: 1fr; gap: 32px; padding: 37px 0 32px; }
+  .folio-footer__groups { gap: 28px 18px; }
+  .folio-footer__legal { align-items: flex-start; gap: 10px 20px; }
+  .folio-footer__copyright { flex-basis: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folio-footer__group a,
+  .folio-footer__legal a {
+    transition: none;
+  }
+}

@@ -114,6 +114,60 @@ The published `0.1.1` package has a built-in home and `slots.home`, but does not
 expose the `home` configuration or `staticRoutes.home` contract described here.
 See the [consumer contract](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md).
 
+## Documentation navigation components
+
+FolioDocNav and FolioToc are public React components, bundled through Folio's
+existing single CSS entry. FolioDocNav takes the current doc and docs, groups
+entries by collection/section and generates router-aware links. FolioToc
+takes parsed headings and tracks active anchors on scroll. Both support
+className and onNavigate. They are used by FolioDocsShell or independently.
+
+For route-aware site customization use slots.docNav and slots.docToc, each a
+render function receiving the public component props for the active document.
+The same callback works on desktop and mobile; forward onNavigate when
+composing custom mobile menus. React slots do not modify the static HTML
+renderer, which continues to emit its default navigation for no-JS reading.
+
+## Path-derived project hierarchy
+
+Project content can follow a folder convention without a separate navigation
+manifest or a parent field:
+
+- projects/alpha/index.md -> /projects/alpha (project overview)
+- projects/alpha/story/index.md -> /projects/alpha/story (child article)
+- projects/alpha/story/notes/index.md -> /projects/alpha/story/notes (nested article)
+
+With type: project, FolioApp automatically renders the project tree in the
+standard reading shell. The overview is a clickable parent and children are
+ordered by frontmatter order. Missing overview pages become non-clickable
+directory labels instead of broken links. The route path is authoritative:
+explicit frontmatter path overrides also change inferred navigation ancestry.
+
+Consumers can call buildFolioContentTree(docs, { rootPath: "/projects" }) for
+any content type, use the public FolioTreeNav component, or customize the
+project reading navigation with slots.projectNav(props). Its props include the
+tree, currentPath and the mobile drawer's onNavigate callback. Unlike
+slots.docNav, this slot applies to project pages.
+
+The static build uses the same Core content tree. Custom staticRoutes consumers
+can call renderFolioStaticProjectShell(context, doc, markdownHtml?) from the
+published vite entry. The default static builder uses it automatically for
+type: project routes. No separate static project metadata is maintained.
+
+## Site footer
+
+The built-in FolioApp footer remains backward compatible with the original
+string config and the no-config default. The structured footer config provides
+optional brand identity (including a logo), link groups, copyright,
+registration links, and legal destinations. Set footer to false to hide the
+default footer, or use slots.footer for full React markup replacement.
+The public FolioFooter component can also be composed directly inside a router.
+
+The official site uses this structured API, including deployment-base-aware
+logo assets; no organization branding or filing claims are baked into the
+package. Static route prerendering covers route bodies and does not automatically
+render the React app-shell footer.
+
 ## React runtime
 
 Use the default lightweight runtime:

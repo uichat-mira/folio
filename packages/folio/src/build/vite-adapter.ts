@@ -157,6 +157,7 @@ export {
   folioAbsoluteRouteUrl,
   folioEscapeHtml,
   renderFolioStaticHome,
+  renderFolioStaticProjectShell,
   renderFolioStaticHtml,
   writeFolioStaticSite,
 } from "../static";

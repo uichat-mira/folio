@@ -12,11 +12,11 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
 import { aggregateStyles } from "../scripts/build-styles.mjs";
+import { STYLE_SOURCES } from "../styles/manifest.mjs";
 import { verifyStylesheet } from "../scripts/verify-styles.mjs";
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const stylesheetPath = join(packageRoot, "dist", "styles.css");
-const sourcePath = join(packageRoot, "src", "styles.css");
 const stylesheet = readFileSync(stylesheetPath, "utf8");
 
 function withTempDir(run) {
@@ -34,14 +34,31 @@ function failureIds(css, directory) {
   return verifyStylesheet({ file }).failures.map((failure) => failure.id);
 }
 
-test("dist/styles.css is byte-identical to the single registered source", () => {
-  const source = readFileSync(sourcePath, "utf8");
-  assert.ok(source.length > 10_000, "src/styles.css is unexpectedly small");
+test("dist/styles.css preserves every registered module stylesheet in manifest order", () => {
+  assert.equal(STYLE_SOURCES[0], "src/styles.css", "tokens and global rules stay first");
+  assert.deepEqual(
+    STYLE_SOURCES.slice(1),
+    [
+      "src/ui/header/header.css",
+      "src/styles/content.css",
+      "src/ui/doc-nav/doc-nav.css",
+      "src/ui/tree-nav/tree-nav.css",
+      "src/ui/toc/toc.css",
+      "src/ui/popover/popover.css",
+      "src/ui/header/header-popover.css",
+      "src/ui/footer/footer.css",
+    ],
+    "the Header, DocNav, TOC, Popover and Footer styles use the existing single-entry CSS aggregator",
+  );
+  const aggregated = aggregateStyles({ packageRoot });
   assert.equal(
     stylesheet,
-    source,
-    "with one manifest source, dist/styles.css must be byte-identical to src/styles.css",
+    aggregated.css,
+    "the public stylesheet must exactly match all registered sources in cascade order",
   );
+  for (const { text } of aggregated.sources) {
+    assert.ok(text.trim().length > 100, "each registered stylesheet must contain real rules");
+  }
 });
 
 test("aggregation is deterministic and preserves the manifest order", () =>
@@ -101,7 +118,7 @@ test("the built stylesheet passes the content gate", () => {
   const report = verifyStylesheet({ packageRoot });
   assert.deepEqual(report.failures, [], "dist/styles.css must pass every content check");
   assert.equal(report.bytes, Buffer.byteLength(stylesheet));
-  assert.deepEqual(report.sources, ["src/styles.css"]);
+  assert.deepEqual(report.sources, STYLE_SOURCES);
 });
 
 test("deleting a canonical component rule fails the gate", () =>

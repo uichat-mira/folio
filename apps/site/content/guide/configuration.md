@@ -48,7 +48,7 @@ type FolioConfig = {
     emptyMessage?: string
   }[]
   home?: FolioHomeConfig
-  footer?: string
+  footer?: string | false | FolioFooterConfig
   github?: string
 }
 ```
@@ -56,6 +56,39 @@ type FolioConfig = {
 `title` 与 `description` 是必填项。`author` 是生成 Article/TechArticle JSON-LD 时的默认作者；文档 Frontmatter 的 `author` 优先，两者都缺失时不生成作者字段。`siteUrl` 也是 canonical、sitemap、robots 与 feed URL 的前置条件。
 
 本页描述当前 `dev` 源码。`collections`、`home` 与 `author` 属于尚未包含在已发布 `0.1.1` 中的候选契约；已发布包的能力边界以[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)为准。
+
+## 门户 Footer 配置
+
+Footer 已抽成公开的 FolioFooter 组件（包内 src/ui/footer/）。原有字符串配置保持不变；不配置时仍显示默认 Built with Folio.，设置为 false 可以隐藏页脚。需要标准门户信息层级时使用结构化配置：
+
+~~~ts
+footer: {
+  brand: {
+    name: "Folio",
+    description: "Git-native 内容与门户发布引擎。",
+    logo: { src: "/folio-logo.svg", darkSrc: "/folio-logo-inverse.svg", alt: "Folio" },
+  },
+  groups: [
+    {
+      title: "使用指南",
+      links: [
+        { label: "快速开始", href: "/guide/getting-started" },
+        { label: "GitHub", href: "https://github.com/uichat-mira/folio", newTab: true },
+      ],
+    },
+  ],
+  legal: {
+    copyright: "© 2026 Mira Organization",
+    // 按站点真实资质填写；没有备案信息就不要添加。
+    registrations: [],
+    links: [],
+  },
+},
+~~~
+
+内部链接通过 React Router 跳转；以 / 开头的 Logo 资源路径会根据站点部署子路径解析。也可通过 FolioApp 的 slots.footer 完全替换默认页脚（自行提供 footer 语义元素）。
+
+技术文档的连续阅读页面可设置 \`<FolioApp ui={{ footerOnDocs: false }} />\`，隐藏 \`type: "doc"\` 路由下的全站 Footer 与文末的 \`articleFooter\` 插槽；首页、文章和集合页仍显示。默认值为 \`true\`，以保持已有消费者行为；即使提供 \`slots.footer\`，文档页也遵循这一开关。此设置只作用于 React 应用壳；静态路由正文的预渲染不会额外注入该组件。
 
 ## 内置首页配置
 
@@ -105,8 +138,84 @@ type FolioSlots = {
   home?: ReactNode
   headerActions?: ReactNode
   articleFooter?: ReactNode
+  docNav?: (props: FolioDocNavProps) => ReactNode
+  docToc?: (props: FolioTocProps) => ReactNode
+  footer?: ReactNode
 }
 ```
+
+### 可复用文档导航与页内目录
+
+左右栏是 Folio 的独立公开组件，均从 `@uichat-mira/folio` 导出，沿用原有单入口 CSS。消费者可独立使用组件，也可组合到文档阅读壳里：
+
+- `FolioDocNav`：传入 `doc`、`docs`，自动按集合与分组生成文档链接，支持 `className`、`ariaLabel`、`onNavigate`，并适配 React Router 的 `basename`。
+- `FolioToc`：传入 `headings`，按标题生成锚点与滚动高亮，支持 `className`、`onNavigate`，空列表不渲染。
+
+默认无需配置。想覆盖内置文档页的左右栏，可以使用动态渲染插槽：
+
+```tsx
+import { FolioApp, FolioDocNav, FolioToc } from "@uichat-mira/folio";
+
+<FolioApp
+  config={config}
+  docs={docs}
+  slots={{
+    docNav: (props) => <FolioDocNav {...props} className="my-doc-nav" />,
+    docToc: (props) => <FolioToc {...props} className="my-doc-toc" />,
+  }}
+/>
+```
+
+插槽会随着当前文档自动收到新数据，桌面和打开的移动端菜单使用同一渲染方式。移动端 `props.onNavigate` 用于跳转后关闭抽屉，覆写时应继续传递。若完全替换导航 DOM，消费者应保持相应语义、布局类名和无障碍行为；独立使用 `FolioDocNav` 时需位于 React Router 内。
+
+静态 HTML 仍使用默认导航和 TOC，保证无 JS 时能浏览。React 的插槽不自动改变静态构建输出，消费者若需要自定义静态布局，应通过站点的 `staticRoutes` 管理。
+
+### 约定式项目目录与父级推导
+
+项目内容不需要手工维护目录清单，也不需要在每篇文章上填写父级 ID。按以下结构放置 Markdown，Folio 会从路由层级构建一棵项目树：
+
+~~~text
+projects/
+  com-design/
+    index.md                     # 项目概览 -> /projects/com-design
+    repeated-operations/
+      index.md                   # 子文章 -> /projects/com-design/repeated-operations
+    notes/
+      design-principles/
+        index.md                 # 深层文章，继续嵌套
+~~~
+
+Frontmatter 示例：
+
+~~~yaml
+---
+type: project
+title: "ComDesign：AI 时代的设计系统实验"
+order: 2
+description: "关于设计系统的长期探索"
+---
+~~~
+
+- 默认情况下，Markdown 路径自动推导 URL，目录中的 `index.md` 对应概览父节点，子目录文章成为它的后代。
+- 侧栏的子文章依 `order` 排序；当前页会高亮，上一篇／下一篇仅在同一顶层项目内移动。
+- 如果父目录暂时没有 `index.md`，导航会显示不可点击的目录分组，**不会创建假的概览链接**。
+- 显式设置 `path` 会覆写默认路由，因此也会改变导航归属；不同项目之间只按完整路径段匹配，避免相似前缀误归属。
+
+项目页面默认复用 Folio 的文档阅读布局，但使用公开的 `FolioTreeNav` 而不是 `FolioDocNav`。核心通过 `buildFolioContentTree(docs, { rootPath })` 构建可序列化的纯数据树，通过 `resolveFolioProjectTree(docs, current)` 自动按项目路径范围归组。需要独立排版时也可以自行组合：
+
+~~~tsx
+import {
+  buildFolioContentTree,
+  FolioTreeNav,
+} from "@uichat-mira/folio";
+
+const tree = buildFolioContentTree(docs, { rootPath: "/projects" });
+<FolioTreeNav tree={tree} currentPath={currentDoc.path} />;
+~~~
+
+消费者可以通过 `slots.projectNav(props)` 自定义项目导航，回调接收 `tree`、`currentPath` 和 `onNavigate`；移动端务必传递 `onNavigate` 以便跳转后关闭抽屉。`slots.docNav` 继续负责普通技术文档，不会被项目模式覆盖。
+
+Folio 的静态构建与 React 使用同一份 Core 树形模型；如需在自定义 `staticRoutes` 中保持约定式项目阅读结构，可使用构建入口 `@uichat-mira/folio/vite` 提供的 `renderFolioStaticProjectShell(context, doc, markdownHtml?)`。
 
 官方 Folio 首页就是 `slots.home` 的真实 consumer。`slots.home` 的优先级高于 `config.home`：只要提供 React 首页节点，就完全使用该节点。
 

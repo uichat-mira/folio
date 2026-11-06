@@ -2,6 +2,12 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { findFolioDocCollection, getFolioDocNeighbors } from "./core/docs-structure";
 import {
+  folioTreeDisplayLabel,
+  getFolioTreeNeighbors,
+  resolveFolioProjectTree,
+  type FolioContentTreeNode,
+} from "./core/content-tree";
+import {
   folioCollectionIndexes,
   selectFolioCollectionDocs,
   assertNoFolioCollectionConflicts,
@@ -321,7 +327,7 @@ function renderStaticDocNav(
     )
     .join("");
 
-  return `<nav class="folio-docnav" aria-label="文档目录"><div class="folio-docnav__collection">${folioEscapeHtml(collection.title)}</div>${sections}</nav>`;
+  return `<nav class="folio-docnav" aria-label="文档目录">${sections}</nav>`;
 }
 
 function renderStaticToc(doc: FolioDoc): string {
@@ -366,7 +372,88 @@ function renderStaticDocShell(
   context: FolioStaticBuildContext,
   doc: FolioDoc,
 ): string {
-  return `<div class="folio-docs-runtime folio-docs-runtime--static">${renderStaticMobileDocs(context, doc)}<div class="folio-docs-shell">${renderStaticDocNav(context, doc)}<main class="folio-doc-main"><div class="folio-doc-toolbar"><div class="folio-eyebrow">${folioEscapeHtml(doc.group)}</div></div><h1>${folioEscapeHtml(doc.title)}</h1>${doc.description ? `<p class="folio-lede">${folioEscapeHtml(doc.description)}</p>` : ""}<article class="folio-markdown">${renderFolioMarkdown(doc.body, { removeH1: true })}</article>${renderStaticPager(context, doc)}</main>${renderStaticToc(doc)}</div></div>`;
+  return `<div class="folio-docs-runtime folio-docs-runtime--static">${renderStaticMobileDocs(context, doc)}<div class="folio-docs-shell">${renderStaticDocNav(context, doc)}<main class="folio-doc-main"><h1>${folioEscapeHtml(doc.title)}</h1>${doc.description ? `<p class="folio-lede">${folioEscapeHtml(doc.description)}</p>` : ""}<article class="folio-markdown">${renderFolioMarkdown(doc.body, { removeH1: true })}</article>${renderStaticPager(context, doc)}</main>${renderStaticToc(doc)}</div></div>`;
+}
+
+function renderStaticTreeChildren(
+  context: FolioStaticBuildContext,
+  nodes: readonly FolioContentTreeNode[],
+  currentPath: string,
+): string {
+  if (!nodes.length) return "";
+  const link = (path: string) => folioEscapeHtml(staticRouteHref(context, path));
+  return '<ul class="folio-tree-nav__children">' + nodes.map((node) => (
+    '<li>' + (node.doc
+      ? '<a' + (node.path === currentPath ? ' class="active" aria-current="page"' : "") +
+        ' href="' + link(node.doc.path) + '">' + folioEscapeHtml(node.title) + '</a>'
+      : '<span class="folio-tree-nav__directory">' + folioEscapeHtml(node.title) + '</span>') +
+    renderStaticTreeChildren(context, node.children, currentPath) + '</li>'
+  )).join("") + '</ul>';
+}
+
+function renderStaticProjectNav(
+  context: FolioStaticBuildContext,
+  doc: FolioDoc,
+  tree: ReturnType<typeof resolveFolioProjectTree>,
+): string {
+  const groups = tree.roots.map((node) => {
+    const label = folioTreeDisplayLabel(node.title);
+    const inner = (label.eyebrow
+      ? '<span class="folio-tree-nav__eyebrow">' + folioEscapeHtml(label.eyebrow) + '</span>'
+      : '') +
+      '<span class="folio-tree-nav__title">' + folioEscapeHtml(label.title) + '</span>';
+    const overview = node.doc
+      ? '<a class="folio-tree-nav__overview' +
+        (node.path === doc.path ? ' active" aria-current="page"' : '"') +
+        ' href="' + folioEscapeHtml(staticRouteHref(context, node.doc.path)) +
+        '">' + inner + '</a>'
+      : '<div class="folio-tree-nav__overview folio-tree-nav__overview--directory">' +
+        inner + '</div>';
+    return '<section class="folio-tree-nav__group">' + overview +
+      renderStaticTreeChildren(context, node.children, doc.path) + '</section>';
+  }).join("");
+  return '<nav class="folio-docnav folio-tree-nav" aria-label="项目目录">' +
+    '<div class="folio-tree-nav__groups">' + groups + '</div></nav>';
+}
+
+/** Static counterpart of the public tree navigation, derived from the same
+ * route tree and rendered with the same classes as the React component.
+ */
+export function renderFolioStaticProjectShell(
+  context: FolioStaticBuildContext,
+  doc: FolioDoc,
+  markdownHtml = renderFolioMarkdown(doc.body, { removeH1: true }),
+): string {
+  const tree = resolveFolioProjectTree(context.docs, doc);
+  const nav = renderStaticProjectNav(context, doc, tree);
+  const toc = renderStaticToc(doc);
+  const { previous, next } = getFolioTreeNeighbors(tree, doc.path);
+  const pager = previous || next
+    ? '<nav class="folio-page-nav" aria-label="文档分页">' +
+      (previous
+        ? '<a class="folio-page-nav__previous" href="' +
+          folioEscapeHtml(staticRouteHref(context, previous.path)) +
+          '"><span>上一篇</span><strong>' + folioEscapeHtml(previous.title) + '</strong></a>'
+        : '<span></span>') +
+      (next
+        ? '<a class="folio-page-nav__next" href="' +
+          folioEscapeHtml(staticRouteHref(context, next.path)) +
+          '"><span>下一篇</span><strong>' + folioEscapeHtml(next.title) + '</strong></a>'
+        : '<span></span>') + '</nav>'
+    : "";
+  const mobile = '<div class="folio-docs-mobile-bar folio-docs-mobile-bar--static">' +
+    '<details class="folio-static-doc-menu"><summary>菜单</summary>' +
+    '<div class="folio-static-doc-menu__panel">' + nav + '</div></details>' +
+    (toc ? '<details class="folio-static-doc-menu folio-static-doc-menu--toc">' +
+      '<summary>页面导航</summary><div class="folio-static-doc-menu__panel">' +
+      toc + '</div></details>' : '') + '</div>';
+  return '<div class="folio-docs-runtime folio-docs-runtime--static">' +
+    mobile + '<div class="folio-docs-shell">' + nav +
+    '<main class="folio-doc-main"><h1>' + folioEscapeHtml(doc.title) + '</h1>' +
+    (doc.description ? '<p class="folio-lede">' +
+      folioEscapeHtml(doc.description) + '</p>' : '') +
+    '<article class="folio-markdown">' + markdownHtml + '</article>' +
+    pager + '</main>' + toc + '</div></div>';
 }
 
 function renderStaticEntryList(
@@ -619,6 +706,8 @@ function defaultRoutes(context: FolioStaticBuildContext): FolioStaticRoute[] {
       body:
         doc.type === "doc"
           ? renderStaticDocShell(context, doc)
+          : doc.type === "project"
+            ? renderFolioStaticProjectShell(context, doc)
           : doc.type === "article"
             ? renderStaticArticle(doc)
             : `<main class="folio-prerender"><p>${folioEscapeHtml(doc.group)}</p><h1>${folioEscapeHtml(doc.title)}</h1><p>${folioEscapeHtml(doc.description)}</p><article class="folio-markdown">${renderFolioMarkdown(doc.body, { removeH1: true })}</article></main>`,

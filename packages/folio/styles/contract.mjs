@@ -148,6 +148,10 @@ export const REQUIRED_SELECTOR_FAMILIES = [
       ".folio-desktop-nav__list",
       ".folio-header-actions",
       ".folio-consumer-header-actions",
+      ".folio-utility-popover",
+      ".folio-utility-popover__trigger",
+      ".folio-utility-popover__panel",
+      ".folio-mobile-panel__custom-actions",
       ".folio-search-trigger",
       ".folio-icon-button",
       ".folio-mobile-menu-button",
@@ -170,7 +174,6 @@ export const REQUIRED_SELECTOR_FAMILIES = [
       ".folio-nav-menu__group",
       ".folio-nav-menu__group-label",
       ".folio-nav-menu__group-entries",
-      ".folio-nav-menu__group--overview",
       ".folio-nav-menu__entry",
       ".folio-nav-menu__icon",
       ".folio-nav-menu__copy",
@@ -211,7 +214,7 @@ export const REQUIRED_SELECTOR_FAMILIES = [
   },
   {
     id: "share",
-    selectors: [".folio-share-button", ".folio-mobile-doc-share"],
+    selectors: [".folio-share-button", ".folio-mobile-panel__actions"],
   },
   {
     id: "docs-shell",
@@ -279,7 +282,12 @@ export const CASCADE_ORDER = [
   [".folio-header", ".folio-markdown"],
   [".folio-markdown", ".folio-search-overlay"],
   [".folio-search-overlay", ".folio-footer"],
-  [".folio-footer", ".folio-docs-shell"],
+  // Footer is the final component stylesheet now; the public footer rule
+  // remains stable while its styles move into its owning module.
+  [".folio-docs-shell", ".folio-docnav"],
+  [".folio-docnav", ".folio-tree-nav__groups"],
+  [".folio-tree-nav__groups", ".folio-toc"],
+  [".folio-toc", ".folio-footer"],
 ];
 
 // Representative rules that must survive into a real consumer's built CSS

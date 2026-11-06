@@ -4,7 +4,7 @@
 //          -> Core only (no React, no DOM globals, no UI, no Build)
 //   Build  src/build/** plus src/static*.ts and the /vite entry
 //          -> Core and Build (no React UI packages, no UI components)
-//   UI     the React components and the React-facing type module
+//   UI     src/ui/**, remaining root React components, and UI-facing types
 //          -> Core and UI (may depend on Core)
 //   entry  src/index.ts, the public barrel -> any layer
 //
@@ -41,7 +41,6 @@ export const BUILD_ROOT_MODULES = ["static.ts", "static-output.ts", "vite.ts"];
 export const UI_ROOT_MODULES = [
   "app.tsx",
   "docs-shell.tsx",
-  "header.tsx",
   "icons.tsx",
   "share.tsx",
   "markdown-react.tsx",
@@ -84,6 +83,7 @@ export function layerOf(relativePath) {
   if (ENTRY_MODULES.includes(path)) return "entry";
   if (path.startsWith("core/")) return "core";
   if (path.startsWith("build/")) return "build";
+  if (path.startsWith("ui/")) return "ui";
   if (CORE_ROOT_MODULES.includes(path)) return "core";
   if (BUILD_ROOT_MODULES.includes(path)) return "build";
   if (UI_ROOT_MODULES.includes(path)) return "ui";
@@ -278,8 +278,8 @@ const SYNTHETIC_SCENARIOS = [
   {
     id: "core-imports-ui-component",
     files: {
-      "core/content.ts": 'import { FolioHeader } from "../header";\n',
-      "header.tsx": "export const FolioHeader = 1;\n",
+      "core/content.ts": 'import { FolioHeader } from "../ui/header";\n',
+      "ui/header/index.ts": "export const FolioHeader = 1;\n",
     },
     expect: ["core:ui"],
     what: "a Core module importing a UI component",
@@ -287,8 +287,8 @@ const SYNTHETIC_SCENARIOS = [
   {
     id: "core-re-exports-ui-type",
     files: {
-      "core/content.ts": 'export type { FolioHeaderProps } from "../header";\n',
-      "header.tsx": "export type FolioHeaderProps = { a: 1 };\n",
+      "core/content.ts": 'export type { FolioHeaderProps } from "../ui/header";\n',
+      "ui/header/index.ts": "export type FolioHeaderProps = { a: 1 };\n",
     },
     expect: ["core:ui"],
     what: "a Core module re-exporting a UI type (type-only edge)",

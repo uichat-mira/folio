@@ -67,6 +67,11 @@ const checks = [
 
       const entry = await import("@uichat-mira/folio");
       assert.equal(typeof entry.FolioApp, "function", "root entry does not export FolioApp");
+      assert.equal(typeof entry.FolioDocNav, "function", "root entry does not export FolioDocNav");
+      assert.equal(typeof entry.FolioToc, "function", "root entry does not export FolioToc");
+      assert.equal(typeof entry.FolioTreeNav, "function", "root entry does not export FolioTreeNav");
+      assert.equal(typeof entry.buildFolioContentTree, "function", "root entry does not export buildFolioContentTree");
+      assert.equal(typeof entry.resolveFolioProjectTree, "function", "root entry does not export resolveFolioProjectTree");
       assert.equal(
         typeof entry.parseFolioDoc,
         "function",
@@ -126,6 +131,7 @@ const checks = [
 
       const entry = await import("@uichat-mira/folio/vite");
       assert.equal(typeof entry.folio, "function", "vite entry does not export folio()");
+      assert.equal(typeof entry.renderFolioStaticProjectShell, "function", "vite entry lacks project renderer");
       assert.equal(
         entry.folioVirtualModule,
         "virtual:folio/content",
@@ -163,6 +169,9 @@ const checks = [
         css.includes("--folio-primary"),
         "styles.css does not contain the Folio custom properties",
       );
+      assert.ok(css.includes(".folio-docnav"), "styles.css lacks document navigation");
+      assert.ok(css.includes(".folio-toc"), "styles.css lacks page TOC");
+      assert.ok(css.includes(".folio-tree-nav"), "styles.css lacks project tree navigation");
       return `${entryFile} (${css.length} bytes)`;
     },
   },

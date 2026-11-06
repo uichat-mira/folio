@@ -1,5 +1,11 @@
 import {
   FolioApp,
+  FolioDocNav,
+  FolioToc,
+  FolioTreeNav,
+  buildFolioContentTree,
+  resolveFolioProjectTree,
+  getFolioTreeNeighbors,
   buildFolioDocStructure,
   defineFolioConfig,
   getFolioDocNeighbors,
@@ -16,6 +22,10 @@ import {
   type FolioDocCollection,
   type FolioDocSection,
   type FolioDocsShellProps,
+  type FolioDocNavProps,
+  type FolioTocProps,
+  type FolioContentTree,
+  type FolioTreeNavProps,
   type FolioDocStructure,
   type FolioEntryType,
   type FolioHeaderProps,
@@ -48,6 +58,10 @@ import {
 type PublicTypeSurface = {
   appProps: FolioAppProps;
   docsShellProps: FolioDocsShellProps;
+  docNavProps: FolioDocNavProps;
+  tocProps: FolioTocProps;
+  tree: FolioContentTree;
+  treeNavProps: FolioTreeNavProps;
   headerProps: FolioHeaderProps;
   shareButtonProps: FolioShareButtonProps;
   markdownProps: FolioMarkdownProps;
@@ -130,7 +144,19 @@ const virtualModule: string = folioVirtualModule;
 const typedVirtualDocs: FolioDoc[] = virtualDocs;
 const typedVirtualRoots: string[] = virtualRoots;
 const plugin = folio(pluginOptions);
-const app = <FolioApp config={config} docs={docs} />;
+const app = <FolioApp config={config} docs={docs}
+  slots={{
+    docNav: (props) => <FolioDocNav {...props} />,
+    docToc: (props) => <FolioToc {...props} />,
+    projectNav: (props) => <FolioTreeNav {...props} />,
+  }}
+/>;
+const standaloneNav = <FolioDocNav doc={docs[0]} docs={docs} ariaLabel="Consumer docs" />;
+const standaloneToc = <FolioToc headings={docs[0].headings} />;
+const contentTree = buildFolioContentTree(docs);
+const projectTree = resolveFolioProjectTree(docs, docs[0]);
+const standaloneTree = <FolioTreeNav tree={contentTree} currentPath={docs[0].path} />;
+const treeNeighbors = getFolioTreeNeighbors(projectTree, docs[0].path);
 
 // @ts-expect-error FolioConfig requires both title and description.
 const missingDescription: FolioConfig = { title: "Only a title" };
@@ -155,6 +181,10 @@ export function consumerSurface(): unknown[] {
     typedVirtualRoots,
     plugin,
     app,
+    standaloneNav,
+    standaloneToc,
+    standaloneTree,
+    treeNeighbors,
     missingDescription,
     missingConfig,
   ];

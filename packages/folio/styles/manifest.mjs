@@ -6,7 +6,7 @@
 // in exactly this order. The order is the cascade order of the published
 // stylesheet, so it is data, not a build-time heuristic.
 //
-// Rules for the component CSS migration that follows (C2–C5):
+// Rules for module stylesheet ownership:
 //   1. A new component stylesheet is registered here; it is never `@import`ed.
 //      Aggregation is plain concatenation, so the published file stays a single
 //      request with a deterministic order.
@@ -14,11 +14,18 @@
 //      the global rules that every component rule below depends on.
 //   3. Paths are package-relative POSIX paths resolved with `node:path`, so the
 //      build is identical on Windows and POSIX.
-//   4. Source bytes are preserved verbatim. With a single source the output is
-//      byte-identical to that source (enforced by `scripts/verify-styles.mjs`).
+//   4. Source bytes are preserved verbatim. The aggregate and its public
+//      cascade order are checked by `scripts/verify-styles.mjs`.
 export const STYLE_SOURCES = [
-  // Tokens (`:root`, `[data-folio-theme="dark"]`), global rules, and the
-  // current component/static rules. Split into component files in C2–C5, each
-  // appended after this entry.
+  // Public token/global entry remains first; all internal module CSS follows
+  // in cascade order. Consumers continue to import one dist/styles.css file.
   "src/styles.css",
+  "src/ui/header/header.css",
+  "src/styles/content.css",
+  "src/ui/doc-nav/doc-nav.css",
+  "src/ui/tree-nav/tree-nav.css",
+  "src/ui/toc/toc.css",
+  "src/ui/popover/popover.css",
+  "src/ui/header/header-popover.css",
+  "src/ui/footer/footer.css",
 ];

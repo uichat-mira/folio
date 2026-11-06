@@ -247,6 +247,51 @@ export type FolioHomeConfig = {
   sections?: FolioHomeSectionConfig[];
 };
 
+/** A footer link. Internal routes use React Router; external URLs stay links. */
+export type FolioFooterLink = {
+  label: string;
+  href: string;
+  /** Open in a new tab. Defaults to false, including for external URLs. */
+  newTab?: boolean;
+};
+
+/** Optional site identity in a structured portal footer. */
+export type FolioFooterBrand = {
+  /** Defaults to the site's config.title. */
+  name?: string;
+  description?: string;
+  /** Defaults to the site root. */
+  href?: string;
+  /** Site-owned logo URL. Root-relative assets honor the runtime basename. */
+  logo?: {
+    src: string;
+    /** Optional dark-theme asset; avoids filters and preserves brand artwork. */
+    darkSrc?: string;
+    alt?: string;
+  };
+};
+
+export type FolioFooterGroup = {
+  title: string;
+  links: FolioFooterLink[];
+};
+
+export type FolioFooterLegal = {
+  /** Plain text; no year or legal entity is invented automatically. */
+  copyright?: string;
+  /** e.g. jurisdiction-specific filing/registration links. */
+  registrations?: FolioFooterLink[];
+  /** Privacy, terms, accessibility or other legal destinations. */
+  links?: FolioFooterLink[];
+};
+
+/** Common portal-footer composition without a custom React component. */
+export type FolioFooterConfig = {
+  brand?: FolioFooterBrand;
+  groups?: FolioFooterGroup[];
+  legal?: FolioFooterLegal;
+};
+
 export type FolioConfig = {
   title: string;
   description: string;
@@ -265,6 +310,7 @@ export type FolioConfig = {
   collections?: FolioCollectionConfig[];
   /** Optional lightweight configuration for the built-in home page. */
   home?: FolioHomeConfig;
-  footer?: string;
+  /** Legacy text, structured portal footer, or false to hide it entirely. */
+  footer?: string | FolioFooterConfig | false;
   github?: string;
 };
