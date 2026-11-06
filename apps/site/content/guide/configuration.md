@@ -48,7 +48,7 @@ type FolioConfig = {
     emptyMessage?: string
   }[]
   home?: FolioHomeConfig
-  footer?: string
+  footer?: string | false | FolioFooterConfig
   github?: string
 }
 ```
@@ -56,6 +56,37 @@ type FolioConfig = {
 `title` 与 `description` 是必填项。`author` 是生成 Article/TechArticle JSON-LD 时的默认作者；文档 Frontmatter 的 `author` 优先，两者都缺失时不生成作者字段。`siteUrl` 也是 canonical、sitemap、robots 与 feed URL 的前置条件。
 
 本页描述当前 `dev` 源码。`collections`、`home` 与 `author` 属于尚未包含在已发布 `0.1.1` 中的候选契约；已发布包的能力边界以[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)为准。
+
+## 门户 Footer 配置
+
+Footer 已抽成公开的 FolioFooter 组件（包内 src/ui/footer/）。原有字符串配置保持不变；不配置时仍显示默认 Built with Folio.，设置为 false 可以隐藏页脚。需要标准门户信息层级时使用结构化配置：
+
+~~~ts
+footer: {
+  brand: {
+    name: "Folio",
+    description: "Git-native 内容与门户发布引擎。",
+    logo: { src: "/folio-logo.svg", darkSrc: "/folio-logo-inverse.svg", alt: "Folio" },
+  },
+  groups: [
+    {
+      title: "使用指南",
+      links: [
+        { label: "快速开始", href: "/guide/getting-started" },
+        { label: "GitHub", href: "https://github.com/uichat-mira/folio", newTab: true },
+      ],
+    },
+  ],
+  legal: {
+    copyright: "© 2026 Mira Organization",
+    // 按站点真实资质填写；没有备案信息就不要添加。
+    registrations: [],
+    links: [],
+  },
+},
+~~~
+
+内部链接通过 React Router 跳转；以 / 开头的 Logo 资源路径会根据站点部署子路径解析。也可通过 FolioApp 的 slots.footer 完全替换默认页脚（自行提供 footer 语义元素）。这属于 React 应用壳能力：静态路由正文的预渲染不会额外注入该组件。
 
 ## 内置首页配置
 

@@ -13,7 +13,10 @@ import {
   type FolioStaticRoute,
 } from "@uichat-mira/folio/vite";
 import { withFolioBaseLinks } from "./content-links";
-import { buildShowcaseHome } from "./home-model";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { MemoryRouter } from "react-router-dom";
+import { HomePage } from "./HomePage";
 
 const TYPE_LABEL: Record<string, string> = {
   doc: "文档",
@@ -219,127 +222,17 @@ function renderGeneric(context: FolioStaticBuildContext, doc: FolioDoc): string 
   );
 }
 
+// Pre-render the same public-API-only HomePage used by the client. Maintaining
+// two separately handwritten home implementations previously made the static
+// index.html stale after a client redesign.
 function renderHome(context: FolioStaticBuildContext): string {
-  const model = buildShowcaseHome(context.config, context.docs);
-
-  const groups = model.groups
-    .map(
-      (group) =>
-        '<article class="showcase-type-card showcase-type-card--' +
-        group.type +
-        '"><header><code>' +
-        group.type +
-        "</code><span>" +
-        folioEscapeHtml(TYPE_LABEL[group.type] ?? group.type) +
-        "</span></header><h3>" +
-        folioEscapeHtml(group.label) +
-        "</h3><p>" +
-        folioEscapeHtml(group.purpose) +
-        "</p><ul>" +
-        group.docs
-          .map(
-            (doc) =>
-              '<li><a href="' +
-              folioEscapeHtml(href(context.base, doc.path)) +
-              '">' +
-              folioEscapeHtml(doc.title) +
-              "</a><small>" +
-              folioEscapeHtml(doc.description) +
-              "</small></li>",
-          )
-          .join("") +
-        "</ul></article>",
-    )
-    .join("");
-
-  const paths = model.paths
-    .map(
-      (path) =>
-        "<li><span>" +
-        folioEscapeHtml(path.label) +
-        "</span><div>" +
-        path.docs
-          .map(
-            (doc, index) =>
-              (index > 0 ? "<b aria-hidden=\"true\">→</b>" : "") +
-              '<a href="' +
-              folioEscapeHtml(href(context.base, doc.path)) +
-              '">' +
-              folioEscapeHtml(doc.title) +
-              "</a>",
-          )
-          .join("") +
-        "</div></li>",
-    )
-    .join("");
-
-  const collections = model.collections
-    .map(
-      (collection) =>
-        '<a href="' +
-        folioEscapeHtml(href(context.base, collection.path)) +
-        '"><code>' +
-        folioEscapeHtml(collection.path) +
-        "</code><h3>" +
-        folioEscapeHtml(collection.title) +
-        "</h3><p>" +
-        folioEscapeHtml(collection.description) +
-        "</p><ul>" +
-        collection.docs
-          .map((doc) => "<li>" + folioEscapeHtml(doc.title) + "</li>")
-          .join("") +
-        "</ul><small>打开集合 →</small></a>",
-    )
-    .join("");
-
-  return (
-    '<main class="showcase-home folio-prerender--showcase">' +
-    '<section class="showcase-hero"><div class="showcase-hero__copy">' +
-    '<span class="showcase-eyebrow">Reference implementation · dev</span>' +
-    "<h1>先体验内容组织。再判断 Folio 能做什么。</h1>" +
-    "<p>这个官网只消费 Folio 的公开 package entrypoints。首页、文档、文章、项目档案、独立页面与集合索引全部来自同一份 <code>virtual:folio/content</code> manifest。</p>" +
-    '<div class="showcase-actions"><a class="showcase-btn showcase-btn--primary" href="' +
-    folioEscapeHtml(href(context.base, "/showcase")) +
-    '">进入能力展厅</a><a class="showcase-btn showcase-btn--secondary" href="' +
-    folioEscapeHtml(href(context.base, "/showcase/content-map")) +
-    '">查看内容图谱</a></div></div>' +
-    '<div class="showcase-code-card"><div class="showcase-code-card__bar"><span>home-model.ts</span><small>docs -&gt; entries</small></div><pre><code>' +
-    folioEscapeHtml(
-      'import docs from "virtual:folio/content";\n' +
-        'import { folioCollectionIndexes } from "@uichat-mira/folio";\n\n' +
-        'const collections = folioCollectionIndexes(config);\n' +
-        'const guides = docs.filter((doc) => doc.type === "doc");\n' +
-        'const articles = docs.filter((doc) => doc.type === "article");',
-    ) +
-    "</code></pre></div></section>" +
-    '<section class="showcase-stats" aria-label="Live Folio content metrics">' +
-    "<div><strong>" + model.stats.docs + "</strong><span>内容条目</span></div>" +
-    "<div><strong>" + model.stats.collections + "</strong><span>集合索引</span></div>" +
-    "<div><strong>" + model.stats.headings + "</strong><span>提取标题</span></div>" +
-    "<div><strong>" + model.stats.tags + "</strong><span>Frontmatter 标签</span></div>" +
-    "</section>" +
-    '<section class="showcase-section"><div class="showcase-section__head">' +
-    '<span class="showcase-eyebrow">Four content types</span><h2>四类内容，四种阅读方式。</h2>' +
-    "<p>文档进入带侧边导航的文档壳，文章按日期排序并出现页内目录，项目档案记录范围与决策，独立页面承担图谱和参考入口。</p></div>" +
-    '<div class="showcase-type-grid">' +
-    groups +
-    "</div></section>" +
-    '<section class="showcase-section showcase-section--soft"><div class="showcase-section__head">' +
-    '<span class="showcase-eyebrow">Reader paths</span><h2>不要只看卡片，沿着路径走一遍。</h2></div>' +
-    '<ol class="showcase-path-list">' +
-    paths +
-    "</ol></section>" +
-    '<section class="showcase-section"><div class="showcase-section__head">' +
-    '<span class="showcase-eyebrow">Collections</span><h2>集合索引来自配置，而不是另写一份列表。</h2></div>' +
-    '<div class="showcase-collection-grid">' +
-    collections +
-    "</div></section>" +
-    '<section class="showcase-cta"><div><span class="showcase-eyebrow">Boundaries are visible</span>' +
-    "<h2>支持什么、缺失什么，都写在真实页面里。</h2><p>搜索、TOC、集合索引和静态输出可以亲自验证；标签聚合、搜索分面和 Mermaid 无 JS 图形则明确记录为未实现。</p></div>" +
-    '<a class="showcase-btn showcase-btn--primary" href="' +
-    folioEscapeHtml(href(context.base, "/showcase/from-file-to-page")) +
-    '">跟踪一条内容链路</a></section>' +
-    "</main>"
+  const basename = context.base === "/" ? undefined : context.base.replace(/[/]$/, "");
+  return renderToStaticMarkup(
+    createElement(
+      MemoryRouter,
+      { basename, initialEntries: [href(context.base, "/")] },
+      createElement(HomePage, { docs: context.docs }),
+    ),
   );
 }
 

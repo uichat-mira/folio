@@ -9,6 +9,7 @@ import { HeaderVersionPopover } from "./HeaderVersionPopover";
 import { withFolioBaseLinks } from "./content-links";
 import "./site.css";
 import "./showcase.css";
+import "./home.css";
 import "./legacy-claude-visual.css";
 
 const basePath = import.meta.env.BASE_URL;

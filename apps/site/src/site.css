@@ -1,4 +1,7 @@
 :root {
+  /* Official Folio brand kit v1; consumer sites keep their own tokens. */
+  --folio-primary: #BE6240;
+  --folio-primary-active: #A65333;
   --site-primary: var(--folio-primary);
   --site-primary-active: var(--folio-primary-active);
   --site-ink: var(--folio-ink);
@@ -15,6 +18,11 @@
   --site-display: var(--folio-font-display);
   --site-sans: var(--folio-font-sans);
   --site-mono: var(--folio-font-mono);
+}
+
+[data-folio-theme="dark"] {
+  --folio-primary: #BE6240;
+  --folio-primary-active: #E1A38A;
 }
 
 html { scroll-behavior: smooth; }
@@ -37,28 +45,39 @@ body {
 }
 
 .folio-brand {
-  gap: 10px;
-  font-size: 16px;
-  font-weight: 700;
+  flex: none;
+  gap: 0;
 }
 
+/* The complete approved wordmark replaces the prototype "F" tile.
+   Both SVG variants are real paths; the inverse is not produced by a filter. */
 .folio-brand::before {
-  content: "F";
-  display: grid;
-  width: 30px;
-  height: 30px;
-  place-items: center;
-  border-radius: 8px;
-  background: var(--site-primary);
-  color: #fff;
-  font-family: var(--site-display);
-  font-size: 19px;
-  font-style: italic;
+  content: "";
+  display: block;
+  width: 94px;
+  height: 40px;
+  flex: none;
+  background: url("/folio-logo.svg") center / contain no-repeat;
 }
 
-/* Base header typography already matches the brand here; only the brand mark
-   and the rail width are site-specific. Nav spacing comes from the package so
-   the demo never drifts from what consumers get. */
+[data-folio-theme="dark"] .folio-brand::before {
+  background-image: url("/folio-logo-inverse.svg");
+}
+
+/* Keep the accessible anchor name without repeating the wordmark visually. */
+.folio-brand > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The brand identity and rail width are site-specific; the navigation
+   layout stays in Folio so consumers do not need a second Header. */
 .folio-header__wrap { padding: 0 28px; }
 
 .site-header-action {
@@ -172,6 +191,7 @@ body {
 
 @media (max-width: 780px) {
   .folio-header__wrap { padding: 0 18px; }
+  .folio-brand::before { width: 86px; height: 36px; }
 
   .folio-doc-page {
     width: min(100% - 32px, 820px);
