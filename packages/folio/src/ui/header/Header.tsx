@@ -9,26 +9,16 @@ import {
   type RefObject,
 } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { FolioShareButton } from "./share";
-import {
-  ChevronDownIcon,
-  GithubIcon,
-  MenuIcon,
-  NavIcon,
-  SearchIcon,
-  ThemeIcon,
-} from "./icons";
-import {
-  isFolioNavItemActive,
-  resolveFolioNavigation,
-  type FolioNavMenuItem,
-  type FolioResolvedNavItem,
-} from "./core/navigation";
+import { FolioShareButton } from "../../share";
+import { DesktopNav } from "./DesktopNav";
+import { MobileNav } from "./MobileNav";
+import { GithubIcon, MenuIcon, SearchIcon, ThemeIcon } from "../../icons";
+import { resolveFolioNavigation } from "../../core/navigation";
 import type {
   FolioConfig,
   FolioDoc,
   FolioNavigationItem,
-} from "./types";
+} from "../../types";
 
 export type FolioHeaderProps = {
   config: FolioConfig;
@@ -133,144 +123,6 @@ export function FolioHeader({
     `${idBase}-menu-${label.replace(/[^a-zA-Z0-9_-]+/g, "-")}`;
   const mobilePanelId = `${idBase}-mobile`;
 
-  function renderTrigger(item: FolioNavMenuItem) {
-    const active = isFolioNavItemActive(item, location.pathname);
-    const expanded = openMenu === item.label;
-    return (
-      <Link
-        to={item.href}
-        className={
-          "folio-nav-menu__trigger" +
-          (active ? " active" : "") +
-          (expanded ? " is-expanded" : "")
-        }
-        aria-expanded={expanded}
-        aria-haspopup="true"
-        aria-controls={expanded ? panelId(item.label) : undefined}
-        aria-current={active ? "page" : undefined}
-        onClick={(event) => {
-          // Modified clicks keep normal link behavior (new tab, save, download);
-          // a plain click belongs to the disclosure.
-          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-            return;
-          }
-          event.preventDefault();
-          cancelScheduledClose();
-          setOpenMenu(expanded ? null : item.label);
-        }}
-        onKeyDown={(event) => {
-          if (event.key !== "Escape") return;
-          event.preventDefault();
-          closeMenu();
-        }}
-      >
-        <span>{item.label}</span>
-        <ChevronDownIcon />
-      </Link>
-    );
-  }
-
-  function renderPanel(item: FolioNavMenuItem) {
-    const expanded = openMenu === item.label;
-    // The section root belongs to the panel heading on desktop, not to a
-    // synthetic full-width card. Keep the resolved entry for mobile consumers.
-    const groups = item.groups
-      .map((group) => ({
-        ...group,
-        entries: group.entries.filter((entry) => entry.href !== item.href),
-      }))
-      .filter((group) => group.entries.length > 0);
-    return (
-      <div
-        className={"folio-nav-menu__panel" + (expanded ? " is-open" : "")}
-        id={panelId(item.label)}
-        // A disclosure panel is a labelled group, not an ARIA menu: entries
-        // stay ordinary tab stops with native link semantics.
-        role="group"
-        aria-label={item.panel.title}
-      >
-        <div className="folio-nav-menu__head">
-          {item.panel.eyebrow ? (
-            <span className="folio-nav-menu__eyebrow">{item.panel.eyebrow}</span>
-          ) : null}
-          <Link to={item.href} onClick={closeMenu}>{item.panel.title}</Link>
-          {item.panel.description ? <p>{item.panel.description}</p> : null}
-        </div>
-        <div className="folio-nav-menu__entries">
-          {groups.map((group) => (
-            <div
-              className="folio-nav-menu__group"
-              key={group.label ?? "__ungrouped"}
-            >
-              {group.label ? (
-                <span className="folio-nav-menu__group-label">{group.label}</span>
-              ) : null}
-              <div className="folio-nav-menu__group-entries">
-                {group.entries.map((entry) => (
-                  <Link
-                    className="folio-nav-menu__entry"
-                    to={entry.href}
-                    key={entry.href + entry.label}
-                    onClick={closeMenu}
-                  >
-                    <span className="folio-nav-menu__icon" aria-hidden="true">
-                      <NavIcon name={entry.icon} />
-                    </span>
-                    <span className="folio-nav-menu__copy">
-                      <strong>{entry.label}</strong>
-                      {entry.description ? <small>{entry.description}</small> : null}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  function renderDesktopItem(item: FolioResolvedNavItem) {
-    const active = isFolioNavItemActive(item, location.pathname);
-
-    if (item.kind === "link") {
-      return (
-        <li key={item.href + item.label}>
-          <Link
-            className={active ? "active" : ""}
-            aria-current={active ? "page" : undefined}
-            to={item.href}
-          >
-            {item.label}
-          </Link>
-        </li>
-      );
-    }
-
-    return (
-      <li
-        className={"folio-nav-menu" + (openMenu === item.label ? " is-open" : "")}
-        key={item.href + item.label}
-        onPointerEnter={(event) => {
-          if (event.pointerType !== "mouse") return;
-          cancelScheduledClose();
-          setOpenMenu(item.label);
-        }}
-        onBlur={(event) => {
-          // Tabbing out of the whole item (trigger and panel) closes it; moving
-          // focus into the panel keeps it open.
-          if (event.currentTarget.contains(event.relatedTarget as Node | null)) {
-            return;
-          }
-          closeMenu();
-        }}
-      >
-        {renderTrigger(item)}
-        {renderPanel(item)}
-      </li>
-    );
-  }
-
   return (
     <header className="folio-header">
       <div className="folio-header__wrap">
@@ -297,11 +149,15 @@ export function FolioHeader({
             }, MENU_CLOSE_DELAY);
           }}
         >
-          <nav className="folio-desktop-nav" aria-label="主导航">
-            <ul className="folio-desktop-nav__list">
-              {items.map(renderDesktopItem)}
-            </ul>
-          </nav>
+          <DesktopNav
+            items={items}
+            pathname={location.pathname}
+            openMenu={openMenu}
+            setOpenMenu={setOpenMenu}
+            panelId={panelId}
+            cancelScheduledClose={cancelScheduledClose}
+            closeMenu={closeMenu}
+          />
 
           <div className="folio-header-actions">
             {actions ? <div className="folio-consumer-header-actions">{actions}</div> : null}
@@ -354,7 +210,6 @@ export function FolioHeader({
                 <GithubIcon />
               </a>
             ) : null}
-
           </div>
         </div>
       </div>
@@ -367,77 +222,17 @@ export function FolioHeader({
         id={mobilePanelId}
         ref={mobilePanelRef}
       >
-        <nav aria-label="移动端主导航">
-          {items.map((item, index) => {
-            const active = isFolioNavItemActive(item, location.pathname);
-
-            if (item.kind === "link") {
-              return (
-                <Link
-                  key={item.href + item.label}
-                  className={active ? "active" : ""}
-                  aria-current={active ? "page" : undefined}
-                  to={item.href}
-                >
-                  {item.label}
-                </Link>
-              );
-            }
-
-            const groupId = `${mobilePanelId}-group-${index}`;
-            const groupOpen = mobileGroup === groupId;
-            return (
-              <div className="folio-mobile-group" key={item.href + item.label}>
-                <button
-                  type="button"
-                  className={
-                    "folio-mobile-group__trigger" + (active ? " active" : "")
-                  }
-                  aria-expanded={groupOpen}
-                  aria-controls={groupId}
-                  onClick={() =>
-                    setMobileGroup((value) => (value === groupId ? null : groupId))
-                  }
-                >
-                  <span>{item.label}</span>
-                  <ChevronDownIcon />
-                </button>
-                <div
-                  className={
-                    "folio-mobile-group__panel" + (groupOpen ? " is-open" : "")
-                  }
-                  id={groupId}
-                >
-                  <div className="folio-mobile-group__inner">
-                    {item.groups.map((group) => (
-                      <div
-                        className="folio-mobile-group__section"
-                        key={group.label ?? "__ungrouped"}
-                      >
-                        {group.label ? (
-                          <span className="folio-mobile-group__label">{group.label}</span>
-                        ) : null}
-                        {group.entries.map((entry) => (
-                          <Link
-                            key={entry.href + entry.label}
-                            to={entry.href}
-                            onClick={() => {
-                              setMobileOpen(false);
-                              setMobileGroup(null);
-                            }}
-                          >
-                            <span>{entry.label}</span>
-                            {entry.description ? <small>{entry.description}</small> : null}
-                          </Link>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </nav>
+        <MobileNav
+          items={items}
+          pathname={location.pathname}
+          mobilePanelId={mobilePanelId}
+          mobileGroup={mobileGroup}
+          setMobileGroup={setMobileGroup}
+          onEntryClick={() => {
+            setMobileOpen(false);
+            setMobileGroup(null);
+          }}
+        />
         {actions ? <div className="folio-mobile-panel__custom-actions">{actions}</div> : null}
         <div className="folio-mobile-panel__actions" aria-label="页面工具">
           {searchEnabled && onSearch ? (

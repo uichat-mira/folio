@@ -65,6 +65,10 @@ test("the layer map keeps Core free of upward edges", () => {
   assert.equal(layerOf("core/content.ts"), "core");
   assert.equal(layerOf("build/vite-adapter.ts"), "build");
   assert.equal(layerOf("app.tsx"), "ui");
+  assert.equal(layerOf("ui/header/Header.tsx"), "ui");
+  assert.equal(layerOf("ui/header/index.ts"), "ui");
+  assert.equal(layerOf("ui/popover/UtilityPopover.tsx"), "ui");
+  assert.equal(layerOf("header.tsx"), undefined, "the old root Header module is no longer a separate layer owner");
   assert.equal(layerOf("index.ts"), "entry");
   assert.equal(layerOf("unknown-module.ts"), undefined);
 });

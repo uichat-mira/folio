@@ -15,7 +15,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { normalizeBasePath } from "./core/config";
-import { FolioHeader } from "./header";
+import { FolioHeader } from "./ui/header";
 import { FolioDocsShell } from "./docs-shell";
 import { SearchIcon } from "./icons";
 import { FolioShareButton } from "./share";

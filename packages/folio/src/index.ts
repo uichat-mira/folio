@@ -1,12 +1,12 @@
 export { FolioApp } from "./app";
-export { FolioHeader } from "./header";
-export { FolioUtilityPopover } from "./utility-popover";
-export type { FolioUtilityPopoverProps } from "./utility-popover";
+export { FolioHeader } from "./ui/header";
+export { FolioUtilityPopover } from "./ui/popover";
+export type { FolioUtilityPopoverProps } from "./ui/popover";
 export { FolioDocsShell } from "./docs-shell";
 export { FolioToc } from "./toc";
 export type { FolioTocProps } from "./toc";
 export type { FolioDocsShellProps } from "./docs-shell";
-export type { FolioHeaderProps } from "./header";
+export type { FolioHeaderProps } from "./ui/header";
 export { FolioShareButton } from "./share";
 export type { FolioShareButtonProps } from "./share";
 export { FolioMarkdown } from "./markdown-react";
