@@ -33,7 +33,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       docs={content}
       basePath={basePath}
       slots={{
-        home: <HomePage docs={content} basePath={basePath} />,
+        home: <HomePage docs={content} />,
         articleFooter,
         headerActions: <HeaderVersionPopover />,
       }}

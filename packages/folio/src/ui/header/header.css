@@ -10,12 +10,26 @@
 
 .folio-header__wrap {
   display: flex;
-  width: min(1440px, 100%);
+  width: 100%;
+  max-width: var(--folio-home-frame-width);
   height: 64px;
   margin: 0 auto;
   align-items: center;
   gap: 24px;
   padding: 0 24px;
+  transition: max-width .42s cubic-bezier(.22, 1, .36, 1);
+}
+
+/* Interior routes match the docs frame; only the stable header rail animates.
+   The page's content geometry is left to each reading mode. */
+.folio-header--interior .folio-header__wrap {
+  max-width: var(--folio-reading-frame-width);
+}
+
+/* Narrow screens already use the available viewport width. There is no
+   meaningful frame-width animation to run there. */
+@media (max-width: 780px), (prefers-reduced-motion: reduce) {
+  .folio-header__wrap { transition: none; }
 }
 
 .folio-brand {

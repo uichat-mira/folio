@@ -1,17 +1,11 @@
 import type { FolioDoc } from "@uichat-mira/folio";
+import { Link } from "react-router-dom";
 import config from "../folio.config";
 import { buildShowcaseHome } from "./home-model";
 
 type HomePageProps = {
   docs: FolioDoc[];
-  basePath: string;
 };
-
-function href(basePath: string, path: string): string {
-  const base = basePath.endsWith("/") ? basePath : basePath + "/";
-  const route = path.startsWith("/") ? path.slice(1) : path;
-  return route ? base + route : base;
-}
 
 const TYPE_COUNT_LABEL: Record<string, string> = {
   doc: "连续阅读",
@@ -20,7 +14,7 @@ const TYPE_COUNT_LABEL: Record<string, string> = {
   page: "独立参考",
 };
 
-export function HomePage({ docs, basePath }: HomePageProps) {
+export function HomePage({ docs }: HomePageProps) {
   const model = buildShowcaseHome(config, docs);
   const counts = new Map<string, number>();
   for (const doc of docs) counts.set(doc.type, (counts.get(doc.type) ?? 0) + 1);
@@ -37,12 +31,12 @@ export function HomePage({ docs, basePath }: HomePageProps) {
             {" "}<code>virtual:folio/content</code> manifest，没有第二套内容数据库。
           </p>
           <div className="showcase-actions">
-            <a className="showcase-btn showcase-btn--primary" href={href(basePath, "/showcase")}>
+            <Link className="showcase-btn showcase-btn--primary" to="/showcase">
               进入能力展厅
-            </a>
-            <a className="showcase-btn showcase-btn--secondary" href={href(basePath, "/showcase/content-map")}>
+            </Link>
+            <Link className="showcase-btn showcase-btn--secondary" to="/showcase/content-map">
               查看内容图谱
-            </a>
+            </Link>
           </div>
           <div className="showcase-trust">
             <span>Public API only</span>
@@ -93,7 +87,7 @@ const articles = docs.filter((doc) => doc.type === "article");`}</code></pre>
               <ul>
                 {group.docs.map((doc) => (
                   <li key={doc.path}>
-                    <a href={href(basePath, doc.path)}>{doc.title}</a>
+                    <Link to={doc.path}>{doc.title}</Link>
                     <small>{doc.description}</small>
                   </li>
                 ))}
@@ -117,7 +111,7 @@ const articles = docs.filter((doc) => doc.type === "article");`}</code></pre>
                 {path.docs.map((doc, index) => (
                   <span className="showcase-path-step" key={doc.path}>
                     {index > 0 ? <b aria-hidden="true">→</b> : null}
-                    <a href={href(basePath, doc.path)}>{doc.title}</a>
+                    <Link to={doc.path}>{doc.title}</Link>
                   </span>
                 ))}
               </div>
@@ -137,7 +131,7 @@ const articles = docs.filter((doc) => doc.type === "article");`}</code></pre>
         </div>
         <div className="showcase-collection-grid">
           {model.collections.map((collection) => (
-            <a href={href(basePath, collection.path)} key={collection.path}>
+            <Link to={collection.path} key={collection.path}>
               <code>{collection.path}</code>
               <h3>{collection.title}</h3>
               <p>{collection.description}</p>
@@ -147,7 +141,7 @@ const articles = docs.filter((doc) => doc.type === "article");`}</code></pre>
                 ))}
               </ul>
               <small>打开集合 →</small>
-            </a>
+            </Link>
           ))}
         </div>
       </section>
@@ -178,9 +172,9 @@ const articles = docs.filter((doc) => doc.type === "article");`}</code></pre>
             无 JS 图形则明确记录为未实现，不用假交互凑数。
           </p>
         </div>
-        <a className="showcase-btn showcase-btn--primary" href={href(basePath, "/showcase/from-file-to-page")}>
+        <Link className="showcase-btn showcase-btn--primary" to="/showcase/from-file-to-page">
           跟踪一条内容链路
-        </a>
+        </Link>
       </section>
     </main>
   );

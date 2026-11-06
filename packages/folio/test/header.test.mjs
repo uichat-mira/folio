@@ -64,6 +64,15 @@ test("the header keeps its shell, brand and right-hand cluster", () => {
   assert.match(html, /class="folio-desktop-nav"/);
 });
 
+test("header frame follows the current route without changing navigation API", () => {
+  const home = render({}, "/");
+  const interior = render({}, "/guide/introduction");
+  assert.match(home, /^<header class="folio-header">/);
+  assert.match(interior, /^<header class="folio-header folio-header--interior">/);
+  assert.match(home, /class="folio-header__wrap"/);
+  assert.match(interior, /class="folio-header__wrap"/);
+});
+
 test("plain navigation entries still render as ordinary links", () => {
   const html = render();
   assert.match(html, /<li><a class="" href="\/blogs"/);

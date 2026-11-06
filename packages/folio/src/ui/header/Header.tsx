@@ -51,6 +51,7 @@ export function FolioHeader({
   actions,
 }: FolioHeaderProps) {
   const location = useLocation();
+  const isHome = location.pathname === "/";
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileGroup, setMobileGroup] = useState<string | null>(null);
@@ -124,7 +125,7 @@ export function FolioHeader({
   const mobilePanelId = `${idBase}-mobile`;
 
   return (
-    <header className="folio-header">
+    <header className={"folio-header" + (isHome ? "" : " folio-header--interior")}>
       <div className="folio-header__wrap">
         <Link to="/" className="folio-brand">
           {config.logo ? <img src={config.logo} alt="" /> : null}

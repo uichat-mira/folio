@@ -1057,7 +1057,7 @@
 .folio-docs-shell {
   display: grid;
   grid-template-columns: 250px minmax(0, 1fr) 210px;
-  max-width: 1280px;
+  max-width: var(--folio-reading-frame-width);
   margin: 0 auto;
 }
 

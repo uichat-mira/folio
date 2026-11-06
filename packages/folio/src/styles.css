@@ -69,4 +69,12 @@ body { margin: 0; min-width: 320px; background: var(--folio-canvas); color: var(
 a { color: inherit; text-decoration: none; }
 button, input { font: inherit; }
 
-.folio-shell { min-height: 100vh; background: var(--folio-canvas); color: var(--folio-ink); }
+/* One source of truth for desktop frames; shared by the Header and docs shell.
+   Consumers may override the values without changing navigation contracts. */
+.folio-shell {
+  --folio-home-frame-width: 1440px;
+  --folio-reading-frame-width: 1280px;
+  min-height: 100vh;
+  background: var(--folio-canvas);
+  color: var(--folio-ink);
+}
