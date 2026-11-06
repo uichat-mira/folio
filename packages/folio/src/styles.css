@@ -111,6 +111,7 @@ button, input { font: inherit; }
    carries `margin-left: auto`; the utility buttons follow it directly so the
    two read as a single block instead of being separated by dead space. */
 .folio-header__nav {
+  --folio-mega-panel-gap: 14px;
   position: relative;
   display: flex;
   min-width: 0;
@@ -120,15 +121,21 @@ button, input { font: inherit; }
   gap: 16px;
 }
 
-/* The panel is positioned against the nav container, not against each trigger
-   and not against the nav rail. Anchor it to a trigger and a panel wider than
-   that item hangs off the viewport; anchor it to the rail and a nav with few
-   entries squeezes the panel into one column. The container is as wide as the
-   chrome allows while still ending at the right padding, so a fixed panel width
-   derived from the viewport always lands inside it. A panel anchored to a left-hand trigger would hang off the viewport at narrow
-   desktop widths; spanning the rail keeps every panel on screen, keeps it
-   horizontally over every trigger (so the pointer can always travel straight
-   down into it), and removes the need to tune individual items. */
+/* The nav wrapper positions the panel independently of individual triggers.
+   The panel chooses its own intrinsic width; the shared hover bridge below
+   covers the route to a narrower menu without coupling width to a trigger. */
+/* Keep the entire nav-to-panel corridor hoverable, even when a one-group
+   panel is narrower than the trigger's distance from the right edge. */
+.folio-header__nav.is-mega-open::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  height: calc(var(--folio-mega-panel-gap) + 1px);
+  z-index: 49;
+}
+
 .folio-desktop-nav {
   display: flex;
   min-width: 0;
@@ -199,20 +206,16 @@ button, input { font: inherit; }
   opacity: 1;
 }
 
-/* Anchored to the right edge of the nav rail and sized by its own content, so
-   the panel does not inherit the rail's width: that width comes from the number
-   of top-level entries, and a nav with few entries would otherwise squeeze the
-   panel into one narrow column. The minimum keeps the columns readable; the
-   maximum keeps it on screen at every supported width. */
+/* Anchor to the nav rail, but size intrinsically from its content.
+   Only the safety cap is fixed: the number of reading groups never decides the
+   width in JS, and the panel must never outgrow the viewport. */
 .folio-nav-menu__panel {
   position: absolute;
-  top: calc(100% + 14px);
+  top: calc(100% + var(--folio-mega-panel-gap));
   right: 0;
   left: auto;
-  /* Explicit, not content-sized: `max-content` plus fractional tracks produces
-     tracks that grow without bound, which pushed the panel past the left edge
-     of the viewport. 56px keeps the panel clear of both 28px page paddings. */
-  width: min(880px, calc(100vw - 56px));
+  width: max-content;
+  max-width: min(880px, calc(100vw - 56px));
   z-index: 50;
   padding: 16px;
   border: 1px solid var(--folio-hairline);
@@ -226,15 +229,15 @@ button, input { font: inherit; }
   transition: opacity .15s ease, transform .15s ease, visibility .15s;
 }
 
-/* Transparent bridge across the 14px gap: without it, moving the pointer from
-   the trigger to the panel leaves the item and closes it mid-travel. */
+/* Overlap the shared nav hover bridge by 1px so moving into the panel
+   never crosses a non-hoverable gap. */
 .folio-nav-menu__panel::before {
   content: "";
   position: absolute;
-  top: -15px;
+  top: calc(-1 * (var(--folio-mega-panel-gap) + 1px));
   right: 0;
   left: 0;
-  height: 15px;
+  height: calc(var(--folio-mega-panel-gap) + 1px);
 }
 
 .folio-nav-menu__panel.is-open,
@@ -259,9 +262,19 @@ button, input { font: inherit; }
   text-transform: uppercase;
 }
 
-.folio-nav-menu__head strong {
+.folio-nav-menu__head > a {
+  width: fit-content;
   color: var(--folio-ink);
   font: 600 18px/1.25 var(--folio-font-display);
+}
+
+.folio-nav-menu__head > a:hover {
+  color: var(--folio-primary-active);
+}
+
+.folio-nav-menu__head > a:focus-visible {
+  outline: 2px solid var(--folio-primary-active);
+  outline-offset: 3px;
 }
 
 .folio-nav-menu__head p {
@@ -271,46 +284,24 @@ button, input { font: inherit; }
   line-height: 1.55;
 }
 
-/* Explicit column counts rather than auto-fit: auto-fit decides per available
-   width, so a given configuration silently reflows from four task columns to
-   three plus a wrapped row. Two columns is the honest default; wide viewports
-   get one column per reading task. */
+/* Flex rows size to their actual content groups, rather than a fixed number of
+   columns or a special-case group count. The column basis is a readability
+   constraint, not a per-menu width; longer menus wrap within the safety cap. */
 .folio-nav-menu__entries {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 18px 22px;
   margin-top: 14px;
 }
 
-/* Four task columns need 786px of panel interior: 4 x 180px plus three 22px
-   gaps. The panel is `min(880px, 100vw - 56px)` with 32px of padding, so that
-   interior width arrives at exactly 874px of viewport. Below it the panel goes
-   to two columns rather than shrinking entries into unreadable slivers. */
-@media (min-width: 874px) {
-  .folio-nav-menu__entries {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-/* Two levels only: reading-task headings, then the links inside them. Deeper
-   structure belongs to the docs sidebar, not to a header dropdown. */
+/* Two levels only: reading-task headings, then links. */
 .folio-nav-menu__group {
   display: grid;
+  flex: 1 1 14rem;
+  min-width: min(100%, 13rem);
+  max-width: 18rem;
   align-content: start;
   gap: 2px;
-}
-
-/* The ungrouped run holds the section root ("all docs"), which is not a reading
-   task. Spanning the full width keeps it out of the task columns instead of
-   consuming a column and forcing the groups onto a second row. */
-.folio-nav-menu__group--overview {
-  grid-column: 1 / -1;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--folio-hairline);
-}
-
-.folio-nav-menu__group--overview .folio-nav-menu__group-entries {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .folio-nav-menu__group-label {
@@ -363,6 +354,7 @@ button, input { font: inherit; }
   display: grid;
   min-width: 0;
   gap: 3px;
+  overflow-wrap: anywhere;
 }
 
 .folio-nav-menu__copy strong {

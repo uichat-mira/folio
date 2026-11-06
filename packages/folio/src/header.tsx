@@ -172,6 +172,14 @@ export function FolioHeader({
 
   function renderPanel(item: FolioNavMenuItem) {
     const expanded = openMenu === item.label;
+    // The section root belongs to the panel heading on desktop, not to a
+    // synthetic full-width card. Keep the resolved entry for mobile consumers.
+    const groups = item.groups
+      .map((group) => ({
+        ...group,
+        entries: group.entries.filter((entry) => entry.href !== item.href),
+      }))
+      .filter((group) => group.entries.length > 0);
     return (
       <div
         className={"folio-nav-menu__panel" + (expanded ? " is-open" : "")}
@@ -185,16 +193,13 @@ export function FolioHeader({
           {item.panel.eyebrow ? (
             <span className="folio-nav-menu__eyebrow">{item.panel.eyebrow}</span>
           ) : null}
-          <strong>{item.panel.title}</strong>
+          <Link to={item.href} onClick={closeMenu}>{item.panel.title}</Link>
           {item.panel.description ? <p>{item.panel.description}</p> : null}
         </div>
         <div className="folio-nav-menu__entries">
-          {item.groups.map((group) => (
+          {groups.map((group) => (
             <div
-              className={
-                "folio-nav-menu__group" +
-                (group.label ? "" : " folio-nav-menu__group--overview")
-              }
+              className="folio-nav-menu__group"
               key={group.label ?? "__ungrouped"}
             >
               {group.label ? (
@@ -251,14 +256,6 @@ export function FolioHeader({
           cancelScheduledClose();
           setOpenMenu(item.label);
         }}
-        onPointerLeave={(event) => {
-          if (event.pointerType !== "mouse") return;
-          cancelScheduledClose();
-          closeTimer.current = window.setTimeout(() => {
-            closeTimer.current = undefined;
-            setOpenMenu(null);
-          }, MENU_CLOSE_DELAY);
-        }}
         onBlur={(event) => {
           // Tabbing out of the whole item (trigger and panel) closes it; moving
           // focus into the panel keeps it open.
@@ -286,8 +283,19 @@ export function FolioHeader({
             is the only element that gets `margin-left: auto`, so the brand
             stays left and everything else forms a continuous right rail. */}
         <div
-          className="folio-header__nav"
+          className={"folio-header__nav" + (openMenu !== null ? " is-mega-open" : "")}
           ref={navRef as RefObject<HTMLDivElement>}
+          onPointerLeave={(event) => {
+            // The panel can be narrower than its trigger's horizontal position.
+            // Keep the menu open across the shared nav-to-panel hover bridge,
+            // rather than closing when the cursor leaves the trigger itself.
+            if (event.pointerType !== "mouse" || openMenu === null) return;
+            cancelScheduledClose();
+            closeTimer.current = window.setTimeout(() => {
+              closeTimer.current = undefined;
+              setOpenMenu(null);
+            }, MENU_CLOSE_DELAY);
+          }}
         >
           <nav className="folio-desktop-nav" aria-label="主导航">
             <ul className="folio-desktop-nav__list">

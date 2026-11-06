@@ -109,7 +109,9 @@ test("group headings render when children declare reading tasks", () => {
 
   assert.match(html, /class="folio-nav-menu__group-label">快速开始</);
   assert.match(html, /class="folio-nav-menu__group-label">编写与配置</);
-  assert.match(html, /folio-nav-menu__group--overview/, "the section root is marked");
+  assert.doesNotMatch(html, /folio-nav-menu__group--overview/, "the desktop panel has no synthetic root card");
+  const desktop = html.slice(html.indexOf('class="folio-nav-menu__panel"'), html.indexOf('class="folio-mobile-panel"'));
+  assert.match(desktop, /href="\/docs"/, "the panel heading links to its root");
 });
 
 test("an ungrouped panel renders no group headings", () => {

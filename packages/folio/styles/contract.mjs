@@ -174,7 +174,6 @@ export const REQUIRED_SELECTOR_FAMILIES = [
       ".folio-nav-menu__group",
       ".folio-nav-menu__group-label",
       ".folio-nav-menu__group-entries",
-      ".folio-nav-menu__group--overview",
       ".folio-nav-menu__entry",
       ".folio-nav-menu__icon",
       ".folio-nav-menu__copy",
