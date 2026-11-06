@@ -9,6 +9,7 @@ import {
 } from "@uichat-mira/folio";
 import {
   folioEscapeHtml,
+  renderFolioStaticProjectShell,
   type FolioStaticBuildContext,
   type FolioStaticRoute,
 } from "@uichat-mira/folio/vite";
@@ -81,13 +82,7 @@ function renderDocNav(context: FolioStaticBuildContext, doc: FolioDoc): string {
     )
     .join("");
 
-  return (
-    '<nav class="folio-docnav" aria-label="文档目录"><div class="folio-docnav__collection">' +
-    folioEscapeHtml(collection.title) +
-    "</div>" +
-    sections +
-    "</nav>"
-  );
+  return '<nav class="folio-docnav" aria-label="文档目录">' + sections + "</nav>";
 }
 
 function renderPager(context: FolioStaticBuildContext, doc: FolioDoc): string {
@@ -160,9 +155,7 @@ function renderDoc(context: FolioStaticBuildContext, doc: FolioDoc): string {
   return (
     '<div class="folio-docs-runtime folio-docs-runtime--static"><div class="folio-docs-shell">' +
     renderDocNav(context, doc) +
-    '<main class="folio-doc-main"><div class="folio-doc-toolbar"><div class="folio-eyebrow">' +
-    folioEscapeHtml(doc.group) +
-    "</div></div><h1>" +
+    '<main class="folio-doc-main"><h1>' +
     folioEscapeHtml(doc.title) +
     "</h1>" +
     (doc.description
@@ -302,6 +295,8 @@ export function buildShowcaseStaticRoutes(
       body:
         doc.type === "doc"
           ? renderDoc(context, doc)
+          : doc.type === "project"
+            ? renderFolioStaticProjectShell(context, doc, markdown(doc, context.base))
           : doc.type === "article"
             ? renderArticle(context, doc)
             : renderGeneric(context, doc),

@@ -284,7 +284,10 @@ export const CASCADE_ORDER = [
   [".folio-search-overlay", ".folio-footer"],
   // Footer is the final component stylesheet now; the public footer rule
   // remains stable while its styles move into its owning module.
-  [".folio-docs-shell", ".folio-footer"],
+  [".folio-docs-shell", ".folio-docnav"],
+  [".folio-docnav", ".folio-tree-nav__groups"],
+  [".folio-tree-nav__groups", ".folio-toc"],
+  [".folio-toc", ".folio-footer"],
 ];
 
 // Representative rules that must survive into a real consumer's built CSS

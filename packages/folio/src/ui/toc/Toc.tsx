@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { FolioHeading } from "./types";
+import type { FolioHeading } from "../../types";
 
 export type FolioTocProps = {
   headings: readonly FolioHeading[];

@@ -41,11 +41,14 @@ test("dist/styles.css preserves every registered module stylesheet in manifest o
     [
       "src/ui/header/header.css",
       "src/styles/content.css",
+      "src/ui/doc-nav/doc-nav.css",
+      "src/ui/tree-nav/tree-nav.css",
+      "src/ui/toc/toc.css",
       "src/ui/popover/popover.css",
       "src/ui/header/header-popover.css",
       "src/ui/footer/footer.css",
     ],
-    "the Header, Popover and Footer styles use the existing single-entry CSS aggregator",
+    "the Header, DocNav, TOC, Popover and Footer styles use the existing single-entry CSS aggregator",
   );
   const aggregated = aggregateStyles({ packageRoot });
   assert.equal(

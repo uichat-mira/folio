@@ -5,8 +5,12 @@ export type { FolioFooterProps } from "./ui/footer";
 export { FolioUtilityPopover } from "./ui/popover";
 export type { FolioUtilityPopoverProps } from "./ui/popover";
 export { FolioDocsShell } from "./docs-shell";
-export { FolioToc } from "./toc";
-export type { FolioTocProps } from "./toc";
+export { FolioTreeNav } from "./ui/tree-nav";
+export type { FolioTreeNavProps } from "./ui/tree-nav";
+export { FolioDocNav } from "./ui/doc-nav";
+export type { FolioDocNavProps } from "./ui/doc-nav";
+export { FolioToc } from "./ui/toc";
+export type { FolioTocProps } from "./ui/toc";
 export type { FolioDocsShellProps } from "./docs-shell";
 export type { FolioHeaderProps } from "./ui/header";
 export { FolioShareButton } from "./share";
@@ -40,6 +44,8 @@ export type {
   FolioHomeSection,
 } from "./core/home";
 export { buildFolioDocStructure, findFolioDocCollection, getFolioDocNeighbors } from "./core/docs-structure";
+export { buildFolioContentTree, resolveFolioProjectTree, getFolioTreeNeighbors, folioTreeDisplayLabel } from "./core/content-tree";
+export type { FolioContentTree, FolioContentTreeNode, FolioContentTreeOptions } from "./core/content-tree";
 export type { FolioDocCollection, FolioDocSection, FolioDocStructure } from "./core/docs-structure";
 export {
   defineFolioConfig,

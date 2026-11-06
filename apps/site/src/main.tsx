@@ -33,6 +33,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       config={config}
       docs={content}
       basePath={basePath}
+      ui={{ footerOnDocs: false }}
       slots={{
         home: <HomePage docs={content} />,
         articleFooter,

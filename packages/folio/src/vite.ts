@@ -12,6 +12,7 @@ export {
   folioEscapeHtml,
   folioVirtualModule,
   renderFolioStaticHome,
+  renderFolioStaticProjectShell,
   renderFolioStaticHtml,
   writeFolioStaticSite,
 } from "./build/vite-adapter";

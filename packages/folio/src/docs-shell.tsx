@@ -5,8 +5,8 @@ import {
 } from "react";
 import { Link } from "react-router-dom";
 import { FolioMarkdown } from "./markdown-react";
-import { FolioShareButton } from "./share";
-import { FolioToc } from "./toc";
+import { FolioToc, type FolioTocProps } from "./ui/toc";
+import { FolioDocNav, type FolioDocNavProps } from "./ui/doc-nav";
 import {
   findFolioDocCollection,
   getFolioDocNeighbors,
@@ -17,47 +17,18 @@ export type FolioDocsShellProps = {
   doc: FolioDoc;
   docs: FolioDoc[];
   footer?: ReactNode;
+  /** @deprecated The documentation toolbar was removed; this option is kept for source compatibility. */
   share?: boolean;
   children?: ReactNode;
+  /** Overrides both desktop and mobile document navigation renderings. */
+  renderNav?: (props: FolioDocNavProps) => ReactNode;
+  /** Overrides both desktop and mobile page TOCs. */
+  renderToc?: (props: FolioTocProps) => ReactNode;
+  /** Optional directory-based previous/next ordering for portal trees. */
+  pageNeighbors?: { previous?: FolioDoc; next?: FolioDoc };
+  /** Accessible drawer name for different reading contexts. */
+  menuLabel?: string;
 };
-
-function FolioDocNav({
-  doc,
-  docs,
-  onNavigate,
-}: {
-  doc: FolioDoc;
-  docs: FolioDoc[];
-  onNavigate?: () => void;
-}) {
-  const collection = findFolioDocCollection(docs, doc);
-  if (!collection) return null;
-
-  return (
-    <nav className="folio-docnav" aria-label="文档目录">
-      <div className="folio-docnav__collection">{collection.title}</div>
-      {collection.sections.map((section) => (
-        <section key={section.id}>
-          <h2>{section.title}</h2>
-          <ul>
-            {section.docs.map((item) => (
-              <li key={item.path}>
-                <Link
-                  className={item.path === doc.path ? "active" : ""}
-                  aria-current={item.path === doc.path ? "page" : undefined}
-                  to={item.path}
-                  onClick={onNavigate}
-                >
-                  {item.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
-    </nav>
-  );
-}
 
 function FolioPager({
   previous,
@@ -90,12 +61,26 @@ export function FolioDocsShell({
   doc,
   docs,
   footer,
-  share = true,
   children,
+  renderNav,
+  renderToc,
+  pageNeighbors,
+  menuLabel = "文档菜单",
 }: FolioDocsShellProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileTocOpen, setMobileTocOpen] = useState(false);
-  const neighbors = getFolioDocNeighbors(docs, doc);
+  const neighbors = pageNeighbors ?? getFolioDocNeighbors(docs, doc);
+
+  // The same public components back desktop and mobile, while consumer render
+  // functions receive route-specific data and close callbacks on mobile.
+  const navigation = (onNavigate?: () => void) => {
+    const props: FolioDocNavProps = { doc, docs, onNavigate };
+    return renderNav ? renderNav(props) : <FolioDocNav {...props} />;
+  };
+  const toc = (onNavigate?: () => void) => {
+    const props: FolioTocProps = { headings: doc.headings, onNavigate };
+    return renderToc ? renderToc(props) : <FolioToc {...props} />;
+  };
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -135,18 +120,14 @@ export function FolioDocsShell({
             if (event.target === event.currentTarget) setMobileMenuOpen(false);
           }}
         >
-          <aside className="folio-docs-drawer" aria-label="文档菜单">
+          <aside className="folio-docs-drawer" aria-label={menuLabel}>
             <div className="folio-docs-drawer__head">
               <span>菜单</span>
               <button type="button" onClick={() => setMobileMenuOpen(false)}>
                 关闭
               </button>
             </div>
-            <FolioDocNav
-              doc={doc}
-              docs={docs}
-              onNavigate={() => setMobileMenuOpen(false)}
-            />
+            {navigation(() => setMobileMenuOpen(false))}
           </aside>
         </div>
       ) : null}
@@ -159,26 +140,14 @@ export function FolioDocsShell({
               关闭
             </button>
           </div>
-          <FolioToc
-            headings={doc.headings}
-            onNavigate={() => setMobileTocOpen(false)}
-          />
+          {toc(() => setMobileTocOpen(false))}
         </div>
       ) : null}
 
       <div className="folio-docs-shell">
-        <FolioDocNav doc={doc} docs={docs} />
+        {navigation()}
 
         <main className="folio-doc-main">
-          <div className="folio-doc-toolbar">
-            <div className="folio-eyebrow">{doc.group}</div>
-            {share ? (
-              <FolioShareButton
-                title={doc.title}
-                text={doc.description}
-              />
-            ) : null}
-          </div>
           <h1>{doc.title}</h1>
           {doc.description ? (
             <p className="folio-lede">{doc.description}</p>
@@ -196,7 +165,7 @@ export function FolioDocsShell({
           />
         </main>
 
-        <FolioToc headings={doc.headings} />
+        {toc()}
       </div>
     </div>
   );
