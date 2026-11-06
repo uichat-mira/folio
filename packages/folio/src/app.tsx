@@ -16,6 +16,7 @@ import {
 } from "react-router-dom";
 import { normalizeBasePath } from "./core/config";
 import { FolioHeader } from "./ui/header";
+import { FolioFooter } from "./ui/footer";
 import { FolioDocsShell } from "./docs-shell";
 import { SearchIcon } from "./icons";
 import { FolioShareButton } from "./share";
@@ -630,9 +631,9 @@ function Shell({
             }
           />
         </Routes>
-        <footer className="folio-footer">
-          {config.footer ?? "Built with Folio."}
-        </footer>
+        {slots?.footer !== undefined ? slots.footer : (
+          <FolioFooter footer={config.footer} siteTitle={config.title} />
+        )}
       </div>
 
       {searchOpen ? <SearchOverlay docs={docs} onClose={() => setSearchOpen(false)} /> : null}

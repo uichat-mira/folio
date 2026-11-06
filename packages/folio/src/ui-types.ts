@@ -7,6 +7,8 @@ export type FolioSlots = {
   home?: ReactNode;
   headerActions?: ReactNode;
   articleFooter?: ReactNode;
+  /** Replaces the entire site footer; the consumer owns the landmark markup. */
+  footer?: ReactNode;
 };
 
 export type FolioThemePreference = "light" | "dark" | "system";

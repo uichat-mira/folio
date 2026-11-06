@@ -24,4 +24,5 @@ export const STYLE_SOURCES = [
   "src/styles/content.css",
   "src/ui/popover/popover.css",
   "src/ui/header/header-popover.css",
+  "src/ui/footer/footer.css",
 ];

@@ -358,15 +358,6 @@
   color: var(--folio-on-primary);
 }
 
-.folio-footer {
-  padding: 28px;
-  border-top: 1px solid var(--folio-hairline);
-  background: var(--folio-surface-soft);
-  color: var(--folio-muted);
-  text-align: center;
-  font-size: 13px;
-}
-
 /* Editorial, content-first defaults: lists rather than oversized card walls.
    These styles share Folio tokens and respond to both light and dark themes. */
 .folio-journal-home,

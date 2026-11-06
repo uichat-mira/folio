@@ -114,6 +114,20 @@ The published `0.1.1` package has a built-in home and `slots.home`, but does not
 expose the `home` configuration or `staticRoutes.home` contract described here.
 See the [consumer contract](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md).
 
+## Site footer
+
+The built-in FolioApp footer remains backward compatible with the original
+string config and the no-config default. The structured footer config provides
+optional brand identity (including a logo), link groups, copyright,
+registration links, and legal destinations. Set footer to false to hide the
+default footer, or use slots.footer for full React markup replacement.
+The public FolioFooter component can also be composed directly inside a router.
+
+The official site uses this structured API, including deployment-base-aware
+logo assets; no organization branding or filing claims are baked into the
+package. Static route prerendering covers route bodies and does not automatically
+render the React app-shell footer.
+
 ## React runtime
 
 Use the default lightweight runtime:

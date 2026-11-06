@@ -43,8 +43,9 @@ test("dist/styles.css preserves every registered module stylesheet in manifest o
       "src/styles/content.css",
       "src/ui/popover/popover.css",
       "src/ui/header/header-popover.css",
+      "src/ui/footer/footer.css",
     ],
-    "the Header and Popover styles use the existing single-entry CSS aggregator",
+    "the Header, Popover and Footer styles use the existing single-entry CSS aggregator",
   );
   const aggregated = aggregateStyles({ packageRoot });
   assert.equal(

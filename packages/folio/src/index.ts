@@ -1,5 +1,7 @@
 export { FolioApp } from "./app";
 export { FolioHeader } from "./ui/header";
+export { FolioFooter } from "./ui/footer";
+export type { FolioFooterProps } from "./ui/footer";
 export { FolioUtilityPopover } from "./ui/popover";
 export type { FolioUtilityPopoverProps } from "./ui/popover";
 export { FolioDocsShell } from "./docs-shell";
@@ -60,6 +62,11 @@ export type {
   FolioCollectionConfig,
   FolioDateSource,
   FolioDateSources,
+  FolioFooterBrand,
+  FolioFooterConfig,
+  FolioFooterGroup,
+  FolioFooterLegal,
+  FolioFooterLink,
   FolioDoc,
   FolioHomeAboutSectionConfig,
   FolioHomeCollectionsSectionConfig,
