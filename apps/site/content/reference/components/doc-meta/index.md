@@ -15,7 +15,7 @@ tags: [React, Metadata, Git, API]
 - 日期优先使用 `publishedAt`，否则使用 `createdAt`；不知道时不杜撰日期，且不使用构建时刻或文件 `mtime`。
 - 阅读时长根据正文估算（汉字每分钟约 350 字、其他文本约 225 词），忽略 Markdown 代码块；正文为空时不显示。
 - 头像优先使用 Frontmatter 显式图片；对于可确认身份的 GitHub 首次提交作者，自动使用 GitHub 头像；其余情况回退为 30px 方形首字头像。无需人物目录或 Gravatar。
-- 没有作者且没有可信日期时不输出空白署名栏。
+- 没有作者和可信日期时，有正文仍独立显示阅读时间；三者均不存在时不输出空白署名栏。
 
 ## 零配置与 Frontmatter
 
@@ -45,6 +45,10 @@ updatedBy: Folio Maintainers
 ~~~
 
 `avatar` 可使用以 `/` 开头的站点路径或 `http(s)` 图片 URL（项目子路径部署时应提供可正确解析的 URL）。未设置 `author` 时，`createdBy` 会作为默认显示姓名；若显式 `author` 与 Git 首次提交作者不是同一个名字，不会将提交者头像冒充文章作者。
+
+## 文档主体默认集成
+
+`FolioDocumentBody` 将标题、摘要、`FolioDocMeta` 与 Markdown 正文组合为统一阅读主体。文章页、文档页和项目页通过各自的外围布局复用它，无需逐篇添加元信息组件。示例站的静态预渲染也通过 `renderFolioStaticDocumentBody` 复用相同结构，保留 Git/Frontmatter 优先级。
 
 ## 独立组合
 
