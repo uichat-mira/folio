@@ -27,26 +27,8 @@
 
 html { scroll-behavior: smooth; }
 
-body {
-  background: var(--site-canvas);
-  color: var(--site-ink);
-  font-family: var(--site-sans);
-}
-
 ::selection {
   background: rgba(204, 120, 92, 0.24);
-}
-
-.folio-header {
-  height: 64px;
-  padding: 0;
-  border-bottom-color: var(--site-hairline);
-  background: color-mix(in srgb, var(--site-canvas) 94%, transparent);
-}
-
-.folio-brand {
-  flex: none;
-  gap: 0;
 }
 
 /* The complete approved wordmark replaces the prototype "F" tile.
@@ -78,8 +60,6 @@ body {
 
 /* The brand identity and rail width are site-specific; the navigation
    layout stays in Folio so consumers do not need a second Header. */
-.folio-header__wrap { padding: 0 28px; }
-
 .site-header-action {
   display: inline-flex;
   height: 40px;
@@ -93,73 +73,6 @@ body {
 }
 
 .site-header-action:hover { background: var(--site-primary-active); }
-
-.folio-doc-page {
-  width: min(820px, calc(100% - 56px));
-  padding: 64px 0 104px;
-}
-
-.folio-eyebrow {
-  color: var(--site-primary-active);
-  font-family: var(--site-mono);
-  font-size: 11px;
-  letter-spacing: .08em;
-}
-
-.folio-doc-page > h1 {
-  max-width: 760px;
-  font-family: inherit;
-  font-size: clamp(36px, 4.6vw, 52px);
-  line-height: 1.12;
-  font-weight: 650;
-  letter-spacing: -0.035em;
-}
-
-.folio-lede {
-  max-width: 700px;
-  color: var(--site-muted);
-  font-size: 17px;
-  line-height: 1.7;
-}
-
-.folio-markdown {
-  color: var(--site-body);
-  font-size: 16px;
-  line-height: 1.78;
-}
-
-.folio-markdown h2 {
-  color: var(--site-ink);
-  font-family: inherit;
-  font-size: 26px;
-  line-height: 1.25;
-  letter-spacing: -0.02em;
-}
-
-.folio-markdown h3 { color: var(--site-ink); }
-
-.folio-markdown a {
-  color: var(--site-primary-active);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-.folio-markdown pre {
-  border: 0;
-  background: var(--site-surface-dark);
-  color: var(--site-on-dark);
-  box-shadow: none;
-}
-
-.folio-markdown :not(pre) > code {
-  background: var(--site-surface-card);
-  color: var(--site-primary-active);
-}
-
-.folio-markdown blockquote {
-  border-left-color: var(--site-primary);
-  color: var(--site-muted);
-}
 
 .site-article-proof {
   margin-top: 64px;
@@ -181,22 +94,6 @@ body {
   color: var(--site-muted);
   font-size: 13px;
   line-height: 1.6;
-}
-
-.folio-footer {
-  border-top-color: var(--site-hairline);
-  background: var(--site-surface-soft);
-  color: var(--site-muted);
-}
-
-@media (max-width: 780px) {
-  .folio-header__wrap { padding: 0 18px; }
-  .folio-brand::before { width: 86px; height: 36px; }
-
-  .folio-doc-page {
-    width: min(100% - 32px, 820px);
-    padding-top: 48px;
-  }
 }
 
 /* Demonstration of the reusable utility popover using real Folio releases. */
