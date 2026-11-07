@@ -32,6 +32,23 @@ Markdown 变化时，virtual module 会失效并触发完整刷新。
 
 默认 sidebar 根据 `docs[].group` 分组，再显示具体条目。因此 consumer 可以同时拥有稳定的产品级顶部入口，以及自动跟随内容变化的文档目录。
 
+## 文档集合入口
+
+指南、参考这类导航项本质上就是一个路由集合。只写 `collection`，Folio 会同时解析入口与高亮范围：
+
+```ts
+navigation: [
+  { label: "指南", collection: "/guide" },
+  { label: "参考", collection: "/reference" },
+]
+```
+
+- 入口 = 该集合读序第一篇 **`type: doc`** 文档（与集合页、侧栏使用同一排序）；集合里没有文档条目时取第一条内容（例如文章按日期），集合为空时回退到集合索引页 `/guide`。
+- `activeMatch` 自动包含集合根，因此 `/guide/*` 的任意页面都会点亮该条目。
+- `href` 仍然可用，并且在同时存在时优先；它适合外部链接、集合索引页或固定落地页。
+- `href` + `collection` 组合时，`collection` 只补充高亮根，入口仍由 `href` 决定。
+- `resolveFolioNavigation(items, docs)` 需要内容才能找到第一篇；`FolioApp` 已经把 `docs` 传给 `FolioHeader`，单独使用 `FolioHeader` 的消费者需要自行传入 `docs`，否则回退到集合索引页。
+
 ## 结构化下拉菜单
 
 顶层条目除了 `label` / `href`，还可以带 `children` 与 `panel`。两者都可选：只写 `label` / `href` 的条目行为与之前完全一致。
@@ -82,18 +99,20 @@ navigation: [
 
 `activeMatch` 修好的是高亮，不是结构：页面仍然散在多个目录里时，路由、内容目录和侧边栏 `collection` 会彼此对不上。**能决定内容布局时，更好的做法是给每种阅读模式一个路由根**——让目录、路由前缀、`config.collections` 和 `collection` 用同一个名字，四处就不会各自漂移。
 
-本站就是这么做的：`/guide/*` 与 `/reference/*` 各自一个根。但落地页是根**内部**的一页（`/guide/introduction`、`/reference/overview`），而激活判断只看 `href` 前缀——同级页面不在 `/guide/introduction` 之下，因此仍然需要声明根：
+本站就是这么做的：`/guide/*` 与 `/reference/*` 各自一个根，并且直接用集合简写，不再需要手写落地页与高亮前缀：
 
 ```ts
 navigation: [
-  { label: "指南", href: "/guide/introduction", activeMatch: ["/guide"] },
-  { label: "参考", href: "/reference/overview", activeMatch: ["/reference"] },
+  { label: "指南", collection: "/guide" },
+  { label: "参考", collection: "/reference" },
 ]
 ```
 
-差别在于**声明一次根，而不是逐页清单**：第三轮需要 11 条页面路径，是因为整个 `/docs` 与 `/api` 目录被两个入口共用；现在目录就是分区，两个根互不交叠，所以一个前缀既够用、也不会让同一页点亮两个条目。
+如果落地页不是集合第一篇，仍然可以写 `{ href: "/guide/start-here", collection: "/guide" }`：`href` 决定入口，`collection` 负责高亮根。
 
-`activeMatch` 的另一个用途是 URL 空间无法重排时：已经发布且被外部引用的路由，或由别的团队维护的内容。
+**声明一次根，而不是逐页清单**：第三轮需要 11 条页面路径，是因为整个 `/docs` 与 `/api` 目录被两个入口共用；现在目录就是分区，两个根互不交叠，所以一个前缀既够用、也不会让同一页点亮两个条目。
+
+`activeMatch` / `collection` 的另一个用途是 URL 空间无法重排时：已经发布且被外部引用的路由，或由别的团队维护的内容。
 
 ## 拆分文档侧边栏
 

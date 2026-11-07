@@ -15,6 +15,7 @@ tags: [React, Header, Navigation]
 type FolioHeaderProps = {
   config: FolioConfig;
   navigation?: FolioNavigationItem[];
+  docs?: readonly FolioDoc[]; // 解析 navigation[].collection 的第一篇入口
   currentDoc?: FolioDoc;
   searchEnabled?: boolean;
   themeEnabled?: boolean;

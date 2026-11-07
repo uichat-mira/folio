@@ -346,6 +346,13 @@ const config = defineFolioConfig({
 });
 ```
 
+- `href` and `collection` are alternative destinations. `collection` selects
+  the first `type: doc` entry in read order (collections without documents use
+  their first entry overall) and automatically adds the collection root to
+  `activeMatch`; an empty collection falls back to its index route. An
+  explicit `href` wins when both are present, with `collection` still supplying
+  the active root. `resolveFolioNavigation(items, docs)` and `FolioHeader.docs`
+  expose this resolution; existing href-only configs are unchanged.
 - `children` entries take `label`, `href`, and optional `icon` / `description` /
   `group`. A menu is rendered when at least one child survives validation.
 - `group` names a reading task, so children that answer the same question render

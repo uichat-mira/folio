@@ -178,7 +178,18 @@ export type FolioNavigationPanel = {
  */
 export type FolioNavigationItem = {
   label: string;
-  href: string;
+  /**
+   * Explicit destination. It wins over `collection` when both are present.
+   * An item needs at least one of `href` or `collection`.
+   */
+  href?: string;
+  /**
+   * Route collection that supplies the section entry. The destination becomes
+   * the first `type: doc` entry in read order (or the first entry overall when
+   * the collection has no documents), falling back to the collection index
+   * when empty. The collection root automatically marks the entry active.
+   */
+  collection?: string;
   /**
    * Extra route prefixes that should mark this entry as current, in addition to
    * `href` itself. A section whose pages live under more than one route

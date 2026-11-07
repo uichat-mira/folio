@@ -80,6 +80,19 @@ test("plain navigation entries still render as ordinary links", () => {
   assert.doesNotMatch(html, /aria-haspopup/, "a plain entry must not become a menu");
 });
 
+test("a collection entry resolves through the docs passed to the header", () => {
+  const docs = [
+    { path: "/guide/getting-started", order: 2, type: "doc", title: "快速开始", tags: [] },
+    { path: "/guide/introduction", order: 1, type: "doc", title: "介绍", tags: [] },
+  ];
+  const html = render(
+    { navigation: [{ label: "指南", collection: "/guide" }], docs },
+    "/guide/getting-started",
+  );
+  assert.match(html, /href="\/guide\/introduction"/);
+  assert.match(html, /<a class="active" aria-current="page" href="\/guide\/introduction"/);
+});
+
 test("an active plain entry is marked for assistive technology", () => {
   const html = render({}, "/blogs");
   assert.match(html, /<a class="active" aria-current="page" href="\/blogs"/);

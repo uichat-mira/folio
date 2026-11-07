@@ -1,8 +1,13 @@
 import type {
+  FolioDoc,
   FolioNavigationChild,
   FolioNavigationItem,
   FolioNavigationPanel,
 } from "../types";
+import {
+  normalizeFolioCollectionPath,
+  selectFolioCollectionDocs,
+} from "./collection-index";
 
 // Navigation is a Core concern: the same resolved model feeds the React header
 // and any consumer that needs to reason about links. Keeping it free of React
@@ -69,10 +74,19 @@ export function folioNavHref(path: string): string {
 }
 
 /** Normalize configured extra match prefixes, dropping blanks and duplicates. */
-function resolveActiveMatch(item: FolioNavigationItem, href: string): string[] {
-  if (!Array.isArray(item.activeMatch)) return [];
+function resolveActiveMatch(
+  item: FolioNavigationItem,
+  href: string,
+  collectionRoot?: string,
+): string[] {
   const seen = new Set<string>([href]);
   const prefixes: string[] = [];
+  // A collection entry owns its whole route root, not just the landing page.
+  if (collectionRoot && !seen.has(collectionRoot)) {
+    seen.add(collectionRoot);
+    prefixes.push(collectionRoot);
+  }
+  if (!Array.isArray(item.activeMatch)) return prefixes;
   for (const value of item.activeMatch) {
     if (typeof value !== "string" || !value.trim()) continue;
     const prefix = folioNavHref(value.trim());
@@ -81,6 +95,40 @@ function resolveActiveMatch(item: FolioNavigationItem, href: string): string[] {
     prefixes.push(prefix);
   }
   return prefixes;
+}
+
+/**
+ * Resolve the landing route and its active root. An explicit `href` always
+ * wins; otherwise a `collection` shorthand selects the first document in read
+ * order. A `type: doc` entry wins over an unrelated project/page that merely
+ * sorts first, because a section entry points at its reading start; a
+ * collection without documents uses its first entry overall. An empty
+ * collection falls back to the collection index.
+ */
+function resolveNavigationDestination(
+  item: FolioNavigationItem,
+  docs: readonly FolioDoc[],
+): { href: string; collectionRoot?: string } | undefined {
+  const explicitHref =
+    typeof item.href === "string" && item.href.trim()
+      ? folioNavHref(item.href.trim())
+      : undefined;
+  const collection =
+    typeof item.collection === "string" && item.collection.trim()
+      ? normalizeFolioCollectionPath(item.collection.trim())
+      : undefined;
+
+  if (!collection) {
+    return explicitHref ? { href: explicitHref } : undefined;
+  }
+
+  const collectionRoot = folioNavHref(collection);
+  const entries = selectFolioCollectionDocs(docs, collection);
+  const first = entries.find((doc) => doc.type === "doc") ?? entries[0];
+  return {
+    href: explicitHref ?? folioNavHref(first?.path ?? collection),
+    collectionRoot,
+  };
 }
 
 function resolveEntries(
@@ -139,22 +187,28 @@ function resolvePanel(
  * spent opening the panel. That entry is skipped when a child already targets
  * the same route, which keeps configuration honest instead of duplicating a
  * link.
+ *
+ * `docs` is optional: it is only needed for `collection` shorthand, which
+ * resolves to the first document in read order. Without docs (or for an empty
+ * collection) the destination falls back to the collection index route.
  */
 export function resolveFolioNavigation(
   items: readonly FolioNavigationItem[] | undefined,
+  docs: readonly FolioDoc[] = [],
 ): FolioResolvedNavItem[] {
   if (!Array.isArray(items)) return [];
 
   const resolved: FolioResolvedNavItem[] = [];
   for (const item of items) {
-    if (!item || typeof item.label !== "string" || typeof item.href !== "string") {
-      continue;
-    }
+    if (!item || typeof item.label !== "string") continue;
     const label = item.label.trim();
-    const href = folioNavHref(item.href.trim());
-    if (!label || !href) continue;
+    if (!label) continue;
 
-    const activeMatch = resolveActiveMatch(item, href);
+    const destination = resolveNavigationDestination(item, docs);
+    if (!destination) continue;
+    const { href, collectionRoot } = destination;
+
+    const activeMatch = resolveActiveMatch(item, href, collectionRoot);
     const entries = resolveEntries(item.children);
     if (entries.length === 0) {
       resolved.push({ kind: "link", label, href, activeMatch });

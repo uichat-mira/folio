@@ -608,6 +608,7 @@ function Shell({
       <FolioHeader
         config={config}
         navigation={navigation}
+        docs={docs}
         currentDoc={current}
         searchEnabled={searchEnabled}
         themeEnabled={themeEnabled}
