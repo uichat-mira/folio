@@ -488,11 +488,22 @@ export function renderFolioStaticPageNav(
     '</nav>';
 }
 
+/** Static counterpart of FolioDocumentBody; shells own only their surrounding chrome. */
+function renderStaticDocumentBody(
+  doc: FolioDoc,
+  markdownHtml = renderFolioMarkdown(doc.body, { removeH1: true }),
+): string {
+  return '<h1>' + folioEscapeHtml(doc.title) + '</h1>' +
+    (doc.description ? '<p class="folio-lede">' + folioEscapeHtml(doc.description) + '</p>' : '') +
+    renderFolioStaticDocMeta(doc) +
+    '<article class="folio-markdown">' + markdownHtml + '</article>';
+}
+
 function renderStaticDocShell(
   context: FolioStaticBuildContext,
   doc: FolioDoc,
 ): string {
-  return `<div class="folio-docs-runtime folio-docs-runtime--static">${renderStaticMobileDocs(context, doc)}<div class="folio-docs-shell">${renderFolioStaticTreeNav(context, doc)}<main class="folio-doc-main"><h1>${folioEscapeHtml(doc.title)}</h1>${doc.description ? `<p class="folio-lede">${folioEscapeHtml(doc.description)}</p>` : ""}${renderFolioStaticDocMeta(doc)}<article class="folio-markdown">${renderFolioMarkdown(doc.body, { removeH1: true })}</article>${renderFolioStaticPageNav(context, doc)}</main>${renderStaticToc(doc)}</div></div>`;
+  return `<div class="folio-docs-runtime folio-docs-runtime--static">${renderStaticMobileDocs(context, doc)}<div class="folio-docs-shell">${renderFolioStaticTreeNav(context, doc)}<main class="folio-doc-main">${renderStaticDocumentBody(doc)}${renderFolioStaticPageNav(context, doc)}</main>${renderStaticToc(doc)}</div></div>`;
 }
 
 /** Static counterpart of the public tree navigation, derived from the same
@@ -514,11 +525,7 @@ export function renderFolioStaticProjectShell(
       toc + '</div></details>' : '') + '</div>';
   return '<div class="folio-docs-runtime folio-docs-runtime--static">' +
     mobile + '<div class="folio-docs-shell">' + nav +
-    '<main class="folio-doc-main"><h1>' + folioEscapeHtml(doc.title) + '</h1>' +
-    (doc.description ? '<p class="folio-lede">' +
-      folioEscapeHtml(doc.description) + '</p>' : '') +
-    renderFolioStaticDocMeta(doc) +
-    '<article class="folio-markdown">' + markdownHtml + '</article>' +
+    '<main class="folio-doc-main">' + renderStaticDocumentBody(doc, markdownHtml) +
     pager + '</main>' + toc + '</div></div>';
 }
 
@@ -737,11 +744,7 @@ function renderStaticArticle(doc: FolioDoc): string {
     (doc.headings.length ? ' folio-article-main' : '') + '">' +
     '<div class="folio-doc-toolbar"><div class="folio-eyebrow">' +
     folioEscapeHtml(doc.group) + '</div></div>' +
-    '<h1>' + folioEscapeHtml(doc.title) + '</h1>' +
-    (doc.description ? '<p class="folio-lede">' + folioEscapeHtml(doc.description) + '</p>' : '') +
-    renderFolioStaticDocMeta(doc) +
-    '<article class="folio-markdown">' +
-    renderFolioMarkdown(doc.body, { removeH1: true }) + '</article></main>';
+    renderStaticDocumentBody(doc) + '</main>';
   const toc = renderStaticToc(doc);
   if (!toc) return article;
   return '<div class="folio-article-layout">' +
