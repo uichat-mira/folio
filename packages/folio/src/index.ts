@@ -8,6 +8,7 @@ export { FolioUtilityPopover } from "./ui/popover";
 export type { FolioUtilityPopoverProps } from "./ui/popover";
 export { FolioDocsShell } from "./docs-shell";
 export { FolioDocMeta } from "./ui/doc-meta";
+export { FolioDocumentBody } from "./document-body";
 export type { FolioDocMetaProps } from "./ui/doc-meta";
 export { getFolioDocMeta, getFolioDocByline } from "./core/doc-meta";
 export type { FolioDocMetaField, FolioDocByline } from "./core/doc-meta";

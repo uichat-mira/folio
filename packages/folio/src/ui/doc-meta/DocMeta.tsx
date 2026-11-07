@@ -30,7 +30,7 @@ export function FolioDocMeta({ doc, className }: FolioDocMetaProps) {
       ) : null}
       {byline.readingMinutes ? (
         <span className="folio-doc-meta__detail">
-          <span className="folio-doc-meta__separator" aria-hidden="true">/</span>
+          {byline.author || byline.date ? <span className="folio-doc-meta__separator" aria-hidden="true">/</span> : null}
           <span>约 {byline.readingMinutes} 分钟</span>
         </span>
       ) : null}

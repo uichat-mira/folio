@@ -6,12 +6,11 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { FolioMarkdown } from "./markdown-react";
+import { FolioDocumentBody } from "./document-body";
 import { FolioToc, type FolioTocProps } from "./ui/toc";
 import { buildFolioNavigationTree, getFolioNavigationNeighbors } from "./core/navigation-tree";
 import { FolioTreeNav, type FolioTreeNavProps } from "./ui/tree-nav";
 import { FolioPageNav } from "./ui/page-nav";
-import { FolioDocMeta } from "./ui/doc-meta";
 import { findFolioDocCollection } from "./core/docs-structure";
 import type { FolioDoc, FolioPageNavNeighbors } from "./types";
 
@@ -176,17 +175,7 @@ export function FolioDocsShell({
         {navigation()}
 
         <main className="folio-doc-main">
-          <h1>{doc.title}</h1>
-          {doc.description ? (
-            <p className="folio-lede">{doc.description}</p>
-          ) : null}
-          <FolioDocMeta doc={doc} />
-          {children ?? (
-            <FolioMarkdown
-              source={doc.body}
-              options={{ removeH1: true }}
-            />
-          )}
+          <FolioDocumentBody doc={doc}>{children}</FolioDocumentBody>
           {footer}
           <FolioPageNav
             previous={neighbors.previous}

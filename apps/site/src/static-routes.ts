@@ -9,7 +9,7 @@ import {
   folioEscapeHtml,
   renderFolioStaticProjectShell,
   renderFolioStaticPageNav,
-  renderFolioStaticDocMeta,
+  renderFolioStaticDocumentBody,
   renderFolioStaticTreeNav,
   renderFolioStaticToc,
   type FolioStaticBuildContext,
@@ -78,51 +78,24 @@ function renderEntryList(
 }
 
 function renderDoc(context: FolioStaticBuildContext, doc: FolioDoc): string {
-  return (
-    '<div class="folio-docs-runtime folio-docs-runtime--static"><div class="folio-docs-shell">' +
+  return '<div class="folio-docs-runtime folio-docs-runtime--static"><div class="folio-docs-shell">' +
     renderFolioStaticTreeNav(context, doc) +
-    '<main class="folio-doc-main"><h1>' +
-    folioEscapeHtml(doc.title) +
-    "</h1>" +
-    (doc.description
-      ? '<p class="folio-lede">' + folioEscapeHtml(doc.description) + "</p>"
-      : "") +
-    renderFolioStaticDocMeta(doc) +
-    '<article class="folio-markdown">' +
-    markdown(doc, context.base) +
-    "</article>" +
+    '<main class="folio-doc-main">' +
+    renderFolioStaticDocumentBody(doc, markdown(doc, context.base)) +
     renderFolioStaticPageNav(context, doc) +
-    "</main>" +
-    renderFolioStaticToc(doc.headings) +
-    "</div></div>"
-  );
+    '</main>' + renderFolioStaticToc(doc.headings) + '</div></div>';
 }
 
 function renderArticle(context: FolioStaticBuildContext, doc: FolioDoc): string {
-  const article =
-    '<main class="folio-doc-page folio-article-main">' +
+  const article = '<main class="folio-doc-page folio-article-main">' +
     '<div class="folio-doc-toolbar"><div class="folio-eyebrow">' +
-    folioEscapeHtml(doc.group) +
-    "</div></div><h1>" +
-    folioEscapeHtml(doc.title) +
-    "</h1>" +
-    (doc.description
-      ? '<p class="folio-lede">' + folioEscapeHtml(doc.description) + "</p>"
-      : "") +
-    renderFolioStaticDocMeta(doc) +
-    '<article class="folio-markdown">' +
-    markdown(doc, context.base) +
-    "</article></main>";
+    folioEscapeHtml(doc.group) + '</div></div>' +
+    renderFolioStaticDocumentBody(doc, markdown(doc, context.base)) + '</main>';
   const toc = renderFolioStaticToc(doc.headings);
   if (!toc) return article;
-  return (
-    '<div class="folio-article-layout"><details class="folio-article-mobile-toc"><summary>本页目录</summary>' +
-    toc +
-    "</details>" +
-    article +
-    toc +
-    "</div>"
-  );
+  return '<div class="folio-article-layout">' +
+    '<details class="folio-article-mobile-toc"><summary>本页目录</summary>' +
+    toc + '</details>' + article + toc + '</div>';
 }
 
 function renderGeneric(context: FolioStaticBuildContext, doc: FolioDoc): string {

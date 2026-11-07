@@ -4,7 +4,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import {
-  FolioDocMeta, FolioDocsShell, getFolioDocByline, getFolioDocMeta, parseFolioDoc,
+  FolioDocMeta, FolioDocumentBody, FolioDocsShell, getFolioDocByline, getFolioDocMeta, parseFolioDoc,
 } from "../dist/index.js";
 import { renderFolioStaticDocMeta, renderFolioStaticProjectShell } from "../dist/vite.js";
 
@@ -75,12 +75,17 @@ test("explicit editorial author and published date win over Git provenance", () 
   }
 });
 
-test("no provenance or editorial author makes no empty chrome or invented date", () => {
+test("no provenance still shows prose reading time without invented date or separator", () => {
   const empty = parseFolioDoc("reference/empty.md", "---\ntitle: Empty\n---\nbody");
   assert.deepEqual(getFolioDocMeta(empty), []);
-  assert.equal(getFolioDocByline(empty), undefined);
-  assert.equal(renderToStaticMarkup(createElement(FolioDocMeta, { doc: empty })), "");
-  assert.equal(renderFolioStaticDocMeta(empty), "");
+  assert.deepEqual(getFolioDocByline(empty), { author: undefined, date: undefined, readingMinutes: 1 });
+  for (const markup of [
+    renderToStaticMarkup(createElement(FolioDocMeta, { doc: empty })),
+    renderFolioStaticDocMeta(empty),
+  ]) {
+    assert.match(markup, /约 1 分钟/);
+    assert.doesNotMatch(markup, /folio-doc-meta__separator|<time|folio-doc-meta__author/);
+  }
 });
 
 test("missing values stay missing; unsafe avatar schemes are ignored", () => {
@@ -146,4 +151,42 @@ test("GitHub avatar is rendered on both surfaces only for the matching Git autho
   }
   const unrelated = { ...gitDoc, data: { author: "Editorial" } };
   assert.equal(getFolioDocByline(unrelated)?.author?.avatar, undefined);
+});
+
+
+test("metadata combinations keep React and static separators consistent", () => {
+  const cases = [
+    { label: "empty", data: {}, body: "", fragments: 0 },
+    { label: "code-only", data: {}, body: "```js\nconst x = 1;\n```", fragments: 0 },
+    { label: "author-only", data: { author: "Writer" }, body: "", fragments: 0 },
+    { label: "date-only", data: { createdAt: "2024-01-02" }, body: "", fragments: 0 },
+    { label: "author-and-prose", data: { author: "Writer" }, body: "hello", fragments: 1 },
+    { label: "date-and-prose", data: { createdAt: "2024-01-02" }, body: "hello", fragments: 1 },
+    { label: "all", data: { author: "Writer", createdAt: "2024-01-02" }, body: "hello", fragments: 2 },
+  ];
+  for (const item of cases) {
+    const input = parseFolioDoc("reference/" + item.label + ".md",
+      "---\ntitle: Case\n" + Object.entries(item.data).map(([key, value]) => key + ": " + value + "\n").join("") + "---\n" + item.body);
+    const html = renderToStaticMarkup(createElement(FolioDocMeta, { doc: input }));
+    const staticHtml = renderFolioStaticDocMeta(input);
+    for (const markup of [html, staticHtml]) {
+      assert.equal((markup.match(/folio-doc-meta__separator/g) || []).length, item.fragments, item.label);
+      assert.equal((markup.match(/约 1 分钟/g) || []).length, item.body === "hello" ? 1 : 0, item.label);
+    }
+  }
+});
+
+test("shared document body owns heading, byline and Markdown in order", () => {
+  const markup = renderToStaticMarkup(createElement(FolioDocumentBody, { doc }));
+  assert.equal((markup.match(/<h1>/g) || []).length, 1);
+  assert.equal((markup.match(/class="folio-doc-meta"/g) || []).length, 1);
+  assert.equal((markup.match(/class="folio-markdown"/g) || []).length, 1);
+  assert.ok(markup.indexOf("<h1>") < markup.indexOf("folio-doc-meta"));
+  assert.ok(markup.indexOf("folio-doc-meta") < markup.indexOf("folio-markdown"));
+  const overridden = renderToStaticMarkup(createElement(
+    FolioDocumentBody, { doc }, createElement("section", { id: "custom-body" }, "Custom"),
+  ));
+  assert.match(overridden, /id="custom-body"/);
+  assert.doesNotMatch(overridden, /class="folio-markdown"/);
+  assert.match(overridden, /class="folio-doc-meta"/);
 });
