@@ -4,7 +4,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import {
-  FolioDocMeta, FolioDocsShell, getFolioDocByline, getFolioDocMeta, parseFolioDoc,
+  FolioDocMeta, FolioDocumentBody, FolioDocsShell, getFolioDocByline, getFolioDocMeta, parseFolioDoc,
 } from "../dist/index.js";
 import { renderFolioStaticDocMeta, renderFolioStaticProjectShell } from "../dist/vite.js";
 
@@ -174,4 +174,19 @@ test("metadata combinations keep React and static separators consistent", () => 
       assert.equal((markup.match(/约 1 分钟/g) || []).length, item.body === "hello" ? 1 : 0, item.label);
     }
   }
+});
+
+test("shared document body owns heading, byline and Markdown in order", () => {
+  const markup = renderToStaticMarkup(createElement(FolioDocumentBody, { doc }));
+  assert.equal((markup.match(/<h1>/g) || []).length, 1);
+  assert.equal((markup.match(/class="folio-doc-meta"/g) || []).length, 1);
+  assert.equal((markup.match(/class="folio-markdown"/g) || []).length, 1);
+  assert.ok(markup.indexOf("<h1>") < markup.indexOf("folio-doc-meta"));
+  assert.ok(markup.indexOf("folio-doc-meta") < markup.indexOf("folio-markdown"));
+  const overridden = renderToStaticMarkup(createElement(
+    FolioDocumentBody, { doc }, createElement("section", { id: "custom-body" }, "Custom"),
+  ));
+  assert.match(overridden, /id="custom-body"/);
+  assert.doesNotMatch(overridden, /class="folio-markdown"/);
+  assert.match(overridden, /class="folio-doc-meta"/);
 });
