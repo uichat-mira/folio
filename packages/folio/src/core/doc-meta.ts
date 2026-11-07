@@ -94,7 +94,7 @@ export function getFolioDocByline(doc: BylineDoc): FolioDocByline | undefined {
     };
   }
 
-  // Don't show a lonely reading-time fragment when no article identity is known.
-  if (!author && !date) return undefined;
-  return { author, date, readingMinutes: readingMinutes(doc.body) };
+  const minutes = readingMinutes(doc.body);
+  if (!author && !date && !minutes) return undefined;
+  return { author, date, readingMinutes: minutes };
 }
