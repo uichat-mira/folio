@@ -41,6 +41,7 @@ export const BUILD_ROOT_MODULES = ["static.ts", "static-output.ts", "vite.ts"];
 export const UI_ROOT_MODULES = [
   "app.tsx",
   "docs-shell.tsx",
+  "document-body.tsx",
   "icons.tsx",
   "share.tsx",
   "markdown-react.tsx",
