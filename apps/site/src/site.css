@@ -96,6 +96,11 @@ html { scroll-behavior: smooth; }
   line-height: 1.6;
 }
 
+/* The wordmark is a site-owned brand asset; mobile sizing does not alter Folio layout. */
+@media (max-width: 780px) {
+  .folio-brand::before { width: 86px; height: 36px; }
+}
+
 /* Demonstration of the reusable utility popover using real Folio releases. */
 .site-version-popover .folio-utility-popover__trigger {
   gap: 6px;
