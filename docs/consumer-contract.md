@@ -198,6 +198,31 @@ body {
 
 These declarations are visual overrides, not a security or isolation mechanism. Re-check a real host page after importing Folio, because the affected rules apply to elements the host already styled.
 
+### Header branding without component CSS overrides (dev candidate)
+
+Folio owns the shared Header markup, link behavior, and layout. A consumer that needs
+more than the default `config.logo` image plus `config.title` text can supply its
+own brand contents through `FolioApp`'s optional `slots.headerBrand`:
+
+```tsx
+<FolioApp
+  config={config}
+  docs={docs}
+  slots={{ headerBrand: <img src="/my-wordmark.svg" alt="My site" /> }}
+/>
+```
+
+The brand content remains inside the Folio-managed home link. Without the slot,
+the default image/title rendering is unchanged. Direct `FolioHeader` consumers
+can use its optional `brand` prop for the same purpose. Style the consumer-owned
+element, not `.folio-brand`, `.folio-header`, or other package selectors; the
+Folio package remains the single source of default component styling. Other
+consumer-specific content, such as custom Home or header utility contents, may
+use their own classes and tokens.
+
+This slot is implemented on the current `dev` source line; it is not part of
+the already-published npm `0.1.1` tarball.
+
 ## Static output: default shell vs custom routes
 
 The Vite plugin writes directory-style HTML for every route (`<route>/index.html`) plus `404.html`, and, when `siteUrl` is configured, `sitemap.xml` and `robots.txt`. All routes share the same metadata pipeline: title, description, robots, canonical, Open Graph, Twitter Card, and JSON-LD.

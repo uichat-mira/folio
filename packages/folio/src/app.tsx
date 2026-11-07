@@ -612,6 +612,7 @@ function Shell({
         darkMode={theme === "dark"}
         onSearch={openSearch}
         onToggleTheme={toggleTheme}
+        brand={slots?.headerBrand}
         actions={slots?.headerActions}
       />
 

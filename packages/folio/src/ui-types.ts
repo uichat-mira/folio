@@ -7,6 +7,8 @@ import type { FolioTreeNavProps } from "./ui/tree-nav";
 
 export type FolioSlots = {
   home?: ReactNode;
+  /** Site-provided header brand content; Folio still owns the header layout. */
+  headerBrand?: ReactNode;
   headerActions?: ReactNode;
   articleFooter?: ReactNode;
   /** One navigation override for both docs and projects, desktop and mobile. */

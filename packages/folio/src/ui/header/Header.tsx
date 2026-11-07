@@ -35,6 +35,7 @@ export type FolioHeaderProps = {
   darkMode?: boolean;
   onSearch?: () => void;
   onToggleTheme?: () => void;
+  brand?: ReactNode;
   actions?: ReactNode;
 };
 
@@ -54,6 +55,7 @@ export function FolioHeader({
   darkMode = false,
   onSearch,
   onToggleTheme,
+  brand,
   actions,
 }: FolioHeaderProps) {
   const location = useLocation();
@@ -137,8 +139,7 @@ export function FolioHeader({
     <header className={"folio-header" + (isHome ? "" : " folio-header--interior")}>
       <div className="folio-header__wrap">
         <Link to="/" className="folio-brand">
-          {config.logo ? <img src={config.logo} alt="" /> : null}
-          <span>{config.title}</span>
+          {brand ?? <>{config.logo ? <img src={config.logo} alt="" /> : null}<span>{config.title}</span></>}
         </Link>
 
         {/* Navigation and utility actions are one right-hand cluster. The nav
