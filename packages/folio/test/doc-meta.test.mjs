@@ -157,7 +157,7 @@ test("GitHub avatar is rendered on both surfaces only for the matching Git autho
 test("metadata combinations keep React and static separators consistent", () => {
   const cases = [
     { label: "empty", data: {}, body: "", fragments: 0 },
-    { label: "code-only", data: {}, body: "```js\\nconst x = 1;\\n```", fragments: 0 },
+    { label: "code-only", data: {}, body: "```js\nconst x = 1;\n```", fragments: 0 },
     { label: "author-only", data: { author: "Writer" }, body: "", fragments: 0 },
     { label: "date-only", data: { createdAt: "2024-01-02" }, body: "", fragments: 0 },
     { label: "author-and-prose", data: { author: "Writer" }, body: "hello", fragments: 1 },
@@ -166,7 +166,7 @@ test("metadata combinations keep React and static separators consistent", () => 
   ];
   for (const item of cases) {
     const input = parseFolioDoc("reference/" + item.label + ".md",
-      "---\\ntitle: Case\\n" + Object.entries(item.data).map(([key, value]) => key + ": " + value + "\\n").join("") + "---\\n" + item.body);
+      "---\ntitle: Case\n" + Object.entries(item.data).map(([key, value]) => key + ": " + value + "\n").join("") + "---\n" + item.body);
     const html = renderToStaticMarkup(createElement(FolioDocMeta, { doc: input }));
     const staticHtml = renderFolioStaticDocMeta(input);
     for (const markup of [html, staticHtml]) {
