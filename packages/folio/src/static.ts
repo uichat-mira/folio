@@ -489,7 +489,7 @@ export function renderFolioStaticPageNav(
 }
 
 /** Static counterpart of FolioDocumentBody; shells own only their surrounding chrome. */
-function renderStaticDocumentBody(
+export function renderFolioStaticDocumentBody(
   doc: FolioDoc,
   markdownHtml = renderFolioMarkdown(doc.body, { removeH1: true }),
 ): string {
@@ -503,7 +503,7 @@ function renderStaticDocShell(
   context: FolioStaticBuildContext,
   doc: FolioDoc,
 ): string {
-  return `<div class="folio-docs-runtime folio-docs-runtime--static">${renderStaticMobileDocs(context, doc)}<div class="folio-docs-shell">${renderFolioStaticTreeNav(context, doc)}<main class="folio-doc-main">${renderStaticDocumentBody(doc)}${renderFolioStaticPageNav(context, doc)}</main>${renderStaticToc(doc)}</div></div>`;
+  return `<div class="folio-docs-runtime folio-docs-runtime--static">${renderStaticMobileDocs(context, doc)}<div class="folio-docs-shell">${renderFolioStaticTreeNav(context, doc)}<main class="folio-doc-main">${renderFolioStaticDocumentBody(doc)}${renderFolioStaticPageNav(context, doc)}</main>${renderStaticToc(doc)}</div></div>`;
 }
 
 /** Static counterpart of the public tree navigation, derived from the same
@@ -525,7 +525,7 @@ export function renderFolioStaticProjectShell(
       toc + '</div></details>' : '') + '</div>';
   return '<div class="folio-docs-runtime folio-docs-runtime--static">' +
     mobile + '<div class="folio-docs-shell">' + nav +
-    '<main class="folio-doc-main">' + renderStaticDocumentBody(doc, markdownHtml) +
+    '<main class="folio-doc-main">' + renderFolioStaticDocumentBody(doc, markdownHtml) +
     pager + '</main>' + toc + '</div></div>';
 }
 
@@ -744,7 +744,7 @@ function renderStaticArticle(doc: FolioDoc): string {
     (doc.headings.length ? ' folio-article-main' : '') + '">' +
     '<div class="folio-doc-toolbar"><div class="folio-eyebrow">' +
     folioEscapeHtml(doc.group) + '</div></div>' +
-    renderStaticDocumentBody(doc) + '</main>';
+    renderFolioStaticDocumentBody(doc) + '</main>';
   const toc = renderStaticToc(doc);
   if (!toc) return article;
   return '<div class="folio-article-layout">' +
