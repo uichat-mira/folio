@@ -22,7 +22,7 @@ function renderHeader(props = {}) {
 }
 
 test("header uses its default text when no custom brand is supplied", () => {
-  assert.match(renderHeader(), /<span>Folio<\\/span>/);
+  assert.match(renderHeader(), /<span>Folio<\/span>/);
 });
 
 test("header brand slot replaces only brand contents, keeping the link", () => {
@@ -35,5 +35,5 @@ test("header brand slot replaces only brand contents, keeping the link", () => {
   });
   assert.match(html, /class="folio-brand"/);
   assert.match(html, /class="site-header-wordmark"/);
-  assert.doesNotMatch(html, /<span>Folio<\\/span>/);
+  assert.doesNotMatch(html, /<span>Folio<\/span>/);
 });
