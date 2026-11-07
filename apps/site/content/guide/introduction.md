@@ -36,10 +36,10 @@ Folio 是面向 Vite 与 React 的 **Git-native 内容与门户发布引擎**。
 
 | 能力 | 交付结果 |
 | --- | --- |
-| 内容建模 | Markdown + YAML Frontmatter 解析为统一 `FolioDoc`；类型、路径、排序、标签、日期与扩展字段有明确默认值。 |
-| 导航与阅读 | 文档侧栏树、文章页内目录、上一篇／下一篇、署名与阅读时长；静态输出保留同一套导航与层级。 |
-| 发布与分发 | 每条 route 生成静态 HTML 与 metadata；支持 sitemap、robots、404 与 GitHub Pages 子路径部署。 |
-| 扩展与集成 | `FolioConfig`、`FolioSlots`、公开 Core 函数与 `virtual:folio/content` 提供稳定扩展点。 |
+| [内容建模](/guide/content-model) | Markdown + YAML Frontmatter 解析为统一 `FolioDoc`；类型、路径、排序、标签、日期与扩展字段有明确默认值。 |
+| [导航与阅读](/guide/navigation) | 文档侧栏树、文章页内目录、上一篇／下一篇、署名与阅读时长；静态输出保留同一套导航与层级。 |
+| [发布与分发](/guide/static-publishing) | 每条 route 生成静态 HTML 与 metadata；支持 sitemap、robots、404 与 GitHub Pages 子路径部署。 |
+| [扩展与集成](/guide/configuration) | `FolioConfig`、`FolioSlots`、公开 Core 函数与 `virtual:folio/content` 提供稳定扩展点。 |
 
 ## 一条内容如何变成页面
 
