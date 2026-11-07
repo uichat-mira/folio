@@ -35,6 +35,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       basePath={basePath}
       ui={{ footerOnDocs: false }}
       slots={{
+        headerBrand: <span className="site-header-wordmark" role="img" aria-label="Folio" />,
         home: <HomePage docs={content} />,
         articleFooter,
         headerActions: <HeaderVersionPopover />,
