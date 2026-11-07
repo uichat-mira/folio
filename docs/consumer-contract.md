@@ -346,6 +346,13 @@ const config = defineFolioConfig({
 });
 ```
 
+- `href` and `collection` are alternative destinations. `collection` selects
+  the first `type: doc` entry in read order (collections without documents use
+  their first entry overall) and automatically adds the collection root to
+  `activeMatch`; an empty collection falls back to its index route. An
+  explicit `href` wins when both are present, with `collection` still supplying
+  the active root. `resolveFolioNavigation(items, docs)` and `FolioHeader.docs`
+  expose this resolution; existing href-only configs are unchanged.
 - `children` entries take `label`, `href`, and optional `icon` / `description` /
   `group`. A menu is rendered when at least one child survives validation.
 - `group` names a reading task, so children that answer the same question render
@@ -592,8 +599,10 @@ published.
 
 ## Public article TOC (FOL-023 candidate, not published in 0.1.1)
 
-`FolioToc` is exported from the Folio package root as a React component accepting `headings: readonly FolioHeading[]`, with optional `className` and `onNavigate`. It uses exactly the IDs in `FolioDoc.headings` (as produced by `extractHeadings`) and highlights the current chapter on scrolling. Existing documentation shells share this same component rather than duplicating TOC rendering.
+`FolioToc` is exported from the Folio package root as a React component accepting `headings: readonly FolioHeading[]`, with optional `className`, `onNavigate`, and `title`. It uses exactly the IDs in `FolioDoc.headings` (as produced by `extractHeadings`), nests h2 → h3 → h4 through the public `buildFolioOutlineTree` helper, and highlights the current chapter on scrolling. The active item is marked by a marker sliding along one continuous rail, and the outline scrolls independently so the active chapter stays visible. Existing documentation shells share this same component rather than duplicating TOC rendering.
 
 The default Folio article route automatically shows an unobtrusive right-hand TOC when its headings are nonempty. At narrow widths, a native `<details>` control makes those anchors accessible without JavaScript; React closes the panel after navigation. Ordinary pages with no headings and non-article pages do not gain empty TOC chrome. Default static article HTML includes the same TOC and heading targets; documentation's existing no-JS navigation is unchanged.
+
+Static builds can call `renderFolioStaticToc(headings, { title })` from `@uichat-mira/folio/vite` to produce the same `nav`/`content`/nested-list structure as `FolioToc`, so custom static routes no longer need a hand-written TOC template. In `FolioDocsShell`, the desktop rail is hidden below 1100px; between 781px and 1100px the same outline is available as a sticky “本页目录” flyout, and the full mobile menu plus outline remains below 780px.
 
 Example consumer: `import { FolioToc } from "@uichat-mira/folio"; <FolioToc headings={doc.headings} />`. This is a pending PR contract, not an npm `0.1.1` promise.

@@ -88,7 +88,7 @@ footer: {
 
 内部链接通过 React Router 跳转；以 / 开头的 Logo 资源路径会根据站点部署子路径解析。也可通过 FolioApp 的 slots.footer 完全替换默认页脚（自行提供 footer 语义元素）。
 
-技术文档的连续阅读页面可设置 \`<FolioApp ui={{ footerOnDocs: false }} />\`，隐藏 \`type: "doc"\` 路由下的全站 Footer 与文末的 \`articleFooter\` 插槽；首页、文章和集合页仍显示。默认值为 \`true\`，以保持已有消费者行为；即使提供 \`slots.footer\`，文档页也遵循这一开关。此设置只作用于 React 应用壳；静态路由正文的预渲染不会额外注入该组件。
+使用 Folio 阅读壳（`docsShell`）时，`<FolioApp ui={{ footerOnDocs: false }} />` 会同时隐藏全站 Footer 和正文 `articleFooter` 插槽。它既适用于 `type: doc`，也适用于使用同一阅读壳的 `type: project`。首页、文章和集合页不受影响。默认值为 `true`，保留已有消费者行为；`slots.footer` 也服从阅读壳的显示策略。此开关由布局决定，而非按内容类型分别设置；若关闭 `docsShell`，普通页面布局独立决定 Footer。静态路由正文的预渲染不会额外注入 React 应用 Footer。
 
 ## 内置首页配置
 
@@ -138,7 +138,7 @@ type FolioSlots = {
   home?: ReactNode
   headerActions?: ReactNode
   articleFooter?: ReactNode
-  docNav?: (props: FolioDocNavProps) => ReactNode
+  navigation?: (props: FolioTreeNavProps) => ReactNode
   docToc?: (props: FolioTocProps) => ReactNode
   footer?: ReactNode
 }
@@ -148,25 +148,28 @@ type FolioSlots = {
 
 左右栏是 Folio 的独立公开组件，均从 `@uichat-mira/folio` 导出，沿用原有单入口 CSS。消费者可独立使用组件，也可组合到文档阅读壳里：
 
-- `FolioDocNav`：传入 `doc`、`docs`，自动按集合与分组生成文档链接，支持 `className`、`ariaLabel`、`onNavigate`，并适配 React Router 的 `basename`。
+- `FolioTreeNav`：唯一左侧导航渲染器，接收 `tree` 和 `currentPath`；普通技术文档与项目文章都使用它，支持路由、分组标题、层级与展开状态。
+- `buildFolioNavigationTree(docs, current, { scopePath? })`：Core 纯函数，生成统一导航树；可通过 `scopePath` 显式声明范围。默认以文档集合与项目路由推导范围，不维护第二份导航清单。
 - `FolioToc`：传入 `headings`，按标题生成锚点与滚动高亮，支持 `className`、`onNavigate`，空列表不渲染。
+
+导航的 `collection / section` 分类始终显示为**不可点击、不可折叠的标签**；只有有子页面的内容父节点才出现 `+ / −`。标题链接负责导航，右侧按钮独立控制展开／收起；整行共享背景与圆角，选中态高于悬停态。FolioApp 将展开状态保存在阅读路由上层，换文章时不会丢失。当前文章的祖先初始展开，其他有概览的分支初始收起；点击箭头不会切换路由。展开区域按实际内容高度平滑变化，折叠时子链接不可获取焦点，并尊重操作系统的减少动态效果设置。公共 `FolioTreeExpansionProps` 继续支持 `defaultExpanded`、`expandedPaths`、`onExpandChange`；`collapsible: false` 可显式切回路由驱动的无按钮模式。没有 JavaScript 时静态页面保留完整链接，不渲染无效按钮。
 
 默认无需配置。想覆盖内置文档页的左右栏，可以使用动态渲染插槽：
 
 ```tsx
-import { FolioApp, FolioDocNav, FolioToc } from "@uichat-mira/folio";
+import { FolioApp, FolioTreeNav, FolioToc } from "@uichat-mira/folio";
 
 <FolioApp
   config={config}
   docs={docs}
   slots={{
-    docNav: (props) => <FolioDocNav {...props} className="my-doc-nav" />,
+    navigation: (props) => <FolioTreeNav {...props} className="my-tree-nav" />,
     docToc: (props) => <FolioToc {...props} className="my-doc-toc" />,
   }}
 />
 ```
 
-插槽会随着当前文档自动收到新数据，桌面和打开的移动端菜单使用同一渲染方式。移动端 `props.onNavigate` 用于跳转后关闭抽屉，覆写时应继续传递。若完全替换导航 DOM，消费者应保持相应语义、布局类名和无障碍行为；独立使用 `FolioDocNav` 时需位于 React Router 内。
+插槽会随着当前文档自动收到新数据，桌面和打开的移动端菜单使用同一渲染方式。移动端 `props.onNavigate` 用于跳转后关闭抽屉，覆写时应继续传递。若完全替换导航 DOM，消费者应保持相应语义、布局类名和无障碍行为；独立使用 `FolioTreeNav` 时需位于 React Router 内。
 
 静态 HTML 仍使用默认导航和 TOC，保证无 JS 时能浏览。React 的插槽不自动改变静态构建输出，消费者若需要自定义静态布局，应通过站点的 `staticRoutes` 管理。
 
@@ -201,7 +204,7 @@ description: "关于设计系统的长期探索"
 - 如果父目录暂时没有 `index.md`，导航会显示不可点击的目录分组，**不会创建假的概览链接**。
 - 显式设置 `path` 会覆写默认路由，因此也会改变导航归属；不同项目之间只按完整路径段匹配，避免相似前缀误归属。
 
-项目页面默认复用 Folio 的文档阅读布局，但使用公开的 `FolioTreeNav` 而不是 `FolioDocNav`。核心通过 `buildFolioContentTree(docs, { rootPath })` 构建可序列化的纯数据树，通过 `resolveFolioProjectTree(docs, current)` 自动按项目路径范围归组。需要独立排版时也可以自行组合：
+项目文章和普通技术文档只通过 `FolioTreeNav` 渲染，不再保留第二套左侧导航组件。核心的 `buildFolioNavigationTree(docs, current, { scopePath? })` 统一组合分类与嵌套项目节点；`buildFolioContentTree` 保留供纯目录树使用，`resolveFolioProjectTree` 仍负责项目内的上一篇／下一篇。需要独立排版时也可以自行组合：
 
 ~~~tsx
 import {
@@ -213,7 +216,7 @@ const tree = buildFolioContentTree(docs, { rootPath: "/projects" });
 <FolioTreeNav tree={tree} currentPath={currentDoc.path} />;
 ~~~
 
-消费者可以通过 `slots.projectNav(props)` 自定义项目导航，回调接收 `tree`、`currentPath` 和 `onNavigate`；移动端务必传递 `onNavigate` 以便跳转后关闭抽屉。`slots.docNav` 继续负责普通技术文档，不会被项目模式覆盖。
+消费者使用唯一的 `slots.navigation(props)` 自定义侧栏，回调接收 `tree`、`currentPath` 和 `onNavigate`，对普通文档与项目文章完全一致。移动端应继续传递 `onNavigate`，以便跳转后关闭抽屉。
 
 Folio 的静态构建与 React 使用同一份 Core 树形模型；如需在自定义 `staticRoutes` 中保持约定式项目阅读结构，可使用构建入口 `@uichat-mira/folio/vite` 提供的 `renderFolioStaticProjectShell(context, doc, markdownHtml?)`。
 

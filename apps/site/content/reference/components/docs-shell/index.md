@@ -17,9 +17,9 @@ type FolioDocsShellProps = {
   docs: FolioDoc[];
   footer?: ReactNode;
   children?: ReactNode;
-  renderNav?: (props: FolioDocNavProps) => ReactNode;
+  renderNav?: (props: FolioTreeNavProps) => ReactNode;
   renderToc?: (props: FolioTocProps) => ReactNode;
-  pageNeighbors?: { previous?: FolioDoc; next?: FolioDoc };
+  pageNeighbors?: FolioPageNavNeighbors; // previous/next 仅需 path 与 title
   menuLabel?: string;
   share?: boolean; // 已弃用：文档工具栏已移除
 };
@@ -27,9 +27,11 @@ type FolioDocsShellProps = {
 
 ## 当前使用方式
 
-- 普通技术文档：默认 `docNav` 和 `FolioToc`。
-- 项目型内容：应用外壳提供 `FolioTreeNav` 和项目内上下篇关系。
+- 普通文档与项目型内容：默认同一个 `FolioTreeNav`，数据来自 `buildFolioNavigationTree()`。
+- 阅读主体由 `FolioDocumentBody` 统一组合标题、摘要、[FolioDocMeta](/reference/components/doc-meta) 和 Markdown；Git 自动获取、Frontmatter 独立覆写。即使没有作者或日期，有正文时仍可显示阅读时间；全部缺失才不显示空容器。
+- 底部上一篇／下一篇由独立的 [FolioPageNav](/reference/components/page-nav) 呈现；默认按照与左侧 `FolioTreeNav` 相同的阅读顺序，组件子树末尾可以接到同一分类的普通文档。独立项目仍限制在项目内部，`FolioToc` 仍是页内标题目录。
 - 手机：左右导航可通过菜单抽屉访问，传入的 `onNavigate` 会在跳转后关闭抽屉。
+- 781–1100px：左侧导航仍在，右侧目录改为顶部「页面导航」浮层；打开时锁定背景滚动，支持 Escape、点击外部和关闭按钮退出。小于 780px 时浮层与菜单抽屉同时可用。
 
 ## 边界
 

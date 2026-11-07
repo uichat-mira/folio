@@ -23,6 +23,11 @@ import type {
 export type FolioHeaderProps = {
   config: FolioConfig;
   navigation?: FolioNavigationItem[];
+  /**
+   * Content used to resolve `navigation[].collection` shorthand to its first
+   * document. Without docs the collection entry falls back to its index route.
+   */
+  docs?: readonly FolioDoc[];
   currentDoc?: FolioDoc;
   searchEnabled?: boolean;
   themeEnabled?: boolean;
@@ -41,6 +46,7 @@ const MENU_CLOSE_DELAY = 140;
 export function FolioHeader({
   config,
   navigation = config.navigation ?? [],
+  docs,
   currentDoc,
   searchEnabled = true,
   themeEnabled = true,
@@ -60,7 +66,10 @@ export function FolioHeader({
   const closeTimer = useRef<number | undefined>(undefined);
   const idBase = useId();
 
-  const items = useMemo(() => resolveFolioNavigation(navigation), [navigation]);
+  const items = useMemo(
+    () => resolveFolioNavigation(navigation, docs),
+    [navigation, docs],
+  );
 
   const cancelScheduledClose = useCallback(() => {
     if (closeTimer.current === undefined) return;
@@ -251,10 +260,10 @@ export function FolioHeader({
               <ThemeIcon dark={darkMode} />
             </button>
           ) : null}
-          {shareEnabled && currentDoc ? (
+          {shareEnabled ? (
             <FolioShareButton
-              title={currentDoc.title}
-              text={currentDoc.description}
+              title={currentDoc?.title ?? config.title}
+              text={currentDoc?.description ?? config.description}
               className="folio-mobile-tool-share"
               compact
             />

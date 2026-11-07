@@ -975,6 +975,7 @@
 
 /* Documentation structure shell */
 .folio-docs-runtime {
+  --folio-docs-mobile-bar-height: 42px;
   min-width: 0;
 }
 
@@ -993,11 +994,6 @@
   min-width: 0;
 }
 
-.folio-article-layout > .folio-toc {
-  max-height: calc(100vh - 110px);
-  overflow-y: auto;
-}
-
 .folio-article-mobile-toc { display: none; }
 
 @media (max-width: 1000px) {
@@ -1009,7 +1005,7 @@
   .folio-article-mobile-toc {
     position: sticky;
     z-index: 33;
-    top: 64px;
+    top: var(--folio-header-height);
     display: block;
     border-bottom: 1px solid var(--folio-hairline);
     background: var(--folio-canvas);
@@ -1066,50 +1062,10 @@
   letter-spacing: -.025em;
 }
 
-.folio-doc-main .folio-markdown h2,
-.folio-doc-main .folio-markdown h3 {
-  scroll-margin-top: 84px;
-}
-
-.folio-page-nav {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 16px;
-  margin-top: 56px;
-  padding-top: 24px;
-  border-top: 1px solid var(--folio-hairline);
-}
-
-.folio-page-nav > a {
-  min-width: 0;
-  padding: 12px 14px;
-  border: 1px solid transparent;
-  border-radius: var(--folio-radius-md);
-}
-
-.folio-page-nav > a:hover {
-  border-color: var(--folio-hairline);
-  background: var(--folio-surface-soft);
-}
-
-.folio-page-nav span {
-  display: block;
-  margin-bottom: 3px;
-  color: var(--folio-muted-soft);
-  font: 10.5px var(--folio-font-mono);
-  text-transform: uppercase;
-}
-
-.folio-page-nav strong {
-  display: block;
-  overflow: hidden;
-  color: var(--folio-ink);
-  font: 600 17px/1.35 var(--folio-font-display);
-  text-overflow: ellipsis;
-}
-
-.folio-page-nav__next {
-  text-align: right;
+.folio-markdown h2,
+.folio-markdown h3,
+.folio-markdown h4 {
+  scroll-margin-top: calc(var(--folio-header-height) + 20px);
 }
 
 .folio-docs-mobile-bar,
@@ -1126,21 +1082,23 @@
   .folio-docs-shell > .folio-toc {
     display: none;
   }
-}
 
-@media (max-width: 780px) {
   .folio-docs-mobile-bar {
     position: sticky;
-    top: 64px;
+    top: var(--folio-header-height);
     z-index: 34;
     display: flex;
-    height: 42px;
+    height: var(--folio-docs-mobile-bar-height);
     align-items: center;
     justify-content: space-between;
     padding: 0 16px;
     border-bottom: 1px solid var(--folio-hairline);
     background: color-mix(in srgb, var(--folio-canvas) 96%, transparent);
     backdrop-filter: blur(10px);
+  }
+
+  .folio-docs-mobile-bar__toc {
+    margin-inline-start: auto;
   }
 
   .folio-docs-mobile-bar button {
@@ -1179,11 +1137,11 @@
 
   .folio-static-doc-menu__panel {
     position: fixed;
-    top: 106px;
+    top: calc(var(--folio-header-height) + var(--folio-docs-mobile-bar-height));
     right: 12px;
     left: 12px;
     z-index: 79;
-    max-height: calc(100vh - 124px);
+    max-height: calc(100vh - var(--folio-header-height) - var(--folio-docs-mobile-bar-height) - 18px);
     overflow-y: auto;
     border: 1px solid var(--folio-hairline);
     border-radius: var(--folio-radius-lg);
@@ -1191,7 +1149,7 @@
     box-shadow: 0 18px 48px rgba(0, 0, 0, .14);
   }
 
-  .folio-static-doc-menu__panel .folio-docnav,
+  .folio-static-doc-menu__panel .folio-tree-nav,
   .folio-static-doc-menu__panel .folio-toc {
     position: static;
     display: block;
@@ -1202,41 +1160,11 @@
     border: 0;
   }
 
-  .folio-docs-shell {
-    display: block;
-  }
-
-  .folio-docs-shell > .folio-docnav {
-    display: none;
-  }
-
-  .folio-doc-main {
-    width: min(100% - 32px, 760px);
-    margin: 0 auto;
-    padding: 36px 0 64px;
-  }
-
-  .folio-docs-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 90;
-    display: block;
-    background: rgba(15, 14, 13, .42);
-    backdrop-filter: blur(4px);
-  }
-
-  .folio-docs-drawer {
-    width: min(86vw, 340px);
-    height: 100%;
-    overflow-y: auto;
-    background: var(--folio-canvas);
-    box-shadow: 14px 0 38px rgba(0, 0, 0, .16);
-  }
-
   .folio-docs-drawer__head,
   .folio-mobile-toc__head {
     display: flex;
     height: 48px;
+    flex: none;
     align-items: center;
     justify-content: space-between;
     padding: 0 16px;
@@ -1255,17 +1183,9 @@
     cursor: pointer;
   }
 
-  .folio-docs-drawer .folio-docnav {
-    position: static;
-    display: block;
-    height: auto;
-    padding: 22px 18px 36px;
-    border-right: 0;
-  }
-
   .folio-mobile-toc {
     position: fixed;
-    top: 106px;
+    top: calc(var(--folio-header-height) + var(--folio-docs-mobile-bar-height));
     right: 12px;
     left: 12px;
     z-index: 80;
@@ -1275,6 +1195,27 @@
     border-radius: var(--folio-radius-lg);
     background: var(--folio-canvas);
     box-shadow: 0 18px 48px rgba(0, 0, 0, .14);
+    /* Stays mounted so closing can animate; inert keeps its links unfocusable. */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-8px) scale(.985);
+    transform-origin: top right;
+    transition:
+      opacity .16s ease,
+      transform .2s cubic-bezier(.2, .7, .2, 1),
+      visibility 0s linear .2s;
+  }
+
+  .folio-mobile-toc.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+    transition:
+      opacity .18s ease,
+      transform .22s cubic-bezier(.2, .7, .2, 1),
+      visibility 0s;
   }
 
   .folio-mobile-toc .folio-toc {
@@ -1284,16 +1225,91 @@
     overflow-y: auto;
     padding: 16px 18px 20px;
   }
+}
 
-  .folio-page-nav {
-    gap: 8px;
+/* Between the mobile drawer and the desktop TOC the sidebar already exists,
+   so only the page-outline trigger is useful. */
+@media (min-width: 781px) and (max-width: 1100px) {
+  .folio-docs-mobile-bar__menu,
+  .folio-docs-mobile-bar--no-toc,
+  .folio-static-doc-menu:not(.folio-static-doc-menu--toc) {
+    display: none;
+  }
+}
+
+@media (max-width: 780px) {
+  .folio-docs-shell {
+    display: block;
   }
 
-  .folio-page-nav > a {
-    padding: 10px;
+  .folio-docs-shell > .folio-tree-nav {
+    display: none;
   }
 
-  .folio-page-nav strong {
-    font-size: 15px;
+  .folio-doc-main {
+    width: min(100% - 32px, 760px);
+    margin: 0 auto;
+    padding: 36px 0 64px;
+  }
+
+  .folio-docs-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: block;
+    background: rgba(15, 14, 13, .42);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    /* Keep the overlay visible for the drawer's slide-out, then hide it. */
+    transition: opacity .2s ease, visibility 0s linear .2s;
+  }
+
+  .folio-docs-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity .2s ease, visibility 0s;
+  }
+
+  .folio-docs-drawer {
+    display: flex;
+    flex-direction: column;
+    width: min(86vw, 340px);
+    height: 100%;
+    overflow: hidden;
+    background: var(--folio-canvas);
+    box-shadow: 14px 0 38px rgba(0, 0, 0, .16);
+    transform: translateX(-100%);
+    transition: transform .22s cubic-bezier(.2, .7, .2, 1);
+  }
+
+  .folio-docs-overlay.is-open .folio-docs-drawer {
+    transform: translateX(0);
+  }
+
+  .folio-docs-drawer .folio-tree-nav {
+    position: static;
+    display: block;
+    flex: 1 1 auto;
+    align-self: stretch;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 22px 18px 36px;
+    border-right: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folio-docs-overlay,
+  .folio-docs-overlay.is-open,
+  .folio-docs-drawer,
+  .folio-mobile-toc,
+  .folio-mobile-toc.is-open {
+    transition: none;
   }
 }

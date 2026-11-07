@@ -1,17 +1,18 @@
 import {
   useEffect,
+  useId,
+  useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
-import { Link } from "react-router-dom";
-import { FolioMarkdown } from "./markdown-react";
+import { FolioDocumentBody } from "./document-body";
 import { FolioToc, type FolioTocProps } from "./ui/toc";
-import { FolioDocNav, type FolioDocNavProps } from "./ui/doc-nav";
-import {
-  findFolioDocCollection,
-  getFolioDocNeighbors,
-} from "./core/docs-structure";
-import type { FolioDoc } from "./types";
+import { buildFolioNavigationTree, getFolioNavigationNeighbors } from "./core/navigation-tree";
+import { FolioTreeNav, type FolioTreeNavProps } from "./ui/tree-nav";
+import { FolioPageNav } from "./ui/page-nav";
+import { findFolioDocCollection } from "./core/docs-structure";
+import type { FolioDoc, FolioPageNavNeighbors } from "./types";
 
 export type FolioDocsShellProps = {
   doc: FolioDoc;
@@ -21,41 +22,14 @@ export type FolioDocsShellProps = {
   share?: boolean;
   children?: ReactNode;
   /** Overrides both desktop and mobile document navigation renderings. */
-  renderNav?: (props: FolioDocNavProps) => ReactNode;
+  renderNav?: (props: FolioTreeNavProps) => ReactNode;
   /** Overrides both desktop and mobile page TOCs. */
   renderToc?: (props: FolioTocProps) => ReactNode;
-  /** Optional directory-based previous/next ordering for portal trees. */
-  pageNeighbors?: { previous?: FolioDoc; next?: FolioDoc };
+  /** Optional explicit previous/next override; otherwise follows the navigation tree. */
+  pageNeighbors?: FolioPageNavNeighbors;
   /** Accessible drawer name for different reading contexts. */
   menuLabel?: string;
 };
-
-function FolioPager({
-  previous,
-  next,
-}: {
-  previous?: FolioDoc;
-  next?: FolioDoc;
-}) {
-  if (!previous && !next) return null;
-
-  return (
-    <nav className="folio-page-nav" aria-label="文档分页">
-      {previous ? (
-        <Link className="folio-page-nav__previous" to={previous.path}>
-          <span>上一篇</span>
-          <strong>{previous.title}</strong>
-        </Link>
-      ) : <span />}
-      {next ? (
-        <Link className="folio-page-nav__next" to={next.path}>
-          <span>下一篇</span>
-          <strong>{next.title}</strong>
-        </Link>
-      ) : <span />}
-    </nav>
-  );
-}
 
 export function FolioDocsShell({
   doc,
@@ -69,13 +43,16 @@ export function FolioDocsShell({
 }: FolioDocsShellProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileTocOpen, setMobileTocOpen] = useState(false);
-  const neighbors = pageNeighbors ?? getFolioDocNeighbors(docs, doc);
+  const mobileTocId = useId();
+  const mobileTocRef = useRef<HTMLDivElement>(null);
+  const mobileTocButtonRef = useRef<HTMLButtonElement>(null);
+  const tree = useMemo(() => buildFolioNavigationTree(docs, doc), [docs, doc]);
+  const neighbors = pageNeighbors ?? getFolioNavigationNeighbors(tree, doc.path);
 
-  // The same public components back desktop and mobile, while consumer render
-  // functions receive route-specific data and close callbacks on mobile.
+  // The exact same navigation tree and renderer back desktop and mobile.
   const navigation = (onNavigate?: () => void) => {
-    const props: FolioDocNavProps = { doc, docs, onNavigate };
-    return renderNav ? renderNav(props) : <FolioDocNav {...props} />;
+    const props: FolioTreeNavProps = { tree, currentPath: doc.path, onNavigate };
+    return renderNav ? renderNav(props) : <FolioTreeNav {...props} />;
   };
   const toc = (onNavigate?: () => void) => {
     const props: FolioTocProps = { headings: doc.headings, onNavigate };
@@ -87,11 +64,50 @@ export function FolioDocsShell({
     setMobileTocOpen(false);
   }, [doc.path]);
 
+  // The outline panel is a fixed flyout: Escape, an outside press and body
+  // scroll lock keep it from trapping the reader or nudging the page behind it.
+  useEffect(() => {
+    if (!mobileTocOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setMobileTocOpen(false);
+      mobileTocButtonRef.current?.focus();
+    };
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (
+        mobileTocRef.current?.contains(target) ||
+        mobileTocButtonRef.current?.contains(target)
+      ) {
+        return;
+      }
+      setMobileTocOpen(false);
+    };
+
+    window.addEventListener("keydown", closeOnEscape);
+    document.addEventListener("pointerdown", closeOnOutsidePointer);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+      document.removeEventListener("pointerdown", closeOnOutsidePointer);
+    };
+  }, [mobileTocOpen]);
+
   return (
     <div className="folio-docs-runtime">
-      <div className="folio-docs-mobile-bar">
+      <div
+        className={
+          "folio-docs-mobile-bar" +
+          (doc.headings.length ? "" : " folio-docs-mobile-bar--no-toc")
+        }
+      >
         <button
           type="button"
+          className="folio-docs-mobile-bar__menu"
           onClick={() => {
             setMobileTocOpen(false);
             setMobileMenuOpen(true);
@@ -100,9 +116,12 @@ export function FolioDocsShell({
           菜单
         </button>
         <button
+          ref={mobileTocButtonRef}
           type="button"
+          className="folio-docs-mobile-bar__toc"
           disabled={!doc.headings.length}
           aria-expanded={doc.headings.length ? mobileTocOpen : undefined}
+          aria-controls={doc.headings.length ? mobileTocId : undefined}
           onClick={() => {
             setMobileMenuOpen(false);
             setMobileTocOpen((value) => !value);
@@ -112,54 +131,53 @@ export function FolioDocsShell({
         </button>
       </div>
 
-      {mobileMenuOpen ? (
-        <div
-          className="folio-docs-overlay"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setMobileMenuOpen(false);
-          }}
-        >
-          <aside className="folio-docs-drawer" aria-label={menuLabel}>
-            <div className="folio-docs-drawer__head">
-              <span>菜单</span>
-              <button type="button" onClick={() => setMobileMenuOpen(false)}>
-                关闭
-              </button>
-            </div>
-            {navigation(() => setMobileMenuOpen(false))}
-          </aside>
-        </div>
-      ) : null}
-
-      {mobileTocOpen ? (
-        <div className="folio-mobile-toc">
-          <div className="folio-mobile-toc__head">
-            <span>页面导航</span>
-            <button type="button" onClick={() => setMobileTocOpen(false)}>
+      <div
+        className={
+          "folio-docs-overlay" + (mobileMenuOpen ? " is-open" : "")
+        }
+        role="presentation"
+        aria-hidden={!mobileMenuOpen}
+        inert={!mobileMenuOpen}
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setMobileMenuOpen(false);
+        }}
+      >
+        <aside className="folio-docs-drawer" aria-label={menuLabel}>
+          <div className="folio-docs-drawer__head">
+            <span>菜单</span>
+            <button type="button" onClick={() => setMobileMenuOpen(false)}>
               关闭
             </button>
           </div>
-          {toc(() => setMobileTocOpen(false))}
+          {navigation(() => setMobileMenuOpen(false))}
+        </aside>
+      </div>
+
+      {/* Mounted while closed so the panel can animate out instead of
+          disappearing; inert keeps its links out of the focus order. */}
+      <div
+        id={mobileTocId}
+        ref={mobileTocRef}
+        className={"folio-mobile-toc" + (mobileTocOpen ? " is-open" : "")}
+        aria-hidden={!mobileTocOpen}
+        inert={!mobileTocOpen}
+      >
+        <div className="folio-mobile-toc__head">
+          <span>页面导航</span>
+          <button type="button" onClick={() => setMobileTocOpen(false)}>
+            关闭
+          </button>
         </div>
-      ) : null}
+        {toc(() => setMobileTocOpen(false))}
+      </div>
 
       <div className="folio-docs-shell">
         {navigation()}
 
         <main className="folio-doc-main">
-          <h1>{doc.title}</h1>
-          {doc.description ? (
-            <p className="folio-lede">{doc.description}</p>
-          ) : null}
-          {children ?? (
-            <FolioMarkdown
-              source={doc.body}
-              options={{ removeH1: true }}
-            />
-          )}
+          <FolioDocumentBody doc={doc}>{children}</FolioDocumentBody>
           {footer}
-          <FolioPager
+          <FolioPageNav
             previous={neighbors.previous}
             next={neighbors.next}
           />

@@ -31,7 +31,7 @@ plugin         folio()
 | 任务 | 文档 |
 | --- | --- |
 | 查 Frontmatter 字段和默认值 | [Frontmatter 参考](/reference/frontmatter) |
-| 查看内置 React 组件及目录父子关系示例 | [组件](/reference/components) |
+| 查看内置 React 组件、公开 API 与能力边界 | [组件](/reference/components) |
 | 接入 Vite plugin、理解构建阶段 | [Vite 构建集成](/reference/build-integration) |
 | 生成静态 HTML、metadata、sitemap 与 robots | [静态构建与 SEO](/reference/seo) |
 | 发布到 GitHub Pages 或下游平台 | [部署到 GitHub Pages](/reference/github-pages)、[Cloudflare Pages 案例](/reference/cloudflare-pages) |
@@ -46,9 +46,12 @@ plugin         folio()
 | --- | --- |
 | 安装、运行仓库或接入 consumer | [快速开始](/guide/getting-started) |
 | 编写文档、文章、项目和页面 | [编写内容](/guide/authoring) |
+| 选择内容类型、理解文件到路由的映射 | [内容类型与路由](/guide/content-types) |
+| 写 Frontmatter、日期、作者与扩展字段 | [Frontmatter 与元数据](/guide/frontmatter-fields) |
+| 组织侧栏分组与阅读顺序 | [内容组织与排序](/guide/organizing-content) |
 | 理解 `FolioDoc`、路径和类型推断 | [内容模型](/guide/content-model) |
 | 配置导航、分组、排序和首页 | [站点配置与扩展](/guide/configuration)、[导航与内容清单](/guide/navigation) |
-| 使用 Markdown、Callout、Mermaid 与标题锚点 | [Markdown Runtime](/guide/markdown-runtime) |
+| 使用 Markdown、Callout、Mermaid 与标题锚点 | [Markdown 写作](/guide/markdown-runtime) |
 | 组合 React runtime 与 official site | [只用公开 API 组合站点](/guide/runtime-composition) |
 | 生成静态 HTML 的完整流程 | [静态发布](/guide/static-publishing) |
 

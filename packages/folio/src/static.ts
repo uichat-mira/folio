@@ -1,10 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { findFolioDocCollection, getFolioDocNeighbors } from "./core/docs-structure";
+import { buildFolioNavigationTree, getFolioNavigationNeighbors } from "./core/navigation-tree";
 import {
   folioTreeDisplayLabel,
-  getFolioTreeNeighbors,
-  resolveFolioProjectTree,
   type FolioContentTreeNode,
 } from "./core/content-tree";
 import {
@@ -14,6 +12,8 @@ import {
   type FolioCollectionIndex,
 } from "./core/collection-index";
 import { renderFolioMarkdown } from "./core/markdown";
+import { buildFolioOutlineTree, type FolioOutlineNode } from "./core/outline";
+import { getFolioDocByline } from "./core/doc-meta";
 import { resolveFolioHome, type FolioHomeModel } from "./core/home";
 import {
   assertFolioSiteIndexing,
@@ -36,7 +36,7 @@ import {
   defaultFolioJsonLd,
   resolveFolioSitemapLastmod,
 } from "./build/structured-data";
-import type { FolioDoc, FolioConfig } from "./types";
+import type { FolioDoc, FolioConfig, FolioHeading } from "./types";
 
 export type FolioStaticRoute = {
   path: string;
@@ -142,6 +142,33 @@ export function folioEscapeHtml(value: string): string {
         "'": "&#39;",
       })[character] ?? character,
   );
+}
+
+
+/** Static HTML projection of the same compact byline model used by FolioDocMeta. */
+export function renderFolioStaticDocMeta(doc: FolioDoc): string {
+  const byline = getFolioDocByline(doc);
+  if (!byline) return "";
+  const author = byline.author
+    ? '<span class="folio-doc-meta__author"><span class="folio-doc-meta__avatar" aria-hidden="true">' +
+      folioEscapeHtml(byline.author.initial) +
+      (byline.author.avatar
+        ? '<img src="' + folioEscapeHtml(byline.author.avatar) + '" alt="" loading="lazy">'
+        : "") +
+      '</span><span class="folio-doc-meta__name">' + folioEscapeHtml(byline.author.name) + '</span></span>'
+    : "";
+  const separator = '<span class="folio-doc-meta__separator" aria-hidden="true">/</span>';
+  const date = byline.date
+    ? '<span class="folio-doc-meta__detail">' + (byline.author ? separator : "") +
+      '<time datetime="' + folioEscapeHtml(byline.date.dateTime) + '">' +
+      folioEscapeHtml(byline.date.value) + '</time></span>'
+    : "";
+  const reading = byline.readingMinutes
+    ? '<span class="folio-doc-meta__detail">' + (byline.author || byline.date ? separator : "") +
+      '<span>约 ' + byline.readingMinutes + ' 分钟</span></span>'
+    : "";
+  return '<div class="folio-doc-meta" role="group" aria-label="文章信息">' +
+    author + date + reading + '</div>';
 }
 
 export function folioAbsoluteRouteUrl(
@@ -308,112 +335,175 @@ function staticRouteHref(
   return `${base}${route === "/" ? "/" : `${route}/`}`;
 }
 
-function renderStaticDocNav(
+/**
+ * Static counterpart of the one public tree renderer. Every descendant stays
+ * visible without JavaScript, and no inert disclosure buttons are emitted.
+ */
+function renderStaticNavigationNode(
+  context: FolioStaticBuildContext,
+  node: FolioContentTreeNode,
+  currentPath: string,
+  root = false,
+): string {
+  const group = node.kind === "section";
+  const active = node.path === currentPath;
+  const display = root && !group ? folioTreeDisplayLabel(node.title) : undefined;
+  const title = display
+    ? (display.eyebrow
+      ? '<span class="folio-tree-nav__eyebrow">' + folioEscapeHtml(display.eyebrow) + '</span>'
+      : '') +
+      '<span class="folio-tree-nav__title">' + folioEscapeHtml(display.title) + '</span>'
+    : folioEscapeHtml(node.title);
+
+  const label = group
+    ? '<h2>' + title + '</h2>'
+    : node.doc
+      ? '<a' + (root ? ' class="folio-tree-nav__overview' + (active ? ' active"' : '"')
+        : active ? ' class="active"' : '') +
+        (active ? ' aria-current="page"' : '') +
+        ' href="' + folioEscapeHtml(staticRouteHref(context, node.doc.path)) +
+        '">' + title + '</a>'
+      : root
+        ? '<div class="folio-tree-nav__overview folio-tree-nav__overview--directory">' +
+          title + '</div>'
+        : '<span class="folio-tree-nav__directory">' + title + '</span>';
+
+  const wrapper = root ? "section" : "li";
+  const kindClass = root
+    ? group ? "folio-tree-nav__section" : "folio-tree-nav__group"
+    : "folio-tree-nav__item";
+  // Keep the React layout containers for identical CSS behavior; no JS means
+  // that every link is initially visible and there is no inert toggle.
+  const children = node.children.length
+    ? '<div class="folio-tree-nav__reveal" data-expanded="true" aria-hidden="false">' +
+      '<div class="folio-tree-nav__reveal-inner">' +
+      '<ul class="folio-tree-nav__children' +
+      (group ? ' folio-tree-nav__children--section' : '') + '">' +
+      node.children.map((child) =>
+        renderStaticNavigationNode(context, child, currentPath)).join("") +
+      '</ul></div></div>'
+    : "";
+  return '<' + wrapper + ' class="' + kindClass + '"><div class="folio-tree-nav__row' +
+    (active ? ' is-active' : '') + (group ? ' folio-tree-nav__row--section' : '') +
+    '">' + label + '</div>' + children + '</' + wrapper + '>';
+}
+
+/** One static sidebar renderer for document collections and project hierarchies. */
+export function renderFolioStaticTreeNav(
   context: FolioStaticBuildContext,
   doc: FolioDoc,
 ): string {
-  const collection = findFolioDocCollection(context.docs, doc);
-  if (!collection) return "";
+  const tree = buildFolioNavigationTree(context.docs, doc);
+  if (!tree.roots.length) return "";
+  const documentMode = tree.roots.some((node) => node.kind === "section");
+  const roots = tree.roots.map((node) =>
+    renderStaticNavigationNode(context, node, doc.path, true)).join("");
+  const navClass = documentMode ? "folio-tree-nav folio-tree-nav--sections" : "folio-tree-nav";
+  return '<nav class="' + navClass + '" aria-label="' +
+    (documentMode ? "文档目录" : "项目目录") +
+    '"><div class="folio-tree-nav__groups">' + roots + '</div></nav>';
+}
 
-  const sections = collection.sections
-    .map(
-      (section) =>
-        `<section><h2>${folioEscapeHtml(section.title)}</h2><ul>${section.docs
-          .map(
-            (item) =>
-              `<li><a${item.path === doc.path ? ' class="active" aria-current="page"' : ""} href="${folioEscapeHtml(staticRouteHref(context, item.path))}">${folioEscapeHtml(item.title)}</a></li>`,
-          )
-          .join("")}</ul></section>`,
-    )
-    .join("");
+function renderStaticOutlineList(
+  nodes: readonly FolioOutlineNode[],
+  nested = false,
+): string {
+  return (
+    `<ul class="folio-toc__list${nested ? " folio-toc__list--nested" : ""}">` +
+    nodes
+      .map(
+        (node) =>
+          `<li class="folio-toc-depth-${node.depth}"><a href="#${folioEscapeHtml(node.id)}" title="${folioEscapeHtml(node.text)}">${folioEscapeHtml(node.text)}</a>` +
+          (node.children.length
+            ? renderStaticOutlineList(node.children, true)
+            : "") +
+          "</li>",
+      )
+      .join("") +
+    "</ul>"
+  );
+}
 
-  return `<nav class="folio-docnav" aria-label="文档目录">${sections}</nav>`;
+/**
+ * Static counterpart of `FolioToc`. It shares the Core outline tree, so the
+ * published markup and the React runtime stay structurally identical. Static
+ * pages have no active marker; the rail and nested list are still rendered.
+ */
+export function renderFolioStaticToc(
+  headings: readonly FolioHeading[],
+  options: { title?: string } = {},
+): string {
+  if (!headings.length) return "";
+  const title = options.title ?? "本页目录";
+  return (
+    `<nav class="folio-toc" aria-label="${folioEscapeHtml(title)}">` +
+    '<div class="folio-toc__content">' +
+    `<h2>${folioEscapeHtml(title)}</h2>` +
+    renderStaticOutlineList(buildFolioOutlineTree(headings)) +
+    "</div></nav>"
+  );
 }
 
 function renderStaticToc(doc: FolioDoc): string {
-  if (!doc.headings.length) return "";
-
-  return `<aside class="folio-toc" aria-label="本页目录"><h2>本页目录</h2><ul>${doc.headings
-    .map(
-      (heading) =>
-        `<li class="folio-toc-depth-${heading.depth}"><a href="#${folioEscapeHtml(heading.id)}">${folioEscapeHtml(heading.text)}</a></li>`,
-    )
-    .join("")}</ul></aside>`;
+  return renderFolioStaticToc(doc.headings);
 }
 
 function renderStaticMobileDocs(
   context: FolioStaticBuildContext,
   doc: FolioDoc,
 ): string {
-  const nav = renderStaticDocNav(context, doc);
+  const nav = renderFolioStaticTreeNav(context, doc);
   const toc = renderStaticToc(doc);
 
   return `<div class="folio-docs-mobile-bar folio-docs-mobile-bar--static"><details class="folio-static-doc-menu"><summary>菜单</summary><div class="folio-static-doc-menu__panel">${nav}</div></details>${toc ? `<details class="folio-static-doc-menu folio-static-doc-menu--toc"><summary>页面导航</summary><div class="folio-static-doc-menu__panel">${toc}</div></details>` : ""}</div>`;
 }
 
-function renderStaticPager(
+/**
+ * The single static paginator for package readers and consumer-rendered docs.
+ * Resolve neighbors from the same navigation tree as React and the sidebar.
+ */
+export function renderFolioStaticPageNav(
   context: FolioStaticBuildContext,
   doc: FolioDoc,
 ): string {
-  const { previous, next } = getFolioDocNeighbors(context.docs, doc);
+  const { previous, next } = getFolioNavigationNeighbors(
+    buildFolioNavigationTree(context.docs, doc), doc.path,
+  );
   if (!previous && !next) return "";
 
-  const previousHtml = previous
-    ? `<a class="folio-page-nav__previous" href="${folioEscapeHtml(staticRouteHref(context, previous.path))}"><span>上一篇</span><strong>${folioEscapeHtml(previous.title)}</strong></a>`
-    : "<span></span>";
-  const nextHtml = next
-    ? `<a class="folio-page-nav__next" href="${folioEscapeHtml(staticRouteHref(context, next.path))}"><span>下一篇</span><strong>${folioEscapeHtml(next.title)}</strong></a>`
+  const anchor = (
+    target: typeof previous,
+    direction: "previous" | "next",
+    label: string,
+  ) => target
+    ? '<a class="folio-page-nav__' + direction + '" href="' +
+      folioEscapeHtml(staticRouteHref(context, target.path)) +
+      '"><span>' + label + '</span><strong>' +
+      folioEscapeHtml(target.title) + '</strong></a>'
     : "<span></span>";
 
-  return `<nav class="folio-page-nav" aria-label="文档分页">${previousHtml}${nextHtml}</nav>`;
+  return '<nav class="folio-page-nav" aria-label="文档分页">' +
+    anchor(previous, "previous", "上一篇") +
+    anchor(next, "next", "下一篇") +
+    '</nav>';
+}
+
+/** Static counterpart of FolioDocumentBody; shells own only their surrounding chrome. */
+export function renderFolioStaticDocumentBody(
+  doc: FolioDoc,
+  markdownHtml = renderFolioMarkdown(doc.body, { removeH1: true }),
+): string {
+  return '<h1>' + folioEscapeHtml(doc.title) + '</h1>' +
+    (doc.description ? '<p class="folio-lede">' + folioEscapeHtml(doc.description) + '</p>' : '') +
+    renderFolioStaticDocMeta(doc) +
+    '<article class="folio-markdown">' + markdownHtml + '</article>';
 }
 
 function renderStaticDocShell(
   context: FolioStaticBuildContext,
   doc: FolioDoc,
 ): string {
-  return `<div class="folio-docs-runtime folio-docs-runtime--static">${renderStaticMobileDocs(context, doc)}<div class="folio-docs-shell">${renderStaticDocNav(context, doc)}<main class="folio-doc-main"><h1>${folioEscapeHtml(doc.title)}</h1>${doc.description ? `<p class="folio-lede">${folioEscapeHtml(doc.description)}</p>` : ""}<article class="folio-markdown">${renderFolioMarkdown(doc.body, { removeH1: true })}</article>${renderStaticPager(context, doc)}</main>${renderStaticToc(doc)}</div></div>`;
-}
-
-function renderStaticTreeChildren(
-  context: FolioStaticBuildContext,
-  nodes: readonly FolioContentTreeNode[],
-  currentPath: string,
-): string {
-  if (!nodes.length) return "";
-  const link = (path: string) => folioEscapeHtml(staticRouteHref(context, path));
-  return '<ul class="folio-tree-nav__children">' + nodes.map((node) => (
-    '<li>' + (node.doc
-      ? '<a' + (node.path === currentPath ? ' class="active" aria-current="page"' : "") +
-        ' href="' + link(node.doc.path) + '">' + folioEscapeHtml(node.title) + '</a>'
-      : '<span class="folio-tree-nav__directory">' + folioEscapeHtml(node.title) + '</span>') +
-    renderStaticTreeChildren(context, node.children, currentPath) + '</li>'
-  )).join("") + '</ul>';
-}
-
-function renderStaticProjectNav(
-  context: FolioStaticBuildContext,
-  doc: FolioDoc,
-  tree: ReturnType<typeof resolveFolioProjectTree>,
-): string {
-  const groups = tree.roots.map((node) => {
-    const label = folioTreeDisplayLabel(node.title);
-    const inner = (label.eyebrow
-      ? '<span class="folio-tree-nav__eyebrow">' + folioEscapeHtml(label.eyebrow) + '</span>'
-      : '') +
-      '<span class="folio-tree-nav__title">' + folioEscapeHtml(label.title) + '</span>';
-    const overview = node.doc
-      ? '<a class="folio-tree-nav__overview' +
-        (node.path === doc.path ? ' active" aria-current="page"' : '"') +
-        ' href="' + folioEscapeHtml(staticRouteHref(context, node.doc.path)) +
-        '">' + inner + '</a>'
-      : '<div class="folio-tree-nav__overview folio-tree-nav__overview--directory">' +
-        inner + '</div>';
-    return '<section class="folio-tree-nav__group">' + overview +
-      renderStaticTreeChildren(context, node.children, doc.path) + '</section>';
-  }).join("");
-  return '<nav class="folio-docnav folio-tree-nav" aria-label="项目目录">' +
-    '<div class="folio-tree-nav__groups">' + groups + '</div></nav>';
+  return `<div class="folio-docs-runtime folio-docs-runtime--static">${renderStaticMobileDocs(context, doc)}<div class="folio-docs-shell">${renderFolioStaticTreeNav(context, doc)}<main class="folio-doc-main">${renderFolioStaticDocumentBody(doc)}${renderFolioStaticPageNav(context, doc)}</main>${renderStaticToc(doc)}</div></div>`;
 }
 
 /** Static counterpart of the public tree navigation, derived from the same
@@ -424,23 +514,9 @@ export function renderFolioStaticProjectShell(
   doc: FolioDoc,
   markdownHtml = renderFolioMarkdown(doc.body, { removeH1: true }),
 ): string {
-  const tree = resolveFolioProjectTree(context.docs, doc);
-  const nav = renderStaticProjectNav(context, doc, tree);
+  const nav = renderFolioStaticTreeNav(context, doc);
   const toc = renderStaticToc(doc);
-  const { previous, next } = getFolioTreeNeighbors(tree, doc.path);
-  const pager = previous || next
-    ? '<nav class="folio-page-nav" aria-label="文档分页">' +
-      (previous
-        ? '<a class="folio-page-nav__previous" href="' +
-          folioEscapeHtml(staticRouteHref(context, previous.path)) +
-          '"><span>上一篇</span><strong>' + folioEscapeHtml(previous.title) + '</strong></a>'
-        : '<span></span>') +
-      (next
-        ? '<a class="folio-page-nav__next" href="' +
-          folioEscapeHtml(staticRouteHref(context, next.path)) +
-          '"><span>下一篇</span><strong>' + folioEscapeHtml(next.title) + '</strong></a>'
-        : '<span></span>') + '</nav>'
-    : "";
+  const pager = renderFolioStaticPageNav(context, doc);
   const mobile = '<div class="folio-docs-mobile-bar folio-docs-mobile-bar--static">' +
     '<details class="folio-static-doc-menu"><summary>菜单</summary>' +
     '<div class="folio-static-doc-menu__panel">' + nav + '</div></details>' +
@@ -449,10 +525,7 @@ export function renderFolioStaticProjectShell(
       toc + '</div></details>' : '') + '</div>';
   return '<div class="folio-docs-runtime folio-docs-runtime--static">' +
     mobile + '<div class="folio-docs-shell">' + nav +
-    '<main class="folio-doc-main"><h1>' + folioEscapeHtml(doc.title) + '</h1>' +
-    (doc.description ? '<p class="folio-lede">' +
-      folioEscapeHtml(doc.description) + '</p>' : '') +
-    '<article class="folio-markdown">' + markdownHtml + '</article>' +
+    '<main class="folio-doc-main">' + renderFolioStaticDocumentBody(doc, markdownHtml) +
     pager + '</main>' + toc + '</div></div>';
 }
 
@@ -671,10 +744,7 @@ function renderStaticArticle(doc: FolioDoc): string {
     (doc.headings.length ? ' folio-article-main' : '') + '">' +
     '<div class="folio-doc-toolbar"><div class="folio-eyebrow">' +
     folioEscapeHtml(doc.group) + '</div></div>' +
-    '<h1>' + folioEscapeHtml(doc.title) + '</h1>' +
-    (doc.description ? '<p class="folio-lede">' + folioEscapeHtml(doc.description) + '</p>' : '') +
-    '<article class="folio-markdown">' +
-    renderFolioMarkdown(doc.body, { removeH1: true }) + '</article></main>';
+    renderFolioStaticDocumentBody(doc) + '</main>';
   const toc = renderStaticToc(doc);
   if (!toc) return article;
   return '<div class="folio-article-layout">' +

@@ -5,7 +5,11 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { FolioToc, extractHeadings } from "../dist/index.js";
+import {
+  FolioToc,
+  buildFolioOutlineTree,
+  extractHeadings,
+} from "../dist/index.js";
 import { writeFolioStaticSite } from "../dist/vite.js";
 
 const headings = [
@@ -20,16 +24,46 @@ const doc = (path, type, h=extractHeadings("## 开篇\n\n### 细节与回答\n\n
   headings:h,data:{},
 });
 
-test("public FolioToc renders headings and accessible anchor links without browser APIs", () => {
+test("outline tree nests headings by level and keeps skipped levels attached", () => {
+  const tree = buildFolioOutlineTree([
+    {depth:2,text:"开篇",id:"intro"},
+    {depth:3,text:"细节",id:"details"},
+    {depth:4,text:"更细",id:"deeper"},
+    {depth:2,text:"下一章",id:"next"},
+    {depth:5,text:"忽略",id:"ignored"},
+  ]);
+  assert.equal(tree.length,2);
+  assert.equal(tree[0].id,"intro");
+  assert.equal(tree[0].children[0].id,"details");
+  assert.equal(tree[0].children[0].children[0].id,"deeper");
+  assert.equal(tree[1].id,"next");
+  assert.equal(tree[1].children.length,0);
+
+  const skipped = buildFolioOutlineTree([
+    {depth:2,text:"章",id:"chapter"},
+    {depth:4,text:"跳级",id:"jump"},
+  ]);
+  assert.equal(skipped[0].children[0].id,"jump");
+});
+
+test("public FolioToc renders a nested outline with accessible anchor links", () => {
   const html = renderToStaticMarkup(
     React.createElement(FolioToc,{headings}),
   );
-  assert.match(html,/aria-label="本页目录"/);
+  assert.match(html,/class="folio-toc" aria-label="本页目录"/);
+  assert.match(html,/class="folio-toc__content"/);
+  assert.match(html,/class="folio-toc__list"/);
+  assert.match(html,/class="folio-toc__list folio-toc__list--nested"/);
   assert.match(html,/href="#intro"/);
   assert.match(html,/href="#details"/);
   assert.match(html,/href="#deeper"/);
+  assert.match(html,/title="细节与回答"/);
   assert.match(html,/folio-toc-depth-3/);
-  assert.match(html,/细节与回答/);
+  const custom = renderToStaticMarkup(
+    React.createElement(FolioToc,{headings,title:"大纲"}),
+  );
+  assert.match(custom,/aria-label="大纲"/);
+  assert.match(custom,/<h2>大纲<\/h2>/);
   assert.equal(renderToStaticMarkup(React.createElement(FolioToc,{headings:[]})),"");
 });
 
@@ -56,6 +90,8 @@ test("article static TOC and mobile native disclosure use exact markdown heading
     assert.doesNotMatch(short,/folio-article-layout/);
     assert.doesNotMatch(short,/folio-article-mobile-toc/);
     assert.match(guide,/class="folio-docs-shell"/);
+    assert.match(guide,/class="folio-toc__content"/);
+    assert.match(guide,/class="folio-toc__list folio-toc__list--nested"/);
     assert.equal((guide.match(/aria-label="本页目录"/g)||[]).length>=1,true);
     assert.doesNotMatch(guide,/folio-article-layout/);
     assert.match(long,/href="https:\/\/example.test\/moyu\/blogs\/long\/"/);

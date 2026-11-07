@@ -43,9 +43,25 @@ export type FolioDateSources = {
 /**
  * One author for generated Article/TechArticle structured data. A string is a
  * display name; the object form adds an optional canonical profile URL to the
- * emitted Schema.org `Person`.
+ * emitted Schema.org `Person`, plus an optional image for the byline avatar.
  */
-export type FolioAuthor = string | { name: string; url?: string };
+export type FolioAuthor = string | { name: string; url?: string; avatar?: string };
+
+/** Git records are file-history evidence, not editorial authorship or publication dates. */
+export type FolioGitRevision = {
+  committedAt: string;
+  /** The Git commit's author name, used exactly as recorded (no email). */
+  author?: string;
+  /** GitHub commit-associated avatar (when verifiable at build time). */
+  githubAvatarUrl?: string;
+};
+
+export type FolioGitHistory = {
+  /** Omitted for shallow/incomplete history; earliest visible is not the first. */
+  first?: FolioGitRevision;
+  /** Latest available commit affecting this content path. */
+  last?: FolioGitRevision;
+};
 
 export type FolioDoc = {
   id: string;
@@ -66,16 +82,33 @@ export type FolioDoc = {
    * adapter may fill it from local Git history.
    */
   publishedAt?: string;
-  /** ISO 8601 UTC timestamp, or `undefined` when no trustworthy source exists. */
+  /** Git first commit by default; frontmatter createdAt takes precedence. */
+  createdAt?: string;
+  /** ISO 8601 UTC timestamp, or undefined when no trustworthy source exists. */
   updatedAt?: string;
+  /** Git first author by default; frontmatter createdBy takes precedence. */
+  createdBy?: string;
+  /** Git latest author by default; frontmatter updatedBy takes precedence. */
+  updatedBy?: string;
   /** Provenance for `publishedAt` / `updatedAt`; set by `parseFolioDoc`. */
   dateSources?: FolioDateSources;
+  /** Build-time Git provenance, omitted for untracked files or unavailable history. */
+  gitHistory?: FolioGitHistory;
   tags: string[];
   status?: string;
   cover?: string;
   body: string;
   headings: FolioHeading[];
   data: Record<string, unknown>;
+};
+
+/** A page navigation target needs a route and a title, not an entire document. */
+export type FolioPageNavTarget = Pick<FolioDoc, "path" | "title">;
+
+/** The reading context calculates neighbors; presentation consumes them. */
+export type FolioPageNavNeighbors = {
+  previous?: FolioPageNavTarget;
+  next?: FolioPageNavTarget;
 };
 
 /**
@@ -145,7 +178,18 @@ export type FolioNavigationPanel = {
  */
 export type FolioNavigationItem = {
   label: string;
-  href: string;
+  /**
+   * Explicit destination. It wins over `collection` when both are present.
+   * An item needs at least one of `href` or `collection`.
+   */
+  href?: string;
+  /**
+   * Route collection that supplies the section entry. The destination becomes
+   * the first `type: doc` entry in read order (or the first entry overall when
+   * the collection has no documents), falling back to the collection index
+   * when empty. The collection root automatically marks the entry active.
+   */
+  collection?: string;
   /**
    * Extra route prefixes that should mark this entry as current, in addition to
    * `href` itself. A section whose pages live under more than one route

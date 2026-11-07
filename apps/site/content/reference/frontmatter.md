@@ -76,3 +76,17 @@ author:
 - [内容协议](/guide/content-contract)
 - [编写内容](/guide/authoring)
 - [内容模型](/guide/content-model)
+
+
+## Git-native 创建和修订信息
+
+Folio 会自动读取 Git 历史，记录首次提交时间、最近提交时间和两次提交的作者。它们保留在 `FolioDoc`，供 [FolioDocMeta](/reference/components/doc-meta) 等组件使用；默认署名栏只显示作者、日期和预计阅读时间，不展开四字段表格。以下字段均可在 YAML Frontmatter 独立覆写：
+
+~~~yaml
+createdAt: 2024-06-01
+updatedAt: 2026-11-07
+createdBy: 原作者
+updatedBy: 最近修改者
+~~~
+
+`publishedAt` 和 `author` 仍用于作品发布时间与署名，不强制与 Git 文件记录相同。仓库历史不完整时，Folio 不虚构首次提交的信息；未追踪内容也不填入构建时间。

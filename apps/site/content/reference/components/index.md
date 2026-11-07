@@ -1,61 +1,45 @@
 ---
 title: 组件
-description: Folio 当前公开 React 组件、配置入口与能力边界；同时演示 Markdown 目录自动推导父子导航。
+description: Folio 当前公开 React 组件与相关 Core API 的使用手册。
 type: project
 group: API
 order: 1
 status: draft
-tags:
-  - API
-  - React
-  - Component
-  - Tree
+tags: [API, React, Components]
 ---
 
-这里记录的是 **当前本地开发分支中已经存在的公开组件**，不是规划清单。组件只从 `@uichat-mira/folio` 导入；本页不展示未实现的主题编辑器、可视化搭建器或后台管理界面。
+这里按**消费者实际会使用的组件**组织文档。每个公开组件只有一个一级页面，子功能、Props、核心数据契约和注意事项都写在组件页内，不另设多层文章来演示侧边栏。
 
-## 这个父子关系从哪里来
-
-当前页面在 `reference/components/index.md`，下面的每一篇在子目录的 `index.md`。Folio 根据生成后的路由建立父子关系，**没有额外的导航 JSON，也没有填写父级 ID**。
-
-~~~text
-reference/components/
-  index.md                       # 组件（父级）
-  app/index.md                   # FolioApp
-  header/index.md                # FolioHeader
-  footer/index.md                # FolioFooter
-  docs-shell/index.md            # FolioDocsShell
-  navigation/
-    index.md                     # 导航组件（第二级父级）
-    doc-nav/index.md             # FolioDocNav（第三级）
-    tree-nav/index.md            # FolioTreeNav（第三级）
-    toc/index.md                 # FolioToc（第三级）
-  markdown/index.md              # FolioMarkdown
-  utility-popover/index.md       # FolioUtilityPopover
-  share-button/index.md          # FolioShareButton
-~~~
-
-这里明确设置了 `type: project`，因为当前 Folio 的**约定式树形阅读布局**接在项目类型上；它虽然位于「参考」路径下，但不是普通 `type: doc` 文档集合导航。你会看到组件树，而不是原来按 `collection / section` 分组的「参考」侧栏。
+所有公开组件从 `@uichat-mira/folio` 导入，样式统一来自 `@uichat-mira/folio/styles.css`。以下描述以当前开发源码已实现的能力为准。
 
 ## 组件索引
 
-| 组件 | 已有能力 |
+| 组件 | 功能与详细说明 |
 | --- | --- |
-| [FolioApp](/reference/components/app) | 路由、应用外壳、UI 开关和 slots |
-| [FolioHeader](/reference/components/header) | 全局导航、移动菜单、搜索和主题操作 |
-| [FolioFooter](/reference/components/footer) | 字符串兼容、结构化品牌与链接、法律信息 |
-| [FolioDocsShell](/reference/components/docs-shell) | 文档阅读布局、左右导航与分页 |
-| [导航组件](/reference/components/navigation) | 文档导航、目录树、页内目录 |
-| [FolioMarkdown](/reference/components/markdown) | Markdown 渲染及 Mermaid 增强 |
+| [FolioApp](/reference/components/app) | 应用入口、路由、UI 配置、`FolioSlots` 及导航插槽 |
+| [FolioHeader](/reference/components/header) | 全局导航、菜单、搜索与主题按钮 |
+| [FolioFooter](/reference/components/footer) | 结构化页脚、品牌、深浅色 Logo、链接分组和法律字段 |
+| [FolioDocsShell](/reference/components/docs-shell) | 文档阅读布局、移动抽屉与组合式分页 |
+| [FolioDocMeta](/reference/components/doc-meta) | Git 创建／更新日期及人员，Frontmatter 可独立覆写 |
+| [FolioPageNav](/reference/components/page-nav) | 独立的上一篇／下一篇展示组件，排序由调用者提供 |
+| [FolioTreeNav](/reference/components/tree-nav) | 统一左侧导航、Core 内容树、父级推导和排序 |
+| [FolioToc](/reference/components/toc) | 当前文章的标题锚点与滚动高亮 |
+| [FolioMarkdown](/reference/components/markdown) | Markdown 阅读与 Mermaid 浏览器增强 |
 | [FolioUtilityPopover](/reference/components/utility-popover) | 可关闭的轻量信息浮层 |
-| [FolioShareButton](/reference/components/share-button) | Web Share / 复制页面链接 |
+| [FolioShareButton](/reference/components/share-button) | 浏览器分享与复制链接 |
 
-## 这次刻意保留的能力边界
+## 公共组件与 Core 能力的关系
 
-- **已支持**：层级从路由推导；父级有 `index.md` 时可点击；多层子目录；当前页高亮；同一顶层分组内的上一篇／下一篇；静态 HTML 输出同一棵目录树。
-- **尚未统一**：普通 `type: doc` 仍使用 `collection / section` 分组。它不会仅凭放入子目录就自动切换成树形 DocNav。
-- **Footer 按内容类型控制**：这批示例用的是 `type: project`，所以仍会展示站点 Footer；`ui.footerOnDocs: false` 目前只影响 `type: doc`，不会自动覆盖项目型参考页面。
-- **不是独立包入口**：公共组件从 `@uichat-mira/folio` 导出，默认样式来自 `@uichat-mira/folio/styles.css`；组件级 CSS 文件不作为独立公开入口。
-- **当前版本说明**：此处以 `feat/tomz-1105` 本地源码为准，包含尚未发布到 npm `0.1.1` 的开发能力；不能把本地示例误认为已发布版本具备相同契约。
+`FolioTreeNav` 负责渲染侧栏；`buildFolioNavigationTree()`、`buildFolioContentTree()`、`resolveFolioProjectTree()` 和 `getFolioTreeNeighbors()` 则属于可独立使用的 Core 函数。这些契约集中写在 [FolioTreeNav](/reference/components/tree-nav) 中，不会伪装成另外几个 React 组件。
 
-想对照另一套分组导航，可直接访问 [原有参考索引](/reference/overview)。
+同样，`FolioFooterBrand`、`FolioFooterGroup`、`FolioFooterLegal` 是 Footer 的结构化配置类型，不需要各自独立占一个文档页面；`FolioSlots` 是 `FolioApp` 的扩展点。
+
+## 使用边界
+
+- 分类 `collection / section` 与内容父子路由由 Core 推导；组件目录保持平铺，并不影响 Folio 支持多级导航的能力。
+- 左侧 `FolioTreeNav` 是站点内容导航，右侧 `FolioToc` 是页内标题目录；它们不是同一个组件。
+- 文档与项目文章共用阅读布局，`ui.footerOnDocs: false` 可隐藏这类阅读页面的站点 Footer 与正文 `articleFooter`；不影响首页和普通文章。
+- 组件级样式文件不是独立的公开 CSS 入口。消费站需要的品牌物料、具体链接与法律信息仍由消费站提供。
+- 此处的接口为当前开发分支的实际实现，不应被误读为已经发布的 npm 包一定包含全部能力。
+
+需要站点整体配置，请从 [Folio 配置指南](/guide/configuration) 开始。

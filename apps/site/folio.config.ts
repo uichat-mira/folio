@@ -5,12 +5,11 @@ export default defineFolioConfig({
   description: "Folio 是 Mira 组织的 Git-native 内容与门户发布引擎。以 Markdown 为内容源，在构建时组织并发布产品、文档与文章。",
   siteUrl: "https://uichat-mira.github.io",
   github: "https://github.com/uichat-mira/folio",
-  // 指南 / 参考 are ordinary links, not dropdowns.
+  // 指南 / 参考 are document-collection entries, not dropdowns.
   //
-  // Each is a reading mode with its own sidebar, so each one lands the reader in
-  // a document view directly: the docs shell supplies the left navigation and
-  // the in-page TOC. A dropdown would only add a click in front of a destination
-  // that already exists.
+  // `collection` resolves both halves of the entry from content: the landing
+  // page is the first document in read order, and the whole collection root is
+  // marked active. The config no longer repeats `href` and `activeMatch`.
   //
   // The rule this site follows:
   //
@@ -22,15 +21,11 @@ export default defineFolioConfig({
   // root and the collection name aligned is what makes that field and the route
   // agree instead of contradicting each other.
   //
-  // `href` points at a landing page *inside* the root, so the entry still has to
-  // claim the root explicitly: prefix matching only covers the landing page's own
-  // subtree, which would leave /guide/content-model with nothing lit. `activeMatch`
-  // names the root once, and because the roots are disjoint no page can match
-  // both entries. (Round 3 needed a per-page list precisely because the directory
-  // itself was shared; here the directory is the section, so one prefix is enough.)
+  // 展厅 has children and still needs an explicit `href`; 文章 / 项目 point at
+  // their collection index pages.
   navigation: [
-    { label: "指南", href: "/guide/introduction", activeMatch: ["/guide"] },
-    { label: "参考", href: "/reference/overview", activeMatch: ["/reference"] },
+    { label: "指南", collection: "/guide" },
+    { label: "参考", collection: "/reference" },
     {
       label: "展厅",
       href: "/showcase",

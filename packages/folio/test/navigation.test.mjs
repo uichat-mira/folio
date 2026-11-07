@@ -22,6 +22,60 @@ test("a plain {label, href} entry resolves to a plain link", () => {
   ]);
 });
 
+test("a collection shorthand lands on the first document and owns the whole root", () => {
+  const docs = [
+    { path: "/guide/getting-started", order: 2, type: "doc", title: "快速开始", tags: [] },
+    { path: "/guide/introduction", order: 1, type: "doc", title: "介绍", tags: [] },
+    { path: "/reference/components", order: 1, type: "project", title: "组件", tags: [] },
+    { path: "/reference/overview", order: 40, type: "doc", title: "参考索引", tags: [] },
+  ];
+  const [guide, reference] = resolveFolioNavigation(
+    [
+      { label: "指南", collection: "/guide/" },
+      { label: "参考", collection: "/reference" },
+    ],
+    docs,
+  );
+  assert.deepEqual(guide, {
+    kind: "link",
+    label: "指南",
+    href: "/guide/introduction",
+    activeMatch: ["/guide"],
+  });
+  assert.equal(reference.href, "/reference/overview",
+    "a project index that sorts first must not replace the reading start");
+  assert.equal(isFolioNavItemActive(guide, "/guide/content-model"), true);
+  assert.equal(isFolioNavItemActive(guide, "/reference/overview"), false);
+});
+
+test("a collection without documents uses its first entry overall", () => {
+  const docs = [
+    { path: "/blogs/new", order: 2, type: "article", date: "2026-02-01", title: "新", tags: [] },
+    { path: "/blogs/old", order: 1, type: "article", date: "2026-01-01", title: "旧", tags: [] },
+  ];
+  const [item] = resolveFolioNavigation([{ label: "文章", collection: "/blogs" }], docs);
+  assert.equal(item.href, "/blogs/new");
+});
+
+test("an explicit href wins while collection still supplies the active root", () => {
+  const docs = [{ path: "/guide/introduction", order: 1, type: "doc", title: "介绍", tags: [] }];
+  const [item] = resolveFolioNavigation([
+    { label: "手册", href: "/guide/start-here", collection: "/guide" },
+  ], docs);
+  assert.equal(item.href, "/guide/start-here");
+  assert.deepEqual(item.activeMatch, ["/guide"]);
+});
+
+test("an empty collection falls back to its index and a destinationless entry is dropped", () => {
+  const items = resolveFolioNavigation([
+    { label: "空集合", collection: "/empty" },
+    { label: "没有去处" },
+  ]);
+  assert.equal(items.length, 1);
+  assert.equal(items[0].href, "/empty");
+  assert.deepEqual(items[0].activeMatch, []);
+});
+
 test("navigation is data-driven, not route-specific", () => {
   // The prohibition on hardcoded /about or /blogs logic means any route must
   // be able to become a menu; a route that is special-cased would pass this
