@@ -23,8 +23,7 @@ import { FolioNavigationStateProvider } from "./ui/tree-nav/NavigationState";
 
 import { SearchIcon } from "./icons";
 import { FolioShareButton } from "./share";
-import { FolioDocMeta } from "./ui/doc-meta";
-import { FolioMarkdown } from "./markdown-react";
+import { FolioDocumentBody } from "./document-body";
 import { FolioToc } from "./ui/toc";
 import { searchFolioDocs } from "./core/search";
 import {
@@ -73,10 +72,7 @@ function DocumentPage({
           {share ? <FolioShareButton title={doc.title} text={doc.description} /> : null}
         </div>
       ) : null}
-      <h1>{doc.title}</h1>
-      {doc.description && <p className="folio-lede">{doc.description}</p>}
-      <FolioDocMeta doc={doc} />
-      <FolioMarkdown source={doc.body} options={{ removeH1: true }} />
+      <FolioDocumentBody doc={doc} />
       {footer}
     </main>
   );
