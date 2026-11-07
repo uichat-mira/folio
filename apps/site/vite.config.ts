@@ -8,7 +8,8 @@ import {
 import config from "./folio.config";
 import { buildShowcaseStaticRoutes } from "./src/static-routes";
 
-const base = resolveGithubPagesBase(process.env.GITHUB_REPOSITORY);
+// Dedicated preview hosting uses the domain root; GitHub Pages retains /folio/.
+const base = process.env.FOLIO_SITE_BASE ?? resolveGithubPagesBase(process.env.GITHUB_REPOSITORY);
 // Optional UA-aware OG endpoint. When set, the static HTML points og:image and
 // twitter:image at one stable URL; the worker serves the square mark to WeChat
 // and the wide brand card to other crawlers. Leave it unset to keep the local
