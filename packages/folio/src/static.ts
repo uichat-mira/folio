@@ -164,7 +164,7 @@ export function renderFolioStaticDocMeta(doc: FolioDoc): string {
       folioEscapeHtml(byline.date.value) + '</time></span>'
     : "";
   const reading = byline.readingMinutes
-    ? '<span class="folio-doc-meta__detail">' + separator +
+    ? '<span class="folio-doc-meta__detail">' + (byline.author || byline.date ? separator : "") +
       '<span>约 ' + byline.readingMinutes + ' 分钟</span></span>'
     : "";
   return '<div class="folio-doc-meta" role="group" aria-label="文章信息">' +
