@@ -36,6 +36,9 @@ jobs:
           cache: npm
 
       - name: Build official site
+        env:
+          # Optional. Set the repository variable after the OG worker is deployed.
+          FOLIO_OG_IMAGE_URL: ${{ vars.FOLIO_OG_IMAGE_URL }}
         run: |
           npm ci --no-audit --no-fund
           npm run build

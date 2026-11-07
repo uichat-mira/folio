@@ -1,8 +1,6 @@
 import {
   assertNoFolioCollectionConflicts,
-  findFolioDocCollection,
   folioCollectionIndexes,
-  getFolioDocNeighbors,
   renderFolioMarkdown,
   selectFolioCollectionDocs,
   type FolioDoc,
@@ -10,6 +8,10 @@ import {
 import {
   folioEscapeHtml,
   renderFolioStaticProjectShell,
+  renderFolioStaticPageNav,
+  renderFolioStaticDocMeta,
+  renderFolioStaticTreeNav,
+  renderFolioStaticToc,
   type FolioStaticBuildContext,
   type FolioStaticRoute,
 } from "@uichat-mira/folio/vite";
@@ -34,82 +36,6 @@ function href(base: string, path: string): string {
 
 function markdown(doc: FolioDoc, base: string): string {
   return renderFolioMarkdown(withFolioBaseLinks(doc.body, base), { removeH1: true });
-}
-
-function renderToc(doc: FolioDoc): string {
-  if (!doc.headings.length) return "";
-  return (
-    '<aside class="folio-toc" aria-label="本页目录"><h2>本页目录</h2><ul>' +
-    doc.headings
-      .map(
-        (heading) =>
-          '<li class="folio-toc-depth-' +
-          heading.depth +
-          '"><a href="#' +
-          folioEscapeHtml(heading.id) +
-          '">' +
-          folioEscapeHtml(heading.text) +
-          "</a></li>",
-      )
-      .join("") +
-    "</ul></aside>"
-  );
-}
-
-function renderDocNav(context: FolioStaticBuildContext, doc: FolioDoc): string {
-  const collection = findFolioDocCollection(context.docs, doc);
-  if (!collection) return "";
-
-  const sections = collection.sections
-    .map(
-      (section) =>
-        "<section><h2>" +
-        folioEscapeHtml(section.title) +
-        "</h2><ul>" +
-        section.docs
-          .map(
-            (item) =>
-              '<li><a' +
-              (item.path === doc.path ? ' class="active" aria-current="page"' : "") +
-              ' href="' +
-              folioEscapeHtml(href(context.base, item.path)) +
-              '">' +
-              folioEscapeHtml(item.title) +
-              "</a></li>",
-          )
-          .join("") +
-        "</ul></section>",
-    )
-    .join("");
-
-  return '<nav class="folio-docnav" aria-label="文档目录">' + sections + "</nav>";
-}
-
-function renderPager(context: FolioStaticBuildContext, doc: FolioDoc): string {
-  const { previous, next } = getFolioDocNeighbors(context.docs, doc);
-  if (!previous && !next) return "";
-
-  const previousHtml = previous
-    ? '<a class="folio-page-nav__previous" href="' +
-      folioEscapeHtml(href(context.base, previous.path)) +
-      '"><span>上一篇</span><strong>' +
-      folioEscapeHtml(previous.title) +
-      "</strong></a>"
-    : "<span></span>";
-  const nextHtml = next
-    ? '<a class="folio-page-nav__next" href="' +
-      folioEscapeHtml(href(context.base, next.path)) +
-      '"><span>下一篇</span><strong>' +
-      folioEscapeHtml(next.title) +
-      "</strong></a>"
-    : "<span></span>";
-
-  return (
-    '<nav class="folio-page-nav" aria-label="文档分页">' +
-    previousHtml +
-    nextHtml +
-    "</nav>"
-  );
 }
 
 function renderEntryList(
@@ -154,19 +80,20 @@ function renderEntryList(
 function renderDoc(context: FolioStaticBuildContext, doc: FolioDoc): string {
   return (
     '<div class="folio-docs-runtime folio-docs-runtime--static"><div class="folio-docs-shell">' +
-    renderDocNav(context, doc) +
+    renderFolioStaticTreeNav(context, doc) +
     '<main class="folio-doc-main"><h1>' +
     folioEscapeHtml(doc.title) +
     "</h1>" +
     (doc.description
       ? '<p class="folio-lede">' + folioEscapeHtml(doc.description) + "</p>"
       : "") +
+    renderFolioStaticDocMeta(doc) +
     '<article class="folio-markdown">' +
     markdown(doc, context.base) +
     "</article>" +
-    renderPager(context, doc) +
+    renderFolioStaticPageNav(context, doc) +
     "</main>" +
-    renderToc(doc) +
+    renderFolioStaticToc(doc.headings) +
     "</div></div>"
   );
 }
@@ -182,10 +109,11 @@ function renderArticle(context: FolioStaticBuildContext, doc: FolioDoc): string 
     (doc.description
       ? '<p class="folio-lede">' + folioEscapeHtml(doc.description) + "</p>"
       : "") +
+    renderFolioStaticDocMeta(doc) +
     '<article class="folio-markdown">' +
     markdown(doc, context.base) +
     "</article></main>";
-  const toc = renderToc(doc);
+  const toc = renderFolioStaticToc(doc.headings);
   if (!toc) return article;
   return (
     '<div class="folio-article-layout"><details class="folio-article-mobile-toc"><summary>本页目录</summary>' +

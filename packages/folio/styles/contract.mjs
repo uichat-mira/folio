@@ -8,7 +8,7 @@
 // Changing a list here is a contract change: it must be justified by a task
 // that is allowed to touch the design system, not by a build refactor.
 
-// `:root` token declarations in source order (37 tokens). Order is asserted
+// `:root` token declarations in source order (38 tokens). Order is asserted
 // exactly, so renaming, removing or reordering a token fails the gate.
 export const ROOT_TOKEN_ORDER = [
   "--folio-primary",
@@ -37,6 +37,7 @@ export const ROOT_TOKEN_ORDER = [
   "--folio-font-sans",
   "--folio-font-display",
   "--folio-font-mono",
+  "--folio-header-height",
   "--folio-radius-sm",
   "--folio-radius-md",
   "--folio-radius-lg",
@@ -80,6 +81,7 @@ export const TOKEN_SAMPLE_VALUES = {
   "--folio-ink": "#141413",
   "--folio-canvas": "#faf9f5",
   "--folio-hairline": "#e6dfd8",
+  "--folio-header-height": "64px",
   "--folio-radius-md": "8px",
   "--folio-space-lg": "24px",
 };
@@ -221,9 +223,12 @@ export const REQUIRED_SELECTOR_FAMILIES = [
     selectors: [
       ".folio-docs-runtime",
       ".folio-docs-shell",
-      ".folio-docnav",
+      ".folio-tree-nav",
       ".folio-doc-main",
       ".folio-toc",
+      ".folio-toc__content",
+      ".folio-toc__list",
+      ".folio-toc__marker",
       ".folio-page-nav",
       ".folio-docs-mobile-bar",
       ".folio-docs-overlay",
@@ -256,7 +261,7 @@ export const REQUIRED_DECLARATIONS = {
   ".folio-search-overlay": "position: fixed",
   ".folio-search-dialog": "width: min(680px, 100%)",
   ".folio-docs-shell": "grid-template-columns: 250px",
-  ".folio-docnav": "position: sticky",
+  ".folio-tree-nav": "position: sticky",
   ".folio-doc-main": "padding: 48px 48px 96px",
   ".folio-page-nav": "display: grid",
   ".folio-prerender": "width: min(900px",
@@ -284,8 +289,8 @@ export const CASCADE_ORDER = [
   [".folio-search-overlay", ".folio-footer"],
   // Footer is the final component stylesheet now; the public footer rule
   // remains stable while its styles move into its owning module.
-  [".folio-docs-shell", ".folio-docnav"],
-  [".folio-docnav", ".folio-tree-nav__groups"],
+  [".folio-docs-shell", ".folio-tree-nav"],
+  [".folio-tree-nav", ".folio-tree-nav__groups"],
   [".folio-tree-nav__groups", ".folio-toc"],
   [".folio-toc", ".folio-footer"],
 ];
@@ -299,7 +304,7 @@ export const CONSUMER_CSS_SELECTORS = [
   ".folio-search-overlay",
   ".folio-share-button",
   ".folio-docs-shell",
-  ".folio-docnav",
+  ".folio-tree-nav",
   ".folio-page-nav",
   ".folio-prerender",
   ".folio-static-doc-menu",

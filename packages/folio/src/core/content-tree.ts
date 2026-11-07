@@ -6,6 +6,8 @@ import type { FolioDoc } from "../types";
 export type FolioContentTreeNode = {
   path: string;
   title: string;
+  /** Optional presentation role; directory routes remain ordinary content nodes. */
+  kind?: "section" | "page" | "directory";
   doc?: FolioDoc;
   children: FolioContentTreeNode[];
 };
@@ -13,6 +15,8 @@ export type FolioContentTreeNode = {
 export type FolioContentTree = {
   rootPath: string;
   roots: FolioContentTreeNode[];
+  /** Optional explicit navigation identity, separate from route geography. */
+  scopeId?: string;
 };
 
 export type FolioContentTreeOptions = {
@@ -31,9 +35,13 @@ function segmentTitle(segment: string): string {
   return decoded.replace(/[-_]+/g, " ");
 }
 
-function nodeOrder(node: FolioContentTreeNode): number {
+/** One ordering rule for directory parents and grouped navigation roots. */
+export function folioTreeNodeOrder(node: FolioContentTreeNode): number {
   if (node.doc) return node.doc.order;
-  return Math.min(99, ...node.children.map(nodeOrder));
+  return node.children.reduce(
+    (order, child) => Math.min(order, folioTreeNodeOrder(child)),
+    Number.POSITIVE_INFINITY,
+  );
 }
 
 /**
@@ -80,7 +88,7 @@ export function buildFolioContentTree(
 
   function sort(items: FolioContentTreeNode[]) {
     for (const node of items) sort(node.children);
-    items.sort((a, b) => nodeOrder(a) - nodeOrder(b) || a.path.localeCompare(b.path));
+    items.sort((a, b) => folioTreeNodeOrder(a) - folioTreeNodeOrder(b) || a.path.localeCompare(b.path));
   }
   sort(roots);
   return { rootPath, roots };

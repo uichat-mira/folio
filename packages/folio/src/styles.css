@@ -25,6 +25,7 @@
   --folio-font-sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --folio-font-display: "Cormorant Garamond", Garamond, "Times New Roman", serif;
   --folio-font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  --folio-header-height: 64px;
   --folio-radius-sm: 6px;
   --folio-radius-md: 8px;
   --folio-radius-lg: 12px;

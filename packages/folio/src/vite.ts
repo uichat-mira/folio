@@ -13,6 +13,10 @@ export {
   folioVirtualModule,
   renderFolioStaticHome,
   renderFolioStaticProjectShell,
+  renderFolioStaticPageNav,
+  renderFolioStaticDocMeta,
+  renderFolioStaticTreeNav,
+  renderFolioStaticToc,
   renderFolioStaticHtml,
   writeFolioStaticSite,
 } from "./build/vite-adapter";

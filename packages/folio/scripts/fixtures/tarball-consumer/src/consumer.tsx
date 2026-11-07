@@ -1,9 +1,14 @@
 import {
   FolioApp,
-  FolioDocNav,
   FolioToc,
+  FolioPageNav,
+  FolioDocMeta,
+  getFolioDocMeta,
   FolioTreeNav,
+  resolveFolioReaderKind,
+  shouldShowFolioPageFooter,
   buildFolioContentTree,
+  buildFolioNavigationTree,
   resolveFolioProjectTree,
   getFolioTreeNeighbors,
   buildFolioDocStructure,
@@ -22,10 +27,21 @@ import {
   type FolioDocCollection,
   type FolioDocSection,
   type FolioDocsShellProps,
-  type FolioDocNavProps,
+  type FolioDocMetaProps,
+  type FolioDocMetaField,
+  type FolioGitHistory,
+  type FolioGitRevision,
+  type FolioPageNavProps,
+  type FolioPageNavTarget,
+  type FolioPageNavNeighbors,
   type FolioTocProps,
   type FolioContentTree,
   type FolioTreeNavProps,
+  type FolioTreeExpansionProps,
+  type FolioNavigationTree,
+  type FolioNavigationNode,
+  type FolioNavigationTreeOptions,
+  type FolioReaderKind,
   type FolioDocStructure,
   type FolioEntryType,
   type FolioHeaderProps,
@@ -58,10 +74,14 @@ import {
 type PublicTypeSurface = {
   appProps: FolioAppProps;
   docsShellProps: FolioDocsShellProps;
-  docNavProps: FolioDocNavProps;
   tocProps: FolioTocProps;
   tree: FolioContentTree;
   treeNavProps: FolioTreeNavProps;
+  treeExpansionProps: FolioTreeExpansionProps;
+  navigationTree: FolioNavigationTree;
+  navigationNode: FolioNavigationNode;
+  navigationTreeOptions: FolioNavigationTreeOptions;
+  pageReader: FolioReaderKind;
   headerProps: FolioHeaderProps;
   shareButtonProps: FolioShareButtonProps;
   markdownProps: FolioMarkdownProps;
@@ -70,6 +90,13 @@ type PublicTypeSurface = {
   section: FolioDocSection;
   structure: FolioDocStructure;
   doc: FolioDoc;
+  docMetaProps: FolioDocMetaProps;
+  docMetaField: FolioDocMetaField;
+  gitHistory: FolioGitHistory;
+  gitRevision: FolioGitRevision;
+  pageNavProps: FolioPageNavProps;
+  pageNavTarget: FolioPageNavTarget;
+  pageNavNeighbors: FolioPageNavNeighbors;
   config: FolioConfig;
   navigationItem: FolioNavigationItem;
   slots: FolioSlots;
@@ -134,6 +161,9 @@ const pluginOptions: FolioPluginOptions = {
 
 const structure = buildFolioDocStructure(docs);
 const neighbors = getFolioDocNeighbors(docs, docs[0]);
+const standalonePager = <FolioPageNav next={{ path: "/docs/next", title: "Next" }} />;
+const standaloneMetadata = <FolioDocMeta doc={docs[0]} />;
+const metadataFields = getFolioDocMeta(docs[0]);
 const results = searchFolioDocs(docs, "intro");
 const html: string = renderFolioMarkdown("# Intro");
 const homeModel: FolioHomeModel = resolveFolioHome(config, docs);
@@ -146,17 +176,24 @@ const typedVirtualRoots: string[] = virtualRoots;
 const plugin = folio(pluginOptions);
 const app = <FolioApp config={config} docs={docs}
   slots={{
-    docNav: (props) => <FolioDocNav {...props} />,
+    navigation: (props) => <FolioTreeNav {...props} />,
     docToc: (props) => <FolioToc {...props} />,
-    projectNav: (props) => <FolioTreeNav {...props} />,
   }}
 />;
-const standaloneNav = <FolioDocNav doc={docs[0]} docs={docs} ariaLabel="Consumer docs" />;
+const standaloneNav = (
+  <FolioTreeNav
+    tree={buildFolioNavigationTree(docs, docs[0])}
+    currentPath={docs[0].path}
+    ariaLabel="Consumer docs"
+  />
+);
 const standaloneToc = <FolioToc headings={docs[0].headings} />;
 const contentTree = buildFolioContentTree(docs);
 const projectTree = resolveFolioProjectTree(docs, docs[0]);
 const standaloneTree = <FolioTreeNav tree={contentTree} currentPath={docs[0].path} />;
 const treeNeighbors = getFolioTreeNeighbors(projectTree, docs[0].path);
+const navigationTree = buildFolioNavigationTree(docs, docs[0]);
+const footerAllowed = shouldShowFolioPageFooter(resolveFolioReaderKind(docs[0], true), false);
 
 // @ts-expect-error FolioConfig requires both title and description.
 const missingDescription: FolioConfig = { title: "Only a title" };
@@ -168,6 +205,9 @@ export function consumerSurface(): unknown[] {
   return [
     structure,
     neighbors,
+    standalonePager,
+    standaloneMetadata,
+    metadataFields,
     results,
     html,
     escaped,
@@ -185,6 +225,8 @@ export function consumerSurface(): unknown[] {
     standaloneToc,
     standaloneTree,
     treeNeighbors,
+    navigationTree,
+    footerAllowed,
     missingDescription,
     missingConfig,
   ];

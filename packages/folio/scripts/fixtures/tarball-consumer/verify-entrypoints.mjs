@@ -67,9 +67,14 @@ const checks = [
 
       const entry = await import("@uichat-mira/folio");
       assert.equal(typeof entry.FolioApp, "function", "root entry does not export FolioApp");
-      assert.equal(typeof entry.FolioDocNav, "function", "root entry does not export FolioDocNav");
+      assert.equal("FolioDocNav" in entry, false, "obsolete separate sidebar entry is still exported");
       assert.equal(typeof entry.FolioToc, "function", "root entry does not export FolioToc");
+      assert.equal(typeof entry.FolioPageNav, "function", "root entry does not export FolioPageNav");
+      assert.equal(typeof entry.FolioDocMeta, "function", "root entry does not export FolioDocMeta");
+      assert.equal(typeof entry.getFolioDocMeta, "function", "root entry does not export getFolioDocMeta");
       assert.equal(typeof entry.FolioTreeNav, "function", "root entry does not export FolioTreeNav");
+      assert.equal(typeof entry.buildFolioNavigationTree, "function", "root entry does not export the unified navigation model");
+      assert.equal(typeof entry.getFolioNavigationNeighbors, "function", "root entry does not export unified reading neighbors");
       assert.equal(typeof entry.buildFolioContentTree, "function", "root entry does not export buildFolioContentTree");
       assert.equal(typeof entry.resolveFolioProjectTree, "function", "root entry does not export resolveFolioProjectTree");
       assert.equal(
@@ -132,6 +137,8 @@ const checks = [
       const entry = await import("@uichat-mira/folio/vite");
       assert.equal(typeof entry.folio, "function", "vite entry does not export folio()");
       assert.equal(typeof entry.renderFolioStaticProjectShell, "function", "vite entry lacks project renderer");
+      assert.equal(typeof entry.renderFolioStaticPageNav, "function", "vite entry lacks shared static pager");
+      assert.equal(typeof entry.renderFolioStaticDocMeta, "function", "vite entry lacks static document metadata");
       assert.equal(
         entry.folioVirtualModule,
         "virtual:folio/content",
@@ -169,7 +176,8 @@ const checks = [
         css.includes("--folio-primary"),
         "styles.css does not contain the Folio custom properties",
       );
-      assert.ok(css.includes(".folio-docnav"), "styles.css lacks document navigation");
+      assert.ok(css.includes(".folio-tree-nav"), "styles.css lacks unified navigation");
+      assert.equal(css.includes(".folio-docnav"), false, "legacy sidebar CSS still ships");
       assert.ok(css.includes(".folio-toc"), "styles.css lacks page TOC");
       assert.ok(css.includes(".folio-tree-nav"), "styles.css lacks project tree navigation");
       return `${entryFile} (${css.length} bytes)`;

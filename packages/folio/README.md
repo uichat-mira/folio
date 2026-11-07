@@ -116,17 +116,76 @@ See the [consumer contract](https://github.com/uichat-mira/folio/blob/dev/docs/c
 
 ## Documentation navigation components
 
-FolioDocNav and FolioToc are public React components, bundled through Folio's
-existing single CSS entry. FolioDocNav takes the current doc and docs, groups
-entries by collection/section and generates router-aware links. FolioToc
-takes parsed headings and tracks active anchors on scroll. Both support
-className and onNavigate. They are used by FolioDocsShell or independently.
+FolioTreeNav is the single sidebar renderer for ordinary documentation and
+project hierarchies. buildFolioNavigationTree(docs, current, { scopePath? })
+creates a unified, React-free tree. Collection/section labels are permanent
+non-interactive headings; only content nodes with children expose +/- buttons.
+By default a project is attached to a collection only when its route belongs
+to that collection's authored directories; an unrelated route is never claimed
+because multiple directories happen to share the root path. An explicit
+scopePath widens the navigation domain when a consumer intends to combine
+distant sections. Identically titled sections in different collections remain
+separate, and ambiguous projects retain their own group rather than joining a
+random namesake.
 
-For route-aware site customization use slots.docNav and slots.docToc, each a
-render function receiving the public component props for the active document.
-The same callback works on desktop and mobile; forward onNavigate when
-composing custom mobile menus. React slots do not modify the static HTML
-renderer, which continues to emit its default navigation for no-JS reading.
+FolioApp owns a navigation state provider above individual reading routes:
+manual expansion survives switching between technical documents and project
+articles within a navigation scope; the selected page's ancestors are opened
+on route changes. Selected backgrounds outrank hover backgrounds. Consumers
+using FolioTreeNav independently can control expansion via expandedPaths and
+onExpandChange. FolioToc remains a separate article-heading navigator.
+
+All components use Folio's single CSS entry and support Router basename and
+onNavigate for closing mobile drawers.
+
+For route-aware customization use slots.navigation and slots.docToc.
+The navigation callback receives { tree, currentPath, onNavigate } for every
+reading page, including ordinary docs and project articles. The same callback
+works on desktop and mobile; forward onNavigate to close mobile drawers.
+React slots do not modify the static HTML renderer, which continues to emit
+the default tree and links for no-JS reading.
+
+## Git-native document metadata
+
+`FolioDocMeta` is a compact editorial byline in the reading shells:
+initial/avatar, author, date and estimated reading time. Frontmatter `author`
+takes precedence over Git `createdBy`, and `publishedAt` takes precedence
+over `createdAt`. The optional object form `author: { name, avatar }`
+accepts an explicit root-relative or HTTP(S) image. Git-backed authors use
+verified GitHub noreply identities or a bounded, best-effort build-time commit
+API lookup for GitHub remotes. Offline or unknown identities use a square
+initial avatar. The browser never calls GitHub API or exposes Git author email.
+Set `FOLIO_GITHUB_AVATARS=0` to disable build-time API lookups; noreply and
+explicit images still work. Editorial authors different from the Git commit
+author never inherit that commit author's avatar.
+
+The complete Git history fields remain on `FolioDoc`: first/last commit
+timestamps and authors populate `createdAt`, `updatedAt`, `createdBy` and
+`updatedBy`, each independently overridable in Frontmatter. `author` and
+`publishedAt` remain editorial facts rather than synonyms for Git provenance.
+Untracked files have no inferred values; incomplete history never invents a
+first commit. `getFolioDocMeta(doc)` preserves the full field model, while
+`getFolioDocByline(doc)` is the shared presentation model used by React and
+`renderFolioStaticDocMeta(doc)` from `@uichat-mira/folio/vite`.
+
+## Previous/next page navigation
+
+FolioPageNav is the exported, presentational previous/next component.
+Pass `previous` and/or `next` as `{ path, title }` and optionally `className`
+or `ariaLabel`. It returns no markup when neither neighbor exists. With one
+neighbor, the opposite column remains empty to preserve alignment.
+
+Default reader ordering comes from `getFolioNavigationNeighbors(tree, currentPath)`
+on the same `buildFolioNavigationTree(docs, currentDoc)` as the left sidebar.
+Traversal includes embedded project pages and then the next document in the
+same collection (e.g., the final component page continues to Reference Index).
+Standalone project trees remain bounded to their top-level project. The narrower
+`getFolioDocNeighbors` and `getFolioTreeNeighbors` remain available for explicit
+consumer use, and `pageNeighbors` can override the default in `FolioDocsShell`.
+Static document and project builds follow the identical neighbor resolver and
+emit base-aware links. Custom static document renderers can import
+`renderFolioStaticPageNav(context, doc)` from `@uichat-mira/folio/vite`
+rather than hand-implementing their own pagination.
 
 ## Path-derived project hierarchy
 
@@ -143,11 +202,25 @@ ordered by frontmatter order. Missing overview pages become non-clickable
 directory labels instead of broken links. The route path is authoritative:
 explicit frontmatter path overrides also change inferred navigation ancestry.
 
-Consumers can call buildFolioContentTree(docs, { rootPath: "/projects" }) for
-any content type, use the public FolioTreeNav component, or customize the
-project reading navigation with slots.projectNav(props). Its props include the
-tree, currentPath and the mobile drawer's onNavigate callback. Unlike
-slots.docNav, this slot applies to project pages.
+FolioTreeNav renders every left sidebar through FolioTreeBranch. Collection
+sections such as API/Deployment are labels, always visible and never toggles.
+Content parent titles remain router links; + / − at the far right is a separate
+disclosure button sharing one row background, active state and subtle hover.
+Selected rows remain visually stronger than hovered rows. The child region
+animates to its actual height, while hidden descendants are inert and cannot
+receive focus. The animation obeys prefers-reduced-motion.
+
+FolioTreeExpansionProps keeps defaultExpanded, expandedPaths, and
+onExpandChange for consumers controlling disclosure state. Setting
+collapsible=false removes disclosure buttons and leaves every descendant
+link visible and focusable. Static HTML likewise keeps all descendant links
+visible without inert controls.
+
+Consumers can call buildFolioNavigationTree(docs, currentDoc, { scopePath })
+for a unified documentation and project tree, or buildFolioContentTree for a
+standalone hierarchy. FolioTreeNav renders both. The single slots.navigation
+callback replaces the entire sidebar for either reading page type; the
+consumer receives the assembled Core tree rather than re-deriving it.
 
 The static build uses the same Core content tree. Custom staticRoutes consumers
 can call renderFolioStaticProjectShell(context, doc, markdownHtml?) from the
@@ -162,6 +235,14 @@ optional brand identity (including a logo), link groups, copyright,
 registration links, and legal destinations. Set footer to false to hide the
 default footer, or use slots.footer for full React markup replacement.
 The public FolioFooter component can also be composed directly inside a router.
+
+When FolioApp renders its documentation reading shell (both doc and project
+pages), ui.footerOnDocs=false hides the site footer and articleFooter together.
+The option name is kept for compatibility, but its policy is based on the
+rendered layout, not a special case for project routes. Home, articles and
+collection indexes are unaffected. Consumers building their own shells can
+reuse resolveFolioReaderKind and shouldShowFolioPageFooter to make the same
+presentation decision.
 
 The official site uses this structured API, including deployment-base-aware
 logo assets; no organization branding or filing claims are baked into the

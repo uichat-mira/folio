@@ -251,10 +251,10 @@ export function FolioHeader({
               <ThemeIcon dark={darkMode} />
             </button>
           ) : null}
-          {shareEnabled && currentDoc ? (
+          {shareEnabled ? (
             <FolioShareButton
-              title={currentDoc.title}
-              text={currentDoc.description}
+              title={currentDoc?.title ?? config.title}
+              text={currentDoc?.description ?? config.description}
               className="folio-mobile-tool-share"
               compact
             />

@@ -41,7 +41,8 @@ test("dist/styles.css preserves every registered module stylesheet in manifest o
     [
       "src/ui/header/header.css",
       "src/styles/content.css",
-      "src/ui/doc-nav/doc-nav.css",
+      "src/ui/page-nav/page-nav.css",
+      "src/ui/doc-meta/doc-meta.css",
       "src/ui/tree-nav/tree-nav.css",
       "src/ui/toc/toc.css",
       "src/ui/popover/popover.css",

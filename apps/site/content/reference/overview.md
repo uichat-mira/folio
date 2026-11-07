@@ -31,7 +31,7 @@ plugin         folio()
 | 任务 | 文档 |
 | --- | --- |
 | 查 Frontmatter 字段和默认值 | [Frontmatter 参考](/reference/frontmatter) |
-| 查看内置 React 组件及目录父子关系示例 | [组件](/reference/components) |
+| 查看内置 React 组件、公开 API 与能力边界 | [组件](/reference/components) |
 | 接入 Vite plugin、理解构建阶段 | [Vite 构建集成](/reference/build-integration) |
 | 生成静态 HTML、metadata、sitemap 与 robots | [静态构建与 SEO](/reference/seo) |
 | 发布到 GitHub Pages 或下游平台 | [部署到 GitHub Pages](/reference/github-pages)、[Cloudflare Pages 案例](/reference/cloudflare-pages) |

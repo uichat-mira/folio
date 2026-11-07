@@ -1,7 +1,7 @@
 ---
 title: 编写内容
 description: 使用 Folio 创建文档、文章、项目和自定义页面。
-group: 入门
+group: 写作
 collection: 指南
 order: 11
 type: doc

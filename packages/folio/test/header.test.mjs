@@ -161,6 +161,23 @@ test("mobile disclosure buttons start collapsed and are labelled", () => {
   assert.match(menuButton[0], /aria-controls="/);
 });
 
+test("the collapsed mobile disclosure is inert and uses the +/x affordance", () => {
+  const html = render({ navigation: structured });
+
+  const panel = html.match(/<div[^>]*folio-mobile-group__panel[^>]*>/);
+  assert.ok(panel, "mobile group panel renders");
+  assert.match(panel[0], /aria-hidden="true"/);
+  assert.match(panel[0], /inert=""/);
+
+  // The mobile row copies the utility popover: CSS draws + and ×, so no
+  // desktop chevron should be rendered inside the trigger.
+  const triggerBlock = html.slice(
+    html.indexOf('class="folio-mobile-group__trigger"'),
+    html.indexOf('class="folio-mobile-group__panel"'),
+  );
+  assert.doesNotMatch(triggerBlock, /<svg/);
+});
+
 test("utility actions keep their labels and the search hint", () => {
   const html = render({ onSearch: () => {}, onToggleTheme: () => {}, darkMode: true });
   assert.match(html, /class="folio-search-trigger"/);
@@ -194,22 +211,27 @@ test("a consumer render prop precedes desktop theme actions", () => {
 });
 
 test("mobile share lives only inside the expanded-menu tool rail", () => {
+  // The share action is a page utility, not a document-only action: it shares
+  // whatever URL the reader is on, so pages without a current doc keep it too.
   const withoutDoc = render();
-  assert.doesNotMatch(withoutDoc, /folio-mobile-tool-share/);
-
-  const withDoc = render({ currentDoc: { title: "介绍", description: "一个文档" } });
-  const headerActions = withDoc.slice(
-    withDoc.indexOf('class="folio-header-actions"'),
-    withDoc.indexOf('class="folio-mobile-panel"'),
+  const headerActions = withoutDoc.slice(
+    withoutDoc.indexOf('class="folio-header-actions"'),
+    withoutDoc.indexOf('class="folio-mobile-panel"'),
   );
-  const mobileTools = withDoc.slice(withDoc.indexOf('class="folio-mobile-panel__actions"'));
+  const mobileTools = withoutDoc.slice(withoutDoc.indexOf('class="folio-mobile-panel__actions"'));
   assert.doesNotMatch(headerActions, /folio-mobile-tool-share/, "top header shows only the menu button");
   assert.match(mobileTools, /class="folio-mobile-tool-share"/);
   assert.match(mobileTools, /aria-label="分享"/);
+
+  const withDoc = render({ currentDoc: { title: "介绍", description: "一个文档" } });
   assert.equal((withDoc.match(/folio-mobile-tool-share/g) ?? []).length, 1);
 
-  const disabledShare = render({ currentDoc: { title: "介绍" }, shareEnabled: false });
+  const disabledShare = render({ shareEnabled: false });
   assert.doesNotMatch(disabledShare, /folio-mobile-tool-share/);
+  assert.doesNotMatch(
+    render({ currentDoc: { title: "介绍" }, shareEnabled: false }),
+    /folio-mobile-tool-share/,
+  );
 });
 
 test("mobile panel tools are icon-only but keep accessible labels", () => {
@@ -236,6 +258,9 @@ test("header utility popover exposes an accessible compact disclosure", () => {
   assert.match(html, /aria-expanded="false"/);
   assert.match(html, /aria-controls="/);
   assert.match(html, /class="folio-utility-popover__panel"/);
+  // The body wrapper is the single collapsing child the mobile height
+  // animation relies on; removing it would silently disable the transition.
+  assert.match(html, /class="folio-utility-popover__body"/);
   assert.ok(html.includes('href="/versions"'));
 });
 

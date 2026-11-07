@@ -1,7 +1,7 @@
 ---
 title: Markdown Runtime
 description: Folio 自带的 GFM、代码高亮、Callout、表格与 Mermaid 渲染能力。
-group: 入门
+group: 写作
 collection: 指南
 order: 12
 type: doc

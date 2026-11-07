@@ -158,6 +158,10 @@ export {
   folioEscapeHtml,
   renderFolioStaticHome,
   renderFolioStaticProjectShell,
+  renderFolioStaticPageNav,
+  renderFolioStaticDocMeta,
+  renderFolioStaticTreeNav,
+  renderFolioStaticToc,
   renderFolioStaticHtml,
   writeFolioStaticSite,
 } from "../static";

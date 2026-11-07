@@ -227,6 +227,9 @@ export function parseFolioDoc(sourcePath: string, raw: string): FolioDoc {
   const explicitPublishedAt = normalizeFolioDate(data.publishedAt);
   const legacyPublishedAt = normalizeFolioDate(data.date);
   const explicitUpdatedAt = normalizeFolioDate(data.updatedAt);
+  const explicitCreatedAt = normalizeFolioDate(data.createdAt);
+  const explicitPerson = (value: unknown): string | undefined =>
+    typeof value === "string" && value.trim() ? value.trim() : undefined;
 
   const publishedAt = explicitPublishedAt ?? legacyPublishedAt;
   const publishedAtSource: FolioDateSource = explicitPublishedAt
@@ -258,7 +261,10 @@ export function parseFolioDoc(sourcePath: string, raw: string): FolioDoc {
     order: Number(data.order ?? 99),
     date: data.date ? text(data.date) : undefined,
     publishedAt,
+    createdAt: explicitCreatedAt,
     updatedAt: explicitUpdatedAt,
+    createdBy: explicitPerson(data.createdBy),
+    updatedBy: explicitPerson(data.updatedBy),
     dateSources: {
       publishedAt: publishedAtSource,
       updatedAt: updatedAtSource,

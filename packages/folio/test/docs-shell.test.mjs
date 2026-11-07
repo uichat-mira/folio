@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
-import { FolioDocsShell, FolioDocNav, FolioToc } from "../dist/index.js";
+import { FolioDocsShell, FolioTreeNav, FolioToc, buildFolioNavigationTree } from "../dist/index.js";
 import { writeFolioStaticSite } from "../dist/vite.js";
 
 const docs = [
@@ -39,7 +39,7 @@ test("documentation reader starts with the title, not a category/share toolbar",
   assert.match(html, /下一篇/);
   // Document location remains legible in the sidebar without duplicating
   // metadata above the page title.
-  assert.doesNotMatch(html, /folio-docnav__collection/);
+  assert.match(html, /class="folio-tree-nav folio-tree-nav--sections"/);
   assert.match(html, /<h2>构建<\/h2>/);
 });
 
@@ -61,7 +61,7 @@ test("Folio core static docs match the uncluttered runtime; articles retain thei
     assert.match(docHtml, /<main class="folio-doc-main"><h1>Vite 构建集成<\/h1>/);
     assert.doesNotMatch(docHtml, /folio-doc-toolbar|folio-share-button/);
     assert.match(docHtml, /aria-label="文档目录"/);
-    assert.doesNotMatch(docHtml, /folio-docnav__collection/);
+    assert.match(docHtml, /class="folio-tree-nav folio-tree-nav--sections"/);
     assert.match(articleHtml, /folio-doc-toolbar/);
     assert.match(articleHtml, /<h1>文章<\/h1>/);
   } finally {
@@ -69,31 +69,34 @@ test("Folio core static docs match the uncluttered runtime; articles retain thei
   }
 });
 
-test("public FolioDocNav uses the current collection and exposes safe composition props", () => {
+test("public FolioTreeNav uses the current collection and exposes safe composition props", () => {
   const html = renderToStaticMarkup(createElement(
     MemoryRouter,
     { basename: "/folio", initialEntries: ["/folio/reference/vite"] },
-    createElement(FolioDocNav, {
-      doc: docs[0],
-      docs,
+    createElement(FolioTreeNav, {
+      tree: buildFolioNavigationTree(docs, docs[0]),
+      currentPath: docs[0].path,
       className: "consumer-doc-nav",
       ariaLabel: "产品文档导航",
       onNavigate() {},
     }),
   ));
-  assert.match(html, /class="folio-docnav consumer-doc-nav"/);
+  assert.match(html, /class="folio-tree-nav folio-tree-nav--sections consumer-doc-nav"/);
   assert.match(html, /aria-label="产品文档导航"/);
   assert.match(html, /<h2>构建<\/h2>/);
   assert.match(html, /href="\/folio\/reference\/vite"/);
   assert.match(html, /href="\/folio\/reference\/next"/);
   assert.match(html, /aria-current="page"/);
   assert.equal((html.match(/aria-current="page"/g) || []).length, 1);
-  assert.doesNotMatch(html, /folio-docnav__collection/);
+  assert.match(html, /folio-tree-nav__section/);
 
   const missing = { ...docs[0], type: "article", collection: "missing" };
   assert.equal(renderToStaticMarkup(createElement(
     MemoryRouter, { initialEntries: ["/"] },
-    createElement(FolioDocNav, { doc: missing, docs }),
+    createElement(FolioTreeNav, {
+      tree: buildFolioNavigationTree(docs, missing),
+      currentPath: missing.path,
+    }),
   )), "", "a document outside the supplied collection is not invented");
 });
 
@@ -105,20 +108,36 @@ test("FolioDocsShell render callbacks receive current nav/TOC props and preserve
       doc: docs[0],
       docs,
       renderNav(props) {
-        received.push({ kind: "nav", path: props.doc.path, total: props.docs.length });
-        return createElement(FolioDocNav, { ...props, className: "custom-nav" });
+        received.push({
+          kind: "nav",
+          path: props.currentPath,
+          roots: props.tree.roots.length,
+          dismissable: typeof props.onNavigate === "function",
+        });
+        return createElement(FolioTreeNav, { ...props, className: "custom-nav" });
       },
       renderToc(props) {
-        received.push({ kind: "toc", ids: props.headings.map(h => h.id) });
+        received.push({
+          kind: "toc",
+          ids: props.headings.map(h => h.id),
+          dismissable: typeof props.onNavigate === "function",
+        });
         return createElement(FolioToc, { ...props, className: "custom-toc" });
       },
     }),
   ));
+  // The mobile drawer and TOC stay mounted (but inert while closed) so the
+  // drawer keeps expansion state and the TOC panel can animate out. Both
+  // desktop and mobile use the consumer renderer; only the mobile instance
+  // receives a dismiss callback.
   assert.deepEqual(received, [
-    { kind: "nav", path: "/reference/vite", total: 2 },
-    { kind: "toc", ids: ["pipeline"] },
+    { kind: "nav", path: "/reference/vite", roots: 1, dismissable: true },
+    { kind: "toc", ids: ["pipeline"], dismissable: true },
+    { kind: "nav", path: "/reference/vite", roots: 1, dismissable: false },
+    { kind: "toc", ids: ["pipeline"], dismissable: false },
   ]);
-  assert.match(html, /class="folio-docnav custom-nav"/);
+  assert.match(html, /class="folio-mobile-toc" aria-hidden="true" inert=""/);
+  assert.match(html, /class="folio-tree-nav folio-tree-nav--sections custom-nav"/);
   assert.match(html, /class="folio-toc custom-toc"/);
   assert.match(html, /aria-label="文档分页"/);
   assert.match(html, /href="#pipeline"/);
@@ -127,7 +146,10 @@ test("FolioDocsShell render callbacks receive current nav/TOC props and preserve
 test("public navigation selection follows the provided current route", () => {
   const html = renderToStaticMarkup(createElement(
     MemoryRouter, { initialEntries: [docs[1].path] },
-    createElement(FolioDocNav, { doc: docs[1], docs }),
+    createElement(FolioTreeNav, {
+      tree: buildFolioNavigationTree(docs, docs[1]),
+      currentPath: docs[1].path,
+    }),
   ));
   assert.match(html, /<a class="active" aria-current="page" href="\/reference\/next"/);
   assert.doesNotMatch(html, /<a class="active" aria-current="page" href="\/reference\/vite"/);

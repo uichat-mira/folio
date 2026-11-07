@@ -1,6 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDownIcon } from "../../icons";
 import {
   isFolioNavItemActive,
   type FolioResolvedNavItem,
@@ -58,13 +57,14 @@ export function MobileNav({
               }
             >
               <span>{item.label}</span>
-              <ChevronDownIcon />
             </button>
             <div
               className={
                 "folio-mobile-group__panel" + (groupOpen ? " is-open" : "")
               }
               id={groupId}
+              aria-hidden={!groupOpen}
+              inert={!groupOpen}
             >
               <div className="folio-mobile-group__inner">
                 {item.groups.map((group) => (

@@ -17,12 +17,13 @@ import {
 import { normalizeBasePath } from "./core/config";
 import { FolioHeader } from "./ui/header";
 import { FolioFooter } from "./ui/footer";
+import { resolveFolioReaderKind, shouldShowFolioPageFooter } from "./ui/page-presentation";
 import { FolioDocsShell } from "./docs-shell";
-import { FolioTreeNav } from "./ui/tree-nav";
-import { getFolioTreeNeighbors, resolveFolioProjectTree } from "./core/content-tree";
+import { FolioNavigationStateProvider } from "./ui/tree-nav/NavigationState";
 
 import { SearchIcon } from "./icons";
 import { FolioShareButton } from "./share";
+import { FolioDocMeta } from "./ui/doc-meta";
 import { FolioMarkdown } from "./markdown-react";
 import { FolioToc } from "./ui/toc";
 import { searchFolioDocs } from "./core/search";
@@ -74,6 +75,7 @@ function DocumentPage({
       ) : null}
       <h1>{doc.title}</h1>
       {doc.description && <p className="folio-lede">{doc.description}</p>}
+      <FolioDocMeta doc={doc} />
       <FolioMarkdown source={doc.body} options={{ removeH1: true }} />
       {footer}
     </main>
@@ -110,26 +112,14 @@ function ProjectPage({
   footer?: ReactNode;
   slots?: FolioSlots;
 }) {
-  const tree = useMemo(() => resolveFolioProjectTree(docs, doc), [docs, doc]);
-  const neighbors = useMemo(
-    () => getFolioTreeNeighbors(tree, doc.path),
-    [tree, doc.path],
-  );
-
   return (
     <FolioDocsShell
       doc={doc}
       docs={docs}
       footer={footer}
       menuLabel="项目菜单"
-      pageNeighbors={neighbors}
       renderToc={slots?.docToc}
-      renderNav={({ onNavigate }) => {
-        const props = { tree, currentPath: doc.path, onNavigate };
-        return slots?.projectNav
-          ? slots.projectNav(props)
-          : <FolioTreeNav {...props} />;
-      }}
+      renderNav={slots?.navigation}
     />
   );
 }
@@ -567,7 +557,13 @@ function Shell({
   const themeEnabled = ui?.theme !== false;
   const shareEnabled = ui?.share !== false;
   const docsShellEnabled = ui?.docsShell !== false;
-  const showSiteFooter = current?.type !== "doc" || ui?.footerOnDocs !== false;
+  // The same page presentation decision owns both footer surfaces.
+  // Content type is resolved once into a reader kind, not reinterpreted here.
+  const footerVisible = (doc?: FolioDoc) => shouldShowFolioPageFooter(
+    resolveFolioReaderKind(doc, docsShellEnabled),
+    ui?.footerOnDocs,
+  );
+  const showSiteFooter = footerVisible(current);
   const themePreference = ui?.defaultTheme ?? "system";
   const [searchOpen, setSearchOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">(
@@ -646,36 +642,40 @@ function Shell({
               }
             />
           ))}
-          {docs.map((doc) => (
-            <Route
-              key={doc.path}
-              path={href(doc.path)}
-              element={
-                docsShellEnabled && doc.type === "project" ? (
-                  <ProjectPage
-                    doc={doc}
-                    docs={docs}
-                    footer={slots?.articleFooter}
-                    slots={slots}
-                  />
-                ) : docsShellEnabled && doc.type === "doc" ? (
-                  <FolioDocsShell
-                    doc={doc}
-                    docs={docs}
-                    footer={ui?.footerOnDocs === false ? undefined : slots?.articleFooter}
-                    renderNav={slots?.docNav}
-                    renderToc={slots?.docToc}
-                  />
-                ) : (
-                  <DocumentPage
-                    doc={doc}
-                    footer={doc.type === "doc" && ui?.footerOnDocs === false ? undefined : slots?.articleFooter}
-                    share={shareEnabled}
-                  />
-                )
-              }
-            />
-          ))}
+          {docs.map((doc) => {
+            const reader = resolveFolioReaderKind(doc, docsShellEnabled);
+            const articleFooter = footerVisible(doc) ? slots?.articleFooter : undefined;
+            return (
+              <Route
+                key={doc.path}
+                path={href(doc.path)}
+                element={
+                  reader === "project" ? (
+                    <ProjectPage
+                      doc={doc}
+                      docs={docs}
+                      footer={articleFooter}
+                      slots={slots}
+                    />
+                  ) : reader === "document" ? (
+                    <FolioDocsShell
+                      doc={doc}
+                      docs={docs}
+                      footer={articleFooter}
+                      renderNav={slots?.navigation}
+                      renderToc={slots?.docToc}
+                    />
+                  ) : (
+                    <DocumentPage
+                      doc={doc}
+                      footer={articleFooter}
+                      share={shareEnabled}
+                    />
+                  )
+                }
+              />
+            );
+          })}
           <Route
             path="*"
             element={
@@ -709,7 +709,9 @@ export function FolioApp({
 
   return (
     <BrowserRouter basename={basename === "/" ? undefined : basename.replace(/\/$/, "")}>
-      <Shell config={config} docs={docs} slots={slots} ui={ui} />
+      <FolioNavigationStateProvider>
+        <Shell config={config} docs={docs} slots={slots} ui={ui} />
+      </FolioNavigationStateProvider>
     </BrowserRouter>
   );
 }

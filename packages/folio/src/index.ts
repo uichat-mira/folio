@@ -1,16 +1,24 @@
 export { FolioApp } from "./app";
+export { resolveFolioReaderKind, shouldShowFolioPageFooter } from "./ui/page-presentation";
+export type { FolioReaderKind } from "./ui/page-presentation";
 export { FolioHeader } from "./ui/header";
 export { FolioFooter } from "./ui/footer";
 export type { FolioFooterProps } from "./ui/footer";
 export { FolioUtilityPopover } from "./ui/popover";
 export type { FolioUtilityPopoverProps } from "./ui/popover";
 export { FolioDocsShell } from "./docs-shell";
+export { FolioDocMeta } from "./ui/doc-meta";
+export type { FolioDocMetaProps } from "./ui/doc-meta";
+export { getFolioDocMeta, getFolioDocByline } from "./core/doc-meta";
+export type { FolioDocMetaField, FolioDocByline } from "./core/doc-meta";
+export { FolioPageNav } from "./ui/page-nav";
+export type { FolioPageNavProps } from "./ui/page-nav";
 export { FolioTreeNav } from "./ui/tree-nav";
-export type { FolioTreeNavProps } from "./ui/tree-nav";
-export { FolioDocNav } from "./ui/doc-nav";
-export type { FolioDocNavProps } from "./ui/doc-nav";
+export type { FolioTreeNavProps, FolioTreeExpansionProps } from "./ui/tree-nav";
 export { FolioToc } from "./ui/toc";
 export type { FolioTocProps } from "./ui/toc";
+export { buildFolioOutlineTree } from "./core/outline";
+export type { FolioOutlineNode } from "./core/outline";
 export type { FolioDocsShellProps } from "./docs-shell";
 export type { FolioHeaderProps } from "./ui/header";
 export { FolioShareButton } from "./share";
@@ -44,6 +52,8 @@ export type {
   FolioHomeSection,
 } from "./core/home";
 export { buildFolioDocStructure, findFolioDocCollection, getFolioDocNeighbors } from "./core/docs-structure";
+export { buildFolioNavigationTree, getFolioNavigationNeighbors } from "./core/navigation-tree";
+export type { FolioNavigationTree, FolioNavigationNode, FolioNavigationTreeOptions } from "./core/navigation-tree";
 export { buildFolioContentTree, resolveFolioProjectTree, getFolioTreeNeighbors, folioTreeDisplayLabel } from "./core/content-tree";
 export type { FolioContentTree, FolioContentTreeNode, FolioContentTreeOptions } from "./core/content-tree";
 export type { FolioDocCollection, FolioDocSection, FolioDocStructure } from "./core/docs-structure";
@@ -64,6 +74,8 @@ export { renderFolioMarkdown } from "./core/markdown";
 export type { FolioMarkdownRenderOptions } from "./core/markdown";
 export type {
   FolioAuthor,
+  FolioGitHistory,
+  FolioGitRevision,
   FolioConfig,
   FolioCollectionConfig,
   FolioDateSource,
@@ -74,6 +86,8 @@ export type {
   FolioFooterLegal,
   FolioFooterLink,
   FolioDoc,
+  FolioPageNavTarget,
+  FolioPageNavNeighbors,
   FolioHomeAboutSectionConfig,
   FolioHomeCollectionsSectionConfig,
   FolioHomeConfig,
