@@ -31,35 +31,20 @@ html { scroll-behavior: smooth; }
   background: rgba(204, 120, 92, 0.24);
 }
 
-/* The complete approved wordmark replaces the prototype "F" tile.
-   Both SVG variants are real paths; the inverse is not produced by a filter. */
-.folio-brand::before {
-  content: "";
+/* The official wordmark is content supplied through Folio's headerBrand slot.
+   This style owns only the site-provided element, not the shared Header. */
+.site-header-wordmark {
   display: block;
+  flex: none;
   width: 94px;
   height: 40px;
-  flex: none;
   background: url("/folio-logo.svg") center / contain no-repeat;
 }
 
-[data-folio-theme="dark"] .folio-brand::before {
+[data-folio-theme="dark"] .site-header-wordmark {
   background-image: url("/folio-logo-inverse.svg");
 }
 
-/* Keep the accessible anchor name without repeating the wordmark visually. */
-.folio-brand > span {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-/* The brand identity and rail width are site-specific; the navigation
-   layout stays in Folio so consumers do not need a second Header. */
 .site-header-action {
   display: inline-flex;
   height: 40px;
@@ -96,9 +81,8 @@ html { scroll-behavior: smooth; }
   line-height: 1.6;
 }
 
-/* The wordmark is a site-owned brand asset; mobile sizing does not alter Folio layout. */
 @media (max-width: 780px) {
-  .folio-brand::before { width: 86px; height: 36px; }
+  .site-header-wordmark { width: 86px; height: 36px; }
 }
 
 /* Demonstration of the reusable utility popover using real Folio releases. */
