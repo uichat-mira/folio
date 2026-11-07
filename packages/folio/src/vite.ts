@@ -15,6 +15,7 @@ export {
   renderFolioStaticProjectShell,
   renderFolioStaticPageNav,
   renderFolioStaticDocMeta,
+  renderFolioStaticDocumentBody,
   renderFolioStaticTreeNav,
   renderFolioStaticToc,
   renderFolioStaticHtml,
