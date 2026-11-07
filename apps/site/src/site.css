@@ -28,7 +28,7 @@
 html { scroll-behavior: smooth; }
 
 ::selection {
-  background: rgba(204, 120, 92, 0.24);
+  background: color-mix(in srgb, var(--folio-primary) 24%, transparent);
 }
 
 /* The official wordmark is content supplied through Folio's headerBrand slot.
@@ -85,15 +85,18 @@ html { scroll-behavior: smooth; }
   .site-header-wordmark { width: 86px; height: 36px; }
 }
 
-/* Demonstration of the reusable utility popover using real Folio releases. */
-.site-version-popover .folio-utility-popover__trigger {
+/* Only the content supplied by this site is styled here.
+   FolioUtilityPopover owns the trigger/panel layout and interactions. */
+.site-version-popover__trigger {
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
 }
 
-.site-version-popover .folio-utility-popover__trigger > svg {
+.site-version-popover__trigger > svg {
   width: 14px;
   height: 14px;
   fill: none;
@@ -103,12 +106,7 @@ html { scroll-behavior: smooth; }
   stroke-linejoin: round;
 }
 
-.site-version-popover .folio-utility-popover__panel {
-  min-width: 192px;
-  padding: 6px;
-}
-
-.site-version-popover .folio-utility-popover__body > a,
+.site-version-popover__link,
 .site-version-popover__current {
   display: flex;
   min-height: 38px;
@@ -120,11 +118,8 @@ html { scroll-behavior: smooth; }
   font-size: 13px;
 }
 
-.site-version-popover .folio-utility-popover__body > a {
-  color: var(--folio-body);
-}
-
-.site-version-popover .folio-utility-popover__body > a:hover {
+.site-version-popover__link { color: var(--folio-body); }
+.site-version-popover__link:hover {
   background: var(--folio-surface-soft);
   color: var(--folio-ink);
 }
@@ -153,16 +148,11 @@ html { scroll-behavior: smooth; }
 }
 
 @media (max-width: 780px) {
-  /* The mobile section owns the +/- indicator; do not repeat the desktop chevron. */
-  .site-version-popover .folio-utility-popover__trigger > svg {
-    display: none;
-  }
+  /* Mobile menu uses its own open/close affordance. */
+  .site-version-popover__trigger > svg,
+  .site-version-popover__current { display: none; }
 
-  .site-version-popover .site-version-popover__current {
-    display: none;
-  }
-
-  .site-version-popover .folio-utility-popover__body > a {
+  .site-version-popover__link {
     min-height: 36px;
     padding: 6px 0;
     border-radius: 0;
