@@ -1,5 +1,6 @@
 import type { FolioDoc } from "../types";
 import {
+  buildFolioContentTree,
   folioTreeNodeOrder,
   type FolioContentTree,
   type FolioContentTreeNode,
@@ -67,28 +68,12 @@ function sectionNode(id: string, title: string, children: FolioNavigationNode[])
  * Nesting is a property of the route tree, not a special "project" content type.
  * Grouping and ordering remain owned by the existing collection/section contract.
  */
-function sectionPages(docs: readonly FolioDoc[]): FolioNavigationNode[] {
-  const nodes = new Map<string, FolioNavigationNode>();
-  for (const doc of docs) {
-    const path = normalizedPath(doc.path);
-    if (nodes.has(path)) throw new Error("Folio navigation: duplicate route " + path);
-    nodes.set(path, { path, title: doc.title, kind: "page", doc, children: [] });
-  }
-
-  const roots: FolioNavigationNode[] = [];
-  for (const node of nodes.values()) {
-    let ancestor = parentDirectory(node.path);
-    let parent: FolioNavigationNode | undefined;
-    while (ancestor !== "/") {
-      parent = nodes.get(ancestor);
-      if (parent) break;
-      ancestor = parentDirectory(ancestor);
-    }
-    if (parent) parent.children.push(node);
-    else roots.push(node);
-  }
-  sortNodes(roots);
-  return roots;
+function sectionPages(docs: readonly FolioDoc[], rootPath: string): FolioNavigationNode[] {
+  // Preserve the shared content-tree contract: missing overviews are visible
+  // directories, but never fabricated as clickable pages.
+  const includesRoot = docs.some((doc) => normalizedPath(doc.path) === rootPath);
+  const scope = includesRoot ? parentDirectory(rootPath) : rootPath;
+  return buildFolioContentTree(docs, { rootPath: scope }).roots;
 }
 
 /**
@@ -124,7 +109,7 @@ export function buildFolioNavigationTree(
         !explicitlyScoped || isWithin(normalizedPath(doc.path), scopePath));
       if (!documents.length) continue;
       const id = "collection:" + collection.id + "/" + section.id;
-      roots.push(sectionNode(id, section.title, sectionPages(documents)));
+      roots.push(sectionNode(id, section.title, sectionPages(documents, scopePath)));
     }
   }
   sortNodes(roots);

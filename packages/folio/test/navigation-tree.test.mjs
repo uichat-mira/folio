@@ -87,11 +87,11 @@ test("same-named sections from distinct collections remain separate in explicit 
   const tree=buildFolioNavigationTree([alpha,beta,nested],alpha,{scopePath:"/"});
   const groups=tree.roots.filter(group=>group.title==="API");
   assert.equal(groups.length,2);
-  const a=groups.find(group=>group.children.some(child=>child.path===alpha.path));
-  const b=groups.find(group=>group.children.some(child=>child.path===beta.path));
+  const a=groups.find(group=>JSON.stringify(group).includes(alpha.path));
+  const b=groups.find(group=>JSON.stringify(group).includes(beta.path));
   assert.ok(a && b && a!==b);
   assert.doesNotMatch(JSON.stringify(a),/b\/second/);
-  assert.equal(b.children[0].children[0].path,nested.path);
+  assert.equal(b.children[0].children[0].children[0].path,nested.path);
 });
 
 test("missing authored parents never become fake links in the reading sidebar",()=>{
@@ -99,7 +99,7 @@ test("missing authored parents never become fake links in the reading sidebar",(
   const tree=buildFolioNavigationTree([...source,child],child);
   const all=JSON.stringify(tree.roots);
   assert.match(all,/reference\/deep\/unknown\/leaf/);
-  assert.doesNotMatch(all,/"path":"\/reference\/deep\/unknown","title"/);
+  assert.match(all,/"path":"\/reference\/deep\/unknown","title":"unknown"/);
   const context={docs:[...source,child],base:"/folio/",config:{title:"Folio"},roots:[],outDir:""};
   assert.doesNotMatch(renderFolioStaticTreeNav(context,child),/href="\/folio\/reference\/deep\/unknown\/"/);
 });
@@ -109,6 +109,8 @@ test("authored orders above 99 are retained without clipping or fake project gro
   const second=doc("/projects/implicit/child","后文","doc","项目",120,"Independent");
   const tree=buildFolioNavigationTree([first,second],first);
   assert.deepEqual(tree.roots.map(x=>x.title),["项目"]);
-  assert.deepEqual(tree.roots[0].children.map(x=>x.path),[first.path,second.path]);
+  assert.deepEqual(tree.roots[0].children.map(x=>x.path),[first.path,"/projects/implicit"]);
+  assert.equal(tree.roots[0].children[1].children[0].path,second.path);
+  assert.equal(tree.roots[0].children[1].doc,undefined);
   assert.equal(getFolioNavigationNeighbors(tree,first.path).next.path,second.path);
 });
