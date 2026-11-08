@@ -1,7 +1,9 @@
 ---
 title: FolioToc
 description: 读取当前 Markdown 标题、生成页内锚点并随滚动高亮的公开组件。
-type: project
+type: doc
+collection: 参考
+section: API
 order: 55
 status: draft
 tags: [Navigation, TOC, API]

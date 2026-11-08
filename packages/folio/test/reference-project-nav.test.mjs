@@ -16,15 +16,15 @@ const overview=doc("/reference/overview","参考索引","doc","API",40,"参考")
 const build=doc("/reference/build","构建集成","doc","API",50,"参考");
 const deploy=doc("/reference/deploy","部署","doc","部署",90,"参考");
 const guide=doc("/guide/introduction","指南","doc","开始",1,"指南");
-const components=doc("/reference/components","组件","project","API",1);
-const app=doc("/reference/components/app","FolioApp","project","API",10);
-const slots=doc("/reference/components/app/slots","应用插槽","project","API",10);
-const navigationSlot=doc("/reference/components/app/slots/navigation","导航覆写","project","API",10);
-const nav=doc("/reference/components/navigation","导航组件","project","API",20);
-const tree=doc("/reference/components/navigation/tree-nav","FolioTreeNav","project","API",10);
-const contentTree=doc("/reference/components/navigation/tree-nav/content-tree","内容树模型","project","API",10);
-const parent=doc("/reference/components/navigation/tree-nav/content-tree/parent-inference","父级推导","project","API",10);
-const stray=doc("/guide/examples/example","指南示例","project","API",2);
+const components=doc("/reference/components","组件","doc","API",1,"参考");
+const app=doc("/reference/components/app","FolioApp","doc","API",10,"参考");
+const slots=doc("/reference/components/app/slots","应用插槽","doc","API",10,"参考");
+const navigationSlot=doc("/reference/components/app/slots/navigation","导航覆写","doc","API",10,"参考");
+const nav=doc("/reference/components/navigation","导航组件","doc","API",20,"参考");
+const tree=doc("/reference/components/navigation/tree-nav","FolioTreeNav","doc","API",10,"参考");
+const contentTree=doc("/reference/components/navigation/tree-nav/content-tree","内容树模型","doc","API",10,"参考");
+const parent=doc("/reference/components/navigation/tree-nav/content-tree/parent-inference","父级推导","doc","API",10,"参考");
+const stray=doc("/guide/examples/example","指南示例","page","API",2);
 const docs=[guide,overview,deploy,build,slots,tree,components,nav,navigationSlot,app,parent,contentTree,stray];
 const navigation=(current,props={})=>
   createElement(FolioTreeNav,{

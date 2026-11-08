@@ -92,34 +92,6 @@ function DocumentPage({
   );
 }
 
-/**
- * Project routes use the standard reading shell but a directory-derived tree.
- * The tree is built when this route is mounted, not for every static route
- * declaration or on every parent re-render.
- */
-function ProjectPage({
-  doc,
-  docs,
-  footer,
-  slots,
-}: {
-  doc: FolioDoc;
-  docs: FolioDoc[];
-  footer?: ReactNode;
-  slots?: FolioSlots;
-}) {
-  return (
-    <FolioDocsShell
-      doc={doc}
-      docs={docs}
-      footer={footer}
-      menuLabel="项目菜单"
-      renderToc={slots?.docToc}
-      renderNav={slots?.navigation}
-    />
-  );
-}
-
 function EntryList({
   entries,
   headingLevel,
@@ -547,7 +519,6 @@ function Shell({
   const navigation = config.navigation ?? [
     { label: "文档", href: "/docs" },
     { label: "博客", href: "/blogs" },
-    { label: "项目", href: "/projects" },
   ];
   const searchEnabled = ui?.search !== false;
   const themeEnabled = ui?.theme !== false;
@@ -648,14 +619,7 @@ function Shell({
                 key={doc.path}
                 path={href(doc.path)}
                 element={
-                  reader === "project" ? (
-                    <ProjectPage
-                      doc={doc}
-                      docs={docs}
-                      footer={articleFooter}
-                      slots={slots}
-                    />
-                  ) : reader === "document" ? (
+                  reader === "document" ? (
                     <FolioDocsShell
                       doc={doc}
                       docs={docs}

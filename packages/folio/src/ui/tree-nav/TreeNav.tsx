@@ -31,7 +31,7 @@ function selectedAncestors(tree: FolioContentTree, currentPath: string): string[
   return [];
 }
 
-/** The only React sidebar renderer for project and collection navigation. */
+/** The shared React sidebar renderer for authored document and content trees. */
 export function FolioTreeNav({
   tree, currentPath, className, ariaLabel, onNavigate,
   collapsible = true, defaultExpanded = false, expandedPaths, onExpandChange,

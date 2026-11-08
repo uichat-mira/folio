@@ -1,7 +1,9 @@
 ---
 title: FolioUtilityPopover
 description: 支持聚焦、Escape 与外部点击关闭的轻量信息浮层。
-type: project
+type: doc
+collection: 参考
+section: API
 order: 70
 status: draft
 tags: [Popover, React, Accessibility]

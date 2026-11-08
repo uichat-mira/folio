@@ -36,6 +36,15 @@ owners:
   assert.equal(doc.headings[0].id, "roadmap");
 });
 
+test("projects directories use the ordinary document model unless type is explicitly overridden", () => {
+  const implicit = parseFolioDoc("projects/atlas/index.md", "---\ntitle: Atlas\n---\n## Introduction");
+  assert.equal(implicit.path, "/projects/atlas");
+  assert.equal(implicit.type, "doc");
+  assert.equal(implicit.group, "文档");
+  const explicit = parseFolioDoc("projects/atlas/about.md", "---\ntitle: About\ntype: page\n---\n## About");
+  assert.equal(explicit.type, "page");
+});
+
 test("duplicate headings receive deterministic suffixes", () => {
   assert.deepEqual(
     extractHeadings("## Same\n## Same").map((heading) => heading.id),

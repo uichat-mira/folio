@@ -1,7 +1,9 @@
 ---
 title: FolioMarkdown
 description: Folio 公开 Markdown 阅读组件及构建时/运行时的渲染能力边界。
-type: project
+type: doc
+collection: 参考
+section: API
 order: 60
 status: draft
 tags: [Markdown, React, Rendering]

@@ -1,7 +1,9 @@
 ---
 title: FolioPageNav
 description: 独立可组合的上一篇／下一篇导航组件，支持文档集合与项目目录的翻页。
-type: project
+type: doc
+collection: 参考
+section: API
 order: 45
 status: draft
 tags: [React, Pagination, API]

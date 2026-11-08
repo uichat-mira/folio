@@ -55,10 +55,10 @@ surface: handbook
 
 ## 默认值
 
-- `type`：按目录推断，`blogs/*` 为 `article`，`projects/*` 为 `project`，其他为 `doc`。
+- `type`：按目录推断，`blogs/*` 为 `article`，其他目录（包括 `projects/*`）为 `doc`。
 - `path`：由文件位置生成，`index.md` 映射到目录本身。
 - `order`：默认 `99`。
-- `group`：按类型生成，文章为「博客」，项目为「项目」，其他为「文档」。
+- `group`：按类型生成，文章为「博客」，其余默认为「文档」。
 - `tags`：空数组。
 
 ## 导航字段

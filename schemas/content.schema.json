@@ -11,6 +11,7 @@
     "path": { "type": "string", "pattern": "^/" },
     "type": {
       "type": "string",
+      "description": "Use doc, article, or page. The project value is accepted only for legacy content compatibility.",
       "enum": ["doc", "article", "project", "page"]
     },
     "group": { "type": "string" },

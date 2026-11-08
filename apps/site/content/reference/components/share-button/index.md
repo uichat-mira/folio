@@ -1,7 +1,9 @@
 ---
 title: FolioShareButton
 description: 可用时调用 Web Share，不支持时通过剪贴板复制页面 URL。
-type: project
+type: doc
+collection: 参考
+section: API
 order: 80
 status: draft
 tags: [Share, React, Browser]
