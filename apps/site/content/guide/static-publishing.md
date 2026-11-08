@@ -18,14 +18,14 @@ Folio 的 Vite 插件不只负责把 Markdown 变成浏览器里的运行时数�
 
 ## 当前官方站会生成什么
 
-每次生产构建至少包含：
+当前官方站的构建包含以下代表性文件：
 
 ```text
 dist/
 ├── index.html
-├── docs/introduction/index.html
-├── docs/runtime-composition/index.html
-├── projects/folio/index.html
+├── guide/introduction/index.html
+├── guide/runtime-composition/index.html
+├── about/index.html
 ├── reference/site/index.html
 ├── 404.html
 ├── sitemap.xml
@@ -78,9 +78,9 @@ const base = resolveGithubPagesBase(process.env.GITHUB_REPOSITORY);
 
 ## 无 JavaScript 时能做什么
 
-官方站通过 `staticRoutes.routes` 提供自己的静态 body，因此静态文档页在无 JavaScript 时只有正文：能阅读单篇文档，但没有跨文档侧栏、页内目录和上一篇/下一篇。
+官方站通过 `staticRoutes.routes` 组合自己的静态页面，其中文档页仍输出侧边栏、页内目录和上一篇/下一篇；无 JavaScript 时也可以通过真实构建出的路由继续阅读。
 
-库默认的 `staticRoutes: true` 不同：默认文档壳会生成侧栏、页内目录与上一篇/下一篇，链接都指向真实生成的文件，所以无 JavaScript 也能导航。
+库默认的 `staticRoutes: true` 使用通用文档壳生成相应导航。两者构建入口不同，但都应保留真实的静态阅读路径。
 
 两种模式的完整对比，以及静态目录 URL 与 React 路由尾斜杠的差异，见[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)。
 
