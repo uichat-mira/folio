@@ -7,7 +7,6 @@ import {
 } from "@uichat-mira/folio";
 import {
   folioEscapeHtml,
-  renderFolioStaticProjectShell,
   renderFolioStaticPageNav,
   renderFolioStaticDocumentBody,
   renderFolioStaticTreeNav,
@@ -196,8 +195,6 @@ export function buildShowcaseStaticRoutes(
       body:
         doc.type === "doc"
           ? renderDoc(context, doc)
-          : doc.type === "project"
-            ? renderFolioStaticProjectShell(context, doc, markdown(doc, context.base))
           : doc.type === "article"
             ? renderArticle(context, doc)
             : renderGeneric(context, doc),
