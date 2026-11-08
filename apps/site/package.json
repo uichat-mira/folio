@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/copy-schemas.mjs",
+    "build": "vite build && node scripts/copy-schemas.mjs && node scripts/verify-site-routes.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

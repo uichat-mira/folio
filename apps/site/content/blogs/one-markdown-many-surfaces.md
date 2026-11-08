@@ -78,6 +78,6 @@ React 与静态输出可以长得不完全一样，但核心阅读路径不应�
 
 想继续沿着这条数据流往下看，可以阅读：
 
-- [从一个内容文件到最终静态页面](/showcase/from-file-to-page)；
+- [静态发布与 SEO](/guide/static-publishing)；
 - [导航与内容清单](/guide/navigation)；
 - [静态构建与 SEO](/reference/seo)。

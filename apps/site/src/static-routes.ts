@@ -23,7 +23,6 @@ import { HomePage } from "./HomePage";
 const TYPE_LABEL: Record<string, string> = {
   doc: "文档",
   article: "文章",
-  project: "项目",
   page: "页面",
 };
 
@@ -153,7 +152,7 @@ function renderCollection(
   );
 }
 
-export function buildShowcaseStaticRoutes(
+export function buildFolioSiteStaticRoutes(
   context: FolioStaticBuildContext,
 ): FolioStaticRoute[] {
   assertNoFolioCollectionConflicts(context.docs, context.config);

@@ -8,7 +8,6 @@ import { HomePage } from "./HomePage";
 import { HeaderVersionPopover } from "./HeaderVersionPopover";
 import { withFolioBaseLinks } from "./content-links";
 import "./site.css";
-import "./showcase.css";
 import "./home.css";
 import "./legacy-claude-visual.css";
 
