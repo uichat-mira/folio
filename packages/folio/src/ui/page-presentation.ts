@@ -1,6 +1,6 @@
 import type { FolioDoc } from "../types";
 
-export type FolioReaderKind = "document" | "project" | null;
+export type FolioReaderKind = "document" | null;
 
 /** Classify the actual page reader before applying any footer policy. */
 export function resolveFolioReaderKind(
@@ -9,7 +9,6 @@ export function resolveFolioReaderKind(
 ): FolioReaderKind {
   if (!doc || !docsShellEnabled) return null;
   if (doc.type === "doc") return "document";
-  if (doc.type === "project") return "project";
   return null;
 }
 

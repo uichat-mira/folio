@@ -48,10 +48,9 @@ type: doc
 | --- | --- | --- |
 | `doc` | 文档、指南、参考 | 左侧导航 + 页内目录 |
 | `article` | 博客、按日期阅读的长文 | 文章布局 + 页内目录 |
-| `project` | 项目概览与项目子页 | 项目目录树 + 页内目录 |
 | `page` | 独立案例、附录、自定义页面 | 普通页面，无侧栏 |
 
-未写 `type` 时，`blogs/*` 推断为 `article`，`projects/*` 推断为 `project`，其他目录推断为 `doc`。每种类型的布局差异与路由规则见 [内容类型与路由](/guide/content-types)。
+未写 `type` 时，`blogs/*` 推断为 `article`，其他目录（包括 `projects/*`）推断为 `doc`。每种类型的布局差异与路由规则见 [内容类型与路由](/guide/content-types)。
 
 ## Frontmatter 写什么
 

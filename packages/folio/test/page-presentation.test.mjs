@@ -7,7 +7,7 @@ import {
 test("reading layout classification is the sole source of footer policy", () => {
   for (const [type, reader] of [
     ["doc", "document"],
-    ["project", "project"],
+    ["project", null],
     ["article", null],
     ["page", null],
   ]) {
@@ -26,7 +26,7 @@ test("reading layout classification is the sole source of footer policy", () => 
 });
 
 test("global and article footers share one decision", () => {
-  for (const type of ["doc", "project", "article"]) {
+  for (const type of ["doc", "page", "article"]) {
     const reader = resolveFolioReaderKind({ type }, true);
     const visible = shouldShowFolioPageFooter(reader, false);
     const siteFooter = visible ? "site footer" : undefined;

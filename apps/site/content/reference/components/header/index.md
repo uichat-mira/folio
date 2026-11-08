@@ -1,7 +1,9 @@
 ---
 title: FolioHeader
 description: 内置站点导航、移动菜单、搜索、主题与分享操作的应用 Header。
-type: project
+type: doc
+collection: 参考
+section: API
 order: 20
 status: draft
 tags: [React, Header, Navigation]

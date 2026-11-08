@@ -31,7 +31,7 @@ tags:
 
 ## 默认行为
 
-- 未写 `type` 时，`blogs/*` 推断为 `article`，`projects/*` 推断为 `project`，其他为 `doc`。
+- 未写 `type` 时，`blogs/*` 推断为 `article`，其他目录（包括 `projects/*`）为 `doc`。
 - 未写 `path` 时，由 Markdown 文件路径生成；`index.md` 映射到目录路由。
 - `order` 默认 `99`；文章之间按 `date` 倒序优先，再按 `order` 排序。
 - `group` 默认按 entry type 生成；官方站用 group 组织 sidebar，用 order 稳定组内顺序。

@@ -11,7 +11,7 @@ export type FolioSlots = {
   headerBrand?: ReactNode;
   headerActions?: ReactNode;
   articleFooter?: ReactNode;
-  /** One navigation override for both docs and projects, desktop and mobile. */
+  /** One navigation override for document readers, desktop and mobile. */
   navigation?: (props: FolioTreeNavProps) => ReactNode;
   /** Current-document TOC renderer; called for desktop and opened mobile TOC. */
   docToc?: (props: FolioTocProps) => ReactNode;
@@ -28,7 +28,7 @@ export type FolioUiOptions = {
   docsShell?: boolean;
   /**
    * Show site Footer and articleFooter in the shared documentation reading
-   * layout (including project pages; default: true). Kept under its existing
+   * layout (default: true). Kept under its existing
    * name for consumer compatibility.
    */
   footerOnDocs?: boolean;

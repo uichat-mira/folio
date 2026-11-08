@@ -29,12 +29,12 @@ function renderPager(props, basename="/folio") {
   ));
 }
 
-function fixture(path, title, type, order) {
+function fixture(path, title, type, order, collection = "参考") {
   return {
     id:path, path, title,
     sourcePath:path.slice(1)+"/index.md",
     type, group:"API",
-    collection:type==="doc"?"参考":undefined,
+    collection:type==="doc"?collection:undefined,
     section:type==="doc"?"构建":undefined,
     description:"", body:"## 详情", headings:[],
     tags:[], data:{}, order,
@@ -82,9 +82,9 @@ test("FolioDocsShell composes the same exported pager with collection ordering",
 });
 
 test("static document and project readers use one pager structure and base-safe links",()=>{
-  const project=fixture("/projects/atlas","Atlas","project",1);
-  const child=fixture("/projects/atlas/story","故事","project",2);
-  const sibling=fixture("/projects/other","其他项目","project",1);
+  const project=fixture("/projects/atlas","Atlas","doc",1,"Atlas");
+  const child=fixture("/projects/atlas/story","故事","doc",2,"Atlas");
+  const sibling=fixture("/projects/other","其他项目","doc",1,"Other");
   const docs=[current,previous,next,project,child,sibling];
   const directory=mkdtempSync(resolve(tmpdir(),"folio-public-page-nav-"));
   try {
@@ -119,8 +119,8 @@ test("static document and project readers use one pager structure and base-safe 
 });
 
 test("static pagination safely escapes titles and never exposes raw markup",()=>{
-  const malicious=fixture("/projects/atlas/story","<script>alert('x')</script> & 安全","project",2);
-  const parent=fixture("/projects/atlas","Atlas","project",1);
+  const malicious=fixture("/projects/atlas/story","<script>alert('x')</script> & 安全","doc",2,"Atlas");
+  const parent=fixture("/projects/atlas","Atlas","doc",1,"Atlas");
   const context={
     docs:[parent,malicious],roots:[],base:"/folio/",
     config:{title:"Folio",description:"",siteUrl:"https://example.com/folio"},
@@ -184,9 +184,9 @@ test("the last component continues to the Reference Index in the same sidebar or
 });
 
 test("standalone project navigation remains bounded to its own project",()=>{
-  const atlas=fixture("/projects/atlas","Atlas","project",1);
-  const child=fixture("/projects/atlas/story","故事","project",2);
-  const other=fixture("/projects/other","另一项目","project",1);
+  const atlas=fixture("/projects/atlas","Atlas","doc",1,"Atlas");
+  const child=fixture("/projects/atlas/story","故事","doc",2,"Atlas");
+  const other=fixture("/projects/other","另一项目","doc",1,"Other");
   const docs=[atlas,child,other];
   const tree=buildFolioNavigationTree(docs,child);
   assert.equal(getFolioNavigationNeighbors(tree,child.path).previous?.path,atlas.path);

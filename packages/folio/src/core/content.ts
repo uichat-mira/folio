@@ -217,7 +217,7 @@ export function parseFolioDoc(sourcePath: string, raw: string): FolioDoc {
   const path = text(data.path) || sourcePathToRoute(sourcePath);
   const root = sourcePath.split(/[\\/]/)[0];
   const inferredType =
-    root === "blogs" ? "article" : root === "projects" ? "project" : "doc";
+    root === "blogs" ? "article" : "doc";
 
   // Priority is frozen here and completed by the Build layer:
   //   explicit publishedAt > valid legacy date > Git first commit > unknown
@@ -250,11 +250,7 @@ export function parseFolioDoc(sourcePath: string, raw: string): FolioDoc {
     description: text(data.description),
     group: text(
       data.group,
-      inferredType === "article"
-        ? "博客"
-        : inferredType === "project"
-          ? "项目"
-          : "文档",
+      inferredType === "article" ? "博客" : "文档",
     ),
     collection: data.collection ? text(data.collection) : undefined,
     section: data.section ? text(data.section) : undefined,

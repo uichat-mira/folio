@@ -1,7 +1,9 @@
 ---
 title: FolioTreeNav
 description: 统一文档侧栏的 React 组件、导航树数据、父子路由推导与排序规则。
-type: project
+type: doc
+collection: 参考
+section: API
 order: 50
 status: draft
 tags: [Navigation, Tree, Core, API]
@@ -51,7 +53,7 @@ const shared = buildFolioNavigationTree(docs, currentDoc, {
 });
 ~~~
 
-它是 React-free 的 Core 函数，负责把 `type: doc` 的 `collection / section` 分组与 `type: project` 的目录层级组织成同一棵树。默认项目归属依据**各集合实际包含文档的目录**，不会因为多个目录的公共祖先恰好为 `/` 而把全站项目混进来。同名分类也不会跨集合合并；无法唯一归属的项目保留独立分组。
+它是 React-free 的 Core 函数，负责把 `type: doc` 的 `collection / section` 分组和同章节内有真实内容页的父子路由组织成一棵树。不同集合不会因为目录祖先恰好为 `/` 而混入同一导航；同名章节也不会跨集合合并。
 
 `scopePath` 允许消费者明确扩大路由范围，但不等于创建权限系统或后台可编辑菜单。运行时导航与静态输出使用同一份 Core 树。
 
@@ -62,14 +64,13 @@ const shared = buildFolioNavigationTree(docs, currentDoc, {
 ~~~ts
 import {
   buildFolioContentTree,
-  resolveFolioProjectTree,
   getFolioTreeNeighbors,
   type FolioContentTree,
   type FolioContentTreeNode,
 } from "@uichat-mira/folio";
 
 const projectTree = buildFolioContentTree(
-  docs.filter((doc) => doc.type === "project"),
+  docs.filter((doc) => doc.type === "doc"),
   { rootPath: "/projects" },
 );
 
@@ -97,7 +98,7 @@ type FolioContentTreeNode = {
 };
 ~~~
 
-`rootPath` 是树的**容器路径**：如果把它设置成概览页本身的地址，返回的是其后代，不包含该概览页。`resolveFolioProjectTree(docs, currentDoc)` 则根据当前项目路由推导默认范围。
+`rootPath` 是树的**容器路径**：如果把它设置成概览页本身的地址，返回的是其后代，不包含该概览页。`resolveFolioProjectTree()` 是保留的旧版项目范围推导兼容函数；新站点应直接通过 `buildFolioContentTree(docs, { rootPath })` 显式指定范围。
 
 ## 父级推导与缺失概览
 
@@ -127,8 +128,8 @@ projects/
 - 有真实 `doc` 的节点按 Frontmatter `order` 排序；缺省由 `parseFolioDoc` 设为 `99`。
 - 隐式目录没有自身的 `order`，使用子节点最小的排序值，**不会再把值大于 99 的子节点强行截断**。
 - 排序值相同，按路由路径字典序确定稳定顺序。
-- `getFolioNavigationNeighbors()` 是默认阅读分页的顺序来源：按左侧统一树先序遍历有效页面，跨越同一文档导航中的分类及项目子文章。
-- `getFolioTreeNeighbors()` 是保留的纯项目工具函数，仅在当前一级项目树内先序遍历，不跨到相邻项目。没有文档分类的项目默认仍遵循这条边界。
+- `getFolioNavigationNeighbors()` 是默认阅读分页的顺序来源：按左侧统一树先序遍历有效文档，跨越同一文档导航中的分类与子页面。
+- `getFolioTreeNeighbors()` 是通用内容树的邻居查询，在当前顶级树节点范围内按先序遍历，不跨到相邻根节点。
 
 这些规则适用于任意深度的真实内容树，但**不意味着文档中心本身必须保留五层页面**。
 

@@ -94,7 +94,7 @@ export function buildFolioContentTree(
   return { rootPath, roots };
 }
 
-/** Project content is scoped automatically to the first route segment. */
+/** @deprecated Legacy project-only scoping. Use buildFolioContentTree with an explicit rootPath instead. */
 export function resolveFolioProjectTree(
   docs: readonly FolioDoc[],
   current: FolioDoc,

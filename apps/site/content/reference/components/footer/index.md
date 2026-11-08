@@ -1,7 +1,9 @@
 ---
 title: FolioFooter
 description: 品牌、明暗主题 Logo、分组链接、备案与法律信息的结构化门户页脚。
-type: project
+type: doc
+collection: 参考
+section: API
 order: 30
 status: draft
 tags: [React, Footer, Configuration]

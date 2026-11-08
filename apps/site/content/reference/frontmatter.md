@@ -41,7 +41,7 @@ author:
 | --- | --- | --- |
 | `id` | 稳定内容标识 | 由 `path` 生成 |
 | `path` | 显式 route | 由 Markdown 文件路径生成 |
-| `type` | doc / article / project / page / 自定义字符串 | 按目录推断：`blogs/*` → article，`projects/*` → project，其他 → doc |
+| `type` | doc / article / page / 自定义字符串 | 按目录推断：`blogs/*` → article，其他（含 `projects/*`）→ doc；旧 project 仅作兼容 |
 | `title` | 页面、导航与 SEO 标题 | route path |
 | `description` | 摘要与 metadata | 空字符串 |
 | `group` | sidebar 分组 | 按 entry type 生成 |

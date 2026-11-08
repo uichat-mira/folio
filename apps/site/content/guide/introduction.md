@@ -19,7 +19,7 @@ Folio 是面向 Vite 与 React 的 **Git-native 内容与门户发布引擎**。
 ## 为什么用 Folio
 
 - **内容只有一个事实源**：Markdown 与 YAML Frontmatter 留在 Git 中，审阅、版本和回滚沿用现有研发流程，不需要再把内容搬进另一个后台。
-- **组织方式只定义一次**：`doc`、`article`、`project`、`page` 四类条目共享同一模型；路由、侧栏、标题目录、搜索与静态输出读取同一份 `FolioDoc`，不会各自漂移。
+- **组织方式只定义一次**：`doc`、`article`、`page` 三类常用条目共享同一模型；路由、侧栏、标题目录、搜索与静态输出读取同一份 `FolioDoc`，不会各自漂移。
 - **站点仍然属于自己**：Folio 提供薄 runtime 与可组合组件，品牌、页面结构和产品交互由 consumer 决定，不用接受一套固定主题。
 - **发布能力开箱可用**：一次构建同时产出页面 HTML、canonical、Open Graph、JSON-LD、`404.html`、`sitemap.xml` 与 `robots.txt`。
 

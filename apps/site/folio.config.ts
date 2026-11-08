@@ -5,27 +5,18 @@ export default defineFolioConfig({
   description: "Folio 是 Mira 组织的 Git-native 内容与门户发布引擎。以 Markdown 为内容源，在构建时组织并发布产品、文档与文章。",
   siteUrl: "https://uichat-mira.github.io",
   github: "https://github.com/uichat-mira/folio",
-  // 指南 / 参考 are document-collection entries, not dropdowns.
-  //
-  // `collection` resolves both halves of the entry from content: the landing
-  // page is the first document in read order, and the whole collection root is
-  // marked active. The config no longer repeats `href` and `activeMatch`.
-  //
-  // The rule this site follows:
-  //
-  //     navigation entry == route root == collection prefix == content folder
-  //
-  // 指南 -> /guide/* (content/guide), 参考 -> /reference/* (content/reference).
-  // Which page belongs to which side is still decided by `collection:` in the
-  // page's own frontmatter, not by this config. Keeping the folder, the route
-  // root and the collection name aligned is what makes that field and the route
-  // agree instead of contradicting each other.
+  // Guide uses the first document in its collection. Reference explicitly
+  // lands on its reviewed overview page: converting nested component guides to
+  // type: doc must not silently change the entry into the reference handbook.
+  // `collection` still marks every route under each section root as active.
+  // The route root and content folder stay aligned with the collection prefix:
+  // Guide -> /guide/* (content/guide); Reference -> /reference/* (content/reference).
   //
   // 展厅 has children and still needs an explicit `href`; 文章 / 项目 point at
   // their collection index pages.
   navigation: [
     { label: "指南", collection: "/guide" },
-    { label: "参考", collection: "/reference" },
+    { label: "参考", href: "/reference/overview", collection: "/reference" },
     {
       label: "展厅",
       href: "/showcase",

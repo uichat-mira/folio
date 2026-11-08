@@ -1,7 +1,7 @@
 // Core content/config types. This module must stay free of React (and of every
 // other UI runtime) so Core and Build code can depend on it directly.
 
-export type FolioEntryType = "doc" | "article" | "project" | "page" | string;
+export type FolioEntryType = "doc" | "article" | "page" | string;
 
 export type FolioHeading = {
   depth: number;

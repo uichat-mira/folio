@@ -1,7 +1,9 @@
 ---
 title: FolioDocMeta
 description: 极简文章署名栏：头像、作者、日期和阅读时长；保留完整 Git 历史元数据。
-type: project
+type: doc
+collection: 参考
+section: API
 order: 43
 status: draft
 tags: [React, Metadata, Git, API]

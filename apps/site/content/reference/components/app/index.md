@@ -1,7 +1,9 @@
 ---
 title: FolioApp
 description: 路由、页面外壳、统一导航、主题与组件插槽的公开 React 入口。
-type: project
+type: doc
+collection: 参考
+section: API
 order: 10
 status: draft
 tags: [React, Runtime, API]
@@ -18,8 +20,8 @@ import "@uichat-mira/folio/styles.css";
 <FolioApp config={config} docs={docs} />;
 ~~~
 
-- 根据 `docs` 中的路由呈现首页、集合页、技术文档、项目文章及普通文章。
-- `type: doc` 和 `type: project` 共用 `FolioDocsShell` 和 `FolioTreeNav`；底部分页与左侧导航保持相同阅读顺序，独立项目仍只在本项目内翻页。
+- 根据 `docs` 中的路由呈现首页、集合页、技术文档、博客文章及独立页面。
+- `type: doc` 使用 `FolioDocsShell` 和 `FolioTreeNav`；底部分页与左侧导航保持相同阅读顺序，文档目录由 `collection`、`section` 和实际路由决定。
 - 搜索、主题、分享等入口由应用外壳编排；消费者可以通过 `ui` 开关与插槽调整。
 - `ui.footerOnDocs: false` 同时隐藏文档阅读布局的站点 Footer 和正文 `articleFooter`；不会改变首页或普通文章的 Footer。
 

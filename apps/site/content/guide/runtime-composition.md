@@ -53,7 +53,7 @@ Consumer 可以自由拥有：
 - 对默认 runtime CSS 的覆盖；
 - 自己的静态 route body 与 JSON-LD。
 
-这也是为什么首页可以像产品站，而进入 docs、article、project、page 后仍然回到同一个 Folio 内容壳。
+这也是为什么首页可以像产品站，而进入 doc、article、page 后仍然回到同一个 Folio 内容壳。
 
 ## 为什么这条边界重要
 

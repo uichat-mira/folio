@@ -18,7 +18,7 @@ type FolioDoc = {
   id: string
   path: string
   sourcePath: string
-  type: "doc" | "article" | "project" | "page" | string
+  type: "doc" | "article" | "page" | string
   title: string
   description: string
   group: string
@@ -61,7 +61,6 @@ Frontmatter 的 `path` 可以覆盖 URL；Vite plugin 的 `route(sourcePath, doc
 
 ```text
 blogs/*    → article
-projects/* → project
 其他        → doc
 ```
 

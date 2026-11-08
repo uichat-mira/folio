@@ -1,7 +1,9 @@
 ---
 title: FolioDocsShell
 description: 内置左右栏、移动抽屉、Markdown 正文和上下篇导航的阅读布局。
-type: project
+type: doc
+collection: 参考
+section: API
 order: 40
 status: draft
 tags: [React, Docs, Layout]

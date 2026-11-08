@@ -88,7 +88,7 @@ footer: {
 
 内部链接通过 React Router 跳转；以 / 开头的 Logo 资源路径会根据站点部署子路径解析。也可通过 FolioApp 的 slots.footer 完全替换默认页脚（自行提供 footer 语义元素）。
 
-使用 Folio 阅读壳（`docsShell`）时，`<FolioApp ui={{ footerOnDocs: false }} />` 会同时隐藏全站 Footer 和正文 `articleFooter` 插槽。它既适用于 `type: doc`，也适用于使用同一阅读壳的 `type: project`。首页、文章和集合页不受影响。默认值为 `true`，保留已有消费者行为；`slots.footer` 也服从阅读壳的显示策略。此开关由布局决定，而非按内容类型分别设置；若关闭 `docsShell`，普通页面布局独立决定 Footer。静态路由正文的预渲染不会额外注入 React 应用 Footer。
+使用 Folio 阅读壳（`docsShell`）时，`<FolioApp ui={{ footerOnDocs: false }} />` 会同时隐藏全站 Footer 和正文 `articleFooter` 插槽。它适用于 `type: doc` 文档阅读壳，独立文章和页面不会因为此开关被隐藏 Footer。首页、文章和集合页不受影响。默认值为 `true`，保留已有消费者行为；`slots.footer` 也服从阅读壳的显示策略。此开关由布局决定，而非按内容类型分别设置；若关闭 `docsShell`，普通页面布局独立决定 Footer。静态路由正文的预渲染不会额外注入 React 应用 Footer。
 
 ## 内置首页配置
 
@@ -148,8 +148,8 @@ type FolioSlots = {
 
 左右栏是 Folio 的独立公开组件，均从 `@uichat-mira/folio` 导出，沿用原有单入口 CSS。消费者可独立使用组件，也可组合到文档阅读壳里：
 
-- `FolioTreeNav`：唯一左侧导航渲染器，接收 `tree` 和 `currentPath`；普通技术文档与项目文章都使用它，支持路由、分组标题、层级与展开状态。
-- `buildFolioNavigationTree(docs, current, { scopePath? })`：Core 纯函数，生成统一导航树；可通过 `scopePath` 显式声明范围。默认以文档集合与项目路由推导范围，不维护第二份导航清单。
+- `FolioTreeNav`：唯一左侧导航渲染器，接收 `tree` 和 `currentPath`；普通与嵌套技术文档均可使用，支持路由、分组标题、层级与展开状态。
+- `buildFolioNavigationTree(docs, current, { scopePath? })`：Core 纯函数，生成统一导航树；可通过 `scopePath` 显式声明范围。默认以文档集合和内容路由推导范围，不维护第二份导航清单。
 - `FolioToc`：传入 `headings`，按标题生成锚点与滚动高亮，支持 `className`、`onNavigate`，空列表不渲染。
 
 导航的 `collection / section` 分类始终显示为**不可点击、不可折叠的标签**；只有有子页面的内容父节点才出现 `+ / −`。标题链接负责导航，右侧按钮独立控制展开／收起；整行共享背景与圆角，选中态高于悬停态。FolioApp 将展开状态保存在阅读路由上层，换文章时不会丢失。当前文章的祖先初始展开，其他有概览的分支初始收起；点击箭头不会切换路由。展开区域按实际内容高度平滑变化，折叠时子链接不可获取焦点，并尊重操作系统的减少动态效果设置。公共 `FolioTreeExpansionProps` 继续支持 `defaultExpanded`、`expandedPaths`、`onExpandChange`；`collapsible: false` 可显式切回路由驱动的无按钮模式。没有 JavaScript 时静态页面保留完整链接，不渲染无效按钮。
@@ -173,9 +173,9 @@ import { FolioApp, FolioTreeNav, FolioToc } from "@uichat-mira/folio";
 
 静态 HTML 仍使用默认导航和 TOC，保证无 JS 时能浏览。React 的插槽不自动改变静态构建输出，消费者若需要自定义静态布局，应通过站点的 `staticRoutes` 管理。
 
-### 约定式项目目录与父级推导
+### 文档目录与父级推导
 
-项目内容不需要手工维护目录清单，也不需要在每篇文章上填写父级 ID。按以下结构放置 Markdown，Folio 会从路由层级构建一棵项目树：
+层级文档不需要手工维护目录清单，也不需要在每篇文档上填写父级 ID。为文档声明相同的 `collection` 与 `section`，Folio 就会从路由路径构建导航层级：
 
 ~~~text
 projects/
@@ -192,7 +192,9 @@ Frontmatter 示例：
 
 ~~~yaml
 ---
-type: project
+type: doc
+collection: 示例文档
+section: 案例
 title: "ComDesign：AI 时代的设计系统实验"
 order: 2
 description: "关于设计系统的长期探索"
@@ -200,11 +202,11 @@ description: "关于设计系统的长期探索"
 ~~~
 
 - 默认情况下，Markdown 路径自动推导 URL，目录中的 `index.md` 对应概览父节点，子目录文章成为它的后代。
-- 侧栏的子文章依 `order` 排序；当前页会高亮，上一篇／下一篇仅在同一顶层项目内移动。
-- 如果父目录暂时没有 `index.md`，导航会显示不可点击的目录分组，**不会创建假的概览链接**。
+- 同章节内的子文档依 `order` 排序；当前页会高亮，上一篇／下一篇按同一文档导航树的可见顺序移动。
+- 如果父目录暂时没有 `index.md`，文档导航仍可显示实际子文档，**不会创建假的概览链接**；单独使用 `buildFolioContentTree()` 时可得到不可点击的隐式目录节点。
 - 显式设置 `path` 会覆写默认路由，因此也会改变导航归属；不同项目之间只按完整路径段匹配，避免相似前缀误归属。
 
-项目文章和普通技术文档只通过 `FolioTreeNav` 渲染，不再保留第二套左侧导航组件。核心的 `buildFolioNavigationTree(docs, current, { scopePath? })` 统一组合分类与嵌套项目节点；`buildFolioContentTree` 保留供纯目录树使用，`resolveFolioProjectTree` 仍负责项目内的上一篇／下一篇。需要独立排版时也可以自行组合：
+普通技术文档和层级文档都通过 `FolioTreeNav` 渲染，不再需要项目专用侧栏。`buildFolioNavigationTree(docs, current, { scopePath? })` 统一组合文档分类与子文档；`buildFolioContentTree` 仍可独立构造纯路由目录树。需要独立排版时也可以自行组合：
 
 ~~~tsx
 import {
@@ -216,9 +218,9 @@ const tree = buildFolioContentTree(docs, { rootPath: "/projects" });
 <FolioTreeNav tree={tree} currentPath={currentDoc.path} />;
 ~~~
 
-消费者使用唯一的 `slots.navigation(props)` 自定义侧栏，回调接收 `tree`、`currentPath` 和 `onNavigate`，对普通文档与项目文章完全一致。移动端应继续传递 `onNavigate`，以便跳转后关闭抽屉。
+消费者使用唯一的 `slots.navigation(props)` 自定义侧栏，回调接收 `tree`、`currentPath` 和 `onNavigate`，对普通与嵌套文档完全一致。移动端应继续传递 `onNavigate`，以便跳转后关闭抽屉。
 
-Folio 的静态构建与 React 使用同一份 Core 树形模型；如需在自定义 `staticRoutes` 中保持约定式项目阅读结构，可使用构建入口 `@uichat-mira/folio/vite` 提供的 `renderFolioStaticProjectShell(context, doc, markdownHtml?)`。
+Folio 的静态构建与 React 使用同一份 Core 树形模型；自定义 `staticRoutes` 如需复用旧 `renderFolioStaticProjectShell(context, doc, markdownHtml?)`，该导出目前仅作为兼容入口，内部转用普通文档阅读壳，不再提供项目特权；新站点应优先使用普通 `doc` 与默认静态文档路由。
 
 官方 Folio 首页就是 `slots.home` 的真实 consumer。`slots.home` 的优先级高于 `config.home`：只要提供 React 首页节点，就完全使用该节点。
 

@@ -1,7 +1,9 @@
 ---
 title: 组件
 description: Folio 当前公开 React 组件与相关 Core API 的使用手册。
-type: project
+type: doc
+collection: 参考
+section: API
 group: API
 order: 1
 status: draft
@@ -30,7 +32,7 @@ tags: [API, React, Components]
 
 ## 公共组件与 Core 能力的关系
 
-`FolioTreeNav` 负责渲染侧栏；`buildFolioNavigationTree()`、`buildFolioContentTree()`、`resolveFolioProjectTree()` 和 `getFolioTreeNeighbors()` 则属于可独立使用的 Core 函数。这些契约集中写在 [FolioTreeNav](/reference/components/tree-nav) 中，不会伪装成另外几个 React 组件。
+`FolioTreeNav` 负责渲染侧栏；`buildFolioNavigationTree()`、`buildFolioContentTree()` 和 `getFolioTreeNeighbors()` 则属于可独立使用的 Core 函数。这些契约集中写在 [FolioTreeNav](/reference/components/tree-nav) 中，不会伪装成另外几个 React 组件。
 
 同样，`FolioFooterBrand`、`FolioFooterGroup`、`FolioFooterLegal` 是 Footer 的结构化配置类型，不需要各自独立占一个文档页面；`FolioSlots` 是 `FolioApp` 的扩展点。
 
@@ -38,7 +40,7 @@ tags: [API, React, Components]
 
 - 分类 `collection / section` 与内容父子路由由 Core 推导；组件目录保持平铺，并不影响 Folio 支持多级导航的能力。
 - 左侧 `FolioTreeNav` 是站点内容导航，右侧 `FolioToc` 是页内标题目录；它们不是同一个组件。
-- 文档与项目文章共用阅读布局，`ui.footerOnDocs: false` 可隐藏这类阅读页面的站点 Footer 与正文 `articleFooter`；不影响首页和普通文章。
+- 层级文档共用文档阅读布局，`ui.footerOnDocs: false` 可隐藏这类阅读页面的站点 Footer 与正文 `articleFooter`；不影响首页和普通文章。
 - 组件级样式文件不是独立的公开 CSS 入口。消费站需要的品牌物料、具体链接与法律信息仍由消费站提供。
 - 此处的接口为当前开发分支的实际实现，不应被误读为已经发布的 npm 包一定包含全部能力。
 
