@@ -17,8 +17,8 @@ function Arrow({ diagonal = false }: { diagonal?: boolean }) {
 
 const portalModes = [
   { number: "01", label: "PRODUCT / ORGANIZATION", title: "产品与组织门户",
-    description: "介绍产品、串联项目、归档官方信息。清晰的入口，比堆砌页面更重要。",
-    href: "/showcase/content-map", action: "查看内容组织", variant: "product" },
+    description: "介绍产品、组织内容、发布官方信息。清晰的入口，比堆砌页面更重要。",
+    href: "/about", action: "了解 Folio", variant: "product" },
   { number: "02", label: "DOCS / KNOWLEDGE", title: "文档与知识中心",
     description: "导航、集合、页内目录与搜索，让信息有结构，也让人找得到。",
     href: "/guide/introduction", action: "进入文档指南", variant: "knowledge" },
@@ -52,8 +52,8 @@ export function HomePage({ docs }: HomePageProps) {
               在构建时完成组织、渲染与静态发布。从一个产品页面，到整个组织的信息世界。
             </p>
             <div className="portal-hero__actions">
-              <Link className="portal-button portal-button--primary" to="/showcase">
-                探索 Folio 的能力 <Arrow />
+              <Link className="portal-button portal-button--primary" to="/about">
+                认识 Folio <Arrow />
               </Link>
               <Link className="portal-button portal-button--outline" to="/guide/getting-started">
                 快速开始 <Arrow diagonal />
@@ -76,7 +76,7 @@ export function HomePage({ docs }: HomePageProps) {
               <div className="portal-stage__page">
                 <div className="portal-stage__nav">
                   <strong>folio<span>.</span></strong>
-                  <span>STORIES &nbsp; / &nbsp; GUIDES &nbsp; / &nbsp; WORK</span>
+                  <span>STORIES &nbsp; / &nbsp; GUIDES &nbsp; / &nbsp; ABOUT</span>
                 </div>
                 <div className="portal-stage__eyebrow">A HOME FOR EVERY IDEA <span>— 001</span></div>
                 <div className="portal-stage__title">Content is<br />a living <em>thing.</em></div>
@@ -176,7 +176,7 @@ export function HomePage({ docs }: HomePageProps) {
             <div className="portal-config__foot">
               <span className="portal-config__check" aria-hidden="true">✓</span>
               <span>已有 API · 首页组合能力仍在扩展</span>
-              <Link to="/showcase/guides/organize-content" aria-label="查看内容组织实践"><Arrow diagonal /></Link>
+              <Link to="/guide/organizing-content" aria-label="查看内容组织实践"><Arrow diagonal /></Link>
             </div>
           </div>
         </div>
@@ -262,7 +262,7 @@ export function HomePage({ docs }: HomePageProps) {
               <div className="portal-audience__symbol" aria-hidden="true">M.</div>
               <div>
                 <h3>组织的官方信息发布底座</h3>
-                <p>产品、文档、项目、文章与公告，用一套可信的内容链路持续维护。</p>
+                <p>产品介绍、技术文档、文章与公告，用一套可信的内容链路持续维护。</p>
                 <span className="portal-audience__footnote">真实需求驱动引擎演进</span>
               </div>
             </article>

@@ -64,7 +64,7 @@ Git 不是万能的。它对二进制大文件、多人实时协作、非技术�
 现在的官方站已经把这套顺序跑通了：
 
 - [内容协议](/guide/content-contract) 定义了 Skill 与运行时共同依赖的最小字段；
-- [从一个内容文件到最终静态页面](/showcase/from-file-to-page) 展示了文件如何经过解析、清单和静态输出；
-- [官方站项目档案](/projects/official-site) 记录了本项目当前的边界与未完成项。
+- [静态发布与 SEO](/guide/static-publishing) 介绍了从 Markdown 到静态页面的发布过程；
+- [关于 Folio](/about) 说明了引擎的定位和能力边界。
 
 换句话说，“内容留在 Git”不是一句品牌口号，而是这个站点每一次构建时真实发生的数据流。你可以从上面任意一篇内容继续往下读，也可以在站内搜索里直接输入 `virtual:folio/content` 或 `静态构建` 验证这些词确实来自正文。

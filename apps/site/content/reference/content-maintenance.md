@@ -21,7 +21,7 @@ tags:
 - **指南 · 组合**：React runtime 组合与静态发布。
 - **参考 · API**：按任务索引的 API、Frontmatter、Vite 与 SEO 契约。
 - **参考 · 部署 / 迁移 / 附录**：部署方式、迁移快照和独立附录。
-- **案例 / 博客 / 项目**：真实 consumer、设计研究和项目状态，不作为入门步骤。
+- **案例 / 博客 / 关于**：真实 consumer、设计研究和独立介绍页，不作为入门步骤。
 - **维护**：本页，供后续贡献者检查文档。
 
 新增页面时先判断它属于哪一层；不要在入门页复制 API Reference，也不要把案例写成当前能力承诺。
@@ -32,7 +32,6 @@ tags:
 | --- | --- | --- |
 | `doc` | 文档、指南、参考 | 是 |
 | `article` | 博客与按日期排序的文章 | 否 |
-| `project` | 项目门户条目 | 否 |
 | `page` | 独立案例、附录或自定义页面 | 否 |
 
 独立页面必须从至少一个 `doc` 页面链接到，避免成为只靠搜索才能到达的死路。
@@ -44,7 +43,7 @@ tags:
 - `group` 决定 sidebar 分组；新增文档应复用现有 group，不要为单页制造新分组。
 - `order` 决定组内顺序，保持稳定并留有间隔；文章优先按 `date` 排序。
 - `path` 只在需要固定 URL 时显式设置；默认由文件路径生成，修改文件位置前先检查旧链接。
-- `status` 统一使用 `published`（当前维护的正式内容）、`reference`（导入或参考材料）、`active`（进行中的项目）之一。
+- `status` 建议使用 `published`（当前维护的正式内容）或 `reference`（导入或参考材料）。旧项目档案使用的 `active` 属于历史写法，不再作为新内容的推荐值。
 - `tags` 使用稳定主题词；新增前先复用已有标签。
 - 未识别的字段进入 `doc.data`。若 consumer 依赖该字段，必须在本页或对应 consumer 文档说明用途。
 
@@ -81,7 +80,7 @@ tags:
 | `guide/static-publishing.md` | 静态发布与无 JS 阅读边界 | 修正：说明代表路由与实际内容路由，补相关文档；重分组。 |
 | `reference/overview.md` | 原产品介绍与 API 入口重复 | 改写为按任务组织的「参考索引」：只放查证型入口，按顺序读的内容指向指南。 |
 | `guide/getting-started.md` | 仓库开发与 consumer 接入 | 修正：`0.1.1`、Node/CI 说明、虚拟模块类型说明、下一步路径。 |
-| `guide/authoring.md` | 创建文档、文章、项目、页面 | 修正：字段表补 collection/section 与默认值，链接 Frontmatter 参考。 |
+| `guide/authoring.md` | 创建文档、文章、独立页面 | 修正：字段表补 collection/section 与默认值，链接 Frontmatter 参考。 |
 | `guide/content-model.md` | `FolioDoc` 与路径规则 | 修正：类型补 collection/section/publishedAt/updatedAt，标注候选契约。 |
 | `guide/configuration.md` | `FolioConfig`、plugin、slots | 修正：补 `author`、静态选项状态与参考链接；重分组。 |
 | `guide/navigation.md` | virtual manifest、group 与导航 | 保留正文；重分组，排序规则由内容协议统一说明。 |
@@ -100,9 +99,9 @@ tags:
 | `reference/typora-r2.md` | Typora 图片上传 R2 的写作工具附录 | 保留正文；重分组，保持独立 `page` 并由 API 索引链接。 |
 | `blogs/why-folio.md` | 为什么先 dogfood 官方站 | 保留正文；保持 `article` 与日期排序。 |
 | `reference/site.md` | 官方站作为公开 API 案例 | 修正：`status` 统一为 `published`，保持独立案例页。 |
-| `projects/folio.md` | 项目状态与下一步 | 修正：移除已完成的首发待办，更新 `0.1.1` 与后续工作。 |
+| `projects/folio.md`（历史，已退役） | 原项目状态与下一步 | 当时修正首发待办；FOL-035 后不再发布该项目档案，当前产品说明见 `about.md`。 |
 
-本次新增 `reference/content-maintenance.md`（即本页），不替代上述 26 篇的用户文档，只提供维护约定和审阅记录。表格中的路径已更新为「指南 / 参考」分区后的位置（`content/guide/`、`content/reference/`），页面移动时请一并更新本表。
+本次新增 `reference/content-maintenance.md`（即本页），不替代上述 26 篇的用户文档，只提供维护约定和审阅记录。表格保留原 26 篇治理时的历史审阅记录。除已明确标记退役的项目档案外，路径按「指南 / 参考」分区记录（`content/guide/`、`content/reference/`）；后续页面移动时应同步维护清单。
 
 ## 已知保留项
 
