@@ -1,0 +1,5 @@
+
+> @uichat-mira/folio@0.1.1 layers:check
+> node scripts/dependency-layers.mjs
+
+[layers] ok  56 modules (27 ui, 11 build, 17 core, 1 entry), 137 relative edges, 0 non-module specifier(s) ignored

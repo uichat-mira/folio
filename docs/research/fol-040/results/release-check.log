@@ -1,0 +1,2140 @@
+
+> folio-workspace@0.1.1 release:check
+> npm run validate && npm run pack:verify -w @uichat-mira/folio && npm run pack:consumer -w @uichat-mira/folio
+
+
+> folio-workspace@0.1.1 validate
+> npm run typecheck && node --test apps/site/test/style-ownership.test.mjs && npm run test:og-worker && npm run test -w @uichat-mira/folio && npm run build -w @uichat-mira/folio-site
+
+
+> folio-workspace@0.1.1 typecheck
+> npm run typecheck -w @uichat-mira/folio && npm run build -w @uichat-mira/folio && npm run typecheck -w @uichat-mira/folio-site
+
+
+> @uichat-mira/folio@0.1.1 typecheck
+> tsc --noEmit
+
+
+> @uichat-mira/folio@0.1.1 build
+> tsup src/index.ts src/vite.ts src/pwa.ts src/pwa-react.tsx --format esm --dts --clean --external virtual:pwa-register/react && node scripts/copy-styles.mjs
+
+CLI Building entry: src/index.ts, src/pwa-react.tsx, src/pwa.ts, src/vite.ts
+CLI Using tsconfig: tsconfig.json
+CLI tsup v8.5.1
+CLI Target: es2022
+CLI Cleaning output folder
+ESM Build start
+ESM dist/index.js          91.04 KB
+ESM dist/pwa.js            28.95 KB
+ESM dist/vite.js           65.32 KB
+ESM dist/chunk-LTT6SMBZ.js 881.00 B
+ESM dist/chunk-FS4K2DL3.js 37.38 KB
+ESM dist/pwa-react.js      5.32 KB
+ESM ⚡️ Build success in 46ms
+DTS Build start
+DTS ⚡️ Build success in 2112ms
+DTS dist/index.d.ts               25.04 KB
+DTS dist/pwa-react.d.ts           3.94 KB
+DTS dist/pwa.d.ts                 4.56 KB
+DTS dist/vite.d.ts                6.53 KB
+DTS dist/pwa-update-BrGEBxoo.d.ts 2.48 KB
+DTS dist/types-qxPkY5wF.d.ts      13.67 KB
+styles: 10 source(s) -> dist/styles.css (66541 bytes)
+
+> @uichat-mira/folio-site@0.1.1 typecheck
+> tsc --noEmit
+
+TAP version 13
+# Subtest: official site styles only its own composition, never Folio component internals
+ok 1 - official site styles only its own composition, never Folio component internals
+  ---
+  duration_ms: 1.800333
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 42.702208
+
+> folio-workspace@0.1.1 test:og-worker
+> node --test apps/site/worker/og-image/test.mjs
+
+TAP version 13
+# Subtest: detects WeChat browsers, crawlers and proxied image requests
+ok 1 - detects WeChat browsers, crawlers and proxied image requests
+  ---
+  duration_ms: 0.537584
+  type: 'test'
+  ...
+# Subtest: does not classify other social crawlers as WeChat
+ok 2 - does not classify other social crawlers as WeChat
+  ---
+  duration_ms: 0.078084
+  type: 'test'
+  ...
+# Subtest: selects the square mark for WeChat and the wide card otherwise
+ok 3 - selects the square mark for WeChat and the wide card otherwise
+  ---
+  duration_ms: 0.142875
+  type: 'test'
+  ...
+# Subtest: falls back to the default site paths
+ok 4 - falls back to the default site paths
+  ---
+  duration_ms: 0.085833
+  type: 'test'
+  ...
+# Subtest: serves the WeChat mark and keeps the shared URL uncacheable
+ok 5 - serves the WeChat mark and keeps the shared URL uncacheable
+  ---
+  duration_ms: 14.246834
+  type: 'test'
+  ...
+# Subtest: serves the wide card to other crawlers
+ok 6 - serves the wide card to other crawlers
+  ---
+  duration_ms: 0.2915
+  type: 'test'
+  ...
+# Subtest: rejects other paths and non-read methods
+ok 7 - rejects other paths and non-read methods
+  ---
+  duration_ms: 0.244583
+  type: 'test'
+  ...
+# Subtest: reports upstream failures as 502
+ok 8 - reports upstream failures as 502
+  ---
+  duration_ms: 0.199375
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 62.162791
+
+> @uichat-mira/folio@0.1.1 test
+> node --test test/*.test.mjs
+
+TAP version 13
+# Subtest: only type: article enters category and tag archives
+ok 1 - only type: article enters category and tag archives
+  ---
+  duration_ms: 1.247625
+  type: 'test'
+  ...
+# Subtest: articles without a category or tags stay uncategorized and untagged
+ok 2 - articles without a category or tags stay uncategorized and untagged
+  ---
+  duration_ms: 9.532958
+  type: 'test'
+  ...
+# Subtest: one article appears in every matching tag group with its full document
+ok 3 - one article appears in every matching tag group with its full document
+  ---
+  duration_ms: 0.188
+  type: 'test'
+  ...
+# Subtest: case and whitespace variants merge into one stable identity
+ok 4 - case and whitespace variants merge into one stable identity
+  ---
+  duration_ms: 0.250833
+  type: 'test'
+  ...
+# Subtest: Chinese categories and tags keep readable ids and URL identifiers
+ok 5 - Chinese categories and tags keep readable ids and URL identifiers
+  ---
+  duration_ms: 0.263166
+  type: 'test'
+  ...
+# Subtest: URL identifiers normalize, and different labels never silently share one
+ok 6 - URL identifiers normalize, and different labels never silently share one
+  ---
+  duration_ms: 0.5105
+  type: 'test'
+  ...
+# Subtest: a category display-name override changes only the label, not identity or routing
+ok 7 - a category display-name override changes only the label, not identity or routing
+  ---
+  duration_ms: 0.495041
+  type: 'test'
+  ...
+# Subtest: conflicting or duplicate category display labels fail explicitly
+ok 8 - conflicting or duplicate category display labels fail explicitly
+  ---
+  duration_ms: 0.433125
+  type: 'test'
+  ...
+# Subtest: archives span multiple collections from the caller's document set
+ok 9 - archives span multiple collections from the caller's document set
+  ---
+  duration_ms: 0.531166
+  type: 'test'
+  ...
+# Subtest: article ordering and group ordering are deterministic
+ok 10 - article ordering and group ordering are deterministic
+  ---
+  duration_ms: 0.552
+  type: 'test'
+  ...
+# Subtest: documents with equal dates and orders keep a stable path tie-break
+ok 11 - documents with equal dates and orders keep a stable path tie-break
+  ---
+  duration_ms: 0.130208
+  type: 'test'
+  ...
+# Subtest: empty values and repeated tags inside one article are handled deterministically
+ok 12 - empty values and repeated tags inside one article are handled deterministically
+  ---
+  duration_ms: 0.079875
+  type: 'test'
+  ...
+# Subtest: the archive model resolves groups by URL identifier or canonical id
+ok 13 - the archive model resolves groups by URL identifier or canonical id
+  ---
+  duration_ms: 0.086125
+  type: 'test'
+  ...
+# Subtest: arbitrary route prefixes recursively return full documents with segment boundaries and stable sorting
+ok 14 - arbitrary route prefixes recursively return full documents with segment boundaries and stable sorting
+  ---
+  duration_ms: 8.917209
+  type: 'test'
+  ...
+# Subtest: index configuration comes from consumer routes, without hardcoded names or document types
+ok 15 - index configuration comes from consumer routes, without hardcoded names or document types
+  ---
+  duration_ms: 0.196
+  type: 'test'
+  ...
+# Subtest: static lists and home recursively publish arbitrary configured routes with canonical and sitemap
+ok 16 - static lists and home recursively publish arbitrary configured routes with canonical and sitemap
+  ---
+  duration_ms: 17.650625
+  type: 'test'
+  ...
+# Subtest: nested indexes work with custom paths, zero entries, and no configured collections
+ok 17 - nested indexes work with custom paths, zero entries, and no configured collections
+  ---
+  duration_ms: 10.274292
+  type: 'test'
+  ...
+# Subtest: conflicts rejected before writing and parent/child indexes may both be configured
+ok 18 - conflicts rejected before writing and parent/child indexes may both be configured
+  ---
+  duration_ms: 4.674709
+  type: 'test'
+  ...
+# Subtest: editorial home highlights exactly one featured story and renders the ordinary About page
+ok 19 - editorial home highlights exactly one featured story and renders the ordinary About page
+  ---
+  duration_ms: 4.789917
+  type: 'test'
+  ...
+# Subtest: normalizeBasePath keeps a single leading and trailing slash
+ok 20 - normalizeBasePath keeps a single leading and trailing slash
+  ---
+  duration_ms: 0.509625
+  type: 'test'
+  ...
+# Subtest: normalizeBasePath only strips the outer slashes
+ok 21 - normalizeBasePath only strips the outer slashes
+  ---
+  duration_ms: 0.11475
+  type: 'test'
+  ...
+# Subtest: resolveGithubPagesBase returns / for user, organisation and empty input
+ok 22 - resolveGithubPagesBase returns / for user, organisation and empty input
+  ---
+  duration_ms: 0.079167
+  type: 'test'
+  ...
+# Subtest: resolveGithubPagesBase returns a project base for repository names
+ok 23 - resolveGithubPagesBase returns a project base for repository names
+  ---
+  duration_ms: 0.052708
+  type: 'test'
+  ...
+# Subtest: resolveGithubPagesBase returns / without an owner/repo separator
+ok 24 - resolveGithubPagesBase returns / without an owner/repo separator
+  ---
+  duration_ms: 0.102292
+  type: 'test'
+  ...
+# Subtest: defineFolioConfig returns the configuration object unchanged
+ok 25 - defineFolioConfig returns the configuration object unchanged
+  ---
+  duration_ms: 0.364625
+  type: 'test'
+  ...
+# Subtest: category is a single optional Article frontmatter value
+ok 26 - category is a single optional Article frontmatter value
+  ---
+  duration_ms: 6.930333
+  type: 'test'
+  ...
+# Subtest: content without category keeps the previous contract
+ok 27 - content without category keeps the previous contract
+  ---
+  duration_ms: 7.971791
+  type: 'test'
+  ...
+# Subtest: empty category means uncategorized
+ok 28 - empty category means uncategorized
+  ---
+  duration_ms: 2.103459
+  type: 'test'
+  ...
+# Subtest: invalid category shapes resolve to uncategorized without guessing
+ok 29 - invalid category shapes resolve to uncategorized without guessing
+  ---
+  duration_ms: 4.2065
+  type: 'test'
+  ...
+# Subtest: category does not change collection, group, section, route or tags
+ok 30 - category does not change collection, group, section, route or tags
+  ---
+  duration_ms: 1.642584
+  type: 'test'
+  ...
+# Subtest: content schema documents the category and tag contract
+ok 31 - content schema documents the category and tag contract
+  ---
+  duration_ms: 1.107625
+  type: 'test'
+  ...
+# Subtest: Git history fills publishedAt/updatedAt from committer dates in UTC
+ok 32 - Git history fills publishedAt/updatedAt from committer dates in UTC
+  ---
+  duration_ms: 456.091458
+  type: 'test'
+  ...
+# Subtest: renames and non-ASCII paths keep the first commit date
+ok 33 - renames and non-ASCII paths keep the first commit date
+  ---
+  duration_ms: 408.614625
+  type: 'test'
+  ...
+# Subtest: explicit publishedAt and updatedAt override independently
+ok 34 - explicit publishedAt and updatedAt override independently
+  ---
+  duration_ms: 234.553542
+  type: 'test'
+  ...
+# Subtest: an unborn repository is valid and has no history dates
+ok 35 - an unborn repository is valid and has no history dates
+  ---
+  duration_ms: 67.494917
+  type: 'test'
+  ...
+# Subtest: legacy date feeds publishedAt without changing the legacy field
+ok 36 - legacy date feeds publishedAt without changing the legacy field
+  ---
+  duration_ms: 134.75875
+  type: 'test'
+  ...
+# Subtest: untracked and uncommitted content never fabricates a date
+ok 37 - untracked and uncommitted content never fabricates a date
+  ---
+  duration_ms: 101.319625
+  type: 'test'
+  ...
+# Subtest: content outside any Git repository builds with unknown dates
+ok 38 - content outside any Git repository builds with unknown dates
+  ---
+  duration_ms: 17.899292
+  type: 'test'
+  ...
+# Subtest: a shallow clone never presents its earliest visible commit as first
+ok 39 - a shallow clone never presents its earliest visible commit as first
+  ---
+  duration_ms: 212.686125
+  type: 'test'
+  ...
+# Subtest: a missing Git executable degrades to unknown dates instead of failing
+ok 40 - a missing Git executable degrades to unknown dates instead of failing
+  ---
+  duration_ms: 82.413041
+  type: 'test'
+  ...
+# Subtest: parseFolioDoc and the Build layer express the same explicit dates
+ok 41 - parseFolioDoc and the Build layer express the same explicit dates
+  ---
+  duration_ms: 105.434291
+  type: 'test'
+  ...
+# Subtest: the build does not use file mtimes as dates
+ok 42 - the build does not use file mtimes as dates
+  ---
+  duration_ms: 111.132667
+  type: 'test'
+  ...
+# Subtest: Git-first and Git-last authors and timestamps become page history by default
+ok 43 - Git-first and Git-last authors and timestamps become page history by default
+  ---
+  duration_ms: 151.685583
+  type: 'test'
+  ...
+# Subtest: Frontmatter overrides four independent history fields without replacing editorial authorship
+ok 44 - Frontmatter overrides four independent history fields without replacing editorial authorship
+  ---
+  duration_ms: 134.222875
+  type: 'test'
+  ...
+# Subtest: invalid createdAt and missing history do not create fictitious metadata
+ok 45 - invalid createdAt and missing history do not create fictitious metadata
+  ---
+  duration_ms: 131.080208
+  type: 'test'
+  ...
+# Subtest: GitHub noreply author links to avatar without exposing email or requiring a network call
+ok 46 - GitHub noreply author links to avatar without exposing email or requiring a network call
+  ---
+  duration_ms: 120.323875
+  type: 'test'
+  ...
+# Subtest: an unrelated editorial author must not inherit the Git committer's avatar
+ok 47 - an unrelated editorial author must not inherit the Git committer's avatar
+  ---
+  duration_ms: 127.496958
+  type: 'test'
+  ...
+# Subtest: index.md conventions derive parent, child and deep grandchildren without a manifest
+ok 48 - index.md conventions derive parent, child and deep grandchildren without a manifest
+  ---
+  duration_ms: 10.205167
+  type: 'test'
+  ...
+# Subtest: missing overviews produce non-clickable implicit folders and never fake a page
+ok 49 - missing overviews produce non-clickable implicit folders and never fake a page
+  ---
+  duration_ms: 0.550084
+  type: 'test'
+  ...
+# Subtest: path prefix boundaries, explicit route overrides, and duplicate paths
+ok 50 - path prefix boundaries, explicit route overrides, and duplicate paths
+  ---
+  duration_ms: 1.348917
+  type: 'test'
+  ...
+# Subtest: tree builder does not mutate the supplied docs or silently mix other types
+ok 51 - tree builder does not mutate the supplied docs or silently mix other types
+  ---
+  duration_ms: 14.028209
+  type: 'test'
+  ...
+# Subtest: explicit top-level project overview can parent its own custom-routed children
+ok 52 - explicit top-level project overview can parent its own custom-routed children
+  ---
+  duration_ms: 1.541208
+  type: 'test'
+  ...
+# Subtest: source paths become stable routes
+ok 53 - source paths become stable routes
+  ---
+  duration_ms: 0.88775
+  type: 'test'
+  ...
+# Subtest: frontmatter and custom fields are preserved
+ok 54 - frontmatter and custom fields are preserved
+  ---
+  duration_ms: 11.894459
+  type: 'test'
+  ...
+# Subtest: projects directories use the ordinary document model unless type is explicitly overridden
+ok 55 - projects directories use the ordinary document model unless type is explicitly overridden
+  ---
+  duration_ms: 2.467167
+  type: 'test'
+  ...
+# Subtest: duplicate headings receive deterministic suffixes
+ok 56 - duplicate headings receive deterministic suffixes
+  ---
+  duration_ms: 0.269917
+  type: 'test'
+  ...
+# Subtest: Markdown and HTML headings preserve source order
+ok 57 - Markdown and HTML headings preserve source order
+  ---
+  duration_ms: 0.241708
+  type: 'test'
+  ...
+# Subtest: plain markdown remains valid content
+ok 58 - plain markdown remains valid content
+  ---
+  duration_ms: 0.063458
+  type: 'test'
+  ...
+# Subtest: collection and section frontmatter are part of the document contract
+ok 59 - collection and section frontmatter are part of the document contract
+  ---
+  duration_ms: 0.580333
+  type: 'test'
+  ...
+# Subtest: fenced code headings are excluded from the document outline
+ok 60 - fenced code headings are excluded from the document outline
+  ---
+  duration_ms: 0.409166
+  type: 'test'
+  ...
+# Subtest: explicit HTML heading IDs are preserved in the document outline
+ok 61 - explicit HTML heading IDs are preserved in the document outline
+  ---
+  duration_ms: 0.356917
+  type: 'test'
+  ...
+# Subtest: explicit IDs participate in generated heading collision tracking
+ok 62 - explicit IDs participate in generated heading collision tracking
+  ---
+  duration_ms: 0.332083
+  type: 'test'
+  ...
+# Subtest: generated heading IDs reserve later explicit IDs
+ok 63 - generated heading IDs reserve later explicit IDs
+  ---
+  duration_ms: 0.121542
+  type: 'test'
+  ...
+# Subtest: generated suffixes skip IDs reserved by later explicit headings
+ok 64 - generated suffixes skip IDs reserved by later explicit headings
+  ---
+  duration_ms: 0.068916
+  type: 'test'
+  ...
+# Subtest: parsed TOC IDs match rendered headings for inline Markdown, entities and fallback slugs
+ok 65 - parsed TOC IDs match rendered headings for inline Markdown, entities and fallback slugs
+  ---
+  duration_ms: 12.715333
+  type: 'test'
+  ...
+# Subtest: every source module is assigned to a layer
+ok 66 - every source module is assigned to a layer
+  ---
+  duration_ms: 1.779417
+  type: 'test'
+  ...
+# Subtest: Core, UI and Build dependencies stay one-way
+ok 67 - Core, UI and Build dependencies stay one-way
+  ---
+  duration_ms: 0.087291
+  type: 'test'
+  ...
+# Subtest: the gate scans the real edges instead of passing vacuously
+ok 68 - the gate scans the real edges instead of passing vacuously
+  ---
+  duration_ms: 0.144792
+  type: 'test'
+  ...
+# Subtest: the layer map keeps Core free of upward edges
+ok 69 - the layer map keeps Core free of upward edges
+  ---
+  duration_ms: 0.129667
+  type: 'test'
+  ...
+# Subtest: controlled reverse dependencies are rejected on synthetic input
+ok 70 - controlled reverse dependencies are rejected on synthetic input
+  ---
+  duration_ms: 21.648959
+  type: 'test'
+  ...
+# Subtest: full Git history API remains independent of the compact presentation
+ok 71 - full Git history API remains independent of the compact presentation
+  ---
+  duration_ms: 0.881
+  type: 'test'
+  ...
+# Subtest: public FolioDocMeta and static HTML share a minimal, escaped byline
+ok 72 - public FolioDocMeta and static HTML share a minimal, escaped byline
+  ---
+  duration_ms: 6.834708
+  type: 'test'
+  ...
+# Subtest: explicit editorial author and published date win over Git provenance
+ok 73 - explicit editorial author and published date win over Git provenance
+  ---
+  duration_ms: 2.537167
+  type: 'test'
+  ...
+# Subtest: no provenance still shows prose reading time without invented date or separator
+ok 74 - no provenance still shows prose reading time without invented date or separator
+  ---
+  duration_ms: 0.604958
+  type: 'test'
+  ...
+# Subtest: missing values stay missing; unsafe avatar schemes are ignored
+ok 75 - missing values stay missing; unsafe avatar schemes are ignored
+  ---
+  duration_ms: 0.604583
+  type: 'test'
+  ...
+# Subtest: reading time counts prose, not fenced code, and is deterministic for Chinese content
+ok 76 - reading time counts prose, not fenced code, and is deterministic for Chinese content
+  ---
+  duration_ms: 0.493709
+  type: 'test'
+  ...
+# Subtest: the reading shell and static project output render byline before Markdown
+ok 77 - the reading shell and static project output render byline before Markdown
+  ---
+  duration_ms: 8.811417
+  type: 'test'
+  ...
+# Subtest: GitHub avatar is rendered on both surfaces only for the matching Git author
+ok 78 - GitHub avatar is rendered on both surfaces only for the matching Git author
+  ---
+  duration_ms: 0.816208
+  type: 'test'
+  ...
+# Subtest: metadata combinations keep React and static separators consistent
+ok 79 - metadata combinations keep React and static separators consistent
+  ---
+  duration_ms: 3.380333
+  type: 'test'
+  ...
+# Subtest: shared document body owns heading, byline and Markdown in order
+ok 80 - shared document body owns heading, byline and Markdown in order
+  ---
+  duration_ms: 1.225417
+  type: 'test'
+  ...
+# Subtest: documentation reader starts with the title, not a category/share toolbar
+ok 81 - documentation reader starts with the title, not a category/share toolbar
+  ---
+  duration_ms: 22.627667
+  type: 'test'
+  ...
+# Subtest: Folio core static docs match the uncluttered runtime; articles retain their metadata
+ok 82 - Folio core static docs match the uncluttered runtime; articles retain their metadata
+  ---
+  duration_ms: 17.538209
+  type: 'test'
+  ...
+# Subtest: public FolioTreeNav uses the current collection and exposes safe composition props
+ok 83 - public FolioTreeNav uses the current collection and exposes safe composition props
+  ---
+  duration_ms: 11.483334
+  type: 'test'
+  ...
+# Subtest: FolioDocsShell render callbacks receive current nav/TOC props and preserve layout
+ok 84 - FolioDocsShell render callbacks receive current nav/TOC props and preserve layout
+  ---
+  duration_ms: 47.316041
+  type: 'test'
+  ...
+# Subtest: public navigation selection follows the provided current route
+ok 85 - public navigation selection follows the provided current route
+  ---
+  duration_ms: 1.086875
+  type: 'test'
+  ...
+# Subtest: document structure groups collection and section without source-path inference
+ok 86 - document structure groups collection and section without source-path inference
+  ---
+  duration_ms: 1.758792
+  type: 'test'
+  ...
+# Subtest: document neighbors follow the structured navigation order
+ok 87 - document neighbors follow the structured navigation order
+  ---
+  duration_ms: 0.138667
+  type: 'test'
+  ...
+# Subtest: group remains the section fallback for existing content
+ok 88 - group remains the section fallback for existing content
+  ---
+  duration_ms: 0.073834
+  type: 'test'
+  ...
+# Subtest: RSS 2.0 and Atom 1.0 use absolute sub-path URLs and trusted dates
+ok 89 - RSS 2.0 and Atom 1.0 use absolute sub-path URLs and trusted dates
+  ---
+  duration_ms: 24.510125
+  type: 'test'
+  ...
+# Subtest: root deployments keep folioAbsoluteRouteUrl trailing-slash conventions
+ok 90 - root deployments keep folioAbsoluteRouteUrl trailing-slash conventions
+  ---
+  duration_ms: 4.9
+  type: 'test'
+  ...
+# Subtest: mixed document types under a route directory all serialize
+ok 91 - mixed document types under a route directory all serialize
+  ---
+  duration_ms: 24.035625
+  type: 'test'
+  ...
+# Subtest: feed selection is recursive by route directory and titles fall back correctly
+ok 92 - feed selection is recursive by route directory and titles fall back correctly
+  ---
+  duration_ms: 22.1565
+  type: 'test'
+  ...
+# Subtest: dates are trusted by provenance: no Git first commit, mtime or build time
+ok 93 - dates are trusted by provenance: no Git first commit, mtime or build time
+  ---
+  duration_ms: 8.58475
+  type: 'test'
+  ...
+# Subtest: undated documents keep a valid RSS but produce no Atom feed
+ok 94 - undated documents keep a valid RSS but produce no Atom feed
+  ---
+  duration_ms: 4.483667
+  type: 'test'
+  ...
+# Subtest: an empty route directory writes a valid zero-item RSS and no Atom
+ok 95 - an empty route directory writes a valid zero-item RSS and no Atom
+  ---
+  duration_ms: 3.103708
+  type: 'test'
+  ...
+# Subtest: entry order is publication date desc, then order, then path
+ok 96 - entry order is publication date desc, then order, then path
+  ---
+  duration_ms: 10.515667
+  type: 'test'
+  ...
+# Subtest: rss/atom false and custom nested names control the written files
+ok 97 - rss/atom false and custom nested names control the written files
+  ---
+  duration_ms: 4.320375
+  type: 'test'
+  ...
+# Subtest: feed output paths cannot conflict with pages, 404, sitemap or robots
+ok 98 - feed output paths cannot conflict with pages, 404, sitemap or robots
+  ---
+  duration_ms: 10.322333
+  type: 'test'
+  ...
+# Subtest: a feed may reuse sitemap.xml or robots.txt only when that output is disabled
+ok 99 - a feed may reuse sitemap.xml or robots.txt only when that output is disabled
+  ---
+  duration_ms: 14.454416
+  type: 'test'
+  ...
+# Subtest: feed output files cannot duplicate or overlap before any page or feed is written
+ok 100 - feed output files cannot duplicate or overlap before any page or feed is written
+  ---
+  duration_ms: 8.57475
+  type: 'test'
+  ...
+# Subtest: feed XML is structural, escaped and keeps Chinese and emoji
+ok 101 - feed XML is structural, escaped and keeps Chinese and emoji
+  ---
+  duration_ms: 6.343875
+  type: 'test'
+  ...
+# Subtest: existing template alternate links are replaced, never duplicated
+ok 102 - existing template alternate links are replaced, never duplicated
+  ---
+  duration_ms: 3.238542
+  type: 'test'
+  ...
+# Subtest: omitted feeds leave the page head and the file set unchanged
+ok 103 - omitted feeds leave the page head and the file set unchanged
+  ---
+  duration_ms: 7.4165
+  type: 'test'
+  ...
+# Subtest: no siteUrl skips feed generation and alternate links entirely
+ok 104 - no siteUrl skips feed generation and alternate links entirely
+  ---
+  duration_ms: 1.979833
+  type: 'test'
+  ...
+# Subtest: custom route sets still receive feed discovery on every page
+ok 105 - custom route sets still receive feed discovery on every page
+  ---
+  duration_ms: 6.796458
+  type: 'test'
+  ...
+# Subtest: the structural XML helper rejects malformed documents
+ok 106 - the structural XML helper rejects malformed documents
+  ---
+  duration_ms: 0.366
+  type: 'test'
+  ...
+# Subtest: an invalid feed output name is rejected before any static file is written
+ok 107 - an invalid feed output name is rejected before any static file is written
+  ---
+  duration_ms: 2.7555
+  type: 'test'
+  ...
+# Subtest: an invalid feed source route fails with the feed path in the error
+ok 108 - an invalid feed source route fails with the feed path in the error
+  ---
+  duration_ms: 1.577292
+  type: 'test'
+  ...
+# Subtest: the default footer is unchanged for existing consumers
+ok 109 - the default footer is unchanged for existing consumers
+  ---
+  duration_ms: 26.934083
+  type: 'test'
+  ...
+# Subtest: footer false suppresses the entire landmark
+ok 110 - footer false suppresses the entire landmark
+  ---
+  duration_ms: 1.67025
+  type: 'test'
+  ...
+# Subtest: structured footer renders brand, groups and legal metadata
+ok 111 - structured footer renders brand, groups and legal metadata
+  ---
+  duration_ms: 17.825375
+  type: 'test'
+  ...
+# Subtest: root-relative brand assets and internal links honor a subpath basename
+ok 112 - root-relative brand assets and internal links honor a subpath basename
+  ---
+  duration_ms: 1.42325
+  type: 'test'
+  ...
+# Subtest: external logo URL is not rewritten; labels are HTML-escaped
+ok 113 - external logo URL is not rewritten; labels are HTML-escaped
+  ---
+  duration_ms: 0.791875
+  type: 'test'
+  ...
+# Subtest: legal-only structured footer and empty object do not invent claims
+ok 114 - legal-only structured footer and empty object do not invent claims
+  ---
+  duration_ms: 2.306541
+  type: 'test'
+  ...
+# Subtest: header uses its default text when no custom brand is supplied
+ok 115 - header uses its default text when no custom brand is supplied
+  ---
+  duration_ms: 11.487
+  type: 'test'
+  ...
+# Subtest: header brand slot replaces only brand contents, keeping the link
+ok 116 - header brand slot replaces only brand contents, keeping the link
+  ---
+  duration_ms: 1.107708
+  type: 'test'
+  ...
+# Subtest: header primitives are public runtime exports
+ok 117 - header primitives are public runtime exports
+  ---
+  duration_ms: 1.010042
+  type: 'test'
+  ...
+# Subtest: the header keeps its shell, brand and right-hand cluster
+ok 118 - the header keeps its shell, brand and right-hand cluster
+  ---
+  duration_ms: 10.113792
+  type: 'test'
+  ...
+# Subtest: header frame follows the current route without changing navigation API
+ok 119 - header frame follows the current route without changing navigation API
+  ---
+  duration_ms: 2.837417
+  type: 'test'
+  ...
+# Subtest: plain navigation entries still render as ordinary links
+ok 120 - plain navigation entries still render as ordinary links
+  ---
+  duration_ms: 3.686667
+  type: 'test'
+  ...
+# Subtest: a collection entry resolves through the docs passed to the header
+ok 121 - a collection entry resolves through the docs passed to the header
+  ---
+  duration_ms: 13.067083
+  type: 'test'
+  ...
+# Subtest: an active plain entry is marked for assistive technology
+ok 122 - an active plain entry is marked for assistive technology
+  ---
+  duration_ms: 1.215375
+  type: 'test'
+  ...
+# Subtest: a structured entry renders a disclosure trigger and its panel
+ok 123 - a structured entry renders a disclosure trigger and its panel
+  ---
+  duration_ms: 6.854125
+  type: 'test'
+  ...
+# Subtest: group headings render when children declare reading tasks
+ok 124 - group headings render when children declare reading tasks
+  ---
+  duration_ms: 2.095708
+  type: 'test'
+  ...
+# Subtest: an ungrouped panel renders no group headings
+ok 125 - an ungrouped panel renders no group headings
+  ---
+  duration_ms: 2.494583
+  type: 'test'
+  ...
+# Subtest: the panel does not claim to be open on first render
+ok 126 - the panel does not claim to be open on first render
+  ---
+  duration_ms: 4.025208
+  type: 'test'
+  ...
+# Subtest: the mobile panel exposes an accordion, not the desktop panel
+ok 127 - the mobile panel exposes an accordion, not the desktop panel
+  ---
+  duration_ms: 1.792708
+  type: 'test'
+  ...
+# Subtest: mobile disclosure buttons start collapsed and are labelled
+ok 128 - mobile disclosure buttons start collapsed and are labelled
+  ---
+  duration_ms: 1.632291
+  type: 'test'
+  ...
+# Subtest: the collapsed mobile disclosure is inert and uses the +/x affordance
+ok 129 - the collapsed mobile disclosure is inert and uses the +/x affordance
+  ---
+  duration_ms: 1.612958
+  type: 'test'
+  ...
+# Subtest: utility actions keep their labels and the search hint
+ok 130 - utility actions keep their labels and the search hint
+  ---
+  duration_ms: 1.756541
+  type: 'test'
+  ...
+# Subtest: navigation defaults to the config's own navigation
+ok 131 - navigation defaults to the config's own navigation
+  ---
+  duration_ms: 2.8935
+  type: 'test'
+  ...
+# Subtest: no navigation config renders no nav items but keeps the header
+ok 132 - no navigation config renders no nav items but keeps the header
+  ---
+  duration_ms: 0.859209
+  type: 'test'
+  ...
+# Subtest: a consumer render prop precedes desktop theme actions
+ok 133 - a consumer render prop precedes desktop theme actions
+  ---
+  duration_ms: 1.410625
+  type: 'test'
+  ...
+# Subtest: mobile share lives only inside the expanded-menu tool rail
+ok 134 - mobile share lives only inside the expanded-menu tool rail
+  ---
+  duration_ms: 5.049125
+  type: 'test'
+  ...
+# Subtest: mobile panel tools are icon-only but keep accessible labels
+ok 135 - mobile panel tools are icon-only but keep accessible labels
+  ---
+  duration_ms: 3.623958
+  type: 'test'
+  ...
+# Subtest: header utility popover exposes an accessible compact disclosure
+ok 136 - header utility popover exposes an accessible compact disclosure
+  ---
+  duration_ms: 0.284292
+  type: 'test'
+  ...
+# Subtest: header consumer actions stay accessible from the mobile panel
+ok 137 - header consumer actions stay accessible from the mobile panel
+  ---
+  duration_ms: 1.237917
+  type: 'test'
+  ...
+# Subtest: home model defaults mirror the editorial home selection and exclude the featured story from recent
+ok 138 - home model defaults mirror the editorial home selection and exclude the featured story from recent
+  ---
+  duration_ms: 16.922792
+  type: 'test'
+  ...
+# Subtest: configured home controls source, block visibility and order without hardcoded collection names
+ok 139 - configured home controls source, block visibility and order without hardcoded collection names
+  ---
+  duration_ms: 0.955667
+  type: 'test'
+  ...
+# Subtest: empty collections, hidden meta and no sections stay explicit
+ok 140 - empty collections, hidden meta and no sections stay explicit
+  ---
+  duration_ms: 0.508541
+  type: 'test'
+  ...
+# Subtest: static configured home uses the same order, basePath links and escaped text
+ok 141 - static configured home uses the same order, basePath links and escaped text
+  ---
+  duration_ms: 18.553125
+  type: 'test'
+  ...
+# Subtest: configured home links stay correct at the root deployment base
+ok 142 - configured home links stay correct at the root deployment base
+  ---
+  duration_ms: 13.980292
+  type: 'test'
+  ...
+# Subtest: configuring home does not change other static routes, 404, sitemap or robots
+ok 143 - configuring home does not change other static routes, 404, sitemap or robots
+  ---
+  duration_ms: 6.561209
+  type: 'test'
+  ...
+# Subtest: static-only home override changes only '/' and keeps every other route intact
+ok 144 - static-only home override changes only '/' and keeps every other route intact
+  ---
+  duration_ms: 10.342667
+  type: 'test'
+  ...
+# Subtest: static home override composes with a custom route set but still owns only '/'
+ok 145 - static home override composes with a custom route set but still owns only '/'
+  ---
+  duration_ms: 4.281875
+  type: 'test'
+  ...
+# Subtest: static home override rejects a different path before writing output
+ok 146 - static home override rejects a different path before writing output
+  ---
+  duration_ms: 1.190208
+  type: 'test'
+  ...
+# Subtest: static home override requires a '/' route in a custom route set
+ok 147 - static home override requires a '/' route in a custom route set
+  ---
+  duration_ms: 2.135833
+  type: 'test'
+  ...
+# Subtest: home configuration failures are explicit
+ok 148 - home configuration failures are explicit
+  ---
+  duration_ms: 1.128709
+  type: 'test'
+  ...
+# Subtest: renderFolioStaticHome exposes the same configured body used by the default route
+ok 149 - renderFolioStaticHome exposes the same configured body used by the default route
+  ---
+  duration_ms: 1.202875
+  type: 'test'
+  ...
+# Subtest: renderFolioStaticHtml resolves robots precedence without changing SEO metadata
+ok 150 - renderFolioStaticHtml resolves robots precedence without changing SEO metadata
+  ---
+  duration_ms: 5.963583
+  type: 'test'
+  ...
+# Subtest: an ambiguous siteIndexing value throws instead of indexing silently
+ok 151 - an ambiguous siteIndexing value throws instead of indexing silently
+  ---
+  duration_ms: 0.325084
+  type: 'test'
+  ...
+# Subtest: writeFolioStaticSite rejects an ambiguous siteIndexing before writing anything
+ok 152 - writeFolioStaticSite rejects an ambiguous siteIndexing before writing anything
+  ---
+  duration_ms: 3.009125
+  type: 'test'
+  ...
+# Subtest: default and noindex builds over the same /moyu/ fixture write consistent output
+ok 153 - default and noindex builds over the same /moyu/ fixture write consistent output
+  ---
+  duration_ms: 33.198666
+  type: 'test'
+  ...
+# Subtest: custom route pages and 404 inherit the policy at the root path
+ok 154 - custom route pages and 404 inherit the policy at the root path
+  ---
+  duration_ms: 10.965167
+  type: 'test'
+  ...
+# Subtest: an explicit notFound robots value still wins over the 404 default
+ok 155 - an explicit notFound robots value still wins over the 404 default
+  ---
+  duration_ms: 1.344291
+  type: 'test'
+  ...
+# Subtest: robots and sitemap options stay independent from siteIndexing
+ok 156 - robots and sitemap options stay independent from siteIndexing
+  ---
+  duration_ms: 16.662875
+  type: 'test'
+  ...
+# Subtest: renderer preserves custom HTML and removes duplicate H1
+ok 157 - renderer preserves custom HTML and removes duplicate H1
+  ---
+  duration_ms: 30.671375
+  type: 'test'
+  ...
+# Subtest: renderer supports design-system callout variants
+ok 158 - renderer supports design-system callout variants
+  ---
+  duration_ms: 3.888292
+  type: 'test'
+  ...
+# Subtest: GFM tables render with semantic table markup
+ok 159 - GFM tables render with semantic table markup
+  ---
+  duration_ms: 1.285708
+  type: 'test'
+  ...
+# Subtest: code and Mermaid source are safely escaped
+ok 160 - code and Mermaid source are safely escaped
+  ---
+  duration_ms: 26.480875
+  type: 'test'
+  ...
+# Subtest: callout syntax inside fenced code remains verbatim
+ok 161 - callout syntax inside fenced code remains verbatim
+  ---
+  duration_ms: 1.048708
+  type: 'test'
+  ...
+# Subtest: renderer preserves explicit heading IDs and keeps generated IDs aligned
+ok 162 - renderer preserves explicit heading IDs and keeps generated IDs aligned
+  ---
+  duration_ms: 0.235542
+  type: 'test'
+  ...
+# Subtest: renderer reserves later explicit IDs before allocating generated IDs
+ok 163 - renderer reserves later explicit IDs before allocating generated IDs
+  ---
+  duration_ms: 0.158834
+  type: 'test'
+  ...
+# Subtest: renderer reserves explicit IDs on case-insensitive HTML heading tags
+ok 164 - renderer reserves explicit IDs on case-insensitive HTML heading tags
+  ---
+  duration_ms: 0.080042
+  type: 'test'
+  ...
+# Subtest: one document navigation tree includes nested authored routes without a project type
+ok 165 - one document navigation tree includes nested authored routes without a project type
+  ---
+  duration_ms: 20.787875
+  type: 'test'
+  ...
+# Subtest: static document navigation renders nested links, section labels and one active route
+ok 166 - static document navigation renders nested links, section labels and one active route
+  ---
+  duration_ms: 0.655
+  type: 'test'
+  ...
+# Subtest: article, page and arbitrary types do not acquire document navigation
+ok 167 - article, page and arbitrary types do not acquire document navigation
+  ---
+  duration_ms: 0.42575
+  type: 'test'
+  ...
+# Subtest: multi-directory collection shares one scope without swallowing other collections
+ok 168 - multi-directory collection shares one scope without swallowing other collections
+  ---
+  duration_ms: 0.217459
+  type: 'test'
+  ...
+# Subtest: same-named sections from distinct collections remain separate in explicit scope
+ok 169 - same-named sections from distinct collections remain separate in explicit scope
+  ---
+  duration_ms: 0.166834
+  type: 'test'
+  ...
+# Subtest: missing authored parents never become fake links in the reading sidebar
+ok 170 - missing authored parents never become fake links in the reading sidebar
+  ---
+  duration_ms: 0.173375
+  type: 'test'
+  ...
+# Subtest: authored orders above 99 are retained without clipping or fake project grouping
+ok 171 - authored orders above 99 are retained without clipping or fake project grouping
+  ---
+  duration_ms: 0.146625
+  type: 'test'
+  ...
+# Subtest: a plain {label, href} entry resolves to a plain link
+ok 172 - a plain {label, href} entry resolves to a plain link
+  ---
+  duration_ms: 0.984417
+  type: 'test'
+  ...
+# Subtest: a collection shorthand lands on the first document and owns the whole root
+ok 173 - a collection shorthand lands on the first document and owns the whole root
+  ---
+  duration_ms: 87.686875
+  type: 'test'
+  ...
+# Subtest: a collection without documents uses its first entry overall
+ok 174 - a collection without documents uses its first entry overall
+  ---
+  duration_ms: 0.10525
+  type: 'test'
+  ...
+# Subtest: an explicit href wins while collection still supplies the active root
+ok 175 - an explicit href wins while collection still supplies the active root
+  ---
+  duration_ms: 0.077875
+  type: 'test'
+  ...
+# Subtest: an empty collection falls back to its index and a destinationless entry is dropped
+ok 176 - an empty collection falls back to its index and a destinationless entry is dropped
+  ---
+  duration_ms: 0.211167
+  type: 'test'
+  ...
+# Subtest: navigation is data-driven, not route-specific
+ok 177 - navigation is data-driven, not route-specific
+  ---
+  duration_ms: 0.187958
+  type: 'test'
+  ...
+# Subtest: an entry without children stays a link, so old configs are unchanged
+ok 178 - an entry without children stays a link, so old configs are unchanged
+  ---
+  duration_ms: 0.159875
+  type: 'test'
+  ...
+# Subtest: a menu generates an overview entry for the item's own href
+ok 179 - a menu generates an overview entry for the item's own href
+  ---
+  duration_ms: 0.150666
+  type: 'test'
+  ...
+# Subtest: the overview entry is not duplicated when a child already targets it
+ok 180 - the overview entry is not duplicated when a child already targets it
+  ---
+  duration_ms: 0.264833
+  type: 'test'
+  ...
+# Subtest: the overview label falls back to the item label
+ok 181 - the overview label falls back to the item label
+  ---
+  duration_ms: 0.347709
+  type: 'test'
+  ...
+# Subtest: a panel title falls back to the item label but keeps an explicit one
+ok 182 - a panel title falls back to the item label but keeps an explicit one
+  ---
+  duration_ms: 0.131541
+  type: 'test'
+  ...
+# Subtest: malformed children are dropped instead of rendering empty rows
+ok 183 - malformed children are dropped instead of rendering empty rows
+  ---
+  duration_ms: 0.06975
+  type: 'test'
+  ...
+# Subtest: whitespace is trimmed and trailing slashes are normalized
+ok 184 - whitespace is trimmed and trailing slashes are normalized
+  ---
+  duration_ms: 0.05125
+  type: 'test'
+  ...
+# Subtest: the root route keeps its slash and never prefix-matches everything
+ok 185 - the root route keeps its slash and never prefix-matches everything
+  ---
+  duration_ms: 0.047583
+  type: 'test'
+  ...
+# Subtest: a menu is active when any of its entries matches
+ok 186 - a menu is active when any of its entries matches
+  ---
+  duration_ms: 0.046791
+  type: 'test'
+  ...
+# Subtest: a missing or non-array navigation config yields no items
+ok 187 - a missing or non-array navigation config yields no items
+  ---
+  duration_ms: 0.070917
+  type: 'test'
+  ...
+# Subtest: the export is exercised through the published entry point
+ok 188 - the export is exercised through the published entry point
+  ---
+  duration_ms: 0.100625
+  type: 'test'
+  ...
+# Subtest: the built types expose the new navigation fields
+ok 189 - the built types expose the new navigation fields
+  ---
+  duration_ms: 0.285958
+  type: 'test'
+  ...
+# Subtest: a menu without groups stays one flat run, as before
+ok 190 - a menu without groups stays one flat run, as before
+  ---
+  duration_ms: 0.043666
+  type: 'test'
+  ...
+# Subtest: grouped entries split into reading tasks in first-seen order
+ok 191 - grouped entries split into reading tasks in first-seen order
+  ---
+  duration_ms: 0.0695
+  type: 'test'
+  ...
+# Subtest: entries stay flat on `entries` so group-agnostic consumers keep working
+ok 192 - entries stay flat on `entries` so group-agnostic consumers keep working
+  ---
+  duration_ms: 0.050458
+  type: 'test'
+  ...
+# Subtest: group headings are trimmed and blank groups are ignored
+ok 193 - group headings are trimmed and blank groups are ignored
+  ---
+  duration_ms: 0.058208
+  type: 'test'
+  ...
+# Subtest: groupEntries is exported and tolerates an empty list
+ok 194 - groupEntries is exported and tolerates an empty list
+  ---
+  duration_ms: 0.029125
+  type: 'test'
+  ...
+# Subtest: a plain entry is unaffected by the grouping feature
+ok 195 - a plain entry is unaffected by the grouping feature
+  ---
+  duration_ms: 0.031125
+  type: 'test'
+  ...
+# Subtest: activeMatch lets one entry cover several route directories
+ok 196 - activeMatch lets one entry cover several route directories
+  ---
+  duration_ms: 0.04
+  type: 'test'
+  ...
+# Subtest: an entry with activeMatch is still a plain link with no dropdown
+ok 197 - an entry with activeMatch is still a plain link with no dropdown
+  ---
+  duration_ms: 0.037417
+  type: 'test'
+  ...
+# Subtest: a plain entry without activeMatch carries an empty list, not undefined
+ok 198 - a plain entry without activeMatch carries an empty list, not undefined
+  ---
+  duration_ms: 0.032125
+  type: 'test'
+  ...
+# Subtest: activeMatch marks the entry current on its extra prefixes
+ok 199 - activeMatch marks the entry current on its extra prefixes
+  ---
+  duration_ms: 0.045709
+  type: 'test'
+  ...
+# Subtest: FolioPageNav is independently composable and keeps Router basename
+ok 200 - FolioPageNav is independently composable and keeps Router basename
+  ---
+  duration_ms: 22.583166
+  type: 'test'
+  ...
+# Subtest: single-sided pagination retains its two-column alignment and never invents a link
+ok 201 - single-sided pagination retains its two-column alignment and never invents a link
+  ---
+  duration_ms: 3.748542
+  type: 'test'
+  ...
+# Subtest: FolioDocsShell composes the same exported pager with collection ordering
+ok 202 - FolioDocsShell composes the same exported pager with collection ordering
+  ---
+  duration_ms: 37.928375
+  type: 'test'
+  ...
+# Subtest: static document and project readers use one pager structure and base-safe links
+ok 203 - static document and project readers use one pager structure and base-safe links
+  ---
+  duration_ms: 36.080291
+  type: 'test'
+  ...
+# Subtest: static pagination safely escapes titles and never exposes raw markup
+ok 204 - static pagination safely escapes titles and never exposes raw markup
+  ---
+  duration_ms: 0.223958
+  type: 'test'
+  ...
+# Subtest: the last component continues to the Reference Index in the same sidebar order
+ok 205 - the last component continues to the Reference Index in the same sidebar order
+  ---
+  duration_ms: 64.794416
+  type: 'test'
+  ...
+# Subtest: standalone project navigation remains bounded to its own project
+ok 206 - standalone project navigation remains bounded to its own project
+  ---
+  duration_ms: 0.537
+  type: 'test'
+  ...
+# Subtest: an explicit pageNeighbors override remains authoritative
+ok 207 - an explicit pageNeighbors override remains authoritative
+  ---
+  duration_ms: 2.377833
+  type: 'test'
+  ...
+# Subtest: reading layout classification is the sole source of footer policy
+ok 208 - reading layout classification is the sole source of footer policy
+  ---
+  duration_ms: 0.444375
+  type: 'test'
+  ...
+# Subtest: global and article footers share one decision
+ok 209 - global and article footers share one decision
+  ---
+  duration_ms: 0.133584
+  type: 'test'
+  ...
+# Subtest: a legitimate build passes the emitted-manifest boundary
+ok 210 - a legitimate build passes the emitted-manifest boundary
+  ---
+  duration_ms: 1158.333334
+  type: 'test'
+  ...
+# Subtest: a transform that injects a generated page fails the build
+ok 211 - a transform that injects a generated page fails the build
+  ---
+  duration_ms: 2375.22825
+  type: 'test'
+  ...
+# Subtest: the precache guard inspects integrity-bearing entries, not just regex matches
+ok 212 - the precache guard inspects integrity-bearing entries, not just regex matches
+  ---
+  duration_ms: 634.979875
+  type: 'test'
+  ...
+# Subtest: emitted PNG artwork must match the declared icon dimensions
+ok 213 - emitted PNG artwork must match the declared icon dimensions
+  ---
+  duration_ms: 328.686042
+  type: 'test'
+  ...
+# Subtest: SVG viewports must be square
+ok 214 - SVG viewports must be square
+  ---
+  duration_ms: 609.208792
+  type: 'test'
+  ...
+# Subtest: a transform cannot strip the content-version entry
+ok 215 - a transform cannot strip the content-version entry
+  ---
+  duration_ms: 303.958125
+  type: 'test'
+  ...
+# Subtest: an unreadable worker precache manifest fails closed
+ok 216 - an unreadable worker precache manifest fails closed
+  ---
+  duration_ms: 285.218125
+  type: 'test'
+  ...
+# Subtest: a sub-path build resolves asset entries against the same output
+ok 217 - a sub-path build resolves asset entries against the same output
+  ---
+  duration_ms: 319.169625
+  type: 'test'
+  ...
+# Subtest: the built PWA entry owns the documented public surface
+ok 218 - the built PWA entry owns the documented public surface
+  ---
+  duration_ms: 1.4095
+  type: 'test'
+  ...
+# Subtest: PWA dependencies are optional peers, never hard dependencies
+ok 219 - PWA dependencies are optional peers, never hard dependencies
+  ---
+  duration_ms: 0.168834
+  type: 'test'
+  ...
+# Subtest: folioPwa rejects an uninstallable or deployment-unsafe configuration
+ok 220 - folioPwa rejects an uninstallable or deployment-unsafe configuration
+  ---
+  duration_ms: 0.714042
+  type: 'test'
+  ...
+# Subtest: folioPwa refuses an SPA fallback and an HTML precache
+ok 221 - folioPwa refuses an SPA fallback and an HTML precache
+  ---
+  duration_ms: 0.390125
+  type: 'test'
+  ...
+# Subtest: folioPwa keeps the update modes separate
+ok 222 - folioPwa keeps the update modes separate
+  ---
+  duration_ms: 0.7985
+  type: 'test'
+  ...
+# Subtest: folioPwa refuses manifest fields that must follow the deployment base
+ok 223 - folioPwa refuses manifest fields that must follow the deployment base
+  ---
+  duration_ms: 0.122417
+  type: 'test'
+  ...
+# Subtest: the content version is deterministic and content-sensitive
+ok 224 - the content version is deterministic and content-sensitive
+  ---
+  duration_ms: 5.502792
+  type: 'test'
+  ...
+# Subtest: the content version ignores non-HTML artifacts
+ok 225 - the content version ignores non-HTML artifacts
+  ---
+  duration_ms: 1.286875
+  type: 'test'
+  ...
+# Subtest: the content version fails loudly instead of inventing a value
+ok 226 - the content version fails loudly instead of inventing a value
+  ---
+  duration_ms: 0.671125
+  type: 'test'
+  ...
+# Subtest: the resume update check is throttled and never spins
+ok 227 - the resume update check is throttled and never spins
+  ---
+  duration_ms: 0.356209
+  type: 'test'
+  ...
+# Subtest: the optional integration is not reachable from the plain entries
+ok 228 - the optional integration is not reachable from the plain entries
+  ---
+  duration_ms: 0.605417
+  type: 'test'
+  ...
+# Subtest: the React entry ships the prompt and the hook without global styles
+ok 229 - the React entry ships the prompt and the hook without global styles
+  ---
+  duration_ms: 0.196
+  type: 'test'
+  ...
+# Subtest: precache entries that name a generated page are rejected
+ok 230 - precache entries that name a generated page are rejected
+  ---
+  duration_ms: 0.663333
+  type: 'test'
+  ...
+# Subtest: legitimate precache customization still works
+ok 231 - legitimate precache customization still works
+  ---
+  duration_ms: 0.233917
+  type: 'test'
+  ...
+# Subtest: the emitted manifest icon list is validated, not just the input
+ok 232 - the emitted manifest icon list is validated, not just the input
+  ---
+  duration_ms: 0.244334
+  type: 'test'
+  ...
+# Subtest: the registration state collapses into exactly four observable values
+ok 233 - the registration state collapses into exactly four observable values
+  ---
+  duration_ms: 0.051541
+  type: 'test'
+  ...
+# Subtest: the hook exposes the registration state without changing the existing API
+ok 234 - the hook exposes the registration state without changing the existing API
+  ---
+  duration_ms: 0.176916
+  type: 'test'
+  ...
+# Subtest: one navigation tree mixes reference categories and nested components without leaking guide pages
+ok 235 - one navigation tree mixes reference categories and nested components without leaking guide pages
+  ---
+  duration_ms: 30.260333
+  type: 'test'
+  ...
+# Subtest: public TreeNav renders all nested links in one nav and honors Router basename
+ok 236 - public TreeNav renders all nested links in one nav and honors Router basename
+  ---
+  duration_ms: 26.4425
+  type: 'test'
+  ...
+# Subtest: static navigation projects the same links through the public tree renderer
+ok 237 - static navigation projects the same links through the public tree renderer
+  ---
+  duration_ms: 1.57975
+  type: 'test'
+  ...
+# Subtest: project articles preserve peer document categories and their own active ancestry
+ok 238 - project articles preserve peer document categories and their own active ancestry
+  ---
+  duration_ms: 8.950583
+  type: 'test'
+  ...
+# Subtest: static project output retains peers, link semantics, and no inert disclosure
+ok 239 - static project output retains peers, link semantics, and no inert disclosure
+  ---
+  duration_ms: 4.240959
+  type: 'test'
+  ...
+# Subtest: controlled TreeNav expansion keeps content groups visible and allows branch toggles
+ok 240 - controlled TreeNav expansion keeps content groups visible and allows branch toggles
+  ---
+  duration_ms: 3.369125
+  type: 'test'
+  ...
+# Subtest: parent title and +/- are independent; current parent is initially open
+ok 241 - parent title and +/- are independent; current parent is initially open
+  ---
+  duration_ms: 10.040416
+  type: 'test'
+  ...
+# Subtest: taxonomy headings are permanent labels, even under controlled disclosure props
+ok 242 - taxonomy headings are permanent labels, even under controlled disclosure props
+  ---
+  duration_ms: 11.474
+  type: 'test'
+  ...
+# Subtest: empty search returns visible content in document order
+ok 243 - empty search returns visible content in document order
+  ---
+  duration_ms: 1.509791
+  type: 'test'
+  ...
+# Subtest: empty search excludes the home document at /
+ok 244 - empty search excludes the home document at /
+  ---
+  duration_ms: 0.239666
+  type: 'test'
+  ...
+# Subtest: empty search clamps zero and negative limits
+ok 245 - empty search clamps zero and negative limits
+  ---
+  duration_ms: 0.186542
+  type: 'test'
+  ...
+# Subtest: search matches title, description, tags, and body
+ok 246 - search matches title, description, tags, and body
+  ---
+  duration_ms: 0.237625
+  type: 'test'
+  ...
+# Subtest: title exact matches rank before body-only matches
+ok 247 - title exact matches rank before body-only matches
+  ---
+  duration_ms: 0.186167
+  type: 'test'
+  ...
+# Subtest: static HTML includes canonical, social metadata, JSON-LD, and body
+ok 248 - static HTML includes canonical, social metadata, JSON-LD, and body
+  ---
+  duration_ms: 1.340667
+  type: 'test'
+  ...
+# Subtest: static site writer creates routes, 404, sitemap, and robots
+ok 249 - static site writer creates routes, 404, sitemap, and robots
+  ---
+  duration_ms: 3.265417
+  type: 'test'
+  ...
+# Subtest: duplicate and slash-equivalent static routes fail before any output
+ok 250 - duplicate and slash-equivalent static routes fail before any output
+  ---
+  duration_ms: 2.720083
+  type: 'test'
+  ...
+# Subtest: static routes with dot-segment aliases cannot overwrite the same output file
+ok 251 - static routes with dot-segment aliases cannot overwrite the same output file
+  ---
+  duration_ms: 1.941166
+  type: 'test'
+  ...
+# Subtest: default Markdown content routes also reject normalized collisions
+ok 252 - default Markdown content routes also reject normalized collisions
+  ---
+  duration_ms: 3.123917
+  type: 'test'
+  ...
+# Subtest: distinct normalized static routes still publish pages and metadata
+ok 253 - distinct normalized static routes still publish pages and metadata
+  ---
+  duration_ms: 4.738583
+  type: 'test'
+  ...
+# Subtest: static site writer emits exactly the expected output files for a multi-page build
+ok 254 - static site writer emits exactly the expected output files for a multi-page build
+  ---
+  duration_ms: 5.247125
+  type: 'test'
+  ...
+# Subtest: default document routes use the documentation structure shell
+ok 255 - default document routes use the documentation structure shell
+  ---
+  duration_ms: 15.725834
+  type: 'test'
+  ...
+# Subtest: static document shell keeps mobile navigation without JavaScript
+ok 256 - static document shell keeps mobile navigation without JavaScript
+  ---
+  duration_ms: 5.099291
+  type: 'test'
+  ...
+# Subtest: static site writer keeps valid nested routes inside outDir
+ok 257 - static site writer keeps valid nested routes inside outDir
+  ---
+  duration_ms: 2.2975
+  type: 'test'
+  ...
+# Subtest: static site writer refuses traversal routes without writing outside outDir
+ok 258 - static site writer refuses traversal routes without writing outside outDir
+  ---
+  duration_ms: 3.013
+  type: 'test'
+  ...
+# Subtest: static site writer refuses escapes that only appear after normalization
+ok 259 - static site writer refuses escapes that only appear after normalization
+  ---
+  duration_ms: 1.203542
+  type: 'test'
+  ...
+# Subtest: static site writer refuses ambiguous Windows path segments
+ok 260 - static site writer refuses ambiguous Windows path segments
+  ---
+  duration_ms: 1.302125
+  type: 'test'
+  ...
+# Subtest: default document routes are validated before any static output
+ok 261 - default document routes are validated before any static output
+  ---
+  duration_ms: 2.895334
+  type: 'test'
+  ...
+# Subtest: static site writer refuses routes that escape through an existing directory link
+ok 262 - static site writer refuses routes that escape through an existing directory link
+  ---
+  duration_ms: 6.948375
+  type: 'test'
+  ...
+# Subtest: static site writer refuses an existing symlink at the target file
+ok 263 - static site writer refuses an existing symlink at the target file
+  ---
+  duration_ms: 1.599834
+  type: 'test'
+  ...
+# Subtest: static site writer refuses fixed-name outputs redirected through a symlink
+ok 264 - static site writer refuses fixed-name outputs redirected through a symlink
+  ---
+  duration_ms: 1.569458
+  type: 'test'
+  ...
+# Subtest: article JSON-LD projects frontmatter authors, trusted dates, URL and image
+ok 265 - article JSON-LD projects frontmatter authors, trusted dates, URL and image
+  ---
+  duration_ms: 4.69775
+  type: 'test'
+  ...
+# Subtest: document JSON-LD maps to TechArticle and omits every absent field exactly
+ok 266 - document JSON-LD maps to TechArticle and omits every absent field exactly
+  ---
+  duration_ms: 1.334375
+  type: 'test'
+  ...
+# Subtest: author precedence is frontmatter > config.author > omitted
+ok 267 - author precedence is frontmatter > config.author > omitted
+  ---
+  duration_ms: 0.683333
+  type: 'test'
+  ...
+# Subtest: config.author supports a string, an object and an array of both
+ok 268 - config.author supports a string, an object and an array of both
+  ---
+  duration_ms: 0.397084
+  type: 'test'
+  ...
+# Subtest: frontmatter author strings keep the legacy separator semantics
+ok 269 - frontmatter author strings keep the legacy separator semantics
+  ---
+  duration_ms: 0.448291
+  type: 'test'
+  ...
+# Subtest: empty or blank author values never become an author array
+ok 270 - empty or blank author values never become an author array
+  ---
+  duration_ms: 0.897041
+  type: 'test'
+  ...
+# Subtest: only trusted date sources reach datePublished and dateModified
+ok 271 - only trusted date sources reach datePublished and dateModified
+  ---
+  duration_ms: 0.709666
+  type: 'test'
+  ...
+# Subtest: dates without provenance are never inferred from build time, mtime or legacy display values
+ok 272 - dates without provenance are never inferred from build time, mtime or legacy display values
+  ---
+  duration_ms: 0.242083
+  type: 'test'
+  ...
+# Subtest: JSON-LD escaping keeps untrusted title text inside valid JSON
+ok 273 - JSON-LD escaping keeps untrusted title text inside valid JSON
+  ---
+  duration_ms: 0.713833
+  type: 'test'
+  ...
+# Subtest: home, configured collection and unknown custom routes map to the right page type
+ok 274 - home, configured collection and unknown custom routes map to the right page type
+  ---
+  duration_ms: 1.660042
+  type: 'test'
+  ...
+# Subtest: home WebSite omits the URL when no siteUrl is configured
+ok 275 - home WebSite omits the URL when no siteUrl is configured
+  ---
+  duration_ms: 0.419125
+  type: 'test'
+  ...
+# Subtest: consumer-supplied route.jsonLd is never overwritten or merged
+ok 276 - consumer-supplied route.jsonLd is never overwritten or merged
+  ---
+  duration_ms: 0.239917
+  type: 'test'
+  ...
+# Subtest: image is emitted only when one resolves, honouring route image, defaultImage and logo
+ok 277 - image is emitted only when one resolves, honouring route image, defaultImage and logo
+  ---
+  duration_ms: 0.634417
+  type: 'test'
+  ...
+# Subtest: article routes keep og:type=article and the existing social image output
+ok 278 - article routes keep og:type=article and the existing social image output
+  ---
+  duration_ms: 0.365458
+  type: 'test'
+  ...
+# Subtest: sitemap emits lastmod only for explicit or trusted modification dates
+ok 279 - sitemap emits lastmod only for explicit or trusted modification dates
+  ---
+  duration_ms: 14.056959
+  type: 'test'
+  ...
+# Subtest: invalid explicit route.lastmod fails before any page is written
+ok 280 - invalid explicit route.lastmod fails before any page is written
+  ---
+  duration_ms: 0.637333
+  type: 'test'
+  ...
+# Subtest: lastmod rejects date-times without an explicit timezone
+ok 281 - lastmod rejects date-times without an explicit timezone
+  ---
+  duration_ms: 0.432
+  type: 'test'
+  ...
+# Subtest: canonical, og:url, JSON-LD, sitemap loc and lastmod agree under /moyu/
+ok 282 - canonical, og:url, JSON-LD, sitemap loc and lastmod agree under /moyu/
+  ---
+  duration_ms: 31.651917
+  type: 'test'
+  ...
+# Subtest: custom static routes still work and keep their site-relative URLs consistent
+ok 283 - custom static routes still work and keep their site-relative URLs consistent
+  ---
+  duration_ms: 6.349333
+  type: 'test'
+  ...
+# Subtest: default static output for an undated, un-authored document adds no metadata beyond the documented fields
+ok 284 - default static output for an undated, un-authored document adds no metadata beyond the documented fields
+  ---
+  duration_ms: 6.344458
+  type: 'test'
+  ...
+# Subtest: dist/styles.css preserves every registered module stylesheet in manifest order
+ok 285 - dist/styles.css preserves every registered module stylesheet in manifest order
+  ---
+  duration_ms: 2.574917
+  type: 'test'
+  ...
+# Subtest: aggregation is deterministic and preserves the manifest order
+ok 286 - aggregation is deterministic and preserves the manifest order
+  ---
+  duration_ms: 1.402084
+  type: 'test'
+  ...
+# Subtest: the built stylesheet passes the content gate
+ok 287 - the built stylesheet passes the content gate
+  ---
+  duration_ms: 16.707042
+  type: 'test'
+  ...
+# Subtest: deleting a canonical component rule fails the gate
+ok 288 - deleting a canonical component rule fails the gate
+  ---
+  duration_ms: 16.24325
+  type: 'test'
+  ...
+# Subtest: deleting a component rule fails the gate
+ok 289 - deleting a component rule fails the gate
+  ---
+  duration_ms: 11.150875
+  type: 'test'
+  ...
+# Subtest: reordering or removing a token fails the gate
+ok 290 - reordering or removing a token fails the gate
+  ---
+  duration_ms: 16.482916
+  type: 'test'
+  ...
+# Subtest: deleting a global rule fails the gate
+ok 291 - deleting a global rule fails the gate
+  ---
+  duration_ms: 16.026333
+  type: 'test'
+  ...
+# Subtest: moving a component block out of cascade order fails the gate
+ok 292 - moving a component block out of cascade order fails the gate
+  ---
+  duration_ms: 8.251208
+  type: 'test'
+  ...
+# Subtest: a truncated stylesheet fails the gate
+ok 293 - a truncated stylesheet fails the gate
+  ---
+  duration_ms: 14.291541
+  type: 'test'
+  ...
+# Subtest: the gate CLI exits non-zero for a mutated stylesheet
+ok 294 - the gate CLI exits non-zero for a mutated stylesheet
+  ---
+  duration_ms: 62.301917
+  type: 'test'
+  ...
+# Subtest: outline tree nests headings by level and keeps skipped levels attached
+ok 295 - outline tree nests headings by level and keeps skipped levels attached
+  ---
+  duration_ms: 0.478709
+  type: 'test'
+  ...
+# Subtest: public FolioToc renders a nested outline with accessible anchor links
+ok 296 - public FolioToc renders a nested outline with accessible anchor links
+  ---
+  duration_ms: 6.571167
+  type: 'test'
+  ...
+# Subtest: article static TOC and mobile native disclosure use exact markdown headings
+ok 297 - article static TOC and mobile native disclosure use exact markdown headings
+  ---
+  duration_ms: 25.590458
+  type: 'test'
+  ...
+# Subtest: generic document navigation has authored parent/child URLs under arbitrary routes
+ok 298 - generic document navigation has authored parent/child URLs under arbitrary routes
+  ---
+  duration_ms: 19.31525
+  type: 'test'
+  ...
+# Subtest: FolioDocsShell retains TOC, tree navigation and the same document pager
+ok 299 - FolioDocsShell retains TOC, tree navigation and the same document pager
+  ---
+  duration_ms: 11.441416
+  type: 'test'
+  ...
+# Subtest: default static document output keeps the nested tree, base links and real heading content
+ok 300 - default static document output keeps the nested tree, base links and real heading content
+  ---
+  duration_ms: 10.807208
+  type: 'test'
+  ...
+# Subtest: TreeNav keeps disclosure controls and active ancestry for ordinary docs
+ok 301 - TreeNav keeps disclosure controls and active ancestry for ordinary docs
+  ---
+  duration_ms: 3.5515
+  type: 'test'
+  ...
+# Subtest: defaultExpanded opens authored branches; noncollapsible keeps the structure
+ok 302 - defaultExpanded opens authored branches; noncollapsible keeps the structure
+  ---
+  duration_ms: 2.32525
+  type: 'test'
+  ...
+# Subtest: noncollapsible tree never hides unrelated authored descendants
+ok 303 - noncollapsible tree never hides unrelated authored descendants
+  ---
+  duration_ms: 1.613375
+  type: 'test'
+  ...
+# Subtest: React and static document trees share nesting markup and link targets
+ok 304 - React and static document trees share nesting markup and link targets
+  ---
+  duration_ms: 1.306333
+  type: 'test'
+  ...
+# Subtest: an article in the same route directory does not join the doc sidebar
+ok 305 - an article in the same route directory does not join the doc sidebar
+  ---
+  duration_ms: 0.178667
+  type: 'test'
+  ...
+# Subtest: core modules live only in src/core
+ok 306 - core modules live only in src/core
+  ---
+  duration_ms: 2.103875
+  type: 'test'
+  ...
+# Subtest: markdown rendering lives only in src/core and the barrel consumes it there
+ok 307 - markdown rendering lives only in src/core and the barrel consumes it there
+  ---
+  duration_ms: 1.01325
+  type: 'test'
+  ...
+# Subtest: core and build modules stay free of React imports
+ok 308 - core and build modules stay free of React imports
+  ---
+  duration_ms: 1.643417
+  type: 'test'
+  ...
+# Subtest: React-facing prop and slot types live only in ui-types.ts
+ok 309 - React-facing prop and slot types live only in ui-types.ts
+  ---
+  duration_ms: 1.626708
+  type: 'test'
+  ...
+# Subtest: the public barrel still re-exports every published type name
+ok 310 - the public barrel still re-exports every published type name
+  ---
+  duration_ms: 0.819125
+  type: 'test'
+  ...
+# Subtest: the Vite adapter implementation lives only in src/build/vite-adapter.ts
+ok 311 - the Vite adapter implementation lives only in src/build/vite-adapter.ts
+  ---
+  duration_ms: 16.088959
+  type: 'test'
+  ...
+1..311
+# tests 311
+# suites 0
+# pass 311
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 7119.551208
+
+> @uichat-mira/folio-site@0.1.1 build
+> vite build && node scripts/copy-schemas.mjs && node scripts/verify-site-routes.mjs
+
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 2248 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                         1.32 kB │ gzip:   0.75 kB
+dist/assets/index-BkdrgrCL.css                         95.07 kB │ gzip:  18.06 kB
+dist/assets/channel-CqmBc51k.js                         0.12 kB │ gzip:   0.13 kB
+dist/assets/init-Gi6I4Gst.js                            0.15 kB │ gzip:   0.13 kB
+dist/assets/chunk-2Q5K7J3B-TrnhjfnH.js                  0.19 kB │ gzip:   0.16 kB
+dist/assets/chunk-JWPE2WC7-Cdsj8GIi.js                  0.23 kB │ gzip:   0.17 kB
+dist/assets/chunk-XXDRQBXY-C0j45ce1.js                  0.23 kB │ gzip:   0.21 kB
+dist/assets/chunk-5VM5RSS4-h6-k-rpn.js                  0.37 kB │ gzip:   0.27 kB
+dist/assets/stateDiagram-v2-MP3YSRHH-CHcQtMmt.js        0.43 kB │ gzip:   0.30 kB
+dist/assets/classDiagram-ZZMXUADV-C5k6P0rf.js           0.47 kB │ gzip:   0.32 kB
+dist/assets/classDiagram-v2-VYDZK3BY-C5k6P0rf.js        0.47 kB │ gzip:   0.32 kB
+dist/assets/chunk-POPQ4Y6H-Bqc4b5tX.js                  0.51 kB │ gzip:   0.36 kB
+dist/assets/swimlanesDiagram-VR7AAH4N-9kBYMK8f.js       0.55 kB │ gzip:   0.37 kB
+dist/assets/infoDiagram-27XIBGKW-jL7Z6c29.js            0.59 kB │ gzip:   0.41 kB
+dist/assets/sizeCapture-INFHLROL-Ceejkyc-.js            0.94 kB │ gzip:   0.53 kB
+dist/assets/ordinal-Cboi1Yqb.js                         1.19 kB │ gzip:   0.57 kB
+dist/assets/railroadDiagram-O6MQD6OU-CyF-oLd6.js        1.61 kB │ gzip:   0.76 kB
+dist/assets/abnfDiagram-VCTEODGH-CyMHTG3O.js            1.81 kB │ gzip:   0.89 kB
+dist/assets/chunk-F27PBJKO-2I0A8tes.js                  1.88 kB │ gzip:   0.83 kB
+dist/assets/pegDiagram-XKGWAZYB-8TE8F89b.js             1.96 kB │ gzip:   0.93 kB
+dist/assets/ebnfDiagram-PWID7BFC-_4dlC7er.js            2.01 kB │ gzip:   0.88 kB
+dist/assets/arc-Ljwh_7Pw.js                             3.44 kB │ gzip:   1.49 kB
+dist/assets/diagram-Z3DM3KII-Am2eF0jq.js                4.21 kB │ gzip:   1.83 kB
+dist/assets/defaultLocale-DX6XiGOO.js                   4.69 kB │ gzip:   2.18 kB
+dist/assets/linear-AssdFX9P.js                          5.66 kB │ gzip:   2.31 kB
+dist/assets/diagram-UQ7AKVKN-DAoc_jI4.js                6.08 kB │ gzip:   2.62 kB
+dist/assets/pieDiagram-E7YTZNPT-UEIRWyGs.js             6.29 kB │ gzip:   2.63 kB
+dist/assets/diagram-S7CK7UJ4-xaHHIWq0.js                8.22 kB │ gzip:   3.67 kB
+dist/assets/cynefinDiagram-5FMLGOSQ-Bx8NsMik.js        10.10 kB │ gzip:   3.63 kB
+dist/assets/stateDiagram-D77RDMKH-B3Yf1Y12.js          10.36 kB │ gzip:   3.62 kB
+dist/assets/dagre-GXQ25YYZ-C3SMW0if.js                 10.68 kB │ gzip:   4.03 kB
+dist/assets/diagram-VSXAHHWV-Cf3_WU2K.js               10.72 kB │ gzip:   4.13 kB
+dist/assets/chunk-SVP7TREG-s1KW_TzE.js                 15.74 kB │ gzip:   4.41 kB
+dist/assets/diagram-VX7I27RA-Do019Xwi.js               15.96 kB │ gzip:   5.70 kB
+dist/assets/ishikawaDiagram-5VMMS53U-BuGNv9tS.js       17.47 kB │ gzip:   6.64 kB
+dist/assets/kanban-definition-UXKFOSKX-Ozq4EcR4.js     20.29 kB │ gzip:   7.20 kB
+dist/assets/mindmap-definition-YA3MSWOX-Dx335vKQ.js    23.18 kB │ gzip:   7.83 kB
+dist/assets/sankeyDiagram-P5KCCOFB-csR17UiE.js         23.20 kB │ gzip:   8.56 kB
+dist/assets/journeyDiagram-3NMN7TZE-Tb1U-W23.js        23.57 kB │ gzip:   8.35 kB
+dist/assets/wardleyDiagram-VM6X3IG4-DIHk_qQ4.js        25.50 kB │ gzip:   6.79 kB
+dist/assets/gitGraphDiagram-WWUBYQGX-DlMW3ZO2.js       29.42 kB │ gzip:   8.70 kB
+dist/assets/erDiagram-RLTQ6QDP-_ls477zR.js             30.79 kB │ gzip:  10.59 kB
+dist/assets/timeline-definition-24CTP7MA-CJHISIg6.js   30.83 kB │ gzip:  10.15 kB
+dist/assets/requirementDiagram-BXWQKSXE-C-kcRNGd.js    31.00 kB │ gzip:   9.73 kB
+dist/assets/quadrantDiagram-AXDQQJYC-Bn9NSe63.js       34.01 kB │ gzip:   9.98 kB
+dist/assets/layout-BM5hkmdZ.js                         35.44 kB │ gzip:  12.75 kB
+dist/assets/chunk-IMKFNOWR-CzFtHc6e.js                 38.08 kB │ gzip:  12.51 kB
+dist/assets/blockDiagram-I7D4REHJ-CQ-HNLOV.js          41.76 kB │ gzip:  13.58 kB
+dist/assets/vennDiagram-4TSXK5OY-D5q-597O.js           41.96 kB │ gzip:  15.70 kB
+dist/assets/xychartDiagram-S5SC5T6Z-r5jJ49co.js        44.51 kB │ gzip:  12.61 kB
+dist/assets/chunk-TICWLB2K-BYqzDglZ.js                 49.18 kB │ gzip:  15.74 kB
+dist/assets/flowDiagram-HODETNUW-DxSwG-gA.js           61.85 kB │ gzip:  19.87 kB
+dist/assets/c4Diagram-7LVT6UL2-DRBMYRZ5.js             65.47 kB │ gzip:  18.79 kB
+dist/assets/ganttDiagram-EL5Y4UJY-DXh2b8WJ.js          69.70 kB │ gzip:  23.56 kB
+dist/assets/cose-bilkent-JH36ORCC-BXJxMEeL.js          81.70 kB │ gzip:  22.48 kB
+dist/assets/swimlanes-42K2YHIH-C1guVbh1.js            115.79 kB │ gzip:  42.52 kB
+dist/assets/sequenceDiagram-WJ2MYXX4-BmfIzCeG.js      116.96 kB │ gzip:  31.13 kB
+dist/assets/architectureDiagram-5GKGNRK7-DFZGneJL.js  151.83 kB │ gzip:  43.15 kB
+dist/assets/katex-HP8lGamR.js                         261.31 kB │ gzip:  77.57 kB
+dist/assets/cytoscape.esm-BB4DxJjf.js                 443.04 kB │ gzip: 141.98 kB
+dist/assets/mermaid.core-CFO0kkAg.js                  682.99 kB │ gzip: 169.06 kB
+dist/assets/cynefin-OW5HDTMX-K-3FM9ow.js              687.91 kB │ gzip: 154.14 kB
+dist/assets/index-B-zi7545.js                         870.85 kB │ gzip: 273.86 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.78s
+Copied Folio schemas to /Users/tao/Desktop/personal/folio/.worktrees/folio-article-archives/apps/site/dist/schemas
+[folio-site] 50 HTML routes; About, docs, blog, base, sitemap, retired paths and links verified for /
+
+> @uichat-mira/folio@0.1.1 pack:verify
+> node scripts/verify-package.mjs
+
+styles.css verified: 10 ordered source(s), 66541 bytes, tokens + global rules + component/static selectors + cascade order
+npm pack verified: uichat-mira-folio-0.1.1.tgz, 17 files, 386223 bytes unpacked
+
+> @uichat-mira/folio@0.1.1 pack:consumer
+> node scripts/verify-tarball-consumer.mjs
+
+Folio tarball consumer verification (T2)
+  package:  @uichat-mira/folio@0.1.1
+  source:   da6202d70c485e7545708fbf8d36ed23cbce8c68 (working tree dirty)
+  node:     v22.23.2 (darwin/arm64)
+  consumer: /private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio-tarball-consumer-IsWpki/consumer
+
+[tarball]  ok  uichat-mira-folio-0.1.1.tgz sha256=b1eabb9c85aea7e7cecbe00dcac3757e26e94e00de820d4afdb3e550fd22baf2
+[root] ok  /private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio-tarball-consumer-IsWpki/consumer/node_modules/@uichat-mira/folio (FolioApp, parseFolioDoc, dates)
+[vite] ok  /private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio-tarball-consumer-IsWpki/consumer/node_modules/@uichat-mira/folio/dist/vite.js (folio(), folioVirtualModule)
+[styles.css] ok  /private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio-tarball-consumer-IsWpki/consumer/node_modules/@uichat-mira/folio/dist/styles.css (66539 bytes)
+[pwa] ok  dist/pwa.js + dist/pwa-react.js (folioPwa, update hook, prompt)
+[types]    ok  tsc --noEmit (NodeNext, skipLibCheck=false) resolved the declarations
+[types]    ok  strict Bundler-mode tsc resolves virtual:folio/content without a local declaration
+[types]    ok  virtual-only strict tsc loads installed Folio types via compilerOptions.types
+[build]    ok  vite build (staticRoutes: false) wrote /private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio-tarball-consumer-IsWpki/consumer/vite-app/dist
+[content]  ok  FOLIO_CONSUMER_cb6cf2921492be29 and "Consumer discovery fixture" reached the client bundle (1 JS assets)
+[content]  ok  publishedAt override and Git-derived updatedAt reached the client bundle
+[css]      ok  1 CSS asset(s), 10 exact component/static selectors and 2 tokens reached the built stylesheet
+[content]  ok  negative control without Markdown built and contains no marker
+[static]   ok  vite build (staticRoutes: on, base /folio-smoke/) wrote /private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio-tarball-consumer-IsWpki/consumer/vite-app/dist-static
+[static]   ok  index.html  title, canonical https://example.test/folio-smoke/, base-prefixed asset /folio-smoke/assets/index-C1xrTmKK.js
+[static]   ok  docs/hello/index.html  marker FOLIO_STATIC_50858e62867124b9, base-prefixed links only (5 anchors)
+[static]   ok  404.html  noindex,nofollow
+[static]   ok  blogs/ and projects/ indexes are prerendered
+[static]   ok  sitemap.xml  four base-prefixed routes, trusted lastmod only, no 404
+[static]   ok  robots.txt  points at the base-prefixed sitemap
+[static]   ok  siteIndexing: "noindex" build  every page noindex,nofollow, canonicals unchanged, preview robots.txt, sitemap unadvertised
+[static]   ok  no feeds configured: no feed files and no alternate links
+[static]   ok  rss.xml  one base-prefixed item, absolute GUID, trusted pubDate
+[static]   ok  atom.xml  permalink ids and trusted updated/published dates only
+[static]   ok  feeds/blogs.xml  zero-item RSS for an empty directory, no Atom
+[static]   ok  feeds  three absolute base-prefixed alternate links on every page including 404
+[static]   ok  configured home uses config text, collection links and base path
+[static]   ok  static-only home override keeps every other route, canonical and sitemap entry
+[static]   ok  SEO fixture: parsed JSON-LD author precedence/dates and parsed sitemap lastmod
+[static]   ok  staticRoutes: false produced no static files (counter-proof)
+[pwa:root]   ok  base /: manifest scope/start_url, 8 precache entries (no HTML, no fallback), manifest link on 5 pages, content version 51e8ad1b80b7…
+[pwa:subpath]   ok  base /folio-smoke/: manifest scope/start_url, 8 precache entries (no HTML, no fallback), manifest link on 5 pages, content version 7ceb58edeeca…
+[pwa:content] ok  Markdown-only change: identical 3 asset(s), new version 9cddd47018a2… -> b69c93c5fc85…, worker bytes changed
+[pwa:stable] ok  unchanged rebuild keeps the same content version
+[pwa:assets] ok  JS change rotates the hashed asset and the worker precache
+[pwa:auto] ok  auto-update mode activates and claims without the prompt
+[pwa:guard] ok  manifestTransforms cannot inject a page (directory, encoded and .html URLs rejected)
+[pwa:off]   ok  disable: true emits no PWA output and keeps the static site
+
+Tarball consumer verification passed for @uichat-mira/folio@0.1.1 (da6202d70c485e7545708fbf8d36ed23cbce8c68 (working tree dirty))
