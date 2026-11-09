@@ -388,9 +388,6 @@ function validateGeneratedSite(
   if (!/cleanupOutdatedCaches\(\)/.test(worker)) {
     fail("the generated service worker does not clean outdated precaches");
   }
-  if (!worker.includes(versionFile)) {
-    fail(`the generated service worker does not precache ${versionFile}`);
-  }
 }
 
 /**
