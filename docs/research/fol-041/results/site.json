@@ -1,0 +1,827 @@
+{
+  "meta": {
+    "purpose": "FOL-041 (#163) independent verification: official site React/static archives, base path, opt-in differential and regressions",
+    "harness": "docs/research/fol-041/verify-site.mjs",
+    "generatedAt": "2026-11-09T08:35:23.512Z",
+    "branch": "feat/folio-article-archives",
+    "commit": "716f5e4071c397b250fe3b57774b492e2f6cd235",
+    "shortCommit": "716f5e4",
+    "baseCommit": "c6ecaef540f33a69ba583680ed0ce02a83e69cec",
+    "dirtyWorkingTree": true,
+    "packagedSourcesDirty": "",
+    "node": "v22.23.2",
+    "platform": "darwin arm64",
+    "chrome": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "npmCache": ".npm-cache (workspace-local; sandbox workaround)",
+    "finishedAt": "2026-11-09T08:36:19.052Z"
+  },
+  "stages": [
+    {
+      "id": "official-site-build",
+      "status": "passed",
+      "ms": 14113
+    },
+    {
+      "id": "static-root-output",
+      "status": "passed",
+      "ms": 12
+    },
+    {
+      "id": "static-subpath-output",
+      "status": "passed",
+      "ms": 7712
+    },
+    {
+      "id": "opt-in-differential",
+      "status": "passed",
+      "ms": 7364
+    },
+    {
+      "id": "browser-react-and-no-js",
+      "status": "passed",
+      "ms": 26245
+    },
+    {
+      "id": "single-source-of-truth",
+      "status": "passed",
+      "ms": 2
+    }
+  ],
+  "checks": [
+    {
+      "id": "package-and-site-build-produced-output",
+      "stage": "official-site-build",
+      "status": "passed",
+      "ms": 0,
+      "detail": "packages/folio/dist + apps/site/dist exist"
+    },
+    {
+      "id": "route-set-matches-core-expectation",
+      "stage": "static-root-output",
+      "status": "passed",
+      "ms": 0,
+      "detail": {
+        "routes": 63,
+        "archives": 13
+      }
+    },
+    {
+      "id": "archive-pages-exist-for-every-core-group",
+      "stage": "static-root-output",
+      "status": "passed",
+      "ms": 0,
+      "detail": "13 archive pages"
+    },
+    {
+      "id": "archive-page-metadata-matches-core",
+      "stage": "static-root-output",
+      "status": "passed",
+      "ms": 0,
+      "detail": [
+        {
+          "route": "/blogs/category/内容模型",
+          "title": "分类：内容模型 · Folio",
+          "canonical": "https://uichat-mira.github.io/blogs/category/内容模型/",
+          "count": 2
+        },
+        {
+          "route": "/blogs/category/工程实践",
+          "title": "分类：工程实践 · Folio",
+          "canonical": "https://uichat-mira.github.io/blogs/category/工程实践/",
+          "count": 2
+        },
+        {
+          "route": "/blogs/tag/content",
+          "title": "标签：Content · Folio",
+          "canonical": "https://uichat-mira.github.io/blogs/tag/content/",
+          "count": 1
+        },
+        {
+          "route": "/blogs/tag/content-model",
+          "title": "标签：Content Model · Folio",
+          "canonical": "https://uichat-mira.github.io/blogs/tag/content-model/",
+          "count": 1
+        },
+        {
+          "route": "/blogs/tag/dogfood",
+          "title": "标签：Dogfood · Folio",
+          "canonical": "https://uichat-mira.github.io/blogs/tag/dogfood/",
+          "count": 1
+        },
+        {
+          "route": "/blogs/tag/folio",
+          "title": "标签：Folio · Folio",
+          "canonical": "https://uichat-mira.github.io/blogs/tag/folio/",
+          "count": 2
+        },
+        {
+          "route": "/blogs/tag/git",
+          "title": "标签：Git · Folio",
+          "canonical": "https://uichat-mira.github.io/blogs/tag/git/",
+          "count": 1
+        },
+        {
+          "route": "/blogs/tag/navigation",
+          "title": "标签：Navigation · Folio",
+          "canonical": "https://uichat-mira.github.io/blogs/tag/navigation/",
+          "count": 1
+        },
+        {
+          "route": "/blogs/tag/react",
+          "title": "标签：React · Folio",
+          "canonical": "https://uichat-mira.github.io/blogs/tag/react/",
+          "count": 1
+        },
+        {
+          "route": "/blogs/tag/search",
+          "title": "标签：Search · Folio",
+          "canonical": "https://uichat-mira.github.io/blogs/tag/search/",
+          "count": 1
+        },
+        {
+          "route": "/blogs/tag/static-build",
+          "title": "标签：Static Build · Folio",
+          "canonical": "https://uichat-mira.github.io/blogs/tag/static-build/",
+          "count": 1
+        },
+        {
+          "route": "/blogs/tag/vite",
+          "title": "标签：Vite · Folio",
+          "canonical": "https://uichat-mira.github.io/blogs/tag/vite/",
+          "count": 1
+        },
+        {
+          "route": "/blogs/tag/workflow",
+          "title": "标签：Workflow · Folio",
+          "canonical": "https://uichat-mira.github.io/blogs/tag/workflow/",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "archive-entry-list-matches-core-order-and-links",
+      "stage": "static-root-output",
+      "status": "passed",
+      "ms": 0,
+      "detail": "13 archive entry lists match the Core index exactly"
+    },
+    {
+      "id": "category-entry-row-and-tag-links-on-collection-index",
+      "stage": "static-root-output",
+      "status": "passed",
+      "ms": 0,
+      "detail": {
+        "chips": 2,
+        "entries": 4
+      }
+    },
+    {
+      "id": "article-pages-expose-tag-links-without-changing-urls",
+      "stage": "static-root-output",
+      "status": "passed",
+      "ms": 0,
+      "detail": "4 article pages keep their URLs and gain tag links"
+    },
+    {
+      "id": "archive-links-are-not-injected-into-header",
+      "stage": "static-root-output",
+      "status": "passed",
+      "ms": 0,
+      "detail": "collection/article/archive headers contain no category/tag archive entry points"
+    },
+    {
+      "id": "sitemap-lists-exactly-the-generated-routes",
+      "stage": "static-root-output",
+      "status": "passed",
+      "ms": 0,
+      "detail": {
+        "locs": 62,
+        "archiveLocs": 13,
+        "sample": [
+          "https://uichat-mira.github.io/blogs/category/内容模型/",
+          "https://uichat-mira.github.io/blogs/category/工程实践/",
+          "https://uichat-mira.github.io/blogs/tag/content/"
+        ]
+      }
+    },
+    {
+      "id": "robots-and-not-found-unchanged",
+      "stage": "static-root-output",
+      "status": "passed",
+      "ms": 0,
+      "detail": "robots.txt advertises the sitemap; 404 stays noindex,nofollow"
+    },
+    {
+      "id": "existing-document-routes-and-home-regression",
+      "stage": "static-root-output",
+      "status": "passed",
+      "ms": 2,
+      "detail": "45 existing document routes still exist with unchanged titles; home links intact"
+    },
+    {
+      "id": "feeds-remain-absent-and-search-is-unchanged",
+      "stage": "static-root-output",
+      "status": "passed",
+      "ms": 4,
+      "detail": "no feeds emitted (same as baseline); tags searchable, category not a search field"
+    },
+    {
+      "id": "cjk-slugs-are-consistent-across-static-surfaces",
+      "stage": "static-root-output",
+      "status": "passed",
+      "ms": 0,
+      "detail": [
+        {
+          "route": "/blogs/category/内容模型",
+          "canonical": "https://uichat-mira.github.io/blogs/category/内容模型/",
+          "entryHrefs": [
+            "/blogs/reading-experience-structure",
+            "/blogs/why-folio"
+          ]
+        },
+        {
+          "route": "/blogs/category/工程实践",
+          "canonical": "https://uichat-mira.github.io/blogs/category/工程实践/",
+          "entryHrefs": [
+            "/blogs/content-stays-in-git",
+            "/blogs/one-markdown-many-surfaces"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "subpath-build-emits-the-same-route-set",
+      "stage": "static-subpath-output",
+      "status": "passed",
+      "ms": 0,
+      "detail": "63 routes under /folio/"
+    },
+    {
+      "id": "subpath-canonical-links-sitemap-and-assets-are-base-aware",
+      "stage": "static-subpath-output",
+      "status": "passed",
+      "ms": 1,
+      "detail": "canonical, internal links, sitemap and robots all use /folio/"
+    },
+    {
+      "id": "subpath-all-internal-links-resolve-to-built-files",
+      "stage": "static-subpath-output",
+      "status": "passed",
+      "ms": 7,
+      "detail": "every internal href in the 63 subpath pages resolves"
+    },
+    {
+      "id": "subpath-static-archive-directly-fetchable-without-js",
+      "stage": "static-subpath-output",
+      "status": "passed",
+      "ms": 12,
+      "detail": {
+        "encoded": "/folio/blogs/category/%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5/",
+        "bytes": 4387,
+        "entries": 2
+      }
+    },
+    {
+      "id": "archive-disabled-build-is-the-50-route-baseline",
+      "stage": "opt-in-differential",
+      "status": "passed",
+      "ms": 3,
+      "detail": "50 routes, no category/tag directory"
+    },
+    {
+      "id": "disabled-build-has-no-archive-entry-points",
+      "stage": "opt-in-differential",
+      "status": "passed",
+      "ms": 0,
+      "detail": "no category row, tag links, archive sitemap entries or home archive links"
+    },
+    {
+      "id": "enabled-minus-disabled-is-exactly-the-archive-routes",
+      "stage": "opt-in-differential",
+      "status": "passed",
+      "ms": 3,
+      "detail": {
+        "added": 13
+      }
+    },
+    {
+      "id": "non-archive-html-is-byte-identical-ignoring-env-noise",
+      "stage": "opt-in-differential",
+      "status": "passed",
+      "ms": 17,
+      "detail": {
+        "differing": 5,
+        "note": "only the collection index (category row + entry tag links) and the four article pages (tag nav) differ; hashed asset names and GitHub-API avatars are normalized as build-environment noise"
+      }
+    },
+    {
+      "id": "global-header-and-existing-navigation-unchanged",
+      "stage": "opt-in-differential",
+      "status": "passed",
+      "ms": 0,
+      "detail": "home/collection/doc headers identical with archive on vs off"
+    },
+    {
+      "id": "react-collection-page-shows-category-row-and-tag-links",
+      "stage": "browser-react-and-no-js",
+      "status": "passed",
+      "ms": 5,
+      "detail": {
+        "chips": [
+          {
+            "href": "/blogs/category/内容模型",
+            "title": "内容模型"
+          },
+          {
+            "href": "/blogs/category/工程实践",
+            "title": "工程实践"
+          }
+        ],
+        "tagLinks": 8,
+        "entries": 4
+      }
+    },
+    {
+      "id": "category-chip-is-keyboard-focusable-and-activatable",
+      "stage": "browser-react-and-no-js",
+      "status": "passed",
+      "ms": 159,
+      "detail": {
+        "chip": "/blogs/category/内容模型",
+        "clientNavigationEntries": 1,
+        "entries": 2
+      }
+    },
+    {
+      "id": "react-tag-archive-spans-categories-and-matches-static",
+      "stage": "browser-react-and-no-js",
+      "status": "passed",
+      "ms": 7,
+      "detail": {
+        "entries": 2,
+        "categories": [
+          "工程实践",
+          "内容模型"
+        ]
+      }
+    },
+    {
+      "id": "react-article-page-tag-link-navigates-without-reload",
+      "stage": "browser-react-and-no-js",
+      "status": "passed",
+      "ms": 27,
+      "detail": {
+        "tags": [
+          "/blogs/tag/dogfood",
+          "/blogs/tag/folio"
+        ],
+        "clientNavigationEntries": 1
+      }
+    },
+    {
+      "id": "react-desktop-and-static-category-lists-agree",
+      "stage": "browser-react-and-no-js",
+      "status": "passed",
+      "ms": 0,
+      "detail": {
+        "route": "/blogs/category/内容模型",
+        "entries": 2
+      }
+    },
+    {
+      "id": "mobile-375px-archive-has-no-horizontal-overflow",
+      "stage": "browser-react-and-no-js",
+      "status": "passed",
+      "ms": 0,
+      "detail": {
+        "entries": [
+          {
+            "href": "/blogs/reading-experience-structure",
+            "title": "分组、标签与日期如何影响阅读体验"
+          },
+          {
+            "href": "/blogs/why-folio",
+            "title": "为什么要先让自己使用 Folio"
+          }
+        ],
+        "scrollWidth": 375,
+        "innerWidth": 375,
+        "h1": "内容模型"
+      }
+    },
+    {
+      "id": "tag-links-are-keyboard-focusable",
+      "stage": "browser-react-and-no-js",
+      "status": "passed",
+      "ms": 0,
+      "detail": "Tab reaches .folio-entry-tag links on the collection index"
+    },
+    {
+      "id": "static-archive-is-readable-with-javascript-disabled",
+      "stage": "browser-react-and-no-js",
+      "status": "passed",
+      "ms": 0,
+      "detail": {
+        "readyState": "complete",
+        "page": true,
+        "h1": "内容模型",
+        "entries": [
+          {
+            "href": "/blogs/reading-experience-structure",
+            "title": "分组、标签与日期如何影响阅读体验"
+          },
+          {
+            "href": "/blogs/why-folio",
+            "title": "为什么要先让自己使用 Folio"
+          }
+        ],
+        "scriptsExecuted": null
+      }
+    },
+    {
+      "id": "no-page-exceptions-during-browser-archive-flow",
+      "stage": "browser-react-and-no-js",
+      "status": "passed",
+      "ms": 0,
+      "detail": {
+        "browser": "Chrome/156.0.8078.81",
+        "consoleEntries": 0
+      }
+    },
+    {
+      "id": "site-archive-composition-consumes-core-helpers",
+      "stage": "single-source-of-truth",
+      "status": "passed",
+      "ms": 2,
+      "detail": {
+        "coreConsumers": [
+          "apps/site/src/archive.ts",
+          "apps/site/src/static-routes.ts",
+          "packages/folio/src/static.ts",
+          "packages/folio/src/ui/article-archive/ArticleArchive.tsx"
+        ],
+        "nonBlockingDuplication": [
+          "route path template '<collection>/<kind>/<slug>' is repeated in apps/site/src/archive.ts, packages/folio/src/ui/article-archive/ArticleArchive.tsx and packages/folio/src/static.ts (no shared public route-path helper)",
+          "archive description string is repeated in apps/site/src/archive.ts and packages/folio/src/static.ts",
+          "React and static entry-list/category-row renderers are intentionally separate render targets"
+        ],
+        "normalizationSource": "packages/folio/src/core/article-archive.ts (single implementation)"
+      }
+    }
+  ],
+  "commands": [
+    {
+      "command": "npm run build -w @uichat-mira/folio  (cwd .)",
+      "status": "passed",
+      "exitCode": 0,
+      "outputTail": [
+        "ESM dist/chunk-HT25YDIZ.js 42.33 KB",
+        "ESM dist/pwa-react.js      5.32 KB",
+        "ESM ⚡️ Build success in 71ms",
+        "DTS Build start",
+        "DTS ⚡️ Build success in 2291ms",
+        "DTS dist/index.d.ts               25.04 KB",
+        "DTS dist/pwa-react.d.ts           3.94 KB",
+        "DTS dist/pwa.d.ts                 4.56 KB",
+        "DTS dist/vite.d.ts                6.53 KB",
+        "DTS dist/pwa-update-BrGEBxoo.d.ts 2.48 KB",
+        "DTS dist/types-qxPkY5wF.d.ts      13.67 KB",
+        "styles: 10 source(s) -> dist/styles.css (69624 bytes)"
+      ],
+      "tailLines": 12
+    },
+    {
+      "command": "npm run build -w @uichat-mira/folio-site  (cwd .)",
+      "status": "passed",
+      "exitCode": 0,
+      "outputTail": [
+        "dist/assets/cytoscape.esm-BB4DxJjf.js                 443.04 kB │ gzip: 141.98 kB",
+        "dist/assets/mermaid.core-DRv57FrO.js                  682.99 kB │ gzip: 169.06 kB",
+        "dist/assets/cynefin-OW5HDTMX-D7oquFkD.js              687.91 kB │ gzip: 154.14 kB",
+        "dist/assets/index-BFUrs9fV.js                         876.71 kB │ gzip: 275.79 kB",
+        "✓ built in 10.33s",
+        "Copied Folio schemas to /Users/tao/Desktop/personal/folio/.worktrees/folio-article-archives/apps/site/dist/schemas",
+        "[folio-site] 63 HTML routes; About, docs, blog, base, sitemap, retired paths and links verified for /",
+        "",
+        "(!) Some chunks are larger than 500 kB after minification. Consider:",
+        "- Using dynamic import() to code-split the application",
+        "- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks",
+        "- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit."
+      ],
+      "tailLines": 12
+    },
+    {
+      "command": "/Users/tao/.local/share/fnm/node-versions/v22.23.2/installation/bin/node /Users/tao/Desktop/personal/folio/.worktrees/folio-article-archives/node_modules/vite/bin/vite.js build --outDir /var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-subpath-2evBZy/dist --emptyOutDir  (cwd apps/site)",
+      "status": "passed",
+      "exitCode": 0,
+      "outputTail": [
+        "../../../../../../../../../var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-subpath-2evBZy/dist/assets/architectureDiagram-5GKGNRK7-DDlsTcY1.js  151.83 kB │ gzip:  43.15 kB",
+        "../../../../../../../../../var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-subpath-2evBZy/dist/assets/katex-HP8lGamR.js                         261.31 kB │ gzip:  77.57 kB",
+        "../../../../../../../../../var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-subpath-2evBZy/dist/assets/cytoscape.esm-BB4DxJjf.js                 443.04 kB │ gzip: 141.98 kB",
+        "../../../../../../../../../var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-subpath-2evBZy/dist/assets/mermaid.core-C3dpRh1g.js                  682.99 kB │ gzip: 169.06 kB",
+        "../../../../../../../../../var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-subpath-2evBZy/dist/assets/cynefin-OW5HDTMX-Dj-Y4tL4.js              687.91 kB │ gzip: 154.14 kB",
+        "../../../../../../../../../var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-subpath-2evBZy/dist/assets/index-B35IhJHR.js                         876.72 kB │ gzip: 275.79 kB",
+        "✓ built in 7.38s",
+        "",
+        "(!) Some chunks are larger than 500 kB after minification. Consider:",
+        "- Using dynamic import() to code-split the application",
+        "- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks",
+        "- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit."
+      ],
+      "tailLines": 12
+    },
+    {
+      "command": "git worktree add --detach /tmp/folio041-disabled-worktree HEAD  (cwd .)",
+      "status": "passed",
+      "exitCode": 0,
+      "outputTail": [
+        "HEAD is now at 716f5e4 feat(folio): article archive pages and static output (FOL-041 #163)",
+        "Preparing worktree (detached HEAD 716f5e4)"
+      ],
+      "tailLines": 12
+    },
+    {
+      "command": "/Users/tao/.local/share/fnm/node-versions/v22.23.2/installation/bin/node /Users/tao/Desktop/personal/folio/.worktrees/folio-article-archives/node_modules/vite/bin/vite.js build  (cwd ../../../../../../../tmp/folio041-disabled-worktree/apps/site)",
+      "status": "passed",
+      "exitCode": 0,
+      "outputTail": [
+        "dist/assets/architectureDiagram-5GKGNRK7-DSFrtDjj.js  151.83 kB │ gzip:  43.15 kB",
+        "dist/assets/katex-HP8lGamR.js                         261.31 kB │ gzip:  77.57 kB",
+        "dist/assets/cytoscape.esm-BB4DxJjf.js                 443.04 kB │ gzip: 141.98 kB",
+        "dist/assets/mermaid.core-Dc7yE_n4.js                  682.99 kB │ gzip: 169.06 kB",
+        "dist/assets/cynefin-OW5HDTMX-QjkLWmyD.js              687.91 kB │ gzip: 154.14 kB",
+        "dist/assets/index-DqkQWQ5s.js                         876.70 kB │ gzip: 275.78 kB",
+        "✓ built in 6.92s",
+        "",
+        "(!) Some chunks are larger than 500 kB after minification. Consider:",
+        "- Using dynamic import() to code-split the application",
+        "- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks",
+        "- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit."
+      ],
+      "tailLines": 12
+    },
+    {
+      "command": "git worktree remove --force /tmp/folio041-disabled-worktree  (cwd .)",
+      "status": "passed",
+      "exitCode": 0,
+      "outputTail": [],
+      "tailLines": 12
+    },
+    {
+      "command": "git worktree prune  (cwd .)",
+      "status": "passed",
+      "exitCode": 0,
+      "outputTail": [],
+      "tailLines": 12
+    }
+  ],
+  "artifacts": {
+    "siteConfig": {
+      "title": "Folio",
+      "description": "Folio 是 Mira 组织的 Git-native 内容与门户发布引擎。以 Markdown 为内容源，在构建时组织并发布产品、文档与文章。",
+      "siteUrl": "https://uichat-mira.github.io",
+      "collections": [
+        {
+          "path": "/guide",
+          "title": "指南"
+        },
+        {
+          "path": "/reference",
+          "title": "参考"
+        },
+        {
+          "path": "/blogs",
+          "title": "博客"
+        }
+      ],
+      "blogsArchive": true
+    },
+    "expected": {
+      "docs": 45,
+      "articles": 4,
+      "collections": [
+        {
+          "path": "/guide",
+          "title": "指南"
+        },
+        {
+          "path": "/reference",
+          "title": "参考"
+        },
+        {
+          "path": "/blogs",
+          "title": "博客"
+        }
+      ],
+      "categories": [
+        {
+          "id": "内容模型",
+          "slug": "内容模型",
+          "title": "内容模型",
+          "docs": [
+            "/blogs/reading-experience-structure",
+            "/blogs/why-folio"
+          ]
+        },
+        {
+          "id": "工程实践",
+          "slug": "工程实践",
+          "title": "工程实践",
+          "docs": [
+            "/blogs/content-stays-in-git",
+            "/blogs/one-markdown-many-surfaces"
+          ]
+        }
+      ],
+      "tags": [
+        {
+          "id": "content",
+          "slug": "content",
+          "title": "Content",
+          "docs": [
+            "/blogs/content-stays-in-git"
+          ]
+        },
+        {
+          "id": "content model",
+          "slug": "content-model",
+          "title": "Content Model",
+          "docs": [
+            "/blogs/reading-experience-structure"
+          ]
+        },
+        {
+          "id": "dogfood",
+          "slug": "dogfood",
+          "title": "Dogfood",
+          "docs": [
+            "/blogs/why-folio"
+          ]
+        },
+        {
+          "id": "folio",
+          "slug": "folio",
+          "title": "Folio",
+          "docs": [
+            "/blogs/content-stays-in-git",
+            "/blogs/why-folio"
+          ]
+        },
+        {
+          "id": "git",
+          "slug": "git",
+          "title": "Git",
+          "docs": [
+            "/blogs/content-stays-in-git"
+          ]
+        },
+        {
+          "id": "navigation",
+          "slug": "navigation",
+          "title": "Navigation",
+          "docs": [
+            "/blogs/reading-experience-structure"
+          ]
+        },
+        {
+          "id": "react",
+          "slug": "react",
+          "title": "React",
+          "docs": [
+            "/blogs/one-markdown-many-surfaces"
+          ]
+        },
+        {
+          "id": "search",
+          "slug": "search",
+          "title": "Search",
+          "docs": [
+            "/blogs/reading-experience-structure"
+          ]
+        },
+        {
+          "id": "static build",
+          "slug": "static-build",
+          "title": "Static Build",
+          "docs": [
+            "/blogs/one-markdown-many-surfaces"
+          ]
+        },
+        {
+          "id": "vite",
+          "slug": "vite",
+          "title": "Vite",
+          "docs": [
+            "/blogs/one-markdown-many-surfaces"
+          ]
+        },
+        {
+          "id": "workflow",
+          "slug": "workflow",
+          "title": "Workflow",
+          "docs": [
+            "/blogs/content-stays-in-git"
+          ]
+        }
+      ],
+      "routes": [
+        "/",
+        "/404",
+        "/about",
+        "/blogs",
+        "/blogs/category/内容模型",
+        "/blogs/category/工程实践",
+        "/blogs/content-stays-in-git",
+        "/blogs/one-markdown-many-surfaces",
+        "/blogs/reading-experience-structure",
+        "/blogs/tag/content",
+        "/blogs/tag/content-model",
+        "/blogs/tag/dogfood",
+        "/blogs/tag/folio",
+        "/blogs/tag/git",
+        "/blogs/tag/navigation",
+        "/blogs/tag/react",
+        "/blogs/tag/search",
+        "/blogs/tag/static-build",
+        "/blogs/tag/vite",
+        "/blogs/tag/workflow",
+        "/blogs/why-folio",
+        "/guide",
+        "/guide/architecture",
+        "/guide/authoring",
+        "/guide/configuration",
+        "/guide/content-contract",
+        "/guide/content-model",
+        "/guide/content-types",
+        "/guide/frontmatter-fields",
+        "/guide/getting-started",
+        "/guide/introduction",
+        "/guide/markdown-runtime",
+        "/guide/navigation",
+        "/guide/organizing-content",
+        "/guide/runtime-composition",
+        "/guide/static-publishing",
+        "/reference",
+        "/reference/build-integration",
+        "/reference/cloudflare-pages",
+        "/reference/components",
+        "/reference/components/app",
+        "/reference/components/doc-meta",
+        "/reference/components/docs-shell",
+        "/reference/components/footer",
+        "/reference/components/header",
+        "/reference/components/markdown",
+        "/reference/components/page-nav",
+        "/reference/components/share-button",
+        "/reference/components/toc",
+        "/reference/components/tree-nav",
+        "/reference/components/utility-popover",
+        "/reference/content-maintenance",
+        "/reference/examples/apple",
+        "/reference/examples/claude",
+        "/reference/examples/product-design-system",
+        "/reference/examples/supabase",
+        "/reference/frontmatter",
+        "/reference/github-pages",
+        "/reference/migration-status",
+        "/reference/overview",
+        "/reference/seo",
+        "/reference/site",
+        "/reference/typora-r2"
+      ]
+    },
+    "screenshots": {
+      "desktopBlogs": {
+        "path": "docs/research/fol-041/results/screenshots/desktop-blogs-entrypoints.png",
+        "bytes": 105551
+      },
+      "desktopChipFocus": {
+        "path": "docs/research/fol-041/results/screenshots/desktop-chip-focus.png",
+        "bytes": 106806
+      },
+      "desktopCategory": {
+        "path": "docs/research/fol-041/results/screenshots/desktop-category.png",
+        "bytes": 84153
+      },
+      "desktopTag": {
+        "path": "docs/research/fol-041/results/screenshots/desktop-tag.png",
+        "bytes": 72417
+      },
+      "mobileCategory": {
+        "path": "docs/research/fol-041/results/screenshots/mobile-category.png",
+        "bytes": 126684
+      },
+      "desktopNoJs": {
+        "path": "docs/research/fol-041/results/screenshots/desktop-nojs-category.png",
+        "bytes": 75144
+      }
+    },
+    "screenshotsDir": "docs/research/fol-041/results/screenshots"
+  },
+  "summary": {
+    "status": "passed",
+    "total": 32,
+    "passed": 32,
+    "failed": 0
+  }
+}
