@@ -42,6 +42,20 @@ export type {
 } from "./core/pwa-update";
 export { normalizeFolioCollectionPath, selectFolioCollectionDocs, folioCollectionIndexes, assertNoFolioCollectionConflicts } from "./core/collection-index";
 export type { FolioCollectionIndex } from "./core/collection-index";
+// FOL-040: Article category/tag archives are pure Core data. The index builder
+// groups the caller's own FolioDoc[]; archive page rendering stays in the
+// Build/UI layers.
+export {
+  buildFolioArticleArchiveIndex,
+  findFolioArticleArchiveGroup,
+  folioArticleArchiveSlug,
+  normalizeFolioArticleArchiveId,
+} from "./core/article-archive";
+export type {
+  FolioArticleArchiveGroup,
+  FolioArticleArchiveIndex,
+  FolioArticleArchiveKind,
+} from "./core/article-archive";
 export { resolveFolioHome } from "./core/home";
 export {
   folioNavHref,
@@ -88,6 +102,7 @@ export { renderFolioMarkdown } from "./core/markdown";
 export type { FolioMarkdownRenderOptions } from "./core/markdown";
 export type {
   FolioAuthor,
+  FolioArticleArchiveConfig,
   FolioGitHistory,
   FolioGitRevision,
   FolioConfig,

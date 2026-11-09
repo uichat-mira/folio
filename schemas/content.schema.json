@@ -15,12 +15,17 @@
       "enum": ["doc", "article", "project", "page"]
     },
     "group": { "type": "string" },
+    "category": {
+      "type": "string",
+      "description": "One optional Article archive category. Empty means uncategorized. A category is an archive dimension only: it is not a route directory, column, tree or navigation level, and it never changes an Article URL. Only type: article content enters category archives."
+    },
     "order": { "type": "number" },
     "date": { "type": "string" },
     "status": { "type": "string" },
     "cover": { "type": "string" },
     "tags": {
       "type": "array",
+      "description": "Zero or more topic labels. Only type: article content enters tag archives.",
       "items": { "type": "string" }
     }
   },
