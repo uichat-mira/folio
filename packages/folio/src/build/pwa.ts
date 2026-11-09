@@ -515,19 +515,98 @@ function readWorkerPrecacheManifest(worker: string): PrecacheEntry[] {
       "the generated service worker has no readable precacheAndRoute([...]) manifest; Folio cannot verify the offline-shell boundary",
     );
   }
-  const body = match[1];
-  const entries = [
-    ...body.matchAll(/\{\s*url\s*:\s*"((?:[^"\\]|\\.)*)"\s*,\s*revision\s*:\s*("((?:[^"\\]|\\.)*)"|null)\s*\}/g),
-  ].map((entry) => ({
-    url: entry[1].replace(/\\"/g, '"'),
-    revision: entry[2] === "null" ? null : entry[3].replace(/\\"/g, '"'),
-  }));
-  if (entries.length === 0) {
-    fail(
-      "the generated service worker precache manifest could not be parsed into any entry; Folio cannot verify the offline-shell boundary and refuses to ship it",
-    );
+  // Validate every emitted entry. The former matchAll regex silently skipped
+  // objects with extra fields (e.g. an integrity-bearing HTML entry).
+  // Parse the full Workbox literal array as data; never execute worker code.
+  // If the upstream generator changes its syntax, fail closed.
+  const literal = "[" + match[1] + "]"; 
+  const json = literal.replace(
+    /([,{]\s*)([A-Za-z_$][\w$]*)\s*:/g,
+    (_match, prefix: string, key: string) => prefix + '"' + key + '":',
+  );
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(json);
+  } catch {
+    fail("the generated service worker precache manifest has unreadable entries; refusing a partial parse");
   }
-  return entries;
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    fail("the generated service worker precache manifest is empty or not an array");
+  }
+  return parsed.map((raw: unknown, index: number): PrecacheEntry => {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+      fail("precache entry " + index + " is not a literal object");
+    }
+    const entry = raw as Record<string, unknown>;
+    if (Object.keys(entry).some((key) => !["url", "revision", "integrity"].includes(key))) {
+      fail("precache entry " + index + " has unsupported fields; refusing an unverified manifest");
+    }
+    if (
+      typeof entry.url !== "string" ||
+      !(entry.revision === null || typeof entry.revision === "string") ||
+      (entry.integrity !== undefined && typeof entry.integrity !== "string")
+    ) {
+      fail("precache entry " + index + " has invalid URL, revision or integrity");
+    }
+    return { url: entry.url, revision: entry.revision };
+  });
+}
+
+/**
+ * Check real local icon artwork instead of trusting the manifest size label.
+ * A real 1x1 PNG labeled 512x512 cannot be an installable application icon.
+ * SVG is scalable, but its intrinsic viewport must be square.
+ */
+function validateLocalIconArtwork(file: string, icon: FolioPwaIcon): void {
+  const mime = icon.type ?? "image/png";
+  if (mime === "image/png") {
+    const bytes = readFileSync(file);
+    const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+    if (
+      bytes.length < 24 ||
+      !bytes.subarray(0, 8).equals(signature) ||
+      bytes.readUInt32BE(8) !== 13 ||
+      bytes.toString("ascii", 12, 16) !== "IHDR"
+    ) {
+      fail("PWA icon " + JSON.stringify(icon.src) + " has an invalid PNG header");
+    }
+    const width = bytes.readUInt32BE(16);
+    const height = bytes.readUInt32BE(20);
+    const claimed = /^(\d+)x(\d+)$/.exec(icon.sizes.trim());
+    if (!claimed || width === 0 || width !== height ||
+      width !== Number(claimed[1]) || height !== Number(claimed[2])) {
+      fail(
+        "PWA icon " + JSON.stringify(icon.src) + " has actual PNG dimensions " +
+        width + "x" + height + ", but declares " + JSON.stringify(icon.sizes) +
+        "; provide matching square artwork",
+      );
+    }
+    return;
+  }
+  if (mime === "image/svg+xml") {
+    const source = readFileSync(file, "utf8");
+    const svg = /<svg\b([^>]*)>/i.exec(source)?.[1];
+    if (!svg) fail("PWA icon " + JSON.stringify(icon.src) + " is not an SVG document");
+    const viewBox = /\bviewBox\s*=\s*["']([^"']+)["']/i.exec(svg)?.[1];
+    const box = viewBox?.trim().split(/[\s,]+/).map(Number);
+    if (box && (box.length !== 4 || box.some((n) => !Number.isFinite(n)) ||
+      box[2] <= 0 || box[2] !== box[3])) {
+      fail("PWA icon " + JSON.stringify(icon.src) + " has a non-square SVG viewBox");
+    }
+    const width = /\bwidth\s*=\s*["'](\d+(?:\.\d+)?)(?:px)?["']/i.exec(svg)?.[1];
+    const height = /\bheight\s*=\s*["'](\d+(?:\.\d+)?)(?:px)?["']/i.exec(svg)?.[1];
+    if (width && height && (Number(width) <= 0 || Number(width) !== Number(height))) {
+      fail("PWA icon " + JSON.stringify(icon.src) + " has non-square SVG dimensions");
+    }
+    if (!box && !(width && height)) {
+      fail("PWA icon " + JSON.stringify(icon.src) + " needs a square SVG viewBox or width/height");
+    }
+    return;
+  }
+  // Other raster formats require a format-specific decoder. Do not claim they
+  // were validated merely because the file exists.
+  fail("cannot verify local PWA icon " + JSON.stringify(icon.src) +
+    " of type " + JSON.stringify(mime) + "; use PNG or SVG");
 }
 
 /**
@@ -611,12 +690,14 @@ function validateManifestIcons(
       continue;
     }
     const relative = precacheUrlToRelative(src, base, "icons");
-    if (!existsSync(join(outDir, relative))) {
+    const file = join(outDir, relative);
+    if (!existsSync(file)) {
       fail(
         `the configured icon ${JSON.stringify(src)} is not part of the build output (${relative}); the manifest would advertise a missing file. ` +
           `Use a base-relative src such as "icons/icon-192.png": the manifest is served from the deployment base, so a leading "/" breaks a subpath deployment`,
       );
     }
+    validateLocalIconArtwork(file, icon);
   }
 }
 
