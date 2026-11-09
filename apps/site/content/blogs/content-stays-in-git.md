@@ -5,8 +5,10 @@ group: 专题
 date: 2026-11-04
 author: Folio 示例内容 · AI Worker
 type: article
+category: 工程实践
 status: dev-sample
 tags:
+  - Folio
   - Git
   - Content
   - Workflow

@@ -94,6 +94,14 @@ export type FolioDoc = {
   dateSources?: FolioDateSources;
   /** Build-time Git provenance, omitted for untracked files or unavailable history. */
   gitHistory?: FolioGitHistory;
+  /**
+   * Optional single Article archive category. It is a pure archive dimension,
+   * not a column, route directory or navigation level: it never changes
+   * `path`, `group`, `section`, `collection` or collection recursion. Missing,
+   * empty and non-string frontmatter values mean uncategorized.
+   */
+  category?: string;
+  /** Zero or more Article/topic labels. Empty entries are ignored. */
   tags: string[];
   status?: string;
   cover?: string;
@@ -203,6 +211,22 @@ export type FolioNavigationItem = {
   panel?: FolioNavigationPanel;
 };
 
+/**
+ * Opt-in Article category/tag archive data for a collection (FOL-040). This is
+ * data configuration only: Core derives the groups, and the Build/UI layers
+ * decide whether and where archive routes are rendered.
+ */
+export type FolioArticleArchiveConfig = {
+  /**
+   * Category display labels keyed by category id, or by any spelling that
+   * normalizes to it (`Frontend` / `frontend`). The archive `id` and URL
+   * identifier stay derived from the category frontmatter value, so changing a
+   * display label never changes routing. Empty values fall back to the source
+   * spelling.
+   */
+  categoryLabels?: Record<string, string>;
+};
+
 export type FolioCollectionConfig = {
   /** Route directory; descendants at any depth are indexed. */
   path: string;
@@ -210,6 +234,12 @@ export type FolioCollectionConfig = {
   title?: string;
   description?: string;
   emptyMessage?: string;
+  /**
+   * Opt in to Article category/tag archive pages for this collection. `true`
+   * uses source labels; an object configures category display labels. Omitted
+   * or `false` keeps the existing collection behavior.
+   */
+  archive?: boolean | FolioArticleArchiveConfig;
 };
 
 export type FolioHomeSectionType =

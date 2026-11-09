@@ -4,6 +4,7 @@ description: 抽象只有接住真实站点，才不是漂亮的空壳。
 group: 博客
 date: 2026-07-25
 type: article
+category: 内容模型
 status: published
 tags:
   - Folio

@@ -205,6 +205,15 @@ function text(value: unknown, fallback = ""): string {
   return value == null ? fallback : String(value);
 }
 
+/**
+ * A single optional scalar field. Only a non-empty string is a valid value:
+ * arrays, objects, numbers and booleans are an invalid shape and resolve to
+ * "unset" deterministically instead of being stringified into a guessed label.
+ */
+function singleText(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
 export function sourcePathToRoute(sourcePath: string): string {
   const normalized = sourcePath.replace(/\\/g, "/").replace(/^\/+/, "");
   const withoutExt = normalized.replace(/\.md$/i, "");
@@ -265,6 +274,7 @@ export function parseFolioDoc(sourcePath: string, raw: string): FolioDoc {
       publishedAt: publishedAtSource,
       updatedAt: updatedAtSource,
     },
+    category: singleText(data.category),
     tags: list(data.tags),
     status: data.status ? text(data.status) : undefined,
     cover: data.cover ? text(data.cover) : undefined,

@@ -33,6 +33,14 @@ import {
   type FolioCollectionIndex,
 } from "./core/collection-index";
 import { resolveFolioHome, type FolioHomeSection } from "./core/home";
+import { FolioEntryList, type FolioEntryTagLink } from "./ui/entry-list";
+import {
+  buildFolioArticleArchiveModel,
+  FolioArchiveCategoryRow,
+  FolioArticleArchivePage,
+  FolioArticleTags,
+  type FolioArticleArchiveCollection,
+} from "./ui/article-archive";
 import type { FolioDoc, FolioConfig } from "./types";
 import type {
   FolioAppProps,
@@ -57,10 +65,12 @@ function DocumentPage({
   doc,
   footer,
   share,
+  tags,
 }: {
   doc: FolioDoc;
   footer?: ReactNode;
   share: boolean;
+  tags?: readonly FolioEntryTagLink[];
 }) {
   const articleToc = doc.type === "article" && doc.headings.length > 0;
   const mobileTocRef = useRef<HTMLDetailsElement>(null);
@@ -72,6 +82,7 @@ function DocumentPage({
           {share ? <FolioShareButton title={doc.title} text={doc.description} /> : null}
         </div>
       ) : null}
+      {doc.type === "article" ? <FolioArticleTags links={tags} /> : null}
       <FolioDocumentBody doc={doc} />
       {footer}
     </main>
@@ -88,33 +99,6 @@ function DocumentPage({
       </details>
       {body}
       <FolioToc headings={doc.headings} />
-    </div>
-  );
-}
-
-function EntryList({
-  entries,
-  headingLevel,
-}: {
-  entries: FolioDoc[];
-  headingLevel: "h2" | "h3";
-}) {
-  const Heading = headingLevel;
-  return (
-    <div className="folio-entry-list">
-      {entries.map((doc, index) => (
-        <Link to={href(doc.path)} className="folio-entry" key={doc.path}>
-          <span className="folio-entry-number" aria-hidden="true">
-            {String(index + 1).padStart(2, "0")}
-          </span>
-          <div className="folio-entry-copy">
-            {doc.date ? <time className="folio-entry-date" dateTime={doc.date}>{doc.date}</time> : null}
-            <Heading className="folio-entry-title">{doc.title}</Heading>
-            {doc.description ? <p className="folio-entry-description">{doc.description}</p> : null}
-          </div>
-          <span className="folio-entry-arrow" aria-hidden="true">↗</span>
-        </Link>
-      ))}
     </div>
   );
 }
@@ -189,7 +173,7 @@ function DefaultHome({
             )}
           </div>
           {recent.length ? (
-            <EntryList entries={recent} headingLevel="h3" />
+            <FolioEntryList entries={recent} headingLevel="h3" />
           ) : !featured ? (
             <p className="folio-collection-empty">这里还没有内容。</p>
           ) : (
@@ -213,7 +197,7 @@ function DefaultHome({
                   </Link>
                 </div>
                 {entries.length ? (
-                  <EntryList entries={entries} headingLevel="h3" />
+                  <FolioEntryList entries={entries} headingLevel="h3" />
                 ) : (
                   <p className="folio-collection-empty">{collection.emptyMessage}</p>
                 )}
@@ -299,7 +283,7 @@ function ConfiguredHome({
                 )}
               </div>
               {section.docs.length ? (
-                <EntryList entries={section.docs} headingLevel="h3" />
+                <FolioEntryList entries={section.docs} headingLevel="h3" />
               ) : section.hadEntries ? (
                 <p className="folio-editorial-endnote">{section.endMessage}</p>
               ) : (
@@ -330,7 +314,7 @@ function ConfiguredHome({
                     </Link>
                   </div>
                   {entry.docs.length ? (
-                    <EntryList entries={entry.docs} headingLevel="h3" />
+                    <FolioEntryList entries={entry.docs} headingLevel="h3" />
                   ) : (
                     <p className="folio-collection-empty">{entry.emptyMessage}</p>
                   )}
@@ -386,9 +370,13 @@ function Home({
 function CollectionIndex({
   docs,
   collection,
+  categories,
+  tagLinks,
 }: {
   docs: FolioDoc[];
   collection: FolioCollectionIndex;
+  categories?: FolioArticleArchiveCollection["index"]["categories"];
+  tagLinks?: ReadonlyMap<string, readonly FolioEntryTagLink[]>;
 }) {
   const entries = selectFolioCollectionDocs(docs, collection.path);
   return (
@@ -398,8 +386,16 @@ function CollectionIndex({
         <h1>{collection.title}</h1>
         {collection.description ? <p>{collection.description}</p> : null}
       </header>
+      <FolioArchiveCategoryRow
+        collection={collection}
+        groups={categories ?? []}
+      />
       {entries.length ? (
-        <EntryList entries={entries} headingLevel="h2" />
+        <FolioEntryList
+          entries={entries}
+          headingLevel="h2"
+          tagLinks={tagLinks}
+        />
       ) : (
         <p className="folio-collection-empty">{collection.emptyMessage}</p>
       )}
@@ -515,6 +511,12 @@ function Shell({
 }: Omit<FolioAppProps, "basePath">) {
   assertNoFolioCollectionConflicts(docs, config);
   const location = useLocation();
+  // Opt-in only: without `collections[].archive` this model has no routes,
+  // no tag links and no category rows, so existing consumers are unchanged.
+  const archive = useMemo(
+    () => buildFolioArticleArchiveModel(docs, config),
+    [docs, config],
+  );
   const current = docs.find((doc) => href(doc.path) === href(location.pathname));
   const navigation = config.navigation ?? [
     { label: "文档", href: "/docs" },
@@ -607,6 +609,25 @@ function Shell({
                 <CollectionIndex
                   docs={docs}
                   collection={collection}
+                  categories={archive.byCollection.get(collection.path)?.index.categories}
+                  tagLinks={
+                    archive.byCollection.has(collection.path)
+                      ? archive.tagsByDoc
+                      : undefined
+                  }
+                />
+              }
+            />
+          ))}
+          {archive.routes.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={
+                <FolioArticleArchivePage
+                  collection={route.collection}
+                  group={route.group}
+                  tagLinks={archive.tagsByDoc}
                 />
               }
             />
@@ -632,6 +653,7 @@ function Shell({
                       doc={doc}
                       footer={articleFooter}
                       share={shareEnabled}
+                      tags={archive.tagsByDoc.get(doc.path)}
                     />
                   )
                 }

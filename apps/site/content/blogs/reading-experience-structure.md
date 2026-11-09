@@ -5,6 +5,7 @@ group: 专题
 date: 2026-11-04
 author: Folio 示例内容 · AI Worker
 type: article
+category: 内容模型
 status: dev-sample
 tags:
   - Content Model
