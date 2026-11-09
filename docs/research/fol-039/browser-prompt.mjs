@@ -379,6 +379,13 @@ async function main() {
   const commit = git(["rev-parse", "HEAD"]) ?? "unknown";
   const branch = git(["rev-parse", "--abbrev-ref", "HEAD"]) ?? "unknown";
   const dirty = Boolean(git(["status", "--porcelain"]));
+  // The tarball is built from the working tree, not from the commit, so the
+  // evidence must say whether packaged sources had uncommitted changes. The
+  // harness's own files are irrelevant here; packages/apps/schemas/scripts are.
+  const dirtyPackagedSources = (git(["status", "--porcelain", "--", "packages", "apps", "schemas", "scripts"]) ?? "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
 
   const acceptance = {
     meta: {
@@ -387,6 +394,8 @@ async function main() {
       branch,
       commit,
       dirtyWorkingTree: dirty,
+      dirtyPackagedSources,
+      packagedSourcesClean: dirtyPackagedSources.length === 0,
       node: process.version,
       platform: `${process.platform} ${process.arch}`,
       chromePath,
@@ -427,6 +436,13 @@ async function main() {
   log("FOL-039 PWA prompt acceptance");
   log(`  source:   ${commit}${dirty ? " (working tree dirty)" : ""} on ${branch}`);
   log(`  package:  ${packageManifest.name}@${packageManifest.version}`);
+  if (acceptance.meta.dirtyPackagedSources.length > 0) {
+    log(
+      `  note:     packaged sources have uncommitted changes ` +
+        `(${acceptance.meta.dirtyPackagedSources.length} path(s)); the recorded commit alone does not ` +
+        `identify this tarball`,
+    );
+  }
   log(`  browser:  ${chromePath}`);
   log(`  temp:     ${tempRoot}`);
   log("");

@@ -59,6 +59,15 @@ node docs/research/fol-039/browser-prompt.mjs --keep # 保留临时目录，便�
 具体数值、耗时、tarball sha256、commit SHA、两次内容版本与 console 记录都在
 [`results/acceptance.json`](results/acceptance.json)。
 
+> 该文件里的 `meta.commit` 是运行时的 `git rev-parse HEAD`；tarball 来自**工作区**构建，
+> 所以 `meta.packagedSourcesClean` 与 `meta.dirtyPackagedSources` 一起说明「这个 commit
+> 本身能否唯一标识被测 tarball」。
+>
+> 本次提交记录的验收是在 commit `8a40780` 的 **detached worktree** 里跑的
+> （`meta.runFromCleanCheckout: true`，`packages/`、`apps/`、`schemas/`、`scripts/` 无未提交
+> 改动），因此该 tarball（sha256 `e92ba9fe…`）可由该 commit 复现。工作区里另一次同款运行的
+> 记录（sha256 `c4993637…`）来自带无关未提交改动的树，不能由 commit 单独复现。
+
 ## 设计上的两点取舍
 
 - **正文来自预渲染 HTML，而不是 `virtual:folio/content`。** 如果 fixture 把 Markdown
@@ -67,6 +76,18 @@ node docs/research/fol-039/browser-prompt.mjs --keep # 保留临时目录，便�
 - **「再次显示提示」用的是公开组件重挂载。** 真实读者关掉提示后会进入下一次会话，而
   公共组件本身没有「重新打开」按钮。fixture 因此挂载一个自己的按钮来重挂载
   未经修改的 `<FolioPwaUpdatePrompt />`；没有触碰 Folio 内部状态，也没有伪造提示。
+
+## 负控（脚本真的会失败吗）
+
+一个只会 PASS 的验收脚本不是证据。四个一次性负控（都在 `/tmp` 的副本里跑，仓库内脚本
+未改动，跑完即删）确认失败会被抓到：
+
+| 负控 | 改动 | 结果 |
+| --- | --- | --- |
+| 内容没变 | 第二次构建写回 v1 标记 | `[build-v2] FAIL`（正文不含 v2 标记） |
+| 内容版本没变 | 强行把 v2 的 `folio-version.json` 改回 v1 哈希 | `[content-only-condition] FAIL`（内容-only 前提不成立） |
+| 没有新部署 | 服务器根始终停在 v1 | `[browser] FAIL timed out ... [data-folio-pwa-update-prompt]` |
+| 提示期间偷偷刷新 | 提示可见时强制 `Page.navigate` | `[FAIL] no-reload-while-prompt-visible`（bootId/timeOrigin 变化） |
 
 ## 已知边界（未验证，不得当作通过）
 
