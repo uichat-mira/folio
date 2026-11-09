@@ -11,6 +11,127 @@ The root `README.md`, `packages/folio/README.md`, and the Markdown/static docume
 - **The default static document shell works without JavaScript.** Sidebar, in-page TOC, and previous/next survive with JS disabled. Sites that supply custom static route bodies own that markup and do not get the shell.
 - **`@uichat-mira/folio@0.1.1` is publicly published through GitHub Release and npm OIDC.** The release workflow's second attempt passed independent Registry-installed consumer checks; the initial 0.1.0 bootstrap was manual.
 - **The published package includes virtual-module types.** Strict Registry-installed consumers resolve `default` and `roots` without writing a local `declare module`.
+- **Article archives are opt-in per collection.** Without `collections[].archive`, a site gets no archive routes, entry points or tag links. With it, Folio derives `<collection>/category/<id>` and `<collection>/tag/<id>` from the FOL-040 Core index for both React and static output.
+
+## Article category and tag archives (FOL-040 / FOL-041)
+
+Category and tag archives are an opt-in reading surface for Article content. A
+category is one archive dimension, not a column, tree, navigation level or
+route directory; tags are zero or more topic labels. Neither changes an
+Article's `path`, collection, group, section, search behavior or existing
+permalink.
+
+### Content
+
+```md
+---
+title: 为什么内容要留在 Git
+type: article
+category: 工程实践          # optional; one non-empty string
+tags:                       # optional; zero or more strings
+  - Git
+  - Content
+---
+```
+
+- Only `type: article` documents enter archives. Documents, pages and other
+  types keep their existing behavior.
+- Frontmatter identity is normalized by Core: NFC, trim, collapsed whitespace
+  and lowercase. `Frontend` and `frontend` therefore share one archive; Chinese
+  labels are preserved. `category: ""`, non-string values and a missing value
+  mean uncategorized.
+- Category display labels can be overridden without changing URLs:
+  `archive: { categoryLabels: { frontend: "前端" } }`.
+
+### Configuration
+
+```ts
+import { defineFolioConfig } from "@uichat-mira/folio";
+
+export default defineFolioConfig({
+  // ...
+  collections: [
+    {
+      path: "/blogs",
+      title: "博客",
+      // Opt in. `true` uses source labels; the object form adds display labels.
+      archive: true,
+    },
+  ],
+});
+```
+
+Route derivation uses the configured collection path, not `/blogs`:
+
+| Surface | URL |
+| --- | --- |
+| Collection index | `<collection>` |
+| Category archive | `<collection>/category/<slug>` |
+| Tag archive | `<collection>/tag/<slug>` |
+| Article | unchanged `doc.path` |
+
+`<slug>` is the Core `group.slug` (`slugify` of the normalized label): Chinese
+is preserved, ASCII is lowercased, punctuation is stripped. A consumer building
+its own URL segment should use the Core slug as a single path segment.
+
+### Default React UI
+
+`FolioApp` reads `collections[].archive` automatically:
+
+- the opted-in collection index gains one compact category row (only when
+  categories exist);
+- Article cards in that collection and the Article metadata area expose their
+  tags as links;
+- `<collection>/category/<slug>` and `<collection>/tag/<slug>` render the
+  archive entry list, with a link back to the collection;
+- an unknown archive identifier renders the normal not-found page;
+- the category row and tag links are **not** injected into the global header
+  navigation.
+
+### Static output
+
+The default static route set (`writeFolioStaticSite` without a custom `routes`
+function) emits the same archive pages as HTML:
+
+- title, description and canonical come from the archive route and inherit
+  `base` and `config.siteUrl`;
+- archive URLs are included in `sitemap.xml`;
+- `siteIndexing: "noindex"` applies to archive pages exactly as to other
+  default pages, so a preview build does not publish indexable archive pages;
+- the generated HTML is readable without JavaScript and uses the same entry
+  list, ordering and links as React.
+
+Consumers that supply their own static `routes` own that page markup, as with
+every other custom static route. They can still consume the same Core index
+instead of reimplementing archives:
+
+```ts
+import {
+  buildFolioArticleArchiveIndex,
+  findFolioArticleArchiveGroup,
+} from "@uichat-mira/folio";
+```
+
+The official site (`apps/site`) is such a consumer: it builds its archive
+routes from each configured collection path and renders the same entry list and
+tag links as the default UI.
+
+### Conflict safety
+
+Archive routes participate in the normal static route safety layer. A build
+fails before writing anything when an archive URL collides with a document,
+a configured collection index, another archive route or a custom static route.
+React route derivation fails with `folio article archive route conflict` so a
+document route cannot be silently shadowed. Two distinct labels that collapse
+to one URL identifier (`C++` / `C#`) fail in Core rather than sharing one
+archive.
+
+### Non-goals
+
+No column/tree hierarchy, sub-categories, multi-select filters, tag clouds,
+pagination, comments, CMS, database, automatic header navigation or Article
+permalink change is part of this contract.
+
 
 ## Package status and installation
 

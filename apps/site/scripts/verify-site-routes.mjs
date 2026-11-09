@@ -24,6 +24,10 @@ const reference = page("/reference/overview");
 const component = page("/reference/components");
 const blog = page("/blogs");
 const article = page("/blogs/why-folio");
+// FOL-041: category/tag archive pages are real static routes derived from the
+// configured /blogs collection path, not a hardcoded /blogs implementation.
+const category = page("/blogs/category/工程实践");
+const tag = page("/blogs/tag/folio");
 const notFound = readFileSync(join(dist, "404.html"), "utf8");
 const sitemap = readFileSync(join(dist, "sitemap.xml"), "utf8");
 
@@ -37,7 +41,24 @@ for(const [label, html] of [["Guide",guide],["Reference",reference],["Components
   assert.match(html, /folio-page-nav/, label + " lost the pager");
 }
 assert.match(blog, /folio-collection-page/);
+assert.match(blog, /folio-archive-row/);
+assert.match(blog, /class="folio-entry-tag"/);
+assert.doesNotMatch(
+  blog.slice(0, blog.indexOf("</header>")),
+  /\/blogs\/(?:category|tag)\//,
+  "archive entry points must not be injected into the global header",
+);
 assert.match(article, /folio-article-main/);
+assert.match(article, /folio-article-tags/);
+assert.match(category, /folio-archive-page/);
+assert.match(category, /folio-entry-list/);
+assert.match(category, /href="[^"]*\/blogs\/content-stays-in-git"/);
+assert.match(category, /href="[^"]*\/blogs\/one-markdown-many-surfaces"/);
+assert.match(tag, /folio-archive-page/);
+assert.match(tag, /href="[^"]*\/blogs\/why-folio"/);
+assert.match(tag, /href="[^"]*\/blogs\/content-stays-in-git"/);
+assert.match(sitemap, /\/blogs\/category\//);
+assert.match(sitemap, /\/blogs\/tag\//);
 assert.match(notFound, /noindex,nofollow/);
 assert.match(sitemap, /\/about\/?<\/loc>/);
 assert.doesNotMatch(sitemap, /\/(?:showcase|projects)(?:\/|<)/);

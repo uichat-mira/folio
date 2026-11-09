@@ -7,10 +7,16 @@ import {
 } from "./core/content-tree";
 import {
   folioCollectionIndexes,
+  normalizeFolioCollectionPath,
   selectFolioCollectionDocs,
   assertNoFolioCollectionConflicts,
   type FolioCollectionIndex,
 } from "./core/collection-index";
+import {
+  buildFolioArticleArchiveIndex,
+  type FolioArticleArchiveGroup,
+  type FolioArticleArchiveIndex,
+} from "./core/article-archive";
 import { renderFolioMarkdown } from "./core/markdown";
 import { buildFolioOutlineTree, type FolioOutlineNode } from "./core/outline";
 import { getFolioDocByline } from "./core/doc-meta";
@@ -519,38 +525,235 @@ export function renderFolioStaticProjectShell(
   return renderStaticDocShell(context, doc, markdownHtml);
 }
 
+type FolioStaticArchiveTagLink = {
+  label: string;
+  href: string;
+};
+
+type FolioStaticArchiveCollection = {
+  collection: FolioCollectionIndex;
+  index: FolioArticleArchiveIndex;
+};
+
+type FolioStaticArchiveRoute = {
+  path: string;
+  collection: FolioCollectionIndex;
+  group: FolioArticleArchiveGroup;
+};
+
+type FolioStaticArchiveModel = {
+  byCollection: Map<string, FolioStaticArchiveCollection>;
+  routes: FolioStaticArchiveRoute[];
+  tagsByDoc: Map<string, FolioStaticArchiveTagLink[]>;
+};
+
+/**
+ * FOL-041: static archive routes are derived from the configured collection
+ * path plus the Core group slug. The Build layer consumes the FOL-040 index;
+ * it never re-filters or re-normalizes labels here.
+ *
+ * Route conflicts are rejected before the first page is written. A document,
+ * collection index or another archive page that normalizes to the same route
+ * would otherwise silently shadow an archive URL at request time.
+ */
+function buildStaticArchiveModel(
+  context: FolioStaticBuildContext,
+): FolioStaticArchiveModel {
+  const byCollection = new Map<string, FolioStaticArchiveCollection>();
+  const routes: FolioStaticArchiveRoute[] = [];
+  const tagsByDoc = new Map<string, FolioStaticArchiveTagLink[]>();
+  const owners = new Map<string, string>();
+  const archiveOwners = new Map<string, string>();
+
+  // Existing duplicate-route handling belongs to the static writer; this pass
+  // only learns which non-archive surfaces already own a route, so an archive
+  // page can never shadow one.
+  const remember = (path: string, owner: string): void => {
+    const normalized = normalizeStaticRoute(path);
+    if (!owners.has(normalized)) owners.set(normalized, owner);
+  };
+
+  const claimArchive = (path: string, owner: string): string => {
+    const normalized = normalizeStaticRoute(path);
+    const previous = owners.get(normalized) ?? archiveOwners.get(normalized);
+    if (previous) {
+      throw new Error(
+        `folio article archive route conflict: ${JSON.stringify(normalized)} (${owner}) conflicts with ${previous}`,
+      );
+    }
+    archiveOwners.set(normalized, owner);
+    return normalized;
+  };
+
+  remember("/", "site home");
+  for (const collection of folioCollectionIndexes(context.config)) {
+    remember(collection.path, `collection index ${JSON.stringify(collection.title)}`);
+  }
+  for (const doc of context.docs) {
+    remember(doc.path, `document ${JSON.stringify(doc.title)}`);
+  }
+
+  for (const collection of folioCollectionIndexes(context.config)) {
+    const configured = (context.config.collections ?? []).find(
+      (entry) =>
+        normalizeFolioCollectionPath(entry.path) === collection.path,
+    );
+    const archive = configured?.archive;
+    if (!archive) continue;
+
+    const index = buildFolioArticleArchiveIndex(
+      selectFolioCollectionDocs(context.docs, collection.path),
+      archive,
+    );
+    byCollection.set(collection.path, { collection, index });
+
+    for (const group of [...index.categories, ...index.tags]) {
+      const path = claimArchive(
+        `${collection.path}/${group.kind}/${group.slug}`,
+        `${group.kind} archive ${JSON.stringify(group.title)} of ${JSON.stringify(collection.title)}`,
+      );
+      routes.push({ path, collection, group });
+
+      if (group.kind !== "tag") continue;
+      for (const doc of group.docs) {
+        const links = tagsByDoc.get(doc.path) ?? [];
+        links.push({ label: group.title, href: staticRouteHref(context, path) });
+        tagsByDoc.set(doc.path, links);
+      }
+    }
+  }
+
+  return { byCollection, routes, tagsByDoc };
+}
+
+function archiveDescription(
+  collection: FolioCollectionIndex,
+  group: FolioArticleArchiveGroup,
+): string {
+  return `${collection.title} · ${group.kind === "category" ? "分类" : "标签"}归档，共 ${group.docs.length} 篇文章。`;
+}
+
 function renderStaticEntryList(
   context: FolioStaticBuildContext,
   docs: FolioDoc[],
   heading: "h2" | "h3",
+  tagLinks?: ReadonlyMap<string, readonly FolioStaticArchiveTagLink[]>,
 ): string {
-  return '<div class="folio-entry-list">' + docs.map((doc, index) =>
-    '<a class="folio-entry" href="' + folioEscapeHtml(staticRouteHref(context, doc.path)) + '">' +
-    '<span class="folio-entry-number" aria-hidden="true">' + String(index + 1).padStart(2, "0") + '</span>' +
-    '<div class="folio-entry-copy">' +
-    (doc.date ? '<time class="folio-entry-date" datetime="' + folioEscapeHtml(doc.date) + '">' +
-      folioEscapeHtml(doc.date) + '</time>' : '') +
-    '<' + heading + ' class="folio-entry-title">' + folioEscapeHtml(doc.title) + '</' + heading + '>' +
-    (doc.description ? '<p class="folio-entry-description">' +
-      folioEscapeHtml(doc.description) + '</p>' : '') +
-    '</div><span class="folio-entry-arrow" aria-hidden="true">↗</span></a>'
-  ).join("") + "</div>";
+  return '<div class="folio-entry-list">' + docs.map((doc, index) => {
+    const number = '<span class="folio-entry-number" aria-hidden="true">' +
+      String(index + 1).padStart(2, "0") + '</span>';
+    const tags = tagLinks?.get(doc.path) ?? [];
+    const copy =
+      '<div class="folio-entry-copy">' +
+      (doc.date ? '<time class="folio-entry-date" datetime="' + folioEscapeHtml(doc.date) + '">' +
+        folioEscapeHtml(doc.date) + '</time>' : '') +
+      (tags.length
+        ? '<' + heading + ' class="folio-entry-title"><a class="folio-entry-link" href="' +
+          folioEscapeHtml(staticRouteHref(context, doc.path)) + '">' +
+          folioEscapeHtml(doc.title) + '</a></' + heading + '>'
+        : '<' + heading + ' class="folio-entry-title">' + folioEscapeHtml(doc.title) +
+          '</' + heading + '>') +
+      (doc.description ? '<p class="folio-entry-description">' +
+        folioEscapeHtml(doc.description) + '</p>' : '') +
+      (tags.length
+        ? '<span class="folio-entry-tags">' + tags.map((tag) =>
+          '<a class="folio-entry-tag" href="' + folioEscapeHtml(tag.href) + '">' +
+          folioEscapeHtml(tag.label) + '</a>'
+        ).join("") + '</span>'
+        : '') +
+      '</div>';
+    const arrow = '<span class="folio-entry-arrow" aria-hidden="true">↗</span>';
+
+    // Archive-disabled pages keep the previous whole-row anchor unchanged.
+    if (!tags.length) {
+      return '<a class="folio-entry" href="' +
+        folioEscapeHtml(staticRouteHref(context, doc.path)) + '">' +
+        number + copy + arrow + '</a>';
+    }
+    return '<div class="folio-entry">' + number + copy + arrow + '</div>';
+  }).join("") + "</div>";
+}
+
+function renderStaticArchiveCategoryRow(
+  context: FolioStaticBuildContext,
+  collection: FolioCollectionIndex,
+  groups: readonly FolioArticleArchiveGroup[],
+): string {
+  if (!groups.length) return "";
+  return '<nav class="folio-archive-row" aria-label="' +
+    folioEscapeHtml(collection.title + "分类归档") + '">' +
+    '<span class="folio-archive-row__label">分类</span>' +
+    '<ul class="folio-archive-row__list">' +
+    groups.map((group) =>
+      '<li><a class="folio-archive-chip" href="' +
+      folioEscapeHtml(staticRouteHref(context, `${collection.path}/category/${group.slug}`)) +
+      '">' + folioEscapeHtml(group.title) + '</a></li>'
+    ).join("") +
+    '</ul></nav>';
 }
 
 function renderStaticCollectionIndex(
   context: FolioStaticBuildContext,
   collection: FolioCollectionIndex,
+  archive?: FolioStaticArchiveModel,
 ): string {
   const entries = selectFolioCollectionDocs(context.docs, collection.path);
+  const archiveCollection = archive?.byCollection.get(collection.path);
   const list = entries.length
-    ? renderStaticEntryList(context, entries, "h2")
+    ? renderStaticEntryList(
+        context,
+        entries,
+        "h2",
+        archiveCollection ? archive?.tagsByDoc : undefined,
+      )
     : '<p class="folio-collection-empty">' + folioEscapeHtml(collection.emptyMessage) + '</p>';
   return '<main class="folio-home folio-collection-page">' +
     '<header class="folio-journal-hero folio-collection-hero">' +
     '<span class="folio-journal-kicker">COLLECTION</span>' +
     '<h1>' + folioEscapeHtml(collection.title) + '</h1>' +
     (collection.description ? '<p>' + folioEscapeHtml(collection.description) + '</p>' : '') +
-    '</header>' + list + "</main>";
+    '</header>' +
+    renderStaticArchiveCategoryRow(context, collection, archiveCollection?.index.categories ?? []) +
+    list + "</main>";
+}
+
+function renderStaticArchivePage(
+  context: FolioStaticBuildContext,
+  collection: FolioCollectionIndex,
+  group: FolioArticleArchiveGroup,
+  tagLinks: ReadonlyMap<string, readonly FolioStaticArchiveTagLink[]>,
+): string {
+  const category = group.kind === "category";
+  return '<main class="folio-home folio-collection-page folio-archive-page">' +
+    '<header class="folio-journal-hero folio-collection-hero">' +
+    '<span class="folio-journal-kicker">' +
+    (category ? "CATEGORY ARCHIVE" : "TAG ARCHIVE") + ' · ' + group.docs.length +
+    ' ARTICLES</span>' +
+    '<h1>' + folioEscapeHtml(group.title) + '</h1>' +
+    '<p>' + folioEscapeHtml(
+      `${collection.title} · ${category ? "分类" : "标签"}归档 · 共 ${group.docs.length} 篇文章`,
+    ) + '</p>' +
+    '<a class="folio-archive-back" href="' +
+    folioEscapeHtml(staticRouteHref(context, collection.path)) +
+    '">返回' + folioEscapeHtml(collection.title) +
+    ' <span aria-hidden="true">↗</span></a>' +
+    '</header>' +
+    renderStaticEntryList(context, group.docs, "h2", tagLinks) +
+    '</main>';
+}
+
+function renderStaticArticleTags(
+  doc: FolioDoc,
+  archive: FolioStaticArchiveModel,
+): string {
+  const links = archive.tagsByDoc.get(doc.path);
+  if (!links?.length) return "";
+  return '<nav class="folio-article-tags" aria-label="文章标签">' +
+    '<span class="folio-article-tags__label">标签</span>' +
+    links.map((link) =>
+      '<a class="folio-article-tag" href="' + folioEscapeHtml(link.href) + '">' +
+      folioEscapeHtml(link.label) + '</a>'
+    ).join("") + '</nav>';
 }
 
 function renderDefaultStaticHome(context: FolioStaticBuildContext): string {
@@ -729,11 +932,15 @@ export function renderFolioStaticHome(context: FolioStaticBuildContext): string 
     : renderDefaultStaticHome(context);
 }
 
-function renderStaticArticle(doc: FolioDoc): string {
+function renderStaticArticle(
+  doc: FolioDoc,
+  archive: FolioStaticArchiveModel,
+): string {
   const article = '<main class="folio-doc-page' +
     (doc.headings.length ? ' folio-article-main' : '') + '">' +
     '<div class="folio-doc-toolbar"><div class="folio-eyebrow">' +
     folioEscapeHtml(doc.group) + '</div></div>' +
+    renderStaticArticleTags(doc, archive) +
     renderFolioStaticDocumentBody(doc) + '</main>';
   const toc = renderStaticToc(doc);
   if (!toc) return article;
@@ -744,6 +951,7 @@ function renderStaticArticle(doc: FolioDoc): string {
 
 function defaultRoutes(context: FolioStaticBuildContext): FolioStaticRoute[] {
   assertNoFolioCollectionConflicts(context.docs, context.config);
+  const archive = buildStaticArchiveModel(context);
   return [
     {
       path: "/",
@@ -757,7 +965,14 @@ function defaultRoutes(context: FolioStaticBuildContext): FolioStaticRoute[] {
       title: collection.title,
       description: collection.description,
       type: "website",
-      body: renderStaticCollectionIndex(context, collection),
+      body: renderStaticCollectionIndex(context, collection, archive),
+    })),
+    ...archive.routes.map(({ path, collection, group }) => ({
+      path,
+      title: `${group.kind === "category" ? "分类" : "标签"}：${group.title}`,
+      description: archiveDescription(collection, group),
+      type: "website",
+      body: renderStaticArchivePage(context, collection, group, archive.tagsByDoc),
     })),
     ...context.docs.map((doc) => ({
       path: doc.path,
@@ -767,7 +982,7 @@ function defaultRoutes(context: FolioStaticBuildContext): FolioStaticRoute[] {
         doc.type === "doc"
           ? renderStaticDocShell(context, doc)
           : doc.type === "article"
-            ? renderStaticArticle(doc)
+            ? renderStaticArticle(doc, archive)
             : `<main class="folio-prerender"><p>${folioEscapeHtml(doc.group)}</p><h1>${folioEscapeHtml(doc.title)}</h1><p>${folioEscapeHtml(doc.description)}</p><article class="folio-markdown">${renderFolioMarkdown(doc.body, { removeH1: true })}</article></main>`,
       type: doc.type === "article" ? "article" : "website",
       image: doc.cover,

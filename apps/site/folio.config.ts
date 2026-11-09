@@ -28,6 +28,9 @@ export default defineFolioConfig({
       path: "/blogs",
       title: "博客",
       description: "以日期、作者、标签和长文结构组织的设计说明与操作记录。",
+      // FOL-041 demo: category/tag archives are opt-in per collection. The
+      // routes derive from this path: /blogs/category/<id> and /blogs/tag/<id>.
+      archive: true,
     },
   ],
   footer: {

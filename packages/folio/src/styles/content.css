@@ -430,6 +430,7 @@
 }
 
 .folio-entry {
+  position: relative;
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr) 24px;
   align-items: start;
@@ -523,6 +524,145 @@
   color: var(--folio-primary-active);
   font-weight: 600;
   font-size: 13px;
+}
+
+/* FOL-041: opt-in Article category/tag archive entry points. Tokens only; the
+   row, chips and tag links stay secondary to the article titles. */
+.folio-archive-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin: 0 0 8px;
+  padding: 0 0 22px;
+  border-bottom: 1px solid var(--folio-hairline);
+}
+
+.folio-archive-row__label,
+.folio-article-tags__label {
+  color: var(--folio-muted);
+  font: 600 11px/1.5 var(--folio-font-mono);
+  letter-spacing: .12em;
+}
+
+.folio-archive-row__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.folio-archive-chip {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid var(--folio-hairline);
+  border-radius: var(--folio-radius-pill);
+  color: var(--folio-body-strong);
+  font-size: 12px;
+  line-height: 1.4;
+  transition: border-color .15s ease, color .15s ease;
+}
+
+.folio-archive-chip:hover {
+  border-color: var(--folio-primary);
+  color: var(--folio-primary-active);
+}
+
+.folio-entry-tags {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.folio-entry-tag,
+.folio-article-tag {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  padding: 1px 9px;
+  border: 1px solid var(--folio-hairline);
+  border-radius: var(--folio-radius-pill);
+  color: var(--folio-muted);
+  font-size: 12px;
+  line-height: 1.4;
+  transition: border-color .15s ease, color .15s ease;
+}
+
+.folio-entry-tag:hover,
+.folio-article-tag:hover {
+  border-color: var(--folio-primary);
+  color: var(--folio-primary-active);
+}
+
+/* The title link stretches over the whole entry while tag links stay above it,
+   so a card can expose both the article and its archive links. */
+.folio-entry-link { color: inherit; }
+.folio-entry-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--folio-radius-md);
+}
+.folio-entry-link:focus-visible { outline: none; }
+.folio-entry-link:focus-visible::after {
+  outline: 2px solid var(--folio-primary);
+  outline-offset: -2px;
+}
+
+.folio-archive-chip:focus-visible,
+.folio-entry-tag:focus-visible,
+.folio-article-tag:focus-visible,
+.folio-archive-back:focus-visible {
+  outline: 2px solid var(--folio-primary);
+  outline-offset: 2px;
+}
+
+.folio-article-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 18px;
+}
+
+.folio-article-tag {
+  min-height: 28px;
+  padding: 1px 10px;
+}
+
+.folio-archive-back {
+  display: inline-flex;
+  margin-top: 16px;
+  color: var(--folio-primary-active);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.folio-archive-back:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.folio-archive-page .folio-entry-list {
+  margin-top: 24px;
+}
+
+@media (max-width: 780px) {
+  .folio-archive-row { padding-bottom: 18px; }
+  .folio-archive-chip { min-height: 30px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folio-archive-chip,
+  .folio-article-tag,
+  .folio-entry-tag { transition: none; }
 }
 
 @media (max-width: 780px) {
