@@ -72,11 +72,11 @@ node docs/research/fol-039/browser-prompt.mjs --keep # 保留临时目录，便�
 > （`meta.runFromCleanCheckout: true`，`packages/`、`apps/`、`schemas/`、`scripts/` 无未提交
 > 改动），因此那一份 tarball（sha256 `e92ba9fe…`）可由该 commit 复现。
 >
-> **第二轮（P1/P2/P3 返修）的 20 项记录来自带未提交改动的工作区**，因为返修本身就是未提交
-> 改动：`meta.packagedSourcesClean` 为 `false` 并逐条列出那些路径，`meta.commit` 只是运行时
-> HEAD（`780e6b3`，返修前基线）。这一轮的可复现标识是 tarball sha256（记为
-> `meta.packageEvidence.sha256`），不是 commit。返修提交后会在干净 worktree 里重跑一次以刷新
-> 该记录。
+> **第二轮的 20 项记录**（含子路径与 auto 两个浏览器阶段）最终是在 commit `4c1e66c` 的
+> **detached worktree** 里跑的：`meta.runFromCleanCheckout: true`、
+> `meta.packagedSourcesClean: true`，`packages/`、`apps/`、`schemas/`、`scripts/` 无未提交
+> 改动，因此 tarball（sha256 `900311e5…`）可由该 commit 复现。返修过程中在工作区跑过一次
+> 同名记录（当时 `packagedSourcesClean: false`），已被这次干净 checkout 的记录取代。
 
 ## 设计上的两点取舍
 
