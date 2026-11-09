@@ -11,7 +11,7 @@ The root `README.md`, `packages/folio/README.md`, and the Markdown/static docume
 - **The default static document shell works without JavaScript.** Sidebar, in-page TOC, and previous/next survive with JS disabled. Sites that supply custom static route bodies own that markup and do not get the shell.
 - **`@uichat-mira/folio@0.1.1` is publicly published through GitHub Release and npm OIDC.** The release workflow's second attempt passed independent Registry-installed consumer checks; the initial 0.1.0 bootstrap was manual.
 - **The published package includes virtual-module types.** Strict Registry-installed consumers resolve `default` and `roots` without writing a local `declare module`.
-- **Article archives are opt-in per collection.** Without `collections[].archive`, a site gets no archive routes, entry points or tag links. With it, Folio derives `<collection>/category/<id>` and `<collection>/tag/<id>` from the FOL-040 Core index for both React and static output.
+- **Article archives are opt-in per collection.** Without `collections[].archive`, a site gets no archive routes, entry points or tag links. With it, Folio derives `<collection>/category/<slug>` and `<collection>/tag/<slug>` from the FOL-040 Core index for both React and static output.
 
 ## Article category and tag archives (FOL-040 / FOL-041)
 
@@ -71,8 +71,10 @@ Route derivation uses the configured collection path, not `/blogs`:
 | Article | unchanged `doc.path` |
 
 `<slug>` is the Core `group.slug` (`slugify` of the normalized label): Chinese
-is preserved, ASCII is lowercased, punctuation is stripped. A consumer building
-its own URL segment should use the Core slug as a single path segment.
+is preserved, ASCII is lowercased, punctuation is stripped. It is exactly one
+URL path segment. Non-ASCII slugs are percent-encoded in the request URL (for
+example `/blogs/tag/%E8%AE%BE%E8%AE%A1/` for `设计`), so a consumer that builds
+its own archive URL must `encodeURIComponent` the slug segment.
 
 ### Default React UI
 
@@ -84,7 +86,7 @@ its own URL segment should use the Core slug as a single path segment.
   tags as links;
 - `<collection>/category/<slug>` and `<collection>/tag/<slug>` render the
   archive entry list, with a link back to the collection;
-- an unknown archive identifier renders the normal not-found page;
+- an unknown archive slug renders the normal not-found page;
 - the category row and tag links are **not** injected into the global header
   navigation.
 
@@ -123,7 +125,7 @@ fails before writing anything when an archive URL collides with a document,
 a configured collection index, another archive route or a custom static route.
 React route derivation fails with `folio article archive route conflict` so a
 document route cannot be silently shadowed. Two distinct labels that collapse
-to one URL identifier (`C++` / `C#`) fail in Core rather than sharing one
+to the same URL slug (`C++` / `C#`) fail in Core rather than sharing one
 archive.
 
 ### Non-goals
