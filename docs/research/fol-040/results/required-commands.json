@@ -8,14 +8,15 @@
     "platform": "darwin arm64",
     "capturedAt": "2026-11-09T07:12:40.036Z",
     "workingTreeStatus": "?? docs/research/fol-040/",
-    "note": "npm_config_cache=$PWD/.npm-cache npm_config_logs_dir=$PWD/.npm-logs was exported for every command"
+    "note": "npm_config_cache=$PWD/.npm-cache npm_config_logs_dir=$PWD/.npm-logs was exported for every command",
+    "updatedAt": "2026-11-09T07:16:38.688Z",
+    "logPolicy": "Raw *.log files are intentionally not tracked (repository .gitignore ignores *.log, matching docs/research evidence convention). Command exit codes plus captured output tails are embedded in this file; per-check detail is in results/acceptance.json."
   },
   "commands": [
     {
       "id": "typecheck",
       "command": "npm run typecheck -w @uichat-mira/folio",
       "exitCode": 0,
-      "log": "results/typecheck.log",
       "outputTail": [
         "",
         "> @uichat-mira/folio@0.1.1 typecheck",
@@ -26,7 +27,6 @@
       "id": "package-tests",
       "command": "npm test -w @uichat-mira/folio",
       "exitCode": 0,
-      "log": "results/test.log",
       "outputTail": [
         "1..311",
         "# tests 311",
@@ -44,7 +44,6 @@
       "id": "layer-gate",
       "command": "npm run layers:check -w @uichat-mira/folio",
       "exitCode": 0,
-      "log": "results/layers.log",
       "outputTail": [
         "> node scripts/dependency-layers.mjs",
         "",
@@ -55,7 +54,6 @@
       "id": "pack-verify",
       "command": "npm run pack:verify -w @uichat-mira/folio",
       "exitCode": 0,
-      "log": "results/pack-verify.log",
       "outputTail": [
         "",
         "styles.css verified: 10 ordered source(s), 66541 bytes, tokens + global rules + component/static selectors + cascade order",
@@ -66,12 +64,42 @@
   "releaseCheck": {
     "command": "npm run release:check",
     "exitCode": 0,
-    "log": "results/release-check.log",
-    "logBytes": 77171,
     "summary": [
       "validate: typecheck + package build + site typecheck + style ownership + OG worker test + 311 package tests + site build (50 HTML routes)",
       "pack:verify: 17 files, 386223 bytes unpacked",
       "pack:consumer: tarball sha256 b1eabb9c85aea7e7cecbe00dcac3757e26e94e00de820d4afdb3e550fd22baf2; public entrypoints, declarations, Vite build, static routes/base path/sitemap/robots/feeds/siteIndexing, PWA and counter-proofs all ok"
+    ],
+    "outputTail": [
+      "[content]  ok  publishedAt override and Git-derived updatedAt reached the client bundle",
+      "[css]      ok  1 CSS asset(s), 10 exact component/static selectors and 2 tokens reached the built stylesheet",
+      "[content]  ok  negative control without Markdown built and contains no marker",
+      "[static]   ok  vite build (staticRoutes: on, base /folio-smoke/) wrote /private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio-tarball-consumer-IsWpki/consumer/vite-app/dist-static",
+      "[static]   ok  index.html  title, canonical https://example.test/folio-smoke/, base-prefixed asset /folio-smoke/assets/index-C1xrTmKK.js",
+      "[static]   ok  docs/hello/index.html  marker FOLIO_STATIC_50858e62867124b9, base-prefixed links only (5 anchors)",
+      "[static]   ok  404.html  noindex,nofollow",
+      "[static]   ok  blogs/ and projects/ indexes are prerendered",
+      "[static]   ok  sitemap.xml  four base-prefixed routes, trusted lastmod only, no 404",
+      "[static]   ok  robots.txt  points at the base-prefixed sitemap",
+      "[static]   ok  siteIndexing: \"noindex\" build  every page noindex,nofollow, canonicals unchanged, preview robots.txt, sitemap unadvertised",
+      "[static]   ok  no feeds configured: no feed files and no alternate links",
+      "[static]   ok  rss.xml  one base-prefixed item, absolute GUID, trusted pubDate",
+      "[static]   ok  atom.xml  permalink ids and trusted updated/published dates only",
+      "[static]   ok  feeds/blogs.xml  zero-item RSS for an empty directory, no Atom",
+      "[static]   ok  feeds  three absolute base-prefixed alternate links on every page including 404",
+      "[static]   ok  configured home uses config text, collection links and base path",
+      "[static]   ok  static-only home override keeps every other route, canonical and sitemap entry",
+      "[static]   ok  SEO fixture: parsed JSON-LD author precedence/dates and parsed sitemap lastmod",
+      "[static]   ok  staticRoutes: false produced no static files (counter-proof)",
+      "[pwa:root]   ok  base /: manifest scope/start_url, 8 precache entries (no HTML, no fallback), manifest link on 5 pages, content version 51e8ad1b80b7…",
+      "[pwa:subpath]   ok  base /folio-smoke/: manifest scope/start_url, 8 precache entries (no HTML, no fallback), manifest link on 5 pages, content version 7ceb58edeeca…",
+      "[pwa:content] ok  Markdown-only change: identical 3 asset(s), new version 9cddd47018a2… -> b69c93c5fc85…, worker bytes changed",
+      "[pwa:stable] ok  unchanged rebuild keeps the same content version",
+      "[pwa:assets] ok  JS change rotates the hashed asset and the worker precache",
+      "[pwa:auto] ok  auto-update mode activates and claims without the prompt",
+      "[pwa:guard] ok  manifestTransforms cannot inject a page (directory, encoded and .html URLs rejected)",
+      "[pwa:off]   ok  disable: true emits no PWA output and keeps the static site",
+      "",
+      "Tarball consumer verification passed for @uichat-mira/folio@0.1.1 (da6202d70c485e7545708fbf8d36ed23cbce8c68 (working tree dirty))"
     ]
   },
   "evidence": {

@@ -1,6 +1,0 @@
-
-> @uichat-mira/folio@0.1.1 pack:verify
-> node scripts/verify-package.mjs
-
-styles.css verified: 10 ordered source(s), 66541 bytes, tokens + global rules + component/static selectors + cascade order
-npm pack verified: uichat-mira-folio-0.1.1.tgz, 17 files, 386223 bytes unpacked

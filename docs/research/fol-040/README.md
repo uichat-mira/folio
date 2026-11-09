@@ -108,17 +108,22 @@ schemas/ scripts/` 在打包时没有未提交改动；工作区的未跟踪文�
 
 所有命令都在 worktree 根目录执行，并预设
 `npm_config_cache=$PWD/.npm-cache npm_config_logs_dir=$PWD/.npm-logs`（否则本机沙箱下
-`npm pack`/`npm install` 会因无法写入 `~/.npm/_logs` 失败）。完整输出保存在
-[`results/`](results/)；机器可读汇总见
-[`results/required-commands.json`](results/required-commands.json)。
+`npm pack`/`npm install` 会因无法写入 `~/.npm/_logs` 失败）。命令、退出码与捕获的输出
+尾部记录在 [`results/required-commands.json`](results/required-commands.json)；41 项独立
+检查的逐项明细在 [`results/acceptance.json`](results/acceptance.json)。按仓库
+`.gitignore` 的 `*.log` 规则，原始日志文件不进入版本库。
 
 | 命令 | 退出码 | 结果 |
 | --- | --- | --- |
-| `npm run typecheck -w @uichat-mira/folio` | 0 | `tsc --noEmit` 通过（[log](results/typecheck.log)） |
-| `npm test -w @uichat-mira/folio` | 0 | **311/311** tests pass，0 fail / 0 skip（[log](results/test.log)） |
-| `npm run layers:check -w @uichat-mira/folio` | 0 | 56 modules（27 ui / 11 build / 17 core / 1 entry），137 relative edges，0 violation（[log](results/layers.log)） |
-| `npm run pack:verify -w @uichat-mira/folio` | 0 | 17 files / 386223 bytes unpacked（[log](results/pack-verify.log)） |
-| `npm run release:check` | 0 | 全链路通过（[log](results/release-check.log)） |
+| `npm run typecheck -w @uichat-mira/folio` | 0 | `tsc --noEmit` 通过 |
+| `npm test -w @uichat-mira/folio` | 0 | **311/311** tests pass，0 fail / 0 skip |
+| `npm run layers:check -w @uichat-mira/folio` | 0 | 56 modules（27 ui / 11 build / 17 core / 1 entry），137 relative edges，0 violation |
+| `npm run pack:verify -w @uichat-mira/folio` | 0 | 17 files / 386223 bytes unpacked |
+| `npm run release:check` | 0 | 全链路通过 |
+
+上表每项的实际命令、退出码和输出尾部见
+[`results/required-commands.json`](results/required-commands.json) 的 `commands` 与
+`releaseCheck` 字段（含 release:check 的 pack:consumer 阶段输出尾部）。
 
 `release:check` 实际覆盖：`validate`（仓库 typecheck、包构建、站 typecheck、style
 ownership、OG worker test、311 包测试、官方站构建 **50 HTML routes**）→ `pack:verify`
