@@ -29,6 +29,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { verifyPwaConsumer } from "./checks/pwa-consumer.mjs";
 import { verifyStaticConsumer } from "./checks/static-consumer.mjs";
 import { verifyViteConsumer } from "./checks/vite-consumer.mjs";
 
@@ -172,8 +173,11 @@ try {
     installSpec = tarballPath;
   }
 
-  // Peer dependencies are intentionally not installed explicitly: npm must
-  // bring them in from the package manifest, exactly as for a real consumer.
+  // React/Vite peers are intentionally not installed explicitly: npm must bring
+  // them in from the package manifest, exactly as for a real consumer. The two
+  // optional PWA peers below are the exception, because an optional peer is by
+  // definition not installed automatically — a consumer that opts into
+  // `@uichat-mira/folio/pwa` installs them itself, and this check mirrors that.
   assertStep(
     registryMode ? "npm install <registry package>" : "npm install <tarball>",
     runNpm(
@@ -187,6 +191,13 @@ try {
         "@types/node@^24",
         "@types/react@^19",
         "@types/react-dom@^19",
+        // FOL-039: the optional PWA integration declares vite-plugin-pwa and
+        // workbox-window as optional peer dependencies. A consumer that opts in
+        // installs them itself; the tarball check must install exactly that set
+        // so the published `peerDependenciesMeta` contract is exercised instead
+        // of being bypassed by the package manager.
+        "vite-plugin-pwa@^2",
+        "workbox-window@^7.4.1",
       ],
       consumerDir,
     ),
@@ -263,6 +274,15 @@ try {
   verifyStaticConsumer({
     consumerDir,
     appDir: viteConsumer.appDir,
+    log,
+  });
+
+  // FOL-039: the same isolated installation also proves the optional PWA
+  // integration through its public `/pwa` and `/pwa/react` entries. It reuses
+  // the install above, so the extra cost is the real consumer builds only.
+  verifyPwaConsumer({
+    consumerDir,
+    fixtureDir: join(scriptDir, "fixtures", "pwa-consumer"),
     log,
   });
 

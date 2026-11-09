@@ -27,6 +27,19 @@ export type { FolioShareButtonProps } from "./share";
 export { FolioMarkdown } from "./markdown-react";
 export type { FolioMarkdownProps } from "./markdown-react";
 export { searchFolioDocs } from "./core/search";
+// FOL-039: the update-check throttle policy shipped with the optional PWA
+// integration. Pure Core logic (no DOM, no React, no Workbox), exported so a
+// consumer with its own update UI can reuse the same policy instead of writing
+// a second one. The integration itself stays behind `@uichat-mira/folio/pwa`.
+export {
+  FOLIO_PWA_UPDATE_CHECK_INTERVAL_MS,
+  folioPwaRegistrationState,
+  shouldCheckFolioPwaUpdate,
+} from "./core/pwa-update";
+export type {
+  FolioPwaRegistrationInput,
+  FolioPwaRegistrationState,
+} from "./core/pwa-update";
 export { normalizeFolioCollectionPath, selectFolioCollectionDocs, folioCollectionIndexes, assertNoFolioCollectionConflicts } from "./core/collection-index";
 export type { FolioCollectionIndex } from "./core/collection-index";
 export { resolveFolioHome } from "./core/home";

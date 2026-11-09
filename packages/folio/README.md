@@ -45,6 +45,147 @@ export default defineConfig({
 
 The plugin discovers Markdown, parses YAML Frontmatter, and exposes content through `virtual:folio/content`. It can also generate route-level HTML, canonical and social metadata, JSON-LD, `404.html`, `sitemap.xml`, and `robots.txt`.
 
+## Optional PWA integration
+
+Folio can make a consumer site installable and keep readers on the current
+deployment, without the consumer writing Service Worker registration, update
+event or cache-cleanup code. It is **explicitly opt-in**: `folio()` on its own
+still emits no manifest and no Service Worker.
+
+```ts
+import { defineConfig } from "vite";
+import { folio } from "@uichat-mira/folio/vite";
+import { folioPwa } from "@uichat-mira/folio/pwa";
+
+const config = {
+  title: "My docs",
+  description: "Documentation",
+  siteUrl: "https://example.com",
+};
+
+export default defineConfig({
+  base: "/my-docs/", // optional: the same config works at "/"
+  plugins: [
+    folio({ contentDir: "content", config, staticRoutes: true }),
+    folioPwa({
+      config,
+      icons: [
+        { src: "icon-192.png", sizes: "192x192" },
+        { src: "icon-512.png", sizes: "512x512" },
+        { src: "icon-maskable.png", sizes: "512x512", purpose: "maskable" },
+      ],
+      themeColor: "#cc785c",
+      backgroundColor: "#faf9f5",
+    }),
+  ],
+});
+```
+
+Icons are consumer-owned brand assets under `public/`; Folio never infers icon
+sizes from `config.logo` and fails the build when the manifest would not be
+installable. `start_url` and `scope` follow the Vite `base` automatically, so a
+root and a sub-path deployment need no separate configuration.
+
+`vite-plugin-pwa` and `workbox-window` are **optional peer dependencies**:
+install them only when you enable this integration.
+
+```bash
+npm install --save-dev vite-plugin-pwa workbox-window
+```
+
+### Update prompt
+
+Mount the default prompt once, anywhere in your app:
+
+```tsx
+import { FolioPwaUpdatePrompt } from "@uichat-mira/folio/pwa/react";
+
+export function App() {
+  return (
+    <>
+      <Site />
+      <FolioPwaUpdatePrompt />
+    </>
+  );
+}
+```
+
+The default is `updateMode: "prompt"`: a new deployment is prepared in the
+background, an accessible prompt (`role="status"`, keyboard reachable, 40px
+targets) appears, and the page reloads **only** after the reader confirms.
+"Later" dismisses the prompt for the current update; nothing is force-reloaded
+while an article is being read. Update checks run at app start and when the tab
+returns to the foreground, throttled to one minute
+(`FOLIO_PWA_UPDATE_CHECK_INTERVAL_MS`).
+
+For a custom UI, use the hook — it already wraps the official
+`virtual:pwa-register/react` client and the throttle:
+
+```tsx
+import { useFolioPwaUpdate } from "@uichat-mira/folio/pwa/react";
+
+function MyPrompt() {
+  const {
+    needRefresh,
+    confirmUpdate,
+    dismissUpdate,
+    checkForUpdate,
+    supported,
+    registrationState, // "unsupported" | "registering" | "registered" | "failed"
+  } = useFolioPwaUpdate({
+    checkIntervalMs: 60_000,
+    onRegisterError: (error) => console.warn("PWA registration failed", error),
+  });
+  if (!needRefresh) return null;
+  return (
+    <div role="status">
+      <span>A new version is available.</span>
+      <button onClick={() => void dismissUpdate()}>Later</button>
+      <button onClick={() => void confirmUpdate()}>Reload</button>
+    </div>
+  );
+}
+```
+
+`<FolioPwaUpdatePrompt render={...} />` replaces the default markup while keeping
+the same state machine. `updateMode: "auto"` is an explicit alternative for
+sites that accept an immediate reload; it must not be combined with prompt UI.
+
+`supported` tells you whether the browser has the Service Worker API at all, and
+`registrationState` distinguishes "not registered yet" from "registered" and
+"failed" — derived from the official client's callbacks, not from a second
+lifecycle implementation. Registration errors still reach `onRegisterError`, and
+the site keeps working without offline support.
+
+Icons are validated: they must be square 192 and 512 (plus any maskable
+variant), `src` must resolve to a file in the build output, and
+`manifest.icons` may not replace the dedicated `icons` option. Precache entries
+also stay content-free — `includeAssets` and `workbox.*` may add static assets,
+but an entry that resolves to a generated page fails the build.
+
+### What the integration does and does not do
+
+- **Multi-page safe.** No `navigateFallback`, so an unknown URL still reaches the
+  real `404.html` instead of silently rendering the home page.
+- **No HTML precache.** Only hashed JS/CSS and the brand assets you list are
+  precached. Article and document pages stay online, so a stale body cannot
+  outlive a publication.
+- **No implicit runtime caching.** No API, authenticated or cross-origin
+  responses are cached. `workbox.runtimeCaching` remains an explicit consumer
+  decision.
+- **Outdated precaches are cleaned** (`cleanupOutdatedCaches`) after activation.
+- **Content-only publications are detected.** Folio writes a deterministic
+  `folio-version.json` (a hash of every generated HTML page) and injects it into
+  the Workbox precache manifest, so editing only Markdown still produces a new
+  Service Worker and a visible update — the case a plain asset-hash setup misses.
+- **Precache entries are resolved, not pattern-matched.** A directory URL, an
+  `index` alias or a percent-encoded path that resolves to a generated page is
+  rejected on the emitted worker, including entries injected through
+  `workbox.manifestTransforms`. Static assets stay precacheable, and an
+  unreadable worker manifest fails the build instead of passing silently.
+- **Not implemented:** Web Push, offline article reading, background sync and
+  offline writes. `disable: true` builds the site without any PWA output.
+
 ## Home page customization
 
 The built-in home page has three supported levels. Without any configuration the
@@ -295,6 +436,8 @@ Consumer applications remain responsible for branding, page composition, custom 
 
 - `@uichat-mira/folio` — content model, React runtime, Markdown rendering, and configuration helpers
 - `@uichat-mira/folio/vite` — Markdown discovery, virtual manifests, and static output
+- `@uichat-mira/folio/pwa` — optional Vite PWA integration (`folioPwa()`, content version helper)
+- `@uichat-mira/folio/pwa/react` — optional update prompt and throttled update hook
 - `@uichat-mira/folio/styles.css` — whole-site default stylesheet (not an isolated embed stylesheet)
 
 ## Project status

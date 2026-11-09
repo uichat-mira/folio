@@ -37,7 +37,14 @@ export const defaultSourceRoot = join(packageRoot, "src");
 // A module must be classified explicitly: an unclassified source file fails the
 // gate instead of silently escaping it.
 export const CORE_ROOT_MODULES = ["types.ts"];
-export const BUILD_ROOT_MODULES = ["static.ts", "static-output.ts", "vite.ts"];
+export const BUILD_ROOT_MODULES = [
+  "static.ts",
+  "static-output.ts",
+  "vite.ts",
+  // FOL-039: the optional PWA integration is Build-layer tooling; the public
+  // `/pwa` entry re-exports it the same way `/vite` re-exports the adapter.
+  "pwa.ts",
+];
 export const UI_ROOT_MODULES = [
   "app.tsx",
   "docs-shell.tsx",
@@ -47,6 +54,8 @@ export const UI_ROOT_MODULES = [
   "markdown-react.tsx",
   "toc.tsx",
   "ui-types.ts",
+  // FOL-039: the optional PWA update prompt/hook is UI-facing (React + DOM).
+  "pwa-react.tsx",
 ];
 export const ENTRY_MODULES = ["index.ts"];
 
