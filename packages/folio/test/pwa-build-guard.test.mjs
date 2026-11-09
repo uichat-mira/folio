@@ -24,13 +24,10 @@ import { folioPwa } from "../dist/pwa.js";
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-// A real 1x1 PNG: the manifest validator resolves every icon against the build
-// output, so the fixture needs files that actually exist.
-const PNG = Buffer.from(
-  "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c489" +
-    "0000000d4944415478da63f8ffff3f0005fe02fea735d0d80000000049454e44ae426082",
-  "hex",
-);
+// Use the real 192px/512px PNG fixtures: the validator must inspect pixels,
+// not merely a file named after the desired dimensions.
+const PNG_192 = readFileSync(join(packageRoot, "scripts/fixtures/pwa-consumer/public/pwa-icon-192.png"));
+const PNG_512 = readFileSync(join(packageRoot, "scripts/fixtures/pwa-consumer/public/pwa-icon-512.png"));
 
 const config = {
   title: "PWA build guard",
@@ -58,8 +55,8 @@ function createFixture(root) {
     "---\ntitle: Hello\ndescription: A generated document page.\n---\n\nBody text.\n",
   );
   mkdirSync(join(root, "public"), { recursive: true });
-  writeFileSync(join(root, "public", "icon-192.png"), PNG);
-  writeFileSync(join(root, "public", "icon-512.png"), PNG);
+  writeFileSync(join(root, "public", "icon-192.png"), PNG_192);
+  writeFileSync(join(root, "public", "icon-512.png"), PNG_512);
   mkdirSync(join(root, "public", "brand"), { recursive: true });
   writeFileSync(join(root, "public", "brand", "font.woff2"), "woff2-fixture");
   writeFileSync(join(root, "public", "brand", "extra.json"), '{"injected":true}\n');
@@ -158,6 +155,69 @@ test("a transform that injects a generated page fails the build", () =>
         `the build accepted the injected page entry ${JSON.stringify(url)}`,
       );
     }
+  }));
+
+test("the precache guard inspects integrity-bearing entries, not just regex matches", () =>
+  withFixture(async (root) => {
+    // Workbox supports integrity as an optional third field. An ordinary asset
+    // must still build, but an HTML page carrying the extra field must not hide
+    // behind an earlier two-field match.
+    const asset = { integrity: "sha256-dGVzdA==", revision: "asset-revision", url: "brand/extra.json" };
+    await runBuild(root, "integrity-asset", {
+      pwaOptions: {
+        workbox: {
+          manifestTransforms: [
+            (entries) => ({ manifest: [...entries, asset], warnings: [] }),
+          ],
+        },
+      },
+    });
+    const worker = readFileSync(join(root, "dist-integrity-asset", "sw.js"), "utf8");
+    assert.match(worker, /integrity:/, "the emitted worker must retain the third field");
+
+    const page = { integrity: "sha256-dGVzdA==", revision: "page-revision", url: "docs/hello/index.html" };
+    await assert.rejects(
+      () => runBuild(root, "integrity-page", {
+        pwaOptions: {
+          workbox: {
+            manifestTransforms: [
+              (entries) => ({ manifest: [...entries, asset, page], warnings: [] }),
+            ],
+          },
+        },
+      }),
+      /precaches generated pages|unreadable entries/,
+      "an integrity-bearing page bypassed the generated-worker guard",
+    );
+  }));
+
+test("emitted PNG artwork must match the declared icon dimensions", () =>
+  withFixture(async (root) => {
+    // Copy real 192x192 pixels to the purported 512px path.
+    writeFileSync(join(root, "public", "icon-512.png"), PNG_192);
+    await assert.rejects(
+      () => runBuild(root, "wrong-icon-dimensions"),
+      /actual PNG dimensions 192x192.*declares "512x512"/,
+    );
+  }));
+
+test("SVG viewports must be square", () =>
+  withFixture(async (root) => {
+    const svgIcons = [
+      { src: "icon-192.svg", sizes: "192x192", type: "image/svg+xml" },
+      { src: "icon-512.svg", sizes: "512x512", type: "image/svg+xml" },
+    ];
+    writeFileSync(join(root, "public", "icon-192.svg"),
+      '<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192"></svg>');
+    writeFileSync(join(root, "public", "icon-512.svg"),
+      '<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"></svg>');
+    await runBuild(root, "valid-svg", { pwaOptions: { icons: svgIcons } });
+    writeFileSync(join(root, "public", "icon-512.svg"),
+      '<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 256"></svg>');
+    await assert.rejects(
+      () => runBuild(root, "non-square-svg", { pwaOptions: { icons: svgIcons } }),
+      /non-square SVG viewBox/,
+    );
   }));
 
 test("a transform cannot strip the content-version entry", () =>
