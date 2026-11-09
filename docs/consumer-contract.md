@@ -69,6 +69,28 @@ promise for them; it does not change the plain `folio()` contract.
   prefix over every generated HTML page and is precached as a revisioned entry,
   so a Markdown-only edit produces a new Service Worker. No full-site HTML
   precache is involved.
+- **The precache boundary is enforced on the emitted worker.** Every entry that
+  can reach the Workbox manifest (`includeAssets`, `workbox.
+  additionalManifestEntries`, `workbox.manifestTransforms`) is normalised
+  (percent-decoding, query/fragment removal, dot segments, base resolution) and
+  resolved against the real build output. An entry that names a generated page —
+  `index.html`, `docs/hello/`, `docs/index`, `docs%2Fhello%2F`, `...?v=2` — fails
+  the build, and so does an entry that does not name a real artifact. Static
+  assets (`js`, `css`, `json`, `webmanifest`, images, fonts, `wasm`, `pdf`, …)
+  remain precacheable, so narrow consumer customization is preserved. If the
+  emitted manifest cannot be read, the build fails closed instead of assuming
+  there is nothing to check.
+- **Icons are validated twice.** The `icons` option must contain square 192 and
+  512 icons; `manifest.icons` may not override it, and the emitted
+  `manifest.webmanifest` is re-read to prove it still lists exactly the
+  configured icons with their sizes, types and purposes. A configured `src` must
+  resolve to a file in the build output, so an icon URL that is correct at `/`
+  but dead under a sub-path base fails the build.
+- **Registration state is observable.** `useFolioPwaUpdate()` reports
+  `supported`, `registrationState` (`"unsupported" | "registering" |
+  "registered" | "failed"`) and `registered`, derived from the upstream client
+  callbacks. Folio does not add a second Service Worker state machine, and
+  `onRegisterError` still fires on failure.
 - **Prompt-first updates.** `updateMode: "prompt"` is the default: the waiting
   worker only activates after the reader confirms. `"auto"` is a separate
   explicit mode and must not be paired with the prompt UI.

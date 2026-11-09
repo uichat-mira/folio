@@ -24,6 +24,11 @@ const siteUrl = process.env.FOLIO_PWA_SITE_URL;
 // `virtual:folio/content`. That keeps Markdown out of the JS bundle, which is the
 // only way a content-only edit can leave every asset byte-identical.
 const staticOnly = process.env.FOLIO_PWA_STATIC_ONLY === "on";
+// FOLIO_PWA_INJECT_PAGE=<url> adds one precache entry through Workbox'
+// `manifestTransforms`, the escape hatch Folio cannot inspect at config time.
+// The check uses it to prove the emitted-manifest guard really rejects a page
+// entry from a *published* tarball, not just from the workspace build.
+const injectPage = process.env.FOLIO_PWA_INJECT_PAGE;
 
 const config = {
   title: "Folio PWA consumer fixture",
@@ -65,6 +70,18 @@ export default defineConfig({
       updateMode,
       disable: disabled,
       ...(versionFile ? { versionFile } : {}),
+      ...(injectPage
+        ? {
+            workbox: {
+              manifestTransforms: [
+                (entries: { url: string; revision: string | null }[]) => ({
+                  manifest: [...entries, { url: injectPage, revision: "injected" }],
+                  warnings: [],
+                }),
+              ],
+            },
+          }
+        : {}),
     }),
   ],
   build: { outDir, emptyOutDir: true },

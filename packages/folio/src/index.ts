@@ -33,7 +33,12 @@ export { searchFolioDocs } from "./core/search";
 // a second one. The integration itself stays behind `@uichat-mira/folio/pwa`.
 export {
   FOLIO_PWA_UPDATE_CHECK_INTERVAL_MS,
+  folioPwaRegistrationState,
   shouldCheckFolioPwaUpdate,
+} from "./core/pwa-update";
+export type {
+  FolioPwaRegistrationInput,
+  FolioPwaRegistrationState,
 } from "./core/pwa-update";
 export { normalizeFolioCollectionPath, selectFolioCollectionDocs, folioCollectionIndexes, assertNoFolioCollectionConflicts } from "./core/collection-index";
 export type { FolioCollectionIndex } from "./core/collection-index";

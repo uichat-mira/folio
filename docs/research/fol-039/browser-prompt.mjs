@@ -130,8 +130,13 @@ function npm(args, cwd, { allowFailure = false, stage = "setup" } = {}) {
   return { status: result.status, output };
 }
 
-function runNode(args, cwd, { allowFailure = false, stage = "command" } = {}) {
-  const result = spawnSync(process.execPath, args, { cwd, encoding: "utf8", timeout: 600_000 });
+function runNode(args, cwd, { allowFailure = false, stage = "command", env = {} } = {}) {
+  const result = spawnSync(process.execPath, args, {
+    cwd,
+    encoding: "utf8",
+    timeout: 600_000,
+    env: { ...process.env, ...env },
+  });
   const output = `${result.stdout ?? ""}${result.stderr ?? ""}`;
   if (result.status !== 0 && !allowFailure) {
     fail(stage, `node ${args.join(" ")} failed with exit code ${result.status}\n${output.trim().slice(-4000)}`);
@@ -235,6 +240,7 @@ const MIME = {
 const NO_CACHE_NAMES = new Set(["sw.js", "manifest.webmanifest", "folio-version.json"]);
 
 function startServer(state) {
+  const base = state.base ?? "/";
   const server = createServer((request, response) => {
     const url = new URL(request.url, "http://127.0.0.1");
     let pathname;
@@ -245,12 +251,34 @@ function startServer(state) {
       response.end("bad request");
       return;
     }
+    // A subpath deployment is served exactly like GitHub Pages serves a project
+    // site: the whole generated output lives under the Vite base, so the prefix
+    // is stripped before the file lookup and every URL outside it is a 404.
+    if (base !== "/") {
+      if (pathname === base.slice(0, -1)) {
+        response.writeHead(301, { location: base });
+        response.end();
+        return;
+      }
+      if (!pathname.startsWith(base)) {
+        const notFoundPage = join(state.root, "404.html");
+        if (existsSync(notFoundPage)) {
+          response.writeHead(404, { "content-type": MIME[".html"], "cache-control": "no-cache" });
+          response.end(readFileSync(notFoundPage));
+          return;
+        }
+        response.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+        response.end("not found");
+        return;
+      }
+      pathname = pathname.slice(base.length - 1);
+    }
     // Deployment-level fault injection: the harness switches this on for the
     // registration-failure check so `/sw.js` answers 404. A blocked fetch is a
     // page-context decision that does not reliably apply to a service-worker
     // script fetch, while a 404 is answered by the same server the browser is
     // already talking to, so the failure mode is deterministic.
-    if (state.failWorkerScript && pathname === "/sw.js") {
+    if (state.failWorkerScript && pathname === `${base === "/" ? "/" : base}sw.js`) {
       response.writeHead(404, { "content-type": "text/plain; charset=utf-8", "cache-control": "no-cache" });
       response.end("service worker unavailable (fault injection)");
       return;
@@ -314,6 +342,9 @@ const NAV_STATE = String.raw`(() => {
     bootId: window.__folioBootId ?? null,
     mounted: window.__folioPwaMounted === true,
     registered: window.__folioPwaRegistered === true,
+    registrationState: window.__folioPwaRegistrationState ?? null,
+    hookSupported: window.__folioPwaSupported ?? null,
+    hookRegistered: window.__folioPwaRegisteredFlag ?? null,
     registerError: window.__folioPwaRegisterError ?? null,
     markerText: marker ? (marker.textContent || '').replace(/\s+/g, ' ').trim() : null,
     articleHtmlPresent: Boolean(document.querySelector('#root .folio-markdown')),
@@ -547,6 +578,12 @@ async function main() {
     const markers = {
       v1: `FOL039-RUN-${runId}-V1-content`,
       v2: `FOL039-RUN-${runId}-V2-content`,
+      // Separate markers per extra phase: a stale page from another deployment
+      // must never satisfy a content assertion.
+      subV1: `FOL039-RUN-${runId}-SUB-V1-content`,
+      subV2: `FOL039-RUN-${runId}-SUB-V2-content`,
+      autoV1: `FOL039-RUN-${runId}-AUTO-V1-content`,
+      autoV2: `FOL039-RUN-${runId}-AUTO-V2-content`,
     };
     const contentPath = join(consumerDir, "content", "docs", "hello.md");
     const contentTemplate = readFileSync(contentPath, "utf8");
@@ -555,17 +592,22 @@ async function main() {
     }
     const writeContent = (marker) =>
       writeFileSync(contentPath, contentTemplate.replaceAll("__FOL039_MARKER__", marker), "utf8");
-    const buildSite = (outDir, stage) => {
+    const buildSite = (outDir, stage, { base = "/", updateMode = "prompt" } = {}) => {
       writeFileSync(
         join(consumerDir, "vite.config.ts"),
         readFileSync(join(fixtureDir, "vite.config.ts"), "utf8"),
         "utf8",
       );
       const start = Date.now();
-      const result = runNode([join(consumerDir, "node_modules", "vite", "bin", "vite.js"), "build", "--outDir", outDir], consumerDir, {
-        allowFailure: true,
-        stage,
-      });
+      const result = runNode(
+        [join(consumerDir, "node_modules", "vite", "bin", "vite.js"), "build", "--outDir", outDir],
+        consumerDir,
+        {
+          allowFailure: true,
+          stage,
+          env: { FOLIO039_BASE: base, FOLIO039_UPDATE_MODE: updateMode },
+        },
+      );
       const ms = Date.now() - start;
       if (result.status !== 0) {
         fail(stage, `vite build failed with exit code ${result.status}\n${result.output.trim().slice(-4000)}`);
@@ -797,9 +839,12 @@ async function main() {
       return result.result.value;
     };
 
-    const openTarget = async (label) => {
+    const openTarget = async (label, { browserContextId } = {}) => {
       currentPage = label;
-      const { targetId } = await cdp.send("Target.createTarget", { url: "about:blank" });
+      const { targetId } = await cdp.send("Target.createTarget", {
+        url: "about:blank",
+        ...(browserContextId ? { browserContextId } : {}),
+      });
       const { sessionId } = await cdp.send("Target.attachToTarget", { targetId, flatten: true });
       await cdp.send("Page.enable", {}, sessionId);
       await cdp.send("Runtime.enable", {}, sessionId);
@@ -883,11 +928,22 @@ async function main() {
     if (page1.promptPresent) fail("browser-v1-load", "the update prompt is visible before any new deployment exists");
     const cacheV1 = await evaluate(page, CACHE_STATE);
     acceptance.content.cacheV1 = cacheV1;
+    // P3: the public hook must report the registration it just performed. The
+    // value comes from consumer code reading `registrationState`, not from the
+    // harness probing navigator.serviceWorker on its own.
+    const registrationStateV1 = await poll(
+      page,
+      "window.__folioPwaRegistrationState === 'registered' ? { state: window.__folioPwaRegistrationState, supported: window.__folioPwaSupported, registered: window.__folioPwaRegisteredFlag } : null",
+      { label: "useFolioPwaUpdate() to report registrationState 'registered'", timeout: REGISTER_TIMEOUT_MS },
+    );
+    acceptance.registration = { afterV1Load: registrationStateV1 };
     check(
       "v1-load-registers-worker",
       "PASS",
       `deployment v1 rendered ${JSON.stringify(markers.v1)} at ${pageUrl}; worker ${swState.scriptURL} active ` +
-        `(state=${swState.state}, scope=${swState.scope}); no prompt before a new deployment; precache ` +
+        `(state=${swState.state}, scope=${swState.scope}); hook registrationState=` +
+        `${JSON.stringify(registrationStateV1.state)} (supported=${registrationStateV1.supported}, ` +
+        `registered=${registrationStateV1.registered}); no prompt before a new deployment; precache ` +
         `${JSON.stringify(cacheV1.precacheKeys)} holds folio-version.json ${cacheV1.folioVersion?.version}`,
       { ms: Date.now() - t1 },
     );
@@ -1057,6 +1113,300 @@ async function main() {
       { ms: Date.now() - t6 },
     );
 
+    // --- 6b. Subpath deployment in a real browser. --------------------------
+    // The root deployment above proves the prompt contract. A project site is
+    // served from a non-root base, which changes the manifest scope, the worker
+    // scope, the worker script URL and every precache URL at once, so it is
+    // verified in the browser instead of inferred from build artifacts.
+    const tSub = Date.now();
+    const SUBPATH = "/folio-smoke/";
+    const subV1Dir = join(consumerDir, "dist-sub-v1");
+    const subV2Dir = join(consumerDir, "dist-sub-v2");
+    writeContent(markers.subV1);
+    acceptance.timings.buildSubV1Ms = buildSite("dist-sub-v1", "build-sub-v1", {
+      base: SUBPATH,
+    });
+    const subHtmlV1 = readFileSync(join(subV1Dir, "docs", "hello", "index.html"), "utf8");
+    writeContent(markers.subV2);
+    acceptance.timings.buildSubV2Ms = buildSite("dist-sub-v2", "build-sub-v2", {
+      base: SUBPATH,
+    });
+    const subHtmlV2 = readFileSync(join(subV2Dir, "docs", "hello", "index.html"), "utf8");
+    if (!subHtmlV1.includes(markers.subV1) || !subHtmlV2.includes(markers.subV2)) {
+      fail(
+        "browser-subpath",
+        "the subpath builds do not carry their own content markers; a stale page could satisfy the assertions",
+      );
+    }
+    const subManifest = JSON.parse(readFileSync(join(subV1Dir, "manifest.webmanifest"), "utf8"));
+    if (subManifest.scope !== SUBPATH || subManifest.start_url !== SUBPATH) {
+      fail(
+        "browser-subpath",
+        `the subpath manifest advertises scope=${JSON.stringify(subManifest.scope)} ` +
+          `start_url=${JSON.stringify(subManifest.start_url)}, expected ${JSON.stringify(SUBPATH)}`,
+      );
+    }
+    const subState = {
+      root: subV1Dir,
+      deployment: "sub-v1",
+      failWorkerScript: false,
+      base: SUBPATH,
+    };
+    const subServer = await startServer(subState);
+    const subOrigin = `http://127.0.0.1:${subServer.address().port}`;
+    const subPageUrl = `${subOrigin}${SUBPATH}docs/hello/`;
+    acceptance.subpathDeployment = {
+      serverOrigin: subOrigin,
+      base: SUBPATH,
+      pageUrl: subPageUrl,
+      manifestScope: subManifest.scope,
+      startUrl: subManifest.start_url,
+      v1: JSON.parse(readFileSync(join(subV1Dir, "folio-version.json"), "utf8")).version,
+      v2: JSON.parse(readFileSync(join(subV2Dir, "folio-version.json"), "utf8")).version,
+    };
+    let subServerClosed = false;
+    const closeSubServer = async () => {
+      if (subServerClosed) return;
+      subServerClosed = true;
+      await new Promise((resolvePromise) => subServer.close(resolvePromise));
+    };
+
+    const subContext = await cdp.send("Target.createBrowserContext", { disposeOnDetach: true });
+    const subPage = await openTarget("subpath-v1-load", {
+      browserContextId: subContext.browserContextId,
+    });
+    await goto(subPage, subPageUrl);
+    await poll(subPage, "window.__folioPwaMounted === true && typeof window.__folioPwaCheck === 'function'", {
+      label: "the subpath fixture to mount",
+      timeout: REGISTER_TIMEOUT_MS,
+    });
+    const subSw = await poll(
+      subPage,
+      `(async () => {
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (!registration || !registration.active) return null;
+        return {
+          scope: registration.scope,
+          scriptURL: registration.active.scriptURL,
+          state: registration.active.state,
+        };
+      })()`,
+      { label: "an active subpath service-worker registration", timeout: REGISTER_TIMEOUT_MS },
+    );
+    const subPage1 = await evaluate(subPage, NAV_STATE);
+    const subManifestHref = await evaluate(
+      subPage,
+      "document.querySelector('link[rel=manifest]')?.getAttribute('href') ?? null",
+    );
+    const subWorkerUrl = `${subOrigin}${SUBPATH}sw.js`;
+    const subScopeUrl = `${subOrigin}${SUBPATH}`;
+    const subpathV1Ok =
+      subPage1.markerText.includes(markers.subV1) &&
+      subSw.scriptURL === subWorkerUrl &&
+      subSw.scope === subScopeUrl &&
+      subManifestHref === `${SUBPATH}manifest.webmanifest` &&
+      !subPage1.promptPresent;
+    check(
+      "subpath-v1-registers-worker",
+      subpathV1Ok ? "PASS" : "FAIL",
+      `deployment ${subPageUrl} rendered the v1 Markdown; worker script ${subSw.scriptURL} ` +
+        `(scope ${subSw.scope}) equals ${subWorkerUrl}/${subScopeUrl}; manifest link ` +
+        `${JSON.stringify(subManifestHref)}; no prompt before a new deployment`,
+      { ms: Date.now() - tSub, subSw, subManifestHref },
+    );
+
+    // One controlled navigation, exactly like the root phase: prompt mode never
+    // sets `clientsClaim`, so the first visit is not controlled by the worker.
+    await goto(subPage, subPageUrl);
+    await poll(subPage, "window.__folioPwaMounted === true", {
+      label: "the controlled subpath page to mount",
+    });
+    const subBaseline = await evaluate(subPage, NAV_STATE);
+    const subBaselineSw = await evaluate(subPage, SW_STATE);
+    const subBaselineBootId = subBaseline.bootId;
+
+    subState.root = subV2Dir;
+    subState.deployment = "sub-v2";
+    const subServedV2 = await (await fetch(subPageUrl)).text();
+    if (!subServedV2.includes(markers.subV2)) {
+      fail("browser-subpath", "the subpath server is not serving v2 after the root switch");
+    }
+    await evaluate(subPage, "window.__folioPwaCheck()");
+    const subPrompt = await poll(
+      subPage,
+      `(() => {
+        const el = document.querySelector('[data-folio-pwa-update-prompt]');
+        if (!el) return null;
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        const visible = cs.display !== 'none' && cs.visibility !== 'hidden' && Number(cs.opacity) !== 0 &&
+          r.width > 1 && r.height > 1;
+        return visible ? { text: (el.textContent || '').replace(/\\s+/g, ' ').trim() } : null;
+      })()`,
+      { label: "the subpath update prompt", timeout: PROMPT_TIMEOUT_MS },
+    );
+    const subDuringPrompt = await evaluate(subPage, NAV_STATE);
+    const subNoReload =
+      subDuringPrompt.navigationEntries === 1 &&
+      subDuringPrompt.bootId === subBaselineBootId &&
+      subBaselineSw.controller === subWorkerUrl &&
+      subDuringPrompt.markerText.includes(markers.subV1);
+    check(
+      "subpath-update-prompt-without-reload",
+      subNoReload ? "PASS" : "FAIL",
+      `subpath prompt ${JSON.stringify(subPrompt.text)} appeared; page still controlled by ` +
+        `${subBaselineSw.controller}; navigationEntries=${subDuringPrompt.navigationEntries}, ` +
+        `bootId unchanged=${subDuringPrompt.bootId === subBaselineBootId}, ` +
+        `content marker still v1=${subDuringPrompt.markerText.includes(markers.subV1)}`,
+      { ms: Date.now() - tSub, state: subDuringPrompt },
+    );
+
+    await click(subPage, "[data-folio-pwa-update-confirm]");
+    const subReloaded = await poll(
+      subPage,
+      `(() => (window.__folioPwaMounted === true && window.__folioBootId !== ${JSON.stringify(subBaselineBootId)}
+        ? { bootId: window.__folioBootId, url: location.pathname } : null))()`,
+      { label: "the confirmed subpath update to reload", timeout: RELOAD_TIMEOUT_MS, interval: 250 },
+    );
+    const subAfterReload = await evaluate(subPage, NAV_STATE);
+    const subCacheAfter = await evaluate(subPage, CACHE_STATE);
+    const subConfirmedOk =
+      subReloaded.url === `${SUBPATH}docs/hello/` &&
+      subAfterReload.markerText.includes(markers.subV2) &&
+      subCacheAfter.precacheKeys.length === 1 &&
+      subCacheAfter.folioVersion?.version === acceptance.subpathDeployment.v2;
+    check(
+      "subpath-confirm-reloads-onto-new-content",
+      subConfirmedOk ? "PASS" : "FAIL",
+      `confirmed update reloaded ${subReloaded.url} (bootId ${subBaselineBootId} -> ${subReloaded.bootId}) ` +
+        `and shows the v2 Markdown; precache caches=${subCacheAfter.precacheKeys.length}, ` +
+        `cached content version=${JSON.stringify(subCacheAfter.folioVersion?.version)} vs v2 ` +
+        `${acceptance.subpathDeployment.v2}`,
+      { ms: Date.now() - tSub, subReloaded, subAfterReload },
+    );
+    currentPage = "subpath-done";
+    await closeSubServer();
+
+    // --- 6c. Explicit auto-update mode in a real browser. -------------------
+    // `updateMode: "auto"` is a public option, so it is verified the same way:
+    // a new deployment must take over and the page must end up on the new
+    // content without any confirmation UI, and without leaving the old precache.
+    const tAuto = Date.now();
+    const autoV1Dir = join(consumerDir, "dist-auto-v1");
+    const autoV2Dir = join(consumerDir, "dist-auto-v2");
+    writeContent(markers.autoV1);
+    acceptance.timings.buildAutoV1Ms = buildSite("dist-auto-v1", "build-auto-v1", {
+      updateMode: "auto",
+    });
+    writeContent(markers.autoV2);
+    acceptance.timings.buildAutoV2Ms = buildSite("dist-auto-v2", "build-auto-v2", {
+      updateMode: "auto",
+    });
+    const autoVersionV1 = JSON.parse(readFileSync(join(autoV1Dir, "folio-version.json"), "utf8"));
+    const autoVersionV2 = JSON.parse(readFileSync(join(autoV2Dir, "folio-version.json"), "utf8"));
+    if (!readFileSync(join(autoV1Dir, "docs", "hello", "index.html"), "utf8").includes(markers.autoV1)) {
+      fail("browser-auto", "the auto v1 build does not carry the auto-v1 marker");
+    }
+    if (!readFileSync(join(autoV2Dir, "docs", "hello", "index.html"), "utf8").includes(markers.autoV2)) {
+      fail("browser-auto", "the auto v2 build does not carry the auto-v2 marker");
+    }
+    const autoState = { root: autoV1Dir, deployment: "auto-v1", failWorkerScript: false, base: "/" };
+    const autoServer = await startServer(autoState);
+    const autoOrigin = `http://127.0.0.1:${autoServer.address().port}`;
+    const autoPageUrl = `${autoOrigin}/docs/hello/`;
+    let autoServerClosed = false;
+    const closeAutoServer = async () => {
+      if (autoServerClosed) return;
+      autoServerClosed = true;
+      await new Promise((resolvePromise) => autoServer.close(resolvePromise));
+    };
+    const autoContext = await cdp.send("Target.createBrowserContext", { disposeOnDetach: true });
+    const autoPage = await openTarget("auto-v1-load", {
+      browserContextId: autoContext.browserContextId,
+    });
+    await goto(autoPage, autoPageUrl);
+    await poll(autoPage, "window.__folioPwaMounted === true && typeof window.__folioPwaCheck === 'function'", {
+      label: "the auto-mode fixture to mount",
+      timeout: REGISTER_TIMEOUT_MS,
+    });
+    const autoSw = await poll(
+      autoPage,
+      `(async () => {
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (!registration || !registration.active) return null;
+        return { scope: registration.scope, scriptURL: registration.active.scriptURL, state: registration.active.state };
+      })()`,
+      { label: "an active auto-mode worker", timeout: REGISTER_TIMEOUT_MS },
+    );
+    // `skipWaiting` + `clientsClaim` mean the very first visit is already
+    // controlled, which is the observable difference from prompt mode.
+    const autoControlled = await evaluate(
+      autoPage,
+      "(async () => Boolean(navigator.serviceWorker.controller) && Boolean((await navigator.serviceWorker.getRegistration())?.active))()",
+    );
+    const autoPage1 = await evaluate(autoPage, NAV_STATE);
+    const autoBootId = autoPage1.bootId;
+    check(
+      "auto-v1-controlled-first-visit",
+      autoSw.scriptURL === `${autoOrigin}/sw.js` && autoControlled ? "PASS" : "FAIL",
+      `auto mode registered ${autoSw.scriptURL} and the first visit is already controlled=${autoControlled} ` +
+        `(prompt mode is not); content marker ${JSON.stringify(markers.autoV1)}`,
+      { ms: Date.now() - tAuto, autoSw, autoControlled },
+    );
+
+    autoState.root = autoV2Dir;
+    autoState.deployment = "auto-v2";
+    const autoServedV2 = await (await fetch(autoPageUrl)).text();
+    if (!autoServedV2.includes(markers.autoV2)) {
+      fail("browser-auto", "the auto-mode server is not serving v2 after the root switch");
+    }
+    await evaluate(autoPage, "window.__folioPwaCheck()");
+    // Auto mode reloads on activation; the poll waits for the page to come back
+    // with a new boot id and the new Markdown, with no prompt at any point.
+    const autoAfter = await poll(
+      autoPage,
+      `(() => {
+        if (window.__folioPwaMounted !== true) return null;
+        const marker = document.querySelector('[data-content-marker]');
+        const text = marker ? (marker.textContent || '').replace(/\\s+/g, ' ').trim() : '';
+        if (!text.includes(${JSON.stringify(markers.autoV2)})) return null;
+        return {
+          bootId: window.__folioBootId ?? null,
+          text,
+          promptPresent: Boolean(document.querySelector('[data-folio-pwa-update-prompt]')),
+        };
+      })()`,
+      { label: "the auto-mode page to reload onto the new deployment", timeout: PROMPT_TIMEOUT_MS, interval: 250 },
+    );
+    const autoCacheAfter = await evaluate(autoPage, CACHE_STATE);
+    const autoSwAfter = await evaluate(autoPage, SW_STATE);
+    const autoOk =
+      autoAfter.bootId !== autoBootId &&
+      autoAfter.promptPresent === false &&
+      autoCacheAfter.precacheKeys.length === 1 &&
+      autoCacheAfter.folioVersion?.version === autoVersionV2.version;
+    acceptance.autoDeployment = {
+      origin: autoOrigin,
+      pageUrl: autoPageUrl,
+      v1: autoVersionV1.version,
+      v2: autoVersionV2.version,
+      bootIdBefore: autoBootId,
+      bootIdAfter: autoAfter.bootId,
+      promptPresent: autoAfter.promptPresent,
+      cacheKeys: autoCacheAfter.keys,
+    };
+    check(
+      "auto-update-activates-without-prompt",
+      autoOk ? "PASS" : "FAIL",
+      `auto mode reloaded onto the v2 Markdown without confirmation (bootId ${autoBootId} -> ${autoAfter.bootId}); ` +
+        `no prompt element present=${autoAfter.promptPresent === false}; worker now ${autoSwAfter.activeScriptUrl}; ` +
+        `precache caches=${autoCacheAfter.precacheKeys.length}, cached version ` +
+        `${JSON.stringify(autoCacheAfter.folioVersion?.version)} equals v2 ${autoVersionV2.version}`,
+      { ms: Date.now() - tAuto, autoAfter, autoCacheAfter },
+    );
+    currentPage = "auto-done";
+    await closeAutoServer();
+
     // --- 7. Registration failure is observable and non-fatal. --------------
     // A fresh browser context is used on purpose: the main context still has a
     // page controlled by the current worker, and per the service-worker
@@ -1102,6 +1452,12 @@ async function main() {
           `(a silent hang instead of an observable failure): ${error.message}`,
       );
     }
+    const failureRegistration = await poll(
+      failurePage,
+      "window.__folioPwaRegistrationState === 'failed' ? window.__folioPwaRegistrationState : null",
+      { label: "useFolioPwaUpdate() to report registrationState 'failed'", timeout: REGISTER_ERROR_TIMEOUT_MS },
+    );
+    acceptance.registration = { ...acceptance.registration, afterFailure: failureRegistration };
     const failureState = await evaluate(failurePage, NAV_STATE);
     const failureSw = await evaluate(failurePage, SW_STATE);
     const failureOk =
@@ -1113,7 +1469,8 @@ async function main() {
       "registration-failure-observable",
       failureOk ? "PASS" : "FAIL",
       `/sw.js answered 404 for a fresh browser context; consumer reported onRegisterError ` +
-        `${JSON.stringify(String(registerError).slice(0, 160))}; registration present=${failureSw.present}; ` +
+        `${JSON.stringify(String(registerError).slice(0, 160))} and registrationState ` +
+        `${JSON.stringify(failureRegistration)}; registration present=${failureSw.present}; ` +
         `article still rendered=${Boolean(failureState.markerText && failureState.markerText.includes(markers.v2))}`,
       { ms: Date.now() - t7, registerError: String(registerError) },
     );

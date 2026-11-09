@@ -38,3 +38,46 @@ export function shouldCheckFolioPwaUpdate(
   if (!Number.isFinite(lastCheckedAt)) return true;
   return now - lastCheckedAt >= intervalMs;
 }
+
+/**
+ * Observability of the Service Worker registration itself.
+ *
+ * `virtual:pwa-register/react` reports only "a worker was registered" and "that
+ * failed"; it says nothing when the browser has no Service Worker support at
+ * all, and a consumer cannot tell "not registered yet" from "never will be".
+ * Folio derives those four states from the upstream callbacks instead of
+ * running a second Service Worker state machine: the browser and the upstream
+ * client still own installation, activation and control.
+ */
+export type FolioPwaRegistrationState =
+  /** The browser has no `serviceWorker` API; nothing will ever register. */
+  | "unsupported"
+  /** Supported, but no registration result has arrived yet. */
+  | "registering"
+  /** A worker registration is active for this page. */
+  | "registered"
+  /** Registration failed; the site keeps working without offline support. */
+  | "failed";
+
+export type FolioPwaRegistrationInput = {
+  supported: boolean;
+  registered?: boolean;
+  failed?: boolean;
+};
+
+/**
+ * Collapse the registration callbacks into one observable state.
+ *
+ * A failure wins over a later success and vice versa only for the event that
+ * actually happened last, which is why the caller tracks a single event instead
+ * of both booleans; `supported: false` always wins, because a registration that
+ * cannot happen must never be reported as pending forever.
+ */
+export function folioPwaRegistrationState(
+  input: FolioPwaRegistrationInput,
+): FolioPwaRegistrationState {
+  if (!input.supported) return "unsupported";
+  if (input.failed) return "failed";
+  if (input.registered) return "registered";
+  return "registering";
+}

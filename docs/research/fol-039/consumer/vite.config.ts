@@ -19,7 +19,15 @@ const config = {
   footer: "FOL-039 · PWA prompt acceptance",
 };
 
+// The harness reuses this one fixture for three deployments and rewrites the
+// file before every build, so the deployment base and the update mode come from
+// the environment instead of a second config file. The values are read at build
+// time, exactly like a consumer's own `base`/`updateMode` decision.
+const base = process.env.FOLIO039_BASE ?? "/";
+const updateMode = process.env.FOLIO039_UPDATE_MODE === "auto" ? "auto" : "prompt";
+
 export default defineConfig({
+  base,
   plugins: [
     react(),
     folio({
@@ -29,12 +37,15 @@ export default defineConfig({
     }),
     folioPwa({
       config,
-      // The default is "prompt"; it is stated explicitly so a future default
-      // change cannot silently turn this acceptance into an auto-update test.
-      updateMode: "prompt",
+      // Stated explicitly so a future default change cannot silently turn this
+      // acceptance into the other mode.
+      updateMode,
+      // Base-relative on purpose: the manifest is served from the deployment
+      // base, so a `/icons/...` URL would 404 on a subpath deployment. Folio
+      // fails the build for such an icon instead of advertising a dead file.
       icons: [
-        { src: "/icons/icon-192.svg", sizes: "192x192", type: "image/svg+xml" },
-        { src: "/icons/icon-512.svg", sizes: "512x512", type: "image/svg+xml" },
+        { src: "icons/icon-192.svg", sizes: "192x192", type: "image/svg+xml" },
+        { src: "icons/icon-512.svg", sizes: "512x512", type: "image/svg+xml" },
       ],
       includeAssets: ["icons/icon-192.svg", "icons/icon-512.svg"],
     }),

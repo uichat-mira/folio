@@ -125,7 +125,14 @@ For a custom UI, use the hook — it already wraps the official
 import { useFolioPwaUpdate } from "@uichat-mira/folio/pwa/react";
 
 function MyPrompt() {
-  const { needRefresh, confirmUpdate, dismissUpdate, checkForUpdate } = useFolioPwaUpdate({
+  const {
+    needRefresh,
+    confirmUpdate,
+    dismissUpdate,
+    checkForUpdate,
+    supported,
+    registrationState, // "unsupported" | "registering" | "registered" | "failed"
+  } = useFolioPwaUpdate({
     checkIntervalMs: 60_000,
     onRegisterError: (error) => console.warn("PWA registration failed", error),
   });
@@ -144,6 +151,18 @@ function MyPrompt() {
 the same state machine. `updateMode: "auto"` is an explicit alternative for
 sites that accept an immediate reload; it must not be combined with prompt UI.
 
+`supported` tells you whether the browser has the Service Worker API at all, and
+`registrationState` distinguishes "not registered yet" from "registered" and
+"failed" — derived from the official client's callbacks, not from a second
+lifecycle implementation. Registration errors still reach `onRegisterError`, and
+the site keeps working without offline support.
+
+Icons are validated: they must be square 192 and 512 (plus any maskable
+variant), `src` must resolve to a file in the build output, and
+`manifest.icons` may not replace the dedicated `icons` option. Precache entries
+also stay content-free — `includeAssets` and `workbox.*` may add static assets,
+but an entry that resolves to a generated page fails the build.
+
 ### What the integration does and does not do
 
 - **Multi-page safe.** No `navigateFallback`, so an unknown URL still reaches the
@@ -159,6 +178,11 @@ sites that accept an immediate reload; it must not be combined with prompt UI.
   `folio-version.json` (a hash of every generated HTML page) and injects it into
   the Workbox precache manifest, so editing only Markdown still produces a new
   Service Worker and a visible update — the case a plain asset-hash setup misses.
+- **Precache entries are resolved, not pattern-matched.** A directory URL, an
+  `index` alias or a percent-encoded path that resolves to a generated page is
+  rejected on the emitted worker, including entries injected through
+  `workbox.manifestTransforms`. Static assets stay precacheable, and an
+  unreadable worker manifest fails the build instead of passing silently.
 - **Not implemented:** Web Push, offline article reading, background sync and
   offline writes. `disable: true` builds the site without any PWA output.
 

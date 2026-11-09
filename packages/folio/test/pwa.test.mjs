@@ -25,7 +25,11 @@ import {
   computeFolioContentVersion,
   folioPwa,
 } from "../dist/pwa.js";
-import { FOLIO_PWA_UPDATE_CHECK_INTERVAL_MS, shouldCheckFolioPwaUpdate } from "../dist/index.js";
+import {
+  FOLIO_PWA_UPDATE_CHECK_INTERVAL_MS,
+  folioPwaRegistrationState,
+  shouldCheckFolioPwaUpdate,
+} from "../dist/index.js";
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -365,4 +369,188 @@ test("the React entry ships the prompt and the hook without global styles", () =
   assert.match(source, /data-folio-pwa-update-confirm/, "the confirm control must stay addressable");
   assert.match(source, /data-folio-pwa-update-dismiss/, "the dismiss control must stay addressable");
   assert.match(source, /role="status"/, "the prompt must be announced to assistive technology");
+});
+
+// --- precache safety boundary (P1) -------------------------------------------
+//
+// The Workbox precache manifest is a list of URLs the browser will cache and
+// serve offline. `additionalManifestEntries` / `includeAssets` are the consumer
+// escape hatches, and Workbox treats an entry as opaque: `blogs/first-post/` is
+// as valid as `assets/app-1.js`, but it is a generated article page. These tests
+// pin the rejection at config time; `test/pwa-build-guard.test.mjs` proves the
+// same boundary on the *emitted* worker, where a transform can still inject an
+// entry Folio never saw.
+
+test("precache entries that name a generated page are rejected", () => {
+  const config = { title: "PWA guard", description: "PWA guard site" };
+  const iconList = [
+    { src: "icon-192.png", sizes: "192x192" },
+    { src: "icon-512.png", sizes: "512x512" },
+  ];
+  const rejects = (entry, pattern) =>
+    assert.throws(
+      () =>
+        folioPwa({
+          config,
+          icons: iconList,
+          workbox: { additionalManifestEntries: [entry] },
+        }),
+      pattern,
+      `additionalManifestEntries ${JSON.stringify(entry)} must be rejected`,
+    );
+
+  // A page, however it is spelled.
+  rejects("index.html", /names a generated page/);
+  rejects("docs/hello/index.html", /names a generated page/);
+  rejects("docs/hello/", /names a generated page/);
+  rejects("blogs/first-post/", /names a generated page/);
+  rejects("docs/index", /names a generated page/);
+  rejects("404", /names a generated page/);
+  // Percent-encoded, query-decorated and dot-segment aliases of the same page.
+  rejects("docs%2Fhello%2F", /names a generated page/);
+  rejects("docs/hello/index.html?cache=1", /names a generated page/);
+  rejects("docs/hello/index.html#top", /names a generated page/);
+  rejects("./assets/../docs/hello/index.html", /names a generated page/);
+  rejects("docs/./hello/", /names a generated page/);
+  // Escapes and cross-origin entries are never precacheable.
+  rejects("../outside.js", /escapes the build output|outside the deployment scope/);
+  rejects("https://cdn.example.com/app.js", /cross-origin/);
+  rejects("//cdn.example.com/app.js", /cross-origin/);
+
+  // `includeAssets` is validated the same way, with its own message.
+  // `includeAssets` is glob-validated first, so a literal `.html` asset is
+  // rejected there; the alias forms below never reach that rule and must still
+  // be refused as pages.
+  assert.throws(
+    () => folioPwa({ config, icons: iconList, includeAssets: ["docs/hello/index.html"] }),
+    /includeAssets may not precache HTML/,
+  );
+  assert.throws(
+    () => folioPwa({ config, icons: iconList, includeAssets: ["docs/hello/"] }),
+    /includeAssets contains .*names a generated page/,
+  );
+  assert.throws(
+    () => folioPwa({ config, icons: iconList, includeAssets: ["**/*.html"] }),
+    /may not precache HTML/,
+  );
+});
+
+test("legitimate precache customization still works", () => {
+  const config = { title: "PWA guard", description: "PWA guard site" };
+  const plugins = folioPwa({
+    config,
+    icons: [
+      { src: "icon-192.png", sizes: "192x192" },
+      { src: "icon-512.png", sizes: "512x512" },
+    ],
+    includeAssets: ["fonts/inter.woff2", "img/hero.png", "favicon.svg"],
+    workbox: {
+      additionalManifestEntries: [
+        "data/releases.json",
+        { url: "files/guide.pdf", revision: "abc123" },
+      ],
+      runtimeCaching: [
+        {
+          urlPattern: /^https:\/\/fonts\.example\.com\//,
+          handler: "StaleWhileRevalidate",
+        },
+      ],
+    },
+  });
+  assert.ok(Array.isArray(plugins) && plugins.length > 0);
+  assert.ok(
+    plugins.some((plugin) => plugin.name === "folio:pwa"),
+    "the guard must not disable the integration itself",
+  );
+});
+
+test("the emitted manifest icon list is validated, not just the input", () => {
+  const config = { title: "PWA icons", description: "PWA icon site" };
+  // Non-square: 192x256 satisfies "both sides big enough" but is not installable.
+  assert.throws(
+    () =>
+      folioPwa({
+        config,
+        icons: [
+          { src: "icon-192.png", sizes: "192x256" },
+          { src: "icon-512.png", sizes: "512x512" },
+        ],
+      }),
+    /non-square sizes .*192x256/,
+  );
+  // A square 256 icon covers 192 but not 512: still not installable.
+  assert.throws(
+    () => folioPwa({ config, icons: [{ src: "icon-256.png", sizes: "256x256" }] }),
+    /at least 512x512/,
+  );
+  // Only a 192, no 512.
+  assert.throws(
+    () => folioPwa({ config, icons: [{ src: "icon-192.png", sizes: "192x192" }] }),
+    /at least 512x512/,
+  );
+  // The generic manifest override may not replace the validated icon set.
+  assert.throws(
+    () =>
+      folioPwa({
+        config,
+        icons: [
+          { src: "icon-192.png", sizes: "192x192" },
+          { src: "icon-512.png", sizes: "512x512" },
+        ],
+        manifest: { icons: [{ src: "sneaky.png", sizes: "1x1" }] },
+      }),
+    /manifest\.icons must not be overridden/,
+  );
+  // Valid square + maskable + SVG continues to work, and maskable survives.
+  const plugins = folioPwa({
+    config,
+    icons: [
+      { src: "icon-192.png", sizes: "192x192" },
+      { src: "icon-512.svg", sizes: "512x512", type: "image/svg+xml" },
+      { src: "icon-maskable.png", sizes: "512x512", purpose: "maskable" },
+    ],
+  });
+  assert.ok(Array.isArray(plugins) && plugins.length > 0);
+});
+
+// --- registration observability (P3) ----------------------------------------
+
+test("the registration state collapses into exactly four observable values", () => {
+  assert.equal(folioPwaRegistrationState({ supported: false }), "unsupported");
+  // A browser without the API never reports "registering": nothing will happen.
+  assert.equal(
+    folioPwaRegistrationState({ supported: false, registered: true }),
+    "unsupported",
+  );
+  assert.equal(folioPwaRegistrationState({ supported: true }), "registering");
+  assert.equal(folioPwaRegistrationState({ supported: true, registered: true }), "registered");
+  assert.equal(folioPwaRegistrationState({ supported: true, failed: true }), "failed");
+  assert.equal(
+    folioPwaRegistrationState({ supported: true, registered: true, failed: true }),
+    "failed",
+    "a failure must win over a stale success so the consumer sees the real outcome",
+  );
+});
+
+test("the hook exposes the registration state without changing the existing API", () => {
+  const source = readFileSync(join(packageRoot, "src/pwa-react.tsx"), "utf8");
+  // The lifecycle stays upstream: no second `register()`/`skipWaiting` machine.
+  assert.ok(
+    !/navigator\.serviceWorker\.register\(/.test(source),
+    "the hook must not register a worker itself; the official client owns that",
+  );
+  assert.ok(
+    !/addEventListener\(\s*["'](?:waiting|installed|activated|controlling)["']/.test(source),
+    "the hook must not subscribe to worker lifecycle events; that is the upstream client's state machine",
+  );
+  for (const name of ["supported", "registrationState", "registered"]) {
+    assert.ok(source.includes(name), `the hook does not expose ${name}`);
+  }
+  for (const existing of ["needRefresh", "confirmUpdate", "dismissUpdate", "checkForUpdate", "offlineReady"]) {
+    assert.ok(source.includes(existing), `the existing API lost ${existing}`);
+  }
+  const types = readFileSync(join(packageRoot, "dist/pwa-react.d.ts"), "utf8");
+  for (const name of ["supported", "registrationState", "registered", "FolioPwaRegistrationState"]) {
+    assert.ok(types.includes(name), `dist/pwa-react.d.ts is missing ${name}`);
+  }
 });

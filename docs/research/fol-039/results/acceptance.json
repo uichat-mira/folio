@@ -1,10 +1,36 @@
 {
   "meta": {
-    "generatedAt": "2026-11-09T02:35:16.430Z",
+    "generatedAt": "2026-11-09T05:48:22.877Z",
     "harness": "docs/research/fol-039/browser-prompt.mjs",
-    "branch": "HEAD",
-    "commit": "8a4078088aa744cc1ab9ef1aea50479003eeaab8",
+    "branch": "feat/tomz-1109",
+    "commit": "780e6b3869d9a3646cdba32372302ec54ba5abfa",
     "dirtyWorkingTree": true,
+    "dirtyPackagedSources": [
+      "M apps/site/content/reference/components/page-nav/index.md",
+      "M apps/site/content/reference/components/share-button/index.md",
+      "M apps/site/content/reference/overview.md",
+      "M apps/site/folio.config.ts",
+      "M apps/site/src/home.css",
+      "M apps/site/src/legacy-claude-visual.css",
+      "M apps/site/src/site.css",
+      "M apps/site/src/static-routes.ts",
+      "M packages/folio/README.md",
+      "M packages/folio/scripts/checks/pwa-consumer.mjs",
+      "M packages/folio/scripts/fixtures/pwa-consumer/vite.config.ts",
+      "M packages/folio/src/app.tsx",
+      "M packages/folio/src/build/pwa.ts",
+      "M packages/folio/src/core/pwa-update.ts",
+      "M packages/folio/src/index.ts",
+      "M packages/folio/src/pwa-react.tsx",
+      "M packages/folio/src/static.ts",
+      "M packages/folio/src/styles/content.css",
+      "M packages/folio/styles/contract.mjs",
+      "M packages/folio/test/docs-shell.test.mjs",
+      "M packages/folio/test/page-nav.test.mjs",
+      "M packages/folio/test/pwa.test.mjs",
+      "?? packages/folio/test/pwa-build-guard.test.mjs"
+    ],
+    "packagedSourcesClean": false,
     "node": "v22.23.2",
     "platform": "darwin arm64",
     "chromePath": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
@@ -16,23 +42,21 @@
       "pack": "cd packages/folio && npm pack --ignore-scripts --pack-destination <tmp>",
       "install": "npm install --no-audit --no-fund <tarball> vite@^7 @vitejs/plugin-react@^5 react@^19 react-dom@^19 react-router-dom@^7 @types/react@^19 @types/react-dom@^19 @types/node@^24 vite-plugin-pwa@^2 workbox-window@^7.4.1",
       "buildSite": "node node_modules/vite/bin/vite.js build --outDir <dir>"
-    },
-    "runFromCleanCheckout": true,
-    "cleanCheckoutNote": "Captured in a detached git worktree at commit 8a4078088aa744cc1ab9ef1aea50479003eeaab8 with no uncommitted changes under packages/apps/schemas/scripts, so this tarball is reproducible from the commit alone (only the harness results file changed during the run)."
+    }
   },
   "packageEvidence": {
-    "tarball": "/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio-fol039-Ax98wu/tarball/uichat-mira-folio-0.1.1.tgz",
+    "tarball": "/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio-fol039-o8HGDK/tarball/uichat-mira-folio-0.1.1.tgz",
     "fileName": "uichat-mira-folio-0.1.1.tgz",
-    "sha256": "e92ba9fe8682f2ec8fdafb6ad6cd1020775e4e5ede98334ce6603c5c02224201",
-    "bytes": 89273,
-    "sourceCommit": "8a4078088aa744cc1ab9ef1aea50479003eeaab8",
-    "sourceBranch": "HEAD",
+    "sha256": "528135b9bc6b6e9f5d09ed921ba8d6d0835e78786b3e9e8da6994029408ba154",
+    "bytes": 92683,
+    "sourceCommit": "780e6b3869d9a3646cdba32372302ec54ba5abfa",
+    "sourceBranch": "feat/tomz-1109",
     "installed": {
       "version": "0.1.1",
       "symlink": false,
       "symlinkTarget": null,
-      "pwaJsSha256": "66c7ff254aab1371f239df58d1a58b5dcb0389255dbf47c4a597c938ac6c663d",
-      "pwaReactJsSha256": "4586de5f91e082e99aff5884e005b73bcc55ec3493533a7eebf21ae125746c82",
+      "pwaJsSha256": "1cf63191564cb6c11ad3949784010b4ab1e79c34979998e04cc20a7808197d5f",
+      "pwaReactJsSha256": "512e82e1a6d91d54dc3f7575e1f843ff9ad5d0fe09485fdbf3e01b57f68e980a",
       "dependencies": {
         "vite": "7.3.7",
         "@vitejs/plugin-react": "5.2.0",
@@ -47,65 +71,65 @@
   "builds": {
     "v1": {
       "outDir": "dist-v1",
-      "contentVersion": "3e630995ce4d405fcac853002a6e5bde",
+      "contentVersion": "c0f5684588a24a06db9e61dc0416696d",
       "pages": 3,
       "htmlFiles": [
         "404.html",
         "docs/hello/index.html",
         "index.html"
       ],
-      "ms": 2698
+      "ms": 2326
     },
     "v2": {
       "outDir": "dist-v2",
-      "contentVersion": "31f84db9472cdaf79f58358da1a5eae4",
+      "contentVersion": "4c29b298e13a2c94b1b1f5ba639192c2",
       "pages": 3,
       "htmlFiles": [
         "404.html",
         "docs/hello/index.html",
         "index.html"
       ],
-      "ms": 1531
+      "ms": 1245
     }
   },
   "content": {
-    "markerV1": "FOL039-RUN-6e501399-V1-content",
-    "markerV2": "FOL039-RUN-6e501399-V2-content",
-    "versionV1": "3e630995ce4d405fcac853002a6e5bde",
-    "versionV2": "31f84db9472cdaf79f58358da1a5eae4",
+    "markerV1": "FOL039-RUN-3062cd1e-V1-content",
+    "markerV2": "FOL039-RUN-3062cd1e-V2-content",
+    "versionV1": "c0f5684588a24a06db9e61dc0416696d",
+    "versionV2": "4c29b298e13a2c94b1b1f5ba639192c2",
     "pagesV1": 3,
     "pagesV2": 3,
     "cacheV1": {
       "keys": [
-        "workbox-precache-v2-http://127.0.0.1:60415/"
+        "workbox-precache-v2-http://127.0.0.1:61515/"
       ],
       "precacheKeys": [
-        "workbox-precache-v2-http://127.0.0.1:60415/"
+        "workbox-precache-v2-http://127.0.0.1:61515/"
       ],
       "entries": [
         {
-          "key": "workbox-precache-v2-http://127.0.0.1:60415/",
+          "key": "workbox-precache-v2-http://127.0.0.1:61515/",
           "count": 7,
           "urls": [
-            "http://127.0.0.1:60415/assets/workbox-window.prod.es5-BBnX5xw4.js",
-            "http://127.0.0.1:60415/assets/index-CpCM5C3p.js",
-            "http://127.0.0.1:60415/assets/index-BtATUew5.css",
-            "http://127.0.0.1:60415/icons/icon-192.svg?__WB_REVISION__=1d04161c5ce2ea5797352888047e0a90",
-            "http://127.0.0.1:60415/icons/icon-512.svg?__WB_REVISION__=2f87376306a17f90b63ce15f0546be2e",
-            "http://127.0.0.1:60415/manifest.webmanifest?__WB_REVISION__=ca566107fb9e4792b69befcf61feb717",
-            "http://127.0.0.1:60415/folio-version.json?__WB_REVISION__=3e630995ce4d405fcac853002a6e5bde"
+            "http://127.0.0.1:61515/assets/workbox-window.prod.es5-BBnX5xw4.js",
+            "http://127.0.0.1:61515/assets/index-xBHMEB6e.css",
+            "http://127.0.0.1:61515/assets/index-DC-oyzCt.js",
+            "http://127.0.0.1:61515/icons/icon-192.svg?__WB_REVISION__=1d04161c5ce2ea5797352888047e0a90",
+            "http://127.0.0.1:61515/icons/icon-512.svg?__WB_REVISION__=2f87376306a17f90b63ce15f0546be2e",
+            "http://127.0.0.1:61515/manifest.webmanifest?__WB_REVISION__=32e31a7a8fb1714a395e38bdb6a32b8d",
+            "http://127.0.0.1:61515/folio-version.json?__WB_REVISION__=c0f5684588a24a06db9e61dc0416696d"
           ]
         }
       ],
       "folioVersion": {
-        "version": "3e630995ce4d405fcac853002a6e5bde",
+        "version": "c0f5684588a24a06db9e61dc0416696d",
         "pages": 3
       },
-      "folioVersionRevision": "3e630995ce4d405fcac853002a6e5bde",
+      "folioVersionRevision": "c0f5684588a24a06db9e61dc0416696d",
       "folioVersionEntryCount": 1
     },
     "prompt": {
-      "text": "\u672c\u7ad9\u6709\u65b0\u7248\u672c\u53ef\u7528\u3002\u7a0d\u540e\u5237\u65b0\u5e76\u66f4\u65b0",
+      "text": "本站有新版本可用。稍后刷新并更新",
       "rect": {
         "x": 930,
         "y": 818,
@@ -117,43 +141,43 @@
     },
     "cacheAfter": {
       "keys": [
-        "workbox-precache-v2-http://127.0.0.1:60415/"
+        "workbox-precache-v2-http://127.0.0.1:61515/"
       ],
       "precacheKeys": [
-        "workbox-precache-v2-http://127.0.0.1:60415/"
+        "workbox-precache-v2-http://127.0.0.1:61515/"
       ],
       "entries": [
         {
-          "key": "workbox-precache-v2-http://127.0.0.1:60415/",
+          "key": "workbox-precache-v2-http://127.0.0.1:61515/",
           "count": 7,
           "urls": [
-            "http://127.0.0.1:60415/assets/workbox-window.prod.es5-BBnX5xw4.js",
-            "http://127.0.0.1:60415/assets/index-CpCM5C3p.js",
-            "http://127.0.0.1:60415/assets/index-BtATUew5.css",
-            "http://127.0.0.1:60415/icons/icon-192.svg?__WB_REVISION__=1d04161c5ce2ea5797352888047e0a90",
-            "http://127.0.0.1:60415/icons/icon-512.svg?__WB_REVISION__=2f87376306a17f90b63ce15f0546be2e",
-            "http://127.0.0.1:60415/manifest.webmanifest?__WB_REVISION__=ca566107fb9e4792b69befcf61feb717",
-            "http://127.0.0.1:60415/folio-version.json?__WB_REVISION__=31f84db9472cdaf79f58358da1a5eae4"
+            "http://127.0.0.1:61515/assets/workbox-window.prod.es5-BBnX5xw4.js",
+            "http://127.0.0.1:61515/assets/index-xBHMEB6e.css",
+            "http://127.0.0.1:61515/assets/index-DC-oyzCt.js",
+            "http://127.0.0.1:61515/icons/icon-192.svg?__WB_REVISION__=1d04161c5ce2ea5797352888047e0a90",
+            "http://127.0.0.1:61515/icons/icon-512.svg?__WB_REVISION__=2f87376306a17f90b63ce15f0546be2e",
+            "http://127.0.0.1:61515/manifest.webmanifest?__WB_REVISION__=32e31a7a8fb1714a395e38bdb6a32b8d",
+            "http://127.0.0.1:61515/folio-version.json?__WB_REVISION__=4c29b298e13a2c94b1b1f5ba639192c2"
           ]
         }
       ],
       "folioVersion": {
-        "version": "31f84db9472cdaf79f58358da1a5eae4",
+        "version": "4c29b298e13a2c94b1b1f5ba639192c2",
         "pages": 3
       },
-      "folioVersionRevision": "31f84db9472cdaf79f58358da1a5eae4",
+      "folioVersionRevision": "4c29b298e13a2c94b1b1f5ba639192c2",
       "folioVersionEntryCount": 1
     }
   },
   "assets": {
     "v1": [
       {
-        "name": "index-BtATUew5.css",
-        "sha256": "622b6ae710f7799d646a7000cee9e1f46cb83839ac75bbc7fb0458f1214be6b8"
+        "name": "index-DC-oyzCt.js",
+        "sha256": "2a64c40ed31ca28b4f658da6525e89360ca86124fd4263ffd2e9d896e80be363"
       },
       {
-        "name": "index-CpCM5C3p.js",
-        "sha256": "c9b60999dd87be527b8f015e02068568b33e3938d29b2ddd4c868f123eec27a1"
+        "name": "index-xBHMEB6e.css",
+        "sha256": "ed5a88d0d203554790d7776fbb7aae4d34e8a631e33c581a0c14bbf1989ae2de"
       },
       {
         "name": "workbox-window.prod.es5-BBnX5xw4.js",
@@ -162,31 +186,31 @@
     ],
     "v2": [
       {
-        "name": "index-BtATUew5.css",
-        "sha256": "622b6ae710f7799d646a7000cee9e1f46cb83839ac75bbc7fb0458f1214be6b8"
+        "name": "index-DC-oyzCt.js",
+        "sha256": "2a64c40ed31ca28b4f658da6525e89360ca86124fd4263ffd2e9d896e80be363"
       },
       {
-        "name": "index-CpCM5C3p.js",
-        "sha256": "c9b60999dd87be527b8f015e02068568b33e3938d29b2ddd4c868f123eec27a1"
+        "name": "index-xBHMEB6e.css",
+        "sha256": "ed5a88d0d203554790d7776fbb7aae4d34e8a631e33c581a0c14bbf1989ae2de"
       },
       {
         "name": "workbox-window.prod.es5-BBnX5xw4.js",
         "sha256": "cadd21be4a88598a4dec91a26a025df0a5790ff6baec54a884e401c3f5c95557"
       }
     ],
-    "swV1": "3d409f3d0717e6201f91242082c01bb70b6fe6f254c679701799f6ddd579311c",
-    "swV2": "e7e6c3971278e68ebdccf4025355607f6d3dca5f79b43f1233d71738bb4de64d",
+    "swV1": "e148e549e20d7473545e9f447f1d58095f3845913dda1ca32c6761f05e0fded8",
+    "swV2": "2ae77bab43691236111cfaf2f1855b2cff76d0dcd9854381b39e0e584e6e32fd",
     "workboxV1": "workbox-d1213528.js",
     "workboxV2": "workbox-d1213528.js",
     "assetNames": [
-      "index-BtATUew5.css",
-      "index-CpCM5C3p.js",
+      "index-DC-oyzCt.js",
+      "index-xBHMEB6e.css",
       "workbox-window.prod.es5-BBnX5xw4.js"
     ],
     "precacheV1": [
       "assets/workbox-window.prod.es5-BBnX5xw4.js",
-      "assets/index-CpCM5C3p.js",
-      "assets/index-BtATUew5.css",
+      "assets/index-xBHMEB6e.css",
+      "assets/index-DC-oyzCt.js",
       "icons/icon-192.svg",
       "icons/icon-512.svg",
       "manifest.webmanifest",
@@ -194,8 +218,8 @@
     ],
     "precacheV2": [
       "assets/workbox-window.prod.es5-BBnX5xw4.js",
-      "assets/index-CpCM5C3p.js",
-      "assets/index-BtATUew5.css",
+      "assets/index-xBHMEB6e.css",
+      "assets/index-DC-oyzCt.js",
       "icons/icon-192.svg",
       "icons/icon-512.svg",
       "manifest.webmanifest",
@@ -203,78 +227,82 @@
     ]
   },
   "deployment": {
-    "origin": "http://127.0.0.1:60415",
-    "pageUrl": "http://127.0.0.1:60415/docs/hello/",
-    "v1": "3e630995ce4d405fcac853002a6e5bde",
-    "v2": "31f84db9472cdaf79f58358da1a5eae4",
+    "origin": "http://127.0.0.1:61515",
+    "pageUrl": "http://127.0.0.1:61515/docs/hello/",
+    "v1": "c0f5684588a24a06db9e61dc0416696d",
+    "v2": "4c29b298e13a2c94b1b1f5ba639192c2",
     "engine": "Chrome/156.0.8078.81",
-    "profileDir": "/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio039-chrome-GFhHzu"
+    "profileDir": "/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio039-chrome-P0VT0D"
   },
   "timings": {
-    "packageBuildMs": 3182,
-    "installMs": 55726,
-    "buildV1Ms": 2698,
-    "buildV2Ms": 1531,
-    "totalMs": 70604
+    "packageBuildMs": 2918,
+    "installMs": 7605,
+    "buildV1Ms": 2326,
+    "buildV2Ms": 1245,
+    "buildSubV1Ms": 1646,
+    "buildSubV2Ms": 1258,
+    "buildAutoV1Ms": 1632,
+    "buildAutoV2Ms": 1288,
+    "totalMs": 32663
   },
   "checks": [
     {
       "id": "package-packed-from-source",
       "status": "PASS",
-      "detail": "npm run build && npm pack produced uichat-mira-folio-0.1.1.tgz (89273 bytes, sha256 e92ba9fe8682f2ec8fdafb6ad6cd1020775e4e5ede98334ce6603c5c02224201) from 8a4078088aa744cc1ab9ef1aea50479003eeaab8",
-      "ms": 3182
+      "detail": "npm run build && npm pack produced uichat-mira-folio-0.1.1.tgz (92683 bytes, sha256 528135b9bc6b6e9f5d09ed921ba8d6d0835e78786b3e9e8da6994029408ba154) from 780e6b3869d9a3646cdba32372302ec54ba5abfa",
+      "ms": 2918
     },
     {
       "id": "install-independent-tarball",
       "status": "PASS",
-      "detail": "@uichat-mira/folio@0.1.1 installed into /var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio-fol039-Ax98wu/consumer from the tarball (symlink=false); vite 7.3.7, vite-plugin-pwa 2.0.0, workbox-window 7.4.1, react 19.3.1",
-      "ms": 55726
+      "detail": "@uichat-mira/folio@0.1.1 installed into /var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio-fol039-o8HGDK/consumer from the tarball (symlink=false); vite 7.3.7, vite-plugin-pwa 2.0.0, workbox-window 7.4.1, react 19.3.1",
+      "ms": 7605
     },
     {
       "id": "build-v1-static-html",
       "status": "PASS",
-      "detail": "staticRoutes:true wrote 3 real HTML pages; docs/hello/index.html carries FOL039-RUN-6e501399-V1-content; folio-version.json version=3e630995ce4d405fcac853002a6e5bde pages=3",
-      "ms": 2698
+      "detail": "staticRoutes:true wrote 3 real HTML pages; docs/hello/index.html carries FOL039-RUN-3062cd1e-V1-content; folio-version.json version=c0f5684588a24a06db9e61dc0416696d pages=3",
+      "ms": 2326
     },
     {
       "id": "build-v2-static-html",
       "status": "PASS",
-      "detail": "second build wrote 3 HTML pages; docs/hello/index.html carries FOL039-RUN-6e501399-V2-content; folio-version.json version=31f84db9472cdaf79f58358da1a5eae4 pages=3",
-      "ms": 1531
+      "detail": "second build wrote 3 HTML pages; docs/hello/index.html carries FOL039-RUN-3062cd1e-V2-content; folio-version.json version=4c29b298e13a2c94b1b1f5ba639192c2 pages=3",
+      "ms": 1245
     },
     {
       "id": "content-only-condition",
       "status": "PASS",
-      "detail": "assets byte-identical across builds (3 files: index-BtATUew5.css, index-CpCM5C3p.js, workbox-window.prod.es5-BBnX5xw4.js); folio-version.json 3e630995ce4d405fcac853002a6e5bde -> 31f84db9472cdaf79f58358da1a5eae4, pages 3 -> 3"
+      "detail": "assets byte-identical across builds (3 files: index-DC-oyzCt.js, index-xBHMEB6e.css, workbox-window.prod.es5-BBnX5xw4.js); folio-version.json c0f5684588a24a06db9e61dc0416696d -> 4c29b298e13a2c94b1b1f5ba639192c2, pages 3 -> 3"
     },
     {
       "id": "worker-changed-by-content-version",
       "status": "PASS",
-      "detail": "sw.js sha256 3d409f3d0717 -> e7e6c3971278; v2 precaches 7 entries (assets/workbox-window.prod.es5-BBnX5xw4.js, assets/index-CpCM5C3p.js, assets/index-BtATUew5.css, icons/icon-192.svg, icons/icon-512.svg, manifest.webmanifest, folio-version.json) including folio-version.json, no HTML precached=true"
+      "detail": "sw.js sha256 e148e549e20d -> 2ae77bab4369; v2 precaches 7 entries (assets/workbox-window.prod.es5-BBnX5xw4.js, assets/index-xBHMEB6e.css, assets/index-DC-oyzCt.js, icons/icon-192.svg, icons/icon-512.svg, manifest.webmanifest, folio-version.json) including folio-version.json, no HTML precached=true"
     },
     {
       "id": "serve-v1-multipage",
       "status": "PASS",
-      "detail": "http://127.0.0.1:60415/docs/hello/ served the generated static page (4269 bytes); /docs/not-published/ -> 404; sw.js, manifest.webmanifest, folio-version.json and HTML are served no-cache"
+      "detail": "http://127.0.0.1:61515/docs/hello/ served the generated static page (4269 bytes); /docs/not-published/ -> 404; sw.js, manifest.webmanifest, folio-version.json and HTML are served no-cache"
     },
     {
       "id": "v1-load-registers-worker",
       "status": "PASS",
-      "detail": "deployment v1 rendered \"FOL039-RUN-6e501399-V1-content\" at http://127.0.0.1:60415/docs/hello/; worker http://127.0.0.1:60415/sw.js active (state=activated, scope=http://127.0.0.1:60415/); no prompt before a new deployment; precache [\"workbox-precache-v2-http://127.0.0.1:60415/\"] holds folio-version.json 3e630995ce4d405fcac853002a6e5bde",
-      "ms": 711
+      "detail": "deployment v1 rendered \"FOL039-RUN-3062cd1e-V1-content\" at http://127.0.0.1:61515/docs/hello/; worker http://127.0.0.1:61515/sw.js active (state=activated, scope=http://127.0.0.1:61515/); hook registrationState=\"registered\" (supported=true, registered=true); no prompt before a new deployment; precache [\"workbox-precache-v2-http://127.0.0.1:61515/\"] holds folio-version.json c0f5684588a24a06db9e61dc0416696d",
+      "ms": 817
     },
     {
       "id": "v1-controlled-baseline",
       "status": "PASS",
-      "detail": "a second navigation of deployment v1 is controlled by http://127.0.0.1:60415/sw.js; bootId=1a431d27-a5b2-4a94-91dc-2358b3e2dc9f, navigationEntries=1, content marker still \"FOL039-RUN-6e501399-V1-content\"",
-      "ms": 452
+      "detail": "a second navigation of deployment v1 is controlled by http://127.0.0.1:61515/sw.js; bootId=8c337113-fb10-420b-a14f-c3851358f2d9, navigationEntries=1, content marker still \"FOL039-RUN-3062cd1e-V1-content\"",
+      "ms": 431
     },
     {
       "id": "v2-content-only-update-detected",
       "status": "PASS",
-      "detail": "prompt \"\u672c\u7ad9\u6709\u65b0\u7248\u672c\u53ef\u7528\u3002\u7a0d\u540e\u5237\u65b0\u5e76\u66f4\u65b0\" appeared 1051ms after the v2 root was switched on and window.__folioPwaCheck() ran; waiting worker=true, confirm/dismiss buttons=true/true",
-      "ms": 1051,
-      "promptText": "\u672c\u7ad9\u6709\u65b0\u7248\u672c\u53ef\u7528\u3002\u7a0d\u540e\u5237\u65b0\u5e76\u66f4\u65b0",
+      "detail": "prompt \"本站有新版本可用。稍后刷新并更新\" appeared 942ms after the v2 root was switched on and window.__folioPwaCheck() ran; waiting worker=true, confirm/dismiss buttons=true/true",
+      "ms": 942,
+      "promptText": "本站有新版本可用。稍后刷新并更新",
       "promptRect": {
         "x": 930,
         "y": 818,
@@ -285,22 +313,25 @@
     {
       "id": "no-reload-while-prompt-visible",
       "status": "PASS",
-      "detail": "prompt visible=true, navigationEntries=1 (type navigate), bootId 1a431d27-a5b2-4a94-91dc-2358b3e2dc9f -> 1a431d27-a5b2-4a94-91dc-2358b3e2dc9f, timeOrigin unchanged=true, content marker still v1=true",
+      "detail": "prompt visible=true, navigationEntries=1 (type navigate), bootId 8c337113-fb10-420b-a14f-c3851358f2d9 -> 8c337113-fb10-420b-a14f-c3851358f2d9, timeOrigin unchanged=true, content marker still v1=true",
       "ms": 1,
       "state": {
         "url": "/docs/hello/",
         "navigationEntries": 1,
         "navigationType": "navigate",
-        "timeOrigin": 1794191783143.9,
-        "bootId": "1a431d27-a5b2-4a94-91dc-2358b3e2dc9f",
+        "timeOrigin": 1794203320894.7,
+        "bootId": "8c337113-fb10-420b-a14f-c3851358f2d9",
         "mounted": true,
         "registered": true,
+        "registrationState": "registered",
+        "hookSupported": true,
+        "hookRegistered": true,
         "registerError": null,
-        "markerText": "\u672c\u6587\u6863\u7531 FOL-039 \u7684\u72ec\u7acb\u6d88\u8d39\u8005 fixture \u751f\u6210\u3002\u6bcf\u6b21\u8fd0\u884c\u90fd\u4f1a\u5199\u5165\u4e00\u4e2a\u552f\u4e00\u6807\u8bb0\uff1a \u5185\u5bb9\u6807\u8bb0\uff1aFOL039-RUN-6e501399-V1-content \u5185\u5bb9-only \u53d1\u5e03# \u7b2c\u4e8c\u6b21\u6784\u5efa\u53ea\u4fee\u6539\u8fd9\u6bb5 Markdown \u7684\u6587\u672c\uff08\u5305\u62ec\u4e0a\u9762\u7684\u6807\u8bb0\uff09\uff0c\u4e0d\u4fee\u6539\u4efb\u4f55 JS/CSS \u8d44\u6e90\uff0c \u7528\u6765\u8bc1\u660e\u5185\u5bb9\u7248\u672c\u53f7\u4f1a\u968f\u9759\u6001 HTML \u53d8\u5316\uff0c\u800c\u8d44\u6e90\u6587\u4ef6\u540d\u4fdd\u6301\u4e0d\u53d8\u3002",
+        "markerText": "本文档由 FOL-039 的独立消费者 fixture 生成。每次运行都会写入一个唯一标记： 内容标记：FOL039-RUN-3062cd1e-V1-content 内容-only 发布# 第二次构建只修改这段 Markdown 的文本（包括上面的标记），不修改任何 JS/CSS 资源， 用来证明内容版本号会随静态 HTML 变化，而资源文件名保持不变。",
         "articleHtmlPresent": true,
         "promptPresent": true,
         "promptVisible": true,
-        "promptText": "\u672c\u7ad9\u6709\u65b0\u7248\u672c\u53ef\u7528\u3002\u7a0d\u540e\u5237\u65b0\u5e76\u66f4\u65b0",
+        "promptText": "本站有新版本可用。稍后刷新并更新",
         "confirmPresent": true,
         "dismissPresent": true,
         "controlled": true,
@@ -310,18 +341,21 @@
     {
       "id": "dismiss-keeps-page",
       "status": "PASS",
-      "detail": "clicked dismiss \"\u7a0d\u540e\"; prompt removed=true, navigationEntries=1, bootId unchanged=true, content marker still v1=true",
-      "ms": 2,
+      "detail": "clicked dismiss \"稍后\"; prompt removed=true, navigationEntries=1, bootId unchanged=true, content marker still v1=true",
+      "ms": 3,
       "state": {
         "url": "/docs/hello/",
         "navigationEntries": 1,
         "navigationType": "navigate",
-        "timeOrigin": 1794191783143.9,
-        "bootId": "1a431d27-a5b2-4a94-91dc-2358b3e2dc9f",
+        "timeOrigin": 1794203320894.7,
+        "bootId": "8c337113-fb10-420b-a14f-c3851358f2d9",
         "mounted": true,
         "registered": true,
+        "registrationState": "registered",
+        "hookSupported": true,
+        "hookRegistered": true,
         "registerError": null,
-        "markerText": "\u672c\u6587\u6863\u7531 FOL-039 \u7684\u72ec\u7acb\u6d88\u8d39\u8005 fixture \u751f\u6210\u3002\u6bcf\u6b21\u8fd0\u884c\u90fd\u4f1a\u5199\u5165\u4e00\u4e2a\u552f\u4e00\u6807\u8bb0\uff1a \u5185\u5bb9\u6807\u8bb0\uff1aFOL039-RUN-6e501399-V1-content \u5185\u5bb9-only \u53d1\u5e03# \u7b2c\u4e8c\u6b21\u6784\u5efa\u53ea\u4fee\u6539\u8fd9\u6bb5 Markdown \u7684\u6587\u672c\uff08\u5305\u62ec\u4e0a\u9762\u7684\u6807\u8bb0\uff09\uff0c\u4e0d\u4fee\u6539\u4efb\u4f55 JS/CSS \u8d44\u6e90\uff0c \u7528\u6765\u8bc1\u660e\u5185\u5bb9\u7248\u672c\u53f7\u4f1a\u968f\u9759\u6001 HTML \u53d8\u5316\uff0c\u800c\u8d44\u6e90\u6587\u4ef6\u540d\u4fdd\u6301\u4e0d\u53d8\u3002",
+        "markerText": "本文档由 FOL-039 的独立消费者 fixture 生成。每次运行都会写入一个唯一标记： 内容标记：FOL039-RUN-3062cd1e-V1-content 内容-only 发布# 第二次构建只修改这段 Markdown 的文本（包括上面的标记），不修改任何 JS/CSS 资源， 用来证明内容版本号会随静态 HTML 变化，而资源文件名保持不变。",
         "articleHtmlPresent": true,
         "promptPresent": false,
         "promptVisible": false,
@@ -335,18 +369,21 @@
     {
       "id": "confirm-reloads-onto-new-content",
       "status": "PASS",
-      "detail": "clicked show-prompt \"\u518d\u6b21\u663e\u793a\u66f4\u65b0\u63d0\u793a\" (prompt visible again=true) then confirm \"\u5237\u65b0\u5e76\u66f4\u65b0\"; reloaded=true (bootId 1a431d27-a5b2-4a94-91dc-2358b3e2dc9f -> ec9e8d17-1410-48c3-b874-3963ba72e4c1), navigationEntries=1, content marker shows the new Markdown=true",
-      "ms": 1533,
+      "detail": "clicked show-prompt \"再次显示更新提示\" (prompt visible again=true) then confirm \"刷新并更新\"; reloaded=true (bootId 8c337113-fb10-420b-a14f-c3851358f2d9 -> f6cb26c3-1da9-4163-929f-d3b614bec4f0), navigationEntries=1, content marker shows the new Markdown=true",
+      "ms": 1478,
       "afterReload": {
         "url": "/docs/hello/",
         "navigationEntries": 1,
         "navigationType": "reload",
-        "timeOrigin": 1794191784860.2,
-        "bootId": "ec9e8d17-1410-48c3-b874-3963ba72e4c1",
+        "timeOrigin": 1794203322481.3,
+        "bootId": "f6cb26c3-1da9-4163-929f-d3b614bec4f0",
         "mounted": true,
         "registered": true,
+        "registrationState": "registered",
+        "hookSupported": true,
+        "hookRegistered": true,
         "registerError": null,
-        "markerText": "\u672c\u6587\u6863\u7531 FOL-039 \u7684\u72ec\u7acb\u6d88\u8d39\u8005 fixture \u751f\u6210\u3002\u6bcf\u6b21\u8fd0\u884c\u90fd\u4f1a\u5199\u5165\u4e00\u4e2a\u552f\u4e00\u6807\u8bb0\uff1a \u5185\u5bb9\u6807\u8bb0\uff1aFOL039-RUN-6e501399-V2-content \u5185\u5bb9-only \u53d1\u5e03# \u7b2c\u4e8c\u6b21\u6784\u5efa\u53ea\u4fee\u6539\u8fd9\u6bb5 Markdown \u7684\u6587\u672c\uff08\u5305\u62ec\u4e0a\u9762\u7684\u6807\u8bb0\uff09\uff0c\u4e0d\u4fee\u6539\u4efb\u4f55 JS/CSS \u8d44\u6e90\uff0c \u7528\u6765\u8bc1\u660e\u5185\u5bb9\u7248\u672c\u53f7\u4f1a\u968f\u9759\u6001 HTML \u53d8\u5316\uff0c\u800c\u8d44\u6e90\u6587\u4ef6\u540d\u4fdd\u6301\u4e0d\u53d8\u3002",
+        "markerText": "本文档由 FOL-039 的独立消费者 fixture 生成。每次运行都会写入一个唯一标记： 内容标记：FOL039-RUN-3062cd1e-V2-content 内容-only 发布# 第二次构建只修改这段 Markdown 的文本（包括上面的标记），不修改任何 JS/CSS 资源， 用来证明内容版本号会随静态 HTML 变化，而资源文件名保持不变。",
         "articleHtmlPresent": true,
         "promptPresent": false,
         "promptVisible": false,
@@ -360,15 +397,139 @@
     {
       "id": "precache-cleaned-and-current",
       "status": "PASS",
-      "detail": "caches.keys() = [\"workbox-precache-v2-http://127.0.0.1:60415/\"]; precache caches=1; cached folio-version.json version=\"31f84db9472cdaf79f58358da1a5eae4\" (revision 31f84db9472cdaf79f58358da1a5eae4) equals the v2 build 31f84db9472cdaf79f58358da1a5eae4=true; folio-version.json cache entries=1",
+      "detail": "caches.keys() = [\"workbox-precache-v2-http://127.0.0.1:61515/\"]; precache caches=1; cached folio-version.json version=\"4c29b298e13a2c94b1b1f5ba639192c2\" (revision 4c29b298e13a2c94b1b1f5ba639192c2) equals the v2 build 4c29b298e13a2c94b1b1f5ba639192c2=true; folio-version.json cache entries=1",
       "ms": 6
+    },
+    {
+      "id": "subpath-v1-registers-worker",
+      "status": "PASS",
+      "detail": "deployment http://127.0.0.1:61601/folio-smoke/docs/hello/ rendered the v1 Markdown; worker script http://127.0.0.1:61601/folio-smoke/sw.js (scope http://127.0.0.1:61601/folio-smoke/) equals http://127.0.0.1:61601/folio-smoke/sw.js/http://127.0.0.1:61601/folio-smoke/; manifest link \"/folio-smoke/manifest.webmanifest\"; no prompt before a new deployment",
+      "ms": 3625,
+      "subSw": {
+        "scope": "http://127.0.0.1:61601/folio-smoke/",
+        "scriptURL": "http://127.0.0.1:61601/folio-smoke/sw.js",
+        "state": "activated"
+      },
+      "subManifestHref": "/folio-smoke/manifest.webmanifest"
+    },
+    {
+      "id": "subpath-update-prompt-without-reload",
+      "status": "PASS",
+      "detail": "subpath prompt \"本站有新版本可用。稍后刷新并更新\" appeared; page still controlled by http://127.0.0.1:61601/folio-smoke/sw.js; navigationEntries=1, bootId unchanged=true, content marker still v1=true",
+      "ms": 4289,
+      "state": {
+        "url": "/folio-smoke/docs/hello/",
+        "navigationEntries": 1,
+        "navigationType": "navigate",
+        "timeOrigin": 1794203327383.6,
+        "bootId": "3c309a2d-de21-4e63-b83e-9acd1907d0c8",
+        "mounted": true,
+        "registered": true,
+        "registrationState": "registered",
+        "hookSupported": true,
+        "hookRegistered": true,
+        "registerError": null,
+        "markerText": "本文档由 FOL-039 的独立消费者 fixture 生成。每次运行都会写入一个唯一标记： 内容标记：FOL039-RUN-3062cd1e-SUB-V1-content 内容-only 发布# 第二次构建只修改这段 Markdown 的文本（包括上面的标记），不修改任何 JS/CSS 资源， 用来证明内容版本号会随静态 HTML 变化，而资源文件名保持不变。",
+        "articleHtmlPresent": true,
+        "promptPresent": true,
+        "promptVisible": true,
+        "promptText": "本站有新版本可用。稍后刷新并更新",
+        "confirmPresent": true,
+        "dismissPresent": true,
+        "controlled": true,
+        "checkAvailable": true
+      }
+    },
+    {
+      "id": "subpath-confirm-reloads-onto-new-content",
+      "status": "PASS",
+      "detail": "confirmed update reloaded /folio-smoke/docs/hello/ (bootId 3c309a2d-de21-4e63-b83e-9acd1907d0c8 -> 305b31b8-b9d2-4c13-bbe1-aa8ced5bccd6) and shows the v2 Markdown; precache caches=1, cached content version=\"c396fcc9f4308d559bc732666c048055\" vs v2 c396fcc9f4308d559bc732666c048055",
+      "ms": 5587,
+      "subReloaded": {
+        "bootId": "305b31b8-b9d2-4c13-bbe1-aa8ced5bccd6",
+        "url": "/folio-smoke/docs/hello/"
+      },
+      "subAfterReload": {
+        "url": "/folio-smoke/docs/hello/",
+        "navigationEntries": 1,
+        "navigationType": "reload",
+        "timeOrigin": 1794203328048.6,
+        "bootId": "305b31b8-b9d2-4c13-bbe1-aa8ced5bccd6",
+        "mounted": true,
+        "registered": true,
+        "registrationState": "registered",
+        "hookSupported": true,
+        "hookRegistered": true,
+        "registerError": null,
+        "markerText": "本文档由 FOL-039 的独立消费者 fixture 生成。每次运行都会写入一个唯一标记： 内容标记：FOL039-RUN-3062cd1e-SUB-V2-content 内容-only 发布# 第二次构建只修改这段 Markdown 的文本（包括上面的标记），不修改任何 JS/CSS 资源， 用来证明内容版本号会随静态 HTML 变化，而资源文件名保持不变。",
+        "articleHtmlPresent": true,
+        "promptPresent": false,
+        "promptVisible": false,
+        "promptText": null,
+        "confirmPresent": false,
+        "dismissPresent": false,
+        "controlled": true,
+        "checkAvailable": true
+      }
+    },
+    {
+      "id": "auto-v1-controlled-first-visit",
+      "status": "PASS",
+      "detail": "auto mode registered http://127.0.0.1:61643/sw.js and the first visit is already controlled=true (prompt mode is not); content marker \"FOL039-RUN-3062cd1e-AUTO-V1-content\"",
+      "ms": 4219,
+      "autoSw": {
+        "scope": "http://127.0.0.1:61643/",
+        "scriptURL": "http://127.0.0.1:61643/sw.js",
+        "state": "activated"
+      },
+      "autoControlled": true
+    },
+    {
+      "id": "auto-update-activates-without-prompt",
+      "status": "PASS",
+      "detail": "auto mode reloaded onto the v2 Markdown without confirmation (bootId 7179f07e-75ca-456e-9e47-346f02063e25 -> 087e7051-c214-4bd4-b04e-ebb900306395); no prompt element present=true; worker now http://127.0.0.1:61643/sw.js; precache caches=1, cached version \"a50ef296c7b70dffff7adb15c1a0802c\" equals v2 a50ef296c7b70dffff7adb15c1a0802c",
+      "ms": 5509,
+      "autoAfter": {
+        "bootId": "087e7051-c214-4bd4-b04e-ebb900306395",
+        "text": "本文档由 FOL-039 的独立消费者 fixture 生成。每次运行都会写入一个唯一标记： 内容标记：FOL039-RUN-3062cd1e-AUTO-V2-content 内容-only 发布# 第二次构建只修改这段 Markdown 的文本（包括上面的标记），不修改任何 JS/CSS 资源， 用来证明内容版本号会随静态 HTML 变化，而资源文件名保持不变。",
+        "promptPresent": false
+      },
+      "autoCacheAfter": {
+        "keys": [
+          "workbox-precache-v2-http://127.0.0.1:61643/"
+        ],
+        "precacheKeys": [
+          "workbox-precache-v2-http://127.0.0.1:61643/"
+        ],
+        "entries": [
+          {
+            "key": "workbox-precache-v2-http://127.0.0.1:61643/",
+            "count": 7,
+            "urls": [
+              "http://127.0.0.1:61643/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "http://127.0.0.1:61643/assets/index-xBHMEB6e.css",
+              "http://127.0.0.1:61643/assets/index-D28b9sZL.js",
+              "http://127.0.0.1:61643/icons/icon-192.svg?__WB_REVISION__=1d04161c5ce2ea5797352888047e0a90",
+              "http://127.0.0.1:61643/icons/icon-512.svg?__WB_REVISION__=2f87376306a17f90b63ce15f0546be2e",
+              "http://127.0.0.1:61643/manifest.webmanifest?__WB_REVISION__=32e31a7a8fb1714a395e38bdb6a32b8d",
+              "http://127.0.0.1:61643/folio-version.json?__WB_REVISION__=a50ef296c7b70dffff7adb15c1a0802c"
+            ]
+          }
+        ],
+        "folioVersion": {
+          "version": "a50ef296c7b70dffff7adb15c1a0802c",
+          "pages": 3
+        },
+        "folioVersionRevision": "a50ef296c7b70dffff7adb15c1a0802c",
+        "folioVersionEntryCount": 1
+      }
     },
     {
       "id": "registration-failure-observable",
       "status": "PASS",
-      "detail": "/sw.js answered 404 for a fresh browser context; consumer reported onRegisterError \"Failed to register a ServiceWorker for scope ('http://127.0.0.1:60415/') with script ('http://127.0.0.1:60415/sw.js'): A bad HTTP response code (404) was receiv\"; registration present=false; article still rendered=true",
-      "ms": 747,
-      "registerError": "Failed to register a ServiceWorker for scope ('http://127.0.0.1:60415/') with script ('http://127.0.0.1:60415/sw.js'): A bad HTTP response code (404) was received when fetching the script."
+      "detail": "/sw.js answered 404 for a fresh browser context; consumer reported onRegisterError \"Failed to register a ServiceWorker for scope ('http://127.0.0.1:61515/') with script ('http://127.0.0.1:61515/sw.js'): A bad HTTP response code (404) was receiv\" and registrationState \"failed\"; registration present=false; article still rendered=true",
+      "ms": 626,
+      "registerError": "Failed to register a ServiceWorker for scope ('http://127.0.0.1:61515/') with script ('http://127.0.0.1:61515/sw.js'): A bad HTTP response code (404) was received when fetching the script."
     }
   ],
   "console": [
@@ -380,17 +541,46 @@
     }
   ],
   "failure": null,
+  "registration": {
+    "afterV1Load": {
+      "state": "registered",
+      "supported": true,
+      "registered": true
+    },
+    "afterFailure": "failed"
+  },
+  "subpathDeployment": {
+    "serverOrigin": "http://127.0.0.1:61601",
+    "base": "/folio-smoke/",
+    "pageUrl": "http://127.0.0.1:61601/folio-smoke/docs/hello/",
+    "manifestScope": "/folio-smoke/",
+    "startUrl": "/folio-smoke/",
+    "v1": "ff46df62672f2c452ce5a085b3fca692",
+    "v2": "c396fcc9f4308d559bc732666c048055"
+  },
+  "autoDeployment": {
+    "origin": "http://127.0.0.1:61643",
+    "pageUrl": "http://127.0.0.1:61643/docs/hello/",
+    "v1": "2580c93becf76233548961a718bac7c3",
+    "v2": "a50ef296c7b70dffff7adb15c1a0802c",
+    "bootIdBefore": "7179f07e-75ca-456e-9e47-346f02063e25",
+    "bootIdAfter": "087e7051-c214-4bd4-b04e-ebb900306395",
+    "promptPresent": false,
+    "cacheKeys": [
+      "workbox-precache-v2-http://127.0.0.1:61643/"
+    ]
+  },
   "consoleUnexpected": [],
   "summary": {
-    "generatedAt": "2026-11-09T02:36:26.950Z",
-    "commit": "8a4078088aa744cc1ab9ef1aea50479003eeaab8",
-    "passing": 15,
+    "generatedAt": "2026-11-09T05:48:55.477Z",
+    "commit": "780e6b3869d9a3646cdba32372302ec54ba5abfa",
+    "passing": 20,
     "failing": 0,
     "status": "PASS",
-    "tarballSha256": "e92ba9fe8682f2ec8fdafb6ad6cd1020775e4e5ede98334ce6603c5c02224201",
+    "tarballSha256": "528135b9bc6b6e9f5d09ed921ba8d6d0835e78786b3e9e8da6994029408ba154",
     "contentVersions": {
-      "v1": "3e630995ce4d405fcac853002a6e5bde",
-      "v2": "31f84db9472cdaf79f58358da1a5eae4"
+      "v1": "c0f5684588a24a06db9e61dc0416696d",
+      "v2": "4c29b298e13a2c94b1b1f5ba639192c2"
     },
     "unexpectedConsoleErrors": 0
   }

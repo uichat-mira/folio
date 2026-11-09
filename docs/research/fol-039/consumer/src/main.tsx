@@ -48,6 +48,15 @@ function AcceptanceHarness() {
     setMarkdownText(currentMarkdownText());
   }, [update.checkForUpdate]);
 
+  // P3 observability: the registration state is read from the *public* hook, so
+  // the browser check proves the state a consumer actually receives rather than
+  // a value the harness inferred from navigator.serviceWorker.
+  useEffect(() => {
+    window.__folioPwaRegistrationState = update.registrationState;
+    window.__folioPwaSupported = update.supported;
+    window.__folioPwaRegisteredFlag = update.registered;
+  }, [update.registrationState, update.supported, update.registered]);
+
   return (
     <>
       <div data-content-marker="">{markdownText}</div>

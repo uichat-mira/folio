@@ -12,6 +12,12 @@ declare global {
     __folioPwaCheck?: () => Promise<void>;
     /** True once `onRegisteredSW` reported a registration. */
     __folioPwaRegistered?: boolean;
+    /** `registrationState` from `useFolioPwaUpdate()` (FOL-039 P3). */
+    __folioPwaRegistrationState?: "unsupported" | "registering" | "registered" | "failed";
+    /** `supported` from `useFolioPwaUpdate()`. */
+    __folioPwaSupported?: boolean;
+    /** `registered` convenience flag from `useFolioPwaUpdate()`. */
+    __folioPwaRegisteredFlag?: boolean;
     /** Message reported through the consumer's `onRegisterError` path. */
     __folioPwaRegisterError?: string;
     /** True once the React harness rendered. */

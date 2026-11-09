@@ -13,6 +13,8 @@
 //   [pwa:assets]     a JS change must still be picked up by the worker
 //   [pwa:stable]     an unchanged rebuild must not fabricate a new version
 //   [pwa:auto]       the explicit auto-update mode
+//   [pwa:guard]      the emitted-manifest guard rejects a page injected through
+//                    a consumer `manifestTransforms` function
 //   [pwa:off]        `disable: true` must emit no PWA output at all
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
@@ -83,7 +85,7 @@ function assetHashes(directory) {
 function runBuild(
   viteCli,
   appDir,
-  { outDir, base, updateMode, disabled, versionFile, contentDir, staticOnly },
+  { outDir, base, updateMode, disabled, versionFile, contentDir, staticOnly, injectPage, expectFailure },
 ) {
   rmSync(join(appDir, outDir), { recursive: true, force: true });
   const result = spawnSync(process.execPath, [viteCli, "build", "--logLevel", "warn"], {
@@ -100,17 +102,30 @@ function runBuild(
       FOLIO_PWA_STATIC_ONLY: staticOnly ? "on" : "off",
       ...(versionFile ? { FOLIO_PWA_VERSION_FILE: versionFile } : {}),
       ...(contentDir ? { FOLIO_PWA_CONTENT_DIR: contentDir } : {}),
+      ...(injectPage ? { FOLIO_PWA_INJECT_PAGE: injectPage } : {}),
     },
   });
   if (result.error) {
     throw new Error(`[pwa] FAIL vite build could not start: ${result.error.message}`);
   }
   if (result.status !== 0) {
+    const output = `${(result.stdout ?? "").trim()}\n${(result.stderr ?? "").trim()}`;
+    if (expectFailure) {
+      // The rejection is the expected outcome; the caller asserts on the message
+      // so a build that fails for an unrelated reason cannot pass this check.
+      const failure = new Error(output);
+      failure.expectedFailure = true;
+      failure.buildOutput = output;
+      throw failure;
+    }
     throw new Error(
       `[pwa] FAIL vite build (base ${base}, mode ${updateMode ?? "prompt"}) exited with code ${result.status}\n` +
         `--- stdout ---\n${(result.stdout ?? "").trim()}\n` +
         `--- stderr ---\n${(result.stderr ?? "").trim()}`,
     );
+  }
+  if (expectFailure) {
+    throw new Error(`[pwa] FAIL the build succeeded although ${expectFailure} must be rejected`);
   }
   return join(appDir, outDir);
 }
@@ -415,6 +430,41 @@ export function verifyPwaConsumer({ consumerDir, fixtureDir, log }) {
     "the auto-update build emitted no manifest",
   );
   log("[pwa:auto] ok  auto-update mode activates and claims without the prompt");
+
+  // --- emitted-manifest guard on the installed tarball ----------------------
+  // `workbox.manifestTransforms` is a consumer function that runs inside
+  // Workbox, so Folio cannot inspect its output at config time. This proves the
+  // *published* package rejects the injected page on the emitted worker: a
+  // directory URL, an encoded URL and a direct .html URL all have to fail.
+  for (const injected of ["blogs/first-post/", "docs%2Fhello%2F", "docs/hello/index.html"]) {
+    let failure;
+    try {
+      runBuild(viteCli, appDir, {
+        outDir: "dist-pwa-guard",
+        base: "/",
+        staticOnly: true,
+        injectPage: injected,
+        expectFailure: `the precache entry ${JSON.stringify(injected)}`,
+      });
+    } catch (error) {
+      failure = error;
+    }
+    check(
+      "pwa:guard",
+      Boolean(failure && failure.expectedFailure),
+      `the installed tarball accepted a generated-page precache entry injected through manifestTransforms: ${injected}`,
+    );
+    check(
+      "pwa:guard",
+      /precaches generated pages|names a generated page|not part of the build output/.test(
+        failure.buildOutput,
+      ),
+      `the build rejected ${JSON.stringify(injected)} for an unrelated reason:\n${failure.buildOutput.slice(-1200)}`,
+    );
+  }
+  log(
+    "[pwa:guard] ok  manifestTransforms cannot inject a page (directory, encoded and .html URLs rejected)",
+  );
 
   // --- disabled -------------------------------------------------------------
   const offDir = runBuild(viteCli, appDir, {

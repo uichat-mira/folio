@@ -54,7 +54,12 @@ node docs/research/fol-039/browser-prompt.mjs --keep # 保留临时目录，便�
 | PASS | `dismiss-keeps-page` | ~6ms | 点击 `[data-folio-pwa-update-dismiss]` 后提示消失且页面未刷新 |
 | PASS | `confirm-reloads-onto-new-content` | ~1.5s | 重新显示提示后点击 confirm，页面刷新且显示 v2 的新 Markdown |
 | PASS | `precache-cleaned-and-current` | ~4ms | `caches.keys()` 只剩当前 `workbox-precache`，其中 `folio-version.json` 就是 v2 哈希 |
-| PASS | `registration-failure-observable` | ~0.7s | `/sw.js` 404 时消费者 `onRegisterError` 被调用，正文仍渲染 |
+| PASS | `subpath-v1-registers-worker` | ~1.5s | 子路径 `/folio-smoke/`：worker script URL、worker scope 都是 `/folio-smoke/`，manifest link 为 `/folio-smoke/manifest.webmanifest` |
+| PASS | `subpath-update-prompt-without-reload` | ~1.2s | 子路径切到 v2 后提示出现，且页面仍未刷新、仍由子路径 worker 控制 |
+| PASS | `subpath-confirm-reloads-onto-new-content` | ~1.6s | 子路径确认后刷新到 `/folio-smoke/docs/hello/` 的 v2 正文，缓存只剩 1 份且版本等于 v2 |
+| PASS | `auto-v1-controlled-first-visit` | ~0.6s | `updateMode:"auto"` 首次访问即被 worker 接管（prompt 模式不会） |
+| PASS | `auto-update-activates-without-prompt` | ~1.4s | auto 模式无需确认即刷新到 v2，全程无提示元素，旧缓存被替换 |
+| PASS | `registration-failure-observable` | ~0.7s | `/sw.js` 404 时 `onRegisterError` 被调用、`registrationState === "failed"`，正文仍渲染 |
 
 具体数值、耗时、tarball sha256、commit SHA、两次内容版本与 console 记录都在
 [`results/acceptance.json`](results/acceptance.json)。
@@ -63,10 +68,15 @@ node docs/research/fol-039/browser-prompt.mjs --keep # 保留临时目录，便�
 > 所以 `meta.packagedSourcesClean` 与 `meta.dirtyPackagedSources` 一起说明「这个 commit
 > 本身能否唯一标识被测 tarball」。
 >
-> 本次提交记录的验收是在 commit `8a40780` 的 **detached worktree** 里跑的
+> 第一轮记录的验收是在 commit `8a40780` 的 **detached worktree** 里跑的
 > （`meta.runFromCleanCheckout: true`，`packages/`、`apps/`、`schemas/`、`scripts/` 无未提交
-> 改动），因此该 tarball（sha256 `e92ba9fe…`）可由该 commit 复现。工作区里另一次同款运行的
-> 记录（sha256 `c4993637…`）来自带无关未提交改动的树，不能由 commit 单独复现。
+> 改动），因此那一份 tarball（sha256 `e92ba9fe…`）可由该 commit 复现。
+>
+> **第二轮（P1/P2/P3 返修）的 20 项记录来自带未提交改动的工作区**，因为返修本身就是未提交
+> 改动：`meta.packagedSourcesClean` 为 `false` 并逐条列出那些路径，`meta.commit` 只是运行时
+> HEAD（`780e6b3`，返修前基线）。这一轮的可复现标识是 tarball sha256（记为
+> `meta.packageEvidence.sha256`），不是 commit。返修提交后会在干净 worktree 里重跑一次以刷新
+> 该记录。
 
 ## 设计上的两点取舍
 
@@ -89,11 +99,25 @@ node docs/research/fol-039/browser-prompt.mjs --keep # 保留临时目录，便�
 | 没有新部署 | 服务器根始终停在 v1 | `[browser] FAIL timed out ... [data-folio-pwa-update-prompt]` |
 | 提示期间偷偷刷新 | 提示可见时强制 `Page.navigate` | `[FAIL] no-reload-while-prompt-visible`（bootId/timeOrigin 变化） |
 
+## 三个部署阶段（第二轮新增）
+
+同一个 fixture 通过环境变量切换部署形态，三次都是真实浏览器交互：
+
+| 阶段 | base | 更新模式 | 验证内容 |
+| --- | --- | --- | --- |
+| 根路径 | `/` | `prompt` | 提示不刷新 / 稍后 / 确认刷新 / 旧缓存清理 / 注册失败可观察 |
+| 子路径 | `/folio-smoke/` | `prompt` | worker script URL、worker scope、manifest link 都在 base 下；提示同样不刷新；确认后刷新到 `/folio-smoke/` 的新正文 |
+| 自动更新 | `/` | `auto` | 首次访问即被接管；新部署无需人工确认即激活并加载新正文；全程无提示元素；旧缓存被替换 |
+
+子路径阶段使用独立的 browser context（`Target.createBrowserContext`），避免根路径的
+注册与缓存互相干扰；服务器按 base 前缀剥离路径，base 之外的 URL 返回真实 `404.html`。
+
 ## 已知边界（未验证，不得当作通过）
 
-- 只覆盖**根路径部署**（Vite `base: "/"`）。子路径 base（如 `/folio/`）不在本脚本范围内。
 - 只覆盖 Chromium（本机 Chrome 156）。Firefox / Safari 的 Service Worker 行为未验证。
+- 只覆盖一种子路径深度（`/folio-smoke/`，单段）；多段 base（如 `/a/b/`）未单独验证。
 - 只用 `generateSW` + 默认 Workbox 策略；`injectManifest`、自定义 runtimeCaching 未覆盖。
-- 未覆盖 `updateMode: "auto"`、多标签页竞争、离线访问、真实 CDN/托管平台的缓存头差异。
-- 第 7 项用「`/sw.js` 返回 404」代表注册失败。它证明了 `onRegisterError` 通路，
-  但不等于覆盖所有失败形态（如 DNS、TLS、被扩展拦截）。
+- auto 模式未覆盖多标签页竞争与"标签页在后台时是否延迟激活"。
+- 未覆盖离线访问、真实 CDN/托管平台的缓存头差异、iOS/Android 安装流程。
+- 第 7 项用「`/sw.js` 返回 404」代表注册失败。它证明了 `onRegisterError` /
+  `registrationState === "failed"` 通路，但不覆盖 DNS、TLS、被扩展拦截等失败形态。

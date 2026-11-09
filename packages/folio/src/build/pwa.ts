@@ -158,16 +158,30 @@ function validateIcons(icons: FolioPwaIcon[]): void {
         `icon ${JSON.stringify(icon.src)} has invalid sizes ${JSON.stringify(icon.sizes)}; use "WxH" or "any"`,
       );
     }
+    // Manifest icon sizes describe the image's pixel box, and installability
+    // requires square artwork: a 192x256 entry is not a valid install icon even
+    // though both dimensions are large enough. Rejecting it here also keeps the
+    // emitted-manifest check meaningful instead of a second, looser rule.
+    const dimensions = /^(\d+)x(\d+)$/.exec(icon.sizes.trim());
+    if (dimensions !== null && dimensions[1] !== dimensions[2]) {
+      fail(
+        `icon ${JSON.stringify(icon.src)} has non-square sizes ${JSON.stringify(icon.sizes)}; PWA icons must be square (for example "192x192")`,
+      );
+    }
     if (seen.has(icon.src)) fail(`icon ${JSON.stringify(icon.src)} is listed twice`);
     seen.add(icon.src);
   }
-  const covers = (size: number) =>
-    icons.some((icon) => {
-      const match = /^(\d+)x(\d+)$/.exec(icon.sizes.trim());
-      return match !== null && Number(match[1]) >= size && Number(match[2]) >= size;
-    });
+  // Installability requires *square* icons: a 192x256 asset that merely has both
+  // dimensions large enough is not a valid manifest icon, so the dimension check
+  // below is a real square check rather than a "both sides big enough" one.
+  const squareSizes = new Set(
+    icons
+      .map((icon) => /^(\d+)x(\d+)$/.exec(icon.sizes.trim()))
+      .filter((match): match is RegExpExecArray => match !== null && match[1] === match[2])
+      .map((match) => Number(match[1])),
+  );
   for (const size of [192, 512]) {
-    if (!covers(size)) {
+    if (![...squareSizes].some((candidate) => candidate >= size)) {
       fail(
         `icons must include a square icon of at least ${size}x${size}; the manifest would not be installable`,
       );
@@ -278,6 +292,15 @@ function resolveManifest(options: FolioPwaOptions): Partial<ManifestOptions> {
       );
     }
   }
+  // `icons` is validated for installability (square 192 and 512, real artifacts)
+  // and then re-checked on the emitted manifest. Allowing the generic manifest
+  // override to replace it would let a consumer ship an unvalidated icon set, so
+  // the dedicated `icons` option is the only way in.
+  if ("icons" in override) {
+    fail(
+      "manifest.icons must not be overridden; pass the icons to the dedicated `icons` option so Folio can validate sizes, purposes and the emitted files",
+    );
+  }
   return {
     name: config.title,
     short_name: config.title,
@@ -296,26 +319,319 @@ function resolveManifest(options: FolioPwaOptions): Partial<ManifestOptions> {
   };
 }
 
-/** Precache URLs of the generated worker, read from the emitted artifact. */
-function workerPrecacheUrls(worker: string): string[] {
+// --- multi-page precache safety -------------------------------------------
+//
+// A precache entry is an opaque string to Workbox: it is fetched at runtime and
+// cached under that URL. An entry only has to *look* like an asset for the
+// build to succeed, so `assets/app-1234.js` and `blogs/first-post/` are the same
+// kind of value to Workbox -- but the second one is a generated article page.
+// Folio therefore never trusts the entry's spelling. Every entry is normalised
+// (percent-decoding, query/fragment removal, dot-segment resolution, base
+// resolution) and then resolved against the real build output, so a directory
+// URL, a route alias, an `index` suffix or an encoded path cannot smuggle a
+// generated page into the offline shell.
+
+const HTML_EXTENSIONS = [".html", ".htm"];
+/** Extensions that can never name a generated page. */
+const STATIC_ASSET_EXTENSIONS = [
+  ".js",
+  ".mjs",
+  ".cjs",
+  ".css",
+  ".map",
+  ".json",
+  ".webmanifest",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".gif",
+  ".svg",
+  ".webp",
+  ".avif",
+  ".ico",
+  ".woff",
+  ".woff2",
+  ".ttf",
+  ".otf",
+  ".eot",
+  ".txt",
+  ".xml",
+  ".pdf",
+  ".wasm",
+];
+
+/** Strip a query/fragment and percent-decode one precache URL path. */
+function decodedUrlPath(url: string, source: string): string {
+  const withoutQuery = url.split("#")[0].split("?")[0];
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(withoutQuery);
+  } catch {
+    return fail(
+      `${source} contains the malformed percent-encoding ${JSON.stringify(url)}; the precache entry cannot be resolved to a build artifact`,
+    );
+  }
+  // A decoded separator must behave like a separator, not like a literal
+  // character inside a file name (%2F and %5C both decode to a path break).
+  return decoded.replace(/\\\\/g, "/");
+}
+
+/**
+ * Map a manifest/worker URL to a path inside the build output.
+ *
+ * The deployment serves the *contents of outDir* at the Vite base, so:
+ *   - a relative URL (`assets/app-1.js`, `icon-192.png`) is relative to the
+ *     worker/manifest, which live at the base: it maps to the same path inside
+ *     outDir, whatever the base is;
+ *   - an absolute URL (`/folio/app.css`) is a site path: it must start with the
+ *     base, and the base prefix is what outDir stands for. Anything else points
+ *     at another deployment on the origin and is rejected;
+ *   - a cross-origin URL is always rejected.
+ *
+ * Dot segments are resolved first, so `a/../b.css` cannot escape the output
+ * directory and `docs/hello/` is recognised as the page it is.
+ */
+function precacheUrlToRelative(url: string, base: string, source: string): string {
+  const path = decodedUrlPath(url, source);
+  if (/^[a-z][a-z0-9+.-]*:/i.test(path) || path.startsWith("//")) {
+    return fail(
+      `${source} contains the absolute URL ${JSON.stringify(url)}; Folio never precaches cross-origin responses`,
+    );
+  }
+  const scope = normalizePathPrefix(base);
+  let siteRelative: string;
+  if (path.startsWith("/")) {
+    if (scope !== "/" && path !== scope.slice(0, -1) && !path.startsWith(scope)) {
+      return fail(
+        `${source} contains ${JSON.stringify(url)}, which resolves outside the deployment scope ${JSON.stringify(scope)}`,
+      );
+    }
+    siteRelative = path.slice(scope === "/" ? 1 : scope.length);
+  } else {
+    siteRelative = path;
+  }
+  const segments: string[] = [];
+  for (const segment of siteRelative.split("/")) {
+    if (segment === "" || segment === ".") continue;
+    if (segment === "..") {
+      if (segments.length === 0) {
+        return fail(`${source} contains ${JSON.stringify(url)}, which escapes the build output`);
+      }
+      segments.pop();
+      continue;
+    }
+    segments.push(segment);
+  }
+  return segments.join("/");
+}
+
+/** Whether a resolved output-relative path names a page instead of an asset. */
+function describesGeneratedPage(relative: string): boolean {
+  const lower = relative.toLowerCase();
+  for (const extension of HTML_EXTENSIONS) {
+    if (lower.endsWith(extension)) return true;
+  }
+  if (lower.endsWith("/")) return true;
+  const segments = lower.split("/");
+  const last = segments[segments.length - 1] ?? "";
+  if (last === "") return true;
+  // A route alias: `/docs/index` is served by `docs/index.html`.
+  const dot = last.lastIndexOf(".");
+  const stem = dot === -1 ? last : last.slice(0, dot);
+  if (stem === "index") return true;
+  // An extensionless URL can be a directory route on any static host, and a
+  // precache entry must be a *file* whose bytes are known.
+  if (dot === -1) return true;
+  return false;
+}
+
+/** Whether a resolved path can be precached as a static asset. */
+function isStaticAssetPath(relative: string): boolean {
+  const lower = relative.toLowerCase();
+  return STATIC_ASSET_EXTENSIONS.some((extension) => lower.endsWith(extension));
+}
+
+/**
+ * Config-time guard for the entries a consumer hands to Workbox directly.
+ *
+ * The authoritative check runs against the emitted manifest below; this one
+ * fails earlier with a message that names the offending option, so a consumer
+ * learns which value is wrong instead of only that the build was rejected.
+ */
+function assertPrecacheEntryIsNotAPage(url: string, source: string): void {
+  if (typeof url !== "string" || url.trim() === "") {
+    fail(`${source} contains an empty precache entry`);
+  }
+  const relative = precacheUrlToRelative(url, "/", source);
+  if (describesGeneratedPage(relative)) {
+    fail(
+      `${source} contains ${JSON.stringify(url)}, which names a generated page; Folio keeps article and document HTML out of the offline shell`,
+    );
+  }
+}
+
+/** All URLs that a consumer can inject into the Workbox precache manifest. */
+function validateConsumerPrecacheEntries(
+  options: FolioPwaOptions,
+  versionFile: string,
+): void {
+  const includeAssets = options.includeAssets ?? [];
+  for (const entry of includeAssets) {
+    assertPrecacheEntryIsNotAPage(entry, "includeAssets");
+  }
+  const additional = options.workbox?.additionalManifestEntries ?? [];
+  for (const entry of additional) {
+    const url = entryUrl(entry);
+    if (url === versionFile) continue;
+    assertPrecacheEntryIsNotAPage(url, "workbox.additionalManifestEntries");
+  }
+  const templated = options.workbox?.templatedURLs;
+  if (templated !== undefined) {
+    if (typeof templated !== "object" || templated === null || Array.isArray(templated)) {
+      fail("workbox.templatedURLs must be an object keyed by the URL it precaches");
+    }
+    for (const url of Object.keys(templated)) {
+      assertPrecacheEntryIsNotAPage(url, "workbox.templatedURLs");
+    }
+  }
+  // `workbox.manifestTransforms` cannot be inspected (it is a function), so it
+  // is deliberately allowed and caught by the emitted-manifest validation: any
+  // entry it injects is checked against the real build output.
+}
+
+type PrecacheEntry = { url: string; revision: string | null };
+
+/**
+ * Precache entries of the generated worker, read from the emitted artifact.
+ *
+ * Fails closed: a worker whose manifest cannot be read is a build failure, not
+ * an empty list. Returning `[]` here would make every downstream safety check
+ * vacuously true -- precisely how an HTML precache could ship unnoticed.
+ */
+function readWorkerPrecacheManifest(worker: string): PrecacheEntry[] {
   const match = /precacheAndRoute\(\s*\[([\s\S]*?)\]\s*(?:,|\))/.exec(worker);
-  if (!match) return [];
-  return [...match[1].matchAll(/url\s*:\s*"([^"]+)"/g)].map((entry) =>
-    entry[1].replace(/\\/g, "/"),
+  if (!match) {
+    fail(
+      "the generated service worker has no readable precacheAndRoute([...]) manifest; Folio cannot verify the offline-shell boundary",
+    );
+  }
+  const body = match[1];
+  const entries = [
+    ...body.matchAll(/\{\s*url\s*:\s*"((?:[^"\\]|\\.)*)"\s*,\s*revision\s*:\s*("((?:[^"\\]|\\.)*)"|null)\s*\}/g),
+  ].map((entry) => ({
+    url: entry[1].replace(/\\"/g, '"'),
+    revision: entry[2] === "null" ? null : entry[3].replace(/\\"/g, '"'),
+  }));
+  if (entries.length === 0) {
+    fail(
+      "the generated service worker precache manifest could not be parsed into any entry; Folio cannot verify the offline-shell boundary and refuses to ship it",
+    );
+  }
+  return entries;
+}
+
+/**
+ * Icons must survive the trip into the emitted manifest.
+ *
+ * The consumer's `icons` option is the single source of truth: `manifest.icons`
+ * is rejected in `resolveManifest`, and this re-reads `manifest.webmanifest` to
+ * prove the emitted document still lists exactly those icons, with square sizes
+ * and a real file (or an explicit remote/data URL) behind each `src`.
+ */
+function validateManifestIcons(
+  manifest: { icons?: unknown },
+  expected: FolioPwaIcon[],
+  outDir: string,
+  base: string,
+): void {
+  const actual = manifest.icons;
+  if (!Array.isArray(actual)) {
+    fail("the emitted manifest.webmanifest has no icons array; the app would not be installable");
+  }
+  if (actual.length !== expected.length) {
+    fail(
+      `the emitted manifest lists ${actual.length} icon(s) while the consumer configured ${expected.length}; ` +
+        "a manifest override must not change the validated icon set",
+    );
+  }
+  const square = (sizes: unknown): boolean => {
+    if (typeof sizes !== "string") return false;
+    if (sizes.trim() === "any") return true;
+    const match = /^(\d+)x(\d+)$/.exec(sizes.trim());
+    return match !== null && match[1] === match[2];
+  };
+  for (const [index, icon] of expected.entries()) {
+    const emitted = actual[index] as { src?: unknown; sizes?: unknown; type?: unknown; purpose?: unknown };
+    if (!emitted || typeof emitted !== "object") {
+      fail(`the emitted manifest icon ${index} is not an object`);
+    }
+    if (emitted.src !== icon.src) {
+      fail(
+        `the emitted manifest icon ${index} src is ${JSON.stringify(emitted.src)}, expected ${JSON.stringify(icon.src)}`,
+      );
+    }
+    const expectedSizes = icon.sizes.trim();
+    if (emitted.sizes !== expectedSizes) {
+      fail(
+        `the emitted manifest icon ${index} sizes is ${JSON.stringify(emitted.sizes)}, expected ${JSON.stringify(expectedSizes)}`,
+      );
+    }
+    if (!square(emitted.sizes)) {
+      fail(
+        `the emitted manifest icon ${index} (${JSON.stringify(emitted.src)}) has non-square sizes ${JSON.stringify(emitted.sizes)}; installable icons must be square`,
+      );
+    }
+    const expectedType = icon.type ?? "image/png";
+    if (emitted.type !== expectedType) {
+      fail(
+        `the emitted manifest icon ${index} type is ${JSON.stringify(emitted.type)}, expected ${JSON.stringify(expectedType)}`,
+      );
+    }
+    if ((icon.purpose ? icon.purpose : undefined) !== (emitted.purpose ?? undefined)) {
+      fail(
+        `the emitted manifest icon ${index} purpose is ${JSON.stringify(emitted.purpose)}, expected ${JSON.stringify(icon.purpose)}`,
+      );
+    }
+  }
+  const sizes = new Set(
+    (actual as { sizes?: string }[]).map((icon) => (typeof icon.sizes === "string" ? icon.sizes.trim() : "")),
   );
+  for (const required of ["192x192", "512x512"]) {
+    if (!sizes.has(required)) {
+      fail(
+        `the emitted manifest has no ${required} icon; the app would not be installable`,
+      );
+    }
+  }
+  for (const icon of expected) {
+    const src = icon.src;
+    if (/^[a-z][a-z0-9+.-]*:/i.test(src) || src.startsWith("//")) {
+      // A remote or data: icon is valid in a manifest, but Folio cannot verify
+      // a file it does not own.
+      continue;
+    }
+    const relative = precacheUrlToRelative(src, base, "icons");
+    if (!existsSync(join(outDir, relative))) {
+      fail(
+        `the configured icon ${JSON.stringify(src)} is not part of the build output (${relative}); the manifest would advertise a missing file. ` +
+          `Use a base-relative src such as "icons/icon-192.png": the manifest is served from the deployment base, so a leading "/" breaks a subpath deployment`,
+      );
+    }
+  }
 }
 
 /**
  * Asserts the deployment contract on the real build artifacts (the emitted
- * manifest and the generated worker) instead of on the options Folio passed in,
- * so an upstream default change cannot silently reintroduce an SPA fallback, a
- * scope mismatch, an HTML precache or a worker without the content version.
+ * manifest, the generated worker and the emitted precache manifest) instead of
+ * on the options Folio passed in, so an upstream default change or a consumer
+ * escape hatch cannot silently reintroduce an SPA fallback, a scope mismatch, an
+ * HTML precache or a worker without the content version.
  */
 function validateGeneratedSite(
   outDir: string,
   base: string,
   versionFile: string,
-  updateMode: FolioPwaUpdateMode,
+  expectedIcons: FolioPwaIcon[],
 ): void {
   const expected = normalizePathPrefix(base);
 
@@ -325,7 +641,7 @@ function validateGeneratedSite(
       `expected ${JSON.stringify(manifestPath)} to exist after the build; vite-plugin-pwa did not emit the web manifest`,
     );
   }
-  let manifest: { scope?: string; start_url?: string };
+  let manifest: { scope?: string; start_url?: string; icons?: unknown };
   try {
     manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   } catch (error) {
@@ -343,6 +659,7 @@ function validateGeneratedSite(
       `manifest start_url ${JSON.stringify(manifest.start_url)} is outside the deployment base ${JSON.stringify(expected)}`,
     );
   }
+  validateManifestIcons(manifest, expectedIcons, outDir, base);
 
   const versionPath = join(outDir, versionFile);
   if (!existsSync(versionPath)) {
@@ -373,15 +690,37 @@ function validateGeneratedSite(
       "the generated service worker contains a navigation fallback; Folio is a multi-page publication and must not answer unknown URLs with the home page",
     );
   }
-  const precached = workerPrecacheUrls(worker);
-  const htmlEntries = precached.filter((url) => url.endsWith(".html"));
-  if (htmlEntries.length > 0) {
+
+  // Authoritative check: resolve every emitted entry against the build output.
+  const precached = readWorkerPrecacheManifest(worker);
+  const pageEntries: string[] = [];
+  for (const entry of precached) {
+    const relative = precacheUrlToRelative(entry.url, base, "the generated precache manifest");
+    const absolute = join(outDir, relative);
+    const exists = existsSync(absolute);
+    if (describesGeneratedPage(relative)) {
+      pageEntries.push(entry.url);
+      continue;
+    }
+    if (!exists) {
+      fail(
+        `the generated service worker precaches ${JSON.stringify(entry.url)}, which is not part of the build output (${relative}); a precache entry must name a real artifact`,
+      );
+    }
+    if (!isStaticAssetPath(relative)) {
+      fail(
+        `the generated service worker precaches ${JSON.stringify(entry.url)} (${relative}), which Folio cannot classify as a static asset`,
+      );
+    }
+  }
+  if (pageEntries.length > 0) {
     fail(
-      `the generated service worker precaches HTML (${htmlEntries.slice(0, 3).join(", ")}); article content must stay out of the offline shell`,
+      `the generated service worker precaches generated pages (${pageEntries.slice(0, 3).join(", ")}); ` +
+        "article content must stay out of the offline shell, and a directory, alias or percent-encoded URL is still that page",
     );
   }
   for (const forbidden of ["sw.js", "registerSW.js"]) {
-    if (precached.includes(forbidden)) {
+    if (precached.some((entry) => precacheUrlToRelative(entry.url, base, "sw") === forbidden)) {
       fail(`the generated service worker precaches ${forbidden}; a stale worker copy must never ship`);
     }
   }
@@ -457,6 +796,7 @@ export function folioPwa(options: FolioPwaOptions): Plugin[] {
 
   const updateMode: FolioPwaUpdateMode = options.updateMode ?? "prompt";
   const versionFile = options.versionFile ?? FOLIO_PWA_CONTENT_VERSION_FILE;
+  validateConsumerPrecacheEntries(options, versionFile);
   const manifest = resolveManifest(options);
 
   let config: ResolvedConfig | undefined;
@@ -632,7 +972,7 @@ export function folioPwa(options: FolioPwaOptions): Plugin[] {
           resolve(config.root, config.build.outDir),
           config.base,
           versionFile,
-          updateMode,
+          options.icons,
         );
       },
     },

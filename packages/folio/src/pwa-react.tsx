@@ -26,7 +26,9 @@ import {
 import { useRegisterSW } from "virtual:pwa-register/react";
 import {
   FOLIO_PWA_UPDATE_CHECK_INTERVAL_MS,
+  folioPwaRegistrationState,
   shouldCheckFolioPwaUpdate,
+  type FolioPwaRegistrationState,
 } from "./core/pwa-update";
 
 /** Options shared by the hook and the default prompt. */
@@ -55,6 +57,22 @@ export type FolioPwaUpdateOptions = {
 };
 
 export type FolioPwaUpdateState = {
+  /**
+   * True when the browser exposes the Service Worker API. When false, nothing
+   * will ever register and `registrationState` stays "unsupported" instead of
+   * leaving a consumer to interpret "no callback yet" forever.
+   */
+  supported: boolean;
+  /**
+   * Observable registration state derived from the upstream client callbacks.
+   * Folio does not run a second Service Worker state machine: "registering",
+   * "registered" and "failed" are the three outcomes
+   * `virtual:pwa-register/react` can report, plus "unsupported" for a browser
+   * without the API.
+   */
+  registrationState: FolioPwaRegistrationState;
+  /** Convenience flag: `registrationState === "registered"`. */
+  registered: boolean;
   /** True when a new deployment is waiting for confirmation. */
   needRefresh: boolean;
   /** True when the current deployment finished precaching for offline use. */
@@ -94,15 +112,29 @@ export function useFolioPwaUpdate(
   const registrationRef = useRef<ServiceWorkerRegistration | undefined>(undefined);
   const lastCheckedAtRef = useRef<number | null>(null);
 
+  // Read once per hook instance: the API is either present for the lifetime of
+  // the page or never. `useState` keeps the value stable across renders without
+  // a DOM read on every render.
+  const [supported] = useState(
+    () => typeof navigator !== "undefined" && "serviceWorker" in navigator,
+  );
+  // Only the latest registration event matters, so both callbacks write the same
+  // slot: tracking two booleans would let a stale success mask a later failure.
+  const [registrationEvent, setRegistrationEvent] = useState<
+    "registered" | "failed" | undefined
+  >(undefined);
+
   const { needRefresh, offlineReady, updateServiceWorker } = useRegisterSW({
     immediate,
     onRegisteredSW: (swScriptUrl, registration) => {
       registrationRef.current = registration;
+      setRegistrationEvent("registered");
       onRegisteredSW?.(swScriptUrl, registration);
     },
     onRegisterError: (error) => {
       // Surfaced to the consumer, never swallowed: a failed registration is
       // observable while the site itself keeps working.
+      setRegistrationEvent("failed");
       onRegisterError?.(error);
     },
   });
@@ -156,7 +188,16 @@ export function useFolioPwaUpdate(
     needRefresh[1](false);
   }, [needRefresh]);
 
+  const registrationState = folioPwaRegistrationState({
+    supported,
+    registered: registrationEvent === "registered",
+    failed: registrationEvent === "failed",
+  });
+
   return {
+    supported,
+    registrationState,
+    registered: registrationState === "registered",
     needRefresh: needRefresh[0] && !dismissed,
     offlineReady: offlineReady[0],
     confirmUpdate,
@@ -164,6 +205,8 @@ export function useFolioPwaUpdate(
     checkForUpdate,
   };
 }
+
+export type { FolioPwaRegistrationState } from "./core/pwa-update";
 
 export type FolioPwaUpdatePromptProps = FolioPwaUpdateOptions & {
   /** Prompt headline. Defaults to a Chinese/English-neutral short sentence. */
