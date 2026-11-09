@@ -37,9 +37,44 @@ The package is ESM (`"type": "module"` with `import`/`default` export conditions
 | --- | --- |
 | `@uichat-mira/folio` | Content parsing, configuration helpers, React runtime (`FolioApp`, `FolioHeader`, `FolioDocsShell`, `FolioMarkdown`), Markdown rendering, search and doc-structure helpers |
 | `@uichat-mira/folio/vite` | The `folio()` Vite plugin, `virtual:folio/content`, and the static publishing helpers and types |
+| `@uichat-mira/folio/pwa` | Optional `folioPwa()` Vite integration and the deterministic content-version helper. Emits a manifest, a Workbox service worker and `folio-version.json`; nothing is emitted unless a consumer calls it |
+| `@uichat-mira/folio/pwa/react` | Optional `FolioPwaUpdatePrompt` and `useFolioPwaUpdate()`. Wraps the upstream `virtual:pwa-register/react` client, adds a throttled start/foreground update check and a prompt that never reloads without confirmation |
 | `@uichat-mira/folio/styles.css` | The default design tokens and stylesheet (CSS only) |
 
 Peer requirements: React `^19`, React DOM `^19`, React Router DOM `^7`, and Vite `^7`. Folio's own `engines.node` declares `>=20`, but the Vite 7 peer requires Node.js `20.19+` or `22.12+`; use Node 24 for the tested build and release workflow.
+
+## Optional PWA contract (FOL-039)
+
+The PWA entries above are additive and explicit. This section is the 0.1.x
+promise for them; it does not change the plain `folio()` contract.
+
+- **Opt-in only.** `folio()` never emits a manifest, a Service Worker or a
+  registration script. A consumer that does not call `folioPwa()` gets exactly
+  the previous behavior and does not install Workbox.
+- **Optional peers.** `vite-plugin-pwa` (`^2`) and `workbox-window` (`^7.4.1`)
+  are declared with `peerDependenciesMeta.optional`, so `npm install
+  @uichat-mira/folio` stays dependency-free for sites that do not opt in. A
+  consumer that opts in installs both.
+- **Upstream engine.** The integration uses `vite-plugin-pwa` with the
+  `generateSW` strategy and Workbox; Folio supplies configuration, not a second
+  Service Worker engine, cache layer or update state machine.
+- **Deployment scope follows `base`.** `manifest.scope`, `start_url` and `id` are
+  derived from the Vite `base`; a consumer-supplied `scope` that disagrees fails
+  the build. The same config therefore works at `/` and at `/sub-path/`.
+- **Multi-page safety.** No `navigateFallback` (an unknown URL reaches the real
+  `404.html`), no HTML in the precache, no implicit runtime caching, and
+  `cleanupOutdatedCaches` for old precaches. Unsafe `workbox` options
+  (`navigateFallback*`, HTML glob patterns) are rejected at config time.
+- **Content-only publications are visible.** `folio-version.json` is a SHA-256
+  prefix over every generated HTML page and is precached as a revisioned entry,
+  so a Markdown-only edit produces a new Service Worker. No full-site HTML
+  precache is involved.
+- **Prompt-first updates.** `updateMode: "prompt"` is the default: the waiting
+  worker only activates after the reader confirms. `"auto"` is a separate
+  explicit mode and must not be paired with the prompt UI.
+- **Not in scope:** Web Push, offline article/whole-site reading, background
+  sync, offline writes, and any change to Folio's Markdown, routing, TOC, SEO,
+  sitemap, robots or 404 semantics.
 
 ## Independent consumer verification and virtual module types
 

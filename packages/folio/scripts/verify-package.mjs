@@ -65,6 +65,12 @@ const required = [
   "dist/vite.d.ts",
   "dist/virtual.d.ts",
   "dist/styles.css",
+  // FOL-039: the optional PWA entries. They must ship, but nothing else may
+  // acquire PWA behavior implicitly.
+  "dist/pwa.js",
+  "dist/pwa.d.ts",
+  "dist/pwa-react.js",
+  "dist/pwa-react.d.ts",
 ];
 
 for (const path of required) {

@@ -183,6 +183,93 @@ const checks = [
       return `${entryFile} (${css.length} bytes)`;
     },
   },
+  {
+    // FOL-039: the optional PWA integration must resolve through the published
+    // export map from the installed tarball, without the consumer installing
+    // anything beyond the declared optional peers.
+    label: "pwa",
+    async run() {
+      for (const [subpath, file, names] of [
+        [
+          "@uichat-mira/folio/pwa",
+          "pwa.js",
+          ["folioPwa", "computeFolioContentVersion", "FOLIO_PWA_CONTENT_VERSION_FILE"],
+        ],
+        ["@uichat-mira/folio/pwa/react", "pwa-react.js", ["FolioPwaUpdatePrompt", "useFolioPwaUpdate"]],
+      ]) {
+        const url = import.meta.resolve(subpath);
+        const entryFile = fileURLToPath(url);
+        assert.match(
+          normalize(entryFile),
+          new RegExp(`\\/dist\\/${file.replace(".", "\\.")}$`),
+          `${subpath} resolved to ${entryFile}, expected dist/${file}`,
+        );
+        assert.ok(isInside(entryFile, packageDir), `${subpath} escaped the package: ${entryFile}`);
+        // The plugin half is a pure config helper and loads in Node.
+        //
+        // The React half is deliberately *not* imported here: it imports
+        // `virtual:pwa-register/react`, which only exists inside a Vite build.
+        // That is the upstream client contract (the same restriction applies to
+        // `vite-plugin-pwa` itself), so this check asserts the published entry,
+        // its declarations and that it defers to the virtual module instead of
+        // pretending a Node import works.
+        if (subpath.endsWith("/react")) {
+          const source = readFileSync(entryFile, "utf8");
+          assert.match(
+            source,
+            /from "virtual:pwa-register\/react"/,
+            `${subpath} does not delegate to the official update client`,
+          );
+          for (const name of names) {
+            assert.ok(
+              source.includes(name),
+              `${subpath} build output does not expose ${name}`,
+            );
+          }
+          const declarations = readFileSync(
+            join(dirname(entryFile), "pwa-react.d.ts"),
+            "utf8",
+          );
+          for (const name of [...names, "FolioPwaUpdateState", "FolioPwaUpdateOptions"]) {
+            assert.ok(
+              declarations.includes(name),
+              `dist/pwa-react.d.ts is missing ${name}`,
+            );
+          }
+        } else {
+          const entry = await import(subpath);
+          for (const name of names) {
+            assert.ok(name in entry, `${subpath} does not export ${name}`);
+          }
+          assert.equal(entry.FOLIO_PWA_CONTENT_VERSION_FILE, "folio-version.json");
+          // Validation runs before any build, so an unsafe consumer config fails
+          // immediately instead of shipping a broken worker.
+          assert.throws(
+            () =>
+              entry.folioPwa({
+                config: { title: "Consumer", description: "Tarball consumer" },
+                icons: [{ src: "icon-192.png", sizes: "192x192" }],
+              }),
+            /at least 512x512/,
+            "the installed folioPwa() did not validate its icons",
+          );
+          const plugins = entry.folioPwa({
+            config: { title: "Consumer", description: "Tarball consumer" },
+            icons: [
+              { src: "icon-192.png", sizes: "192x192" },
+              { src: "icon-512.png", sizes: "512x512" },
+            ],
+          });
+          assert.ok(Array.isArray(plugins) && plugins.length > 0, "folioPwa() returned no plugins");
+          assert.ok(
+            plugins.some((plugin) => plugin.name === "folio:pwa"),
+            "the installed folioPwa() did not return the Folio plugin",
+          );
+        }
+      }
+      return "dist/pwa.js + dist/pwa-react.js (folioPwa, update hook, prompt)";
+    },
+  },
 ];
 
 const failures = [];
