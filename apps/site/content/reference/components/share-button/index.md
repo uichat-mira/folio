@@ -59,7 +59,7 @@ type FolioShareButtonProps = {
 
 - 触发器是原生 `<button type="button">`，可用 Enter/Space 激活；可访问名称来自状态标签，紧凑模式下的 SVG 标记为 `aria-hidden`，不参与命名。
 - 状态变化只更新可访问名称与 `title`，没有 `aria-live`；如需屏幕阅读器播报结果，消费站应自行提供状态区域。
-- 组件没有响应式布局；官方站在移动 Header 中使用 `compact` 图标形态，桌面文章工具栏使用文字形态。两者行为一致。
+- 组件不决定响应式布局；默认移动 Header 使用 `compact` 图标形态。普通 Article/Page 不再自动注入桌面工具栏，消费站如需正文分享可自行组合此组件。
 
 ## 浏览器与安全上下文
 
@@ -72,4 +72,4 @@ type FolioShareButtonProps = {
 
 `FolioShareButton` 不生成短链接、分享统计、社交卡片（Open Graph/Twitter metadata）或服务端分享记录；这些若需要应由消费站或构建层另行实现。
 
-在 Folio 官方站中，它用于 Header 移动工具区和文章/普通页面工具栏；文档阅读页顶部的旧分享工具栏已移除，`FolioDocsShell` 的 `share` 选项也仅为源码兼容而保留。不要因为组件存在就重新把分享按钮插入技术文档正文。页面的社交元数据由静态站点构建生成，与本组件无关。
+Folio 默认在移动 Header 工具区提供分享入口；Article/Page 与文档阅读页正文上方均不再渲染分享工具栏。消费者仍可自行组合公开的 `FolioShareButton`；`FolioDocsShell` 的 `share` 参数仅为源码兼容保留。页面的社交元数据由静态站点构建生成，与本组件无关。

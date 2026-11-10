@@ -52,18 +52,25 @@ test("Folio core static docs match the uncluttered runtime; articles retain thei
       ...docs[0], id: "story", path: "/blog/story", type: "article",
       title: "文章", group: "Blog", sourcePath: "blog/story.md", collection: undefined,
     };
+    const page = {
+      ...docs[0], id: "about", path: "/about", type: "page",
+      title: "关于", group: "Folio", sourcePath: "about.md", collection: undefined,
+    };
     writeFolioStaticSite({
       config: { title: "Folio", description: "Test", siteUrl: "https://example.com" },
-      docs: [...docs, article], roots: [], base: "/", outDir: dir,
+      docs: [...docs, article, page], roots: [], base: "/", outDir: dir,
     });
     const docHtml = readFileSync(resolve(dir, "reference/vite/index.html"), "utf8");
     const articleHtml = readFileSync(resolve(dir, "blog/story/index.html"), "utf8");
+    const pageHtml = readFileSync(resolve(dir, "about/index.html"), "utf8");
     assert.match(docHtml, /<main class="folio-doc-main"><h1>Vite 构建集成<\/h1>/);
     assert.doesNotMatch(docHtml, /folio-doc-toolbar|folio-share-button/);
     assert.match(docHtml, /aria-label="文档目录"/);
     assert.match(docHtml, /class="folio-tree-nav folio-tree-nav--sections"/);
-    assert.match(articleHtml, /folio-doc-toolbar/);
-    assert.match(articleHtml, /<h1>文章<\/h1>/);
+    assert.doesNotMatch(articleHtml, /folio-doc-toolbar|folio-eyebrow|folio-share-button/);
+    assert.match(articleHtml, /<main class="folio-doc-page"><h1>文章<\/h1>/);
+    assert.doesNotMatch(pageHtml, /folio-doc-toolbar|folio-eyebrow|folio-share-button/);
+    assert.match(pageHtml, /<main class="folio-prerender"><h1>关于<\/h1>/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

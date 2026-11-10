@@ -78,7 +78,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 | --- | --- | --- |
 | `search` | `true` | 隐藏 Header 搜索按钮与 `Ctrl/Cmd + K` 覆盖层。 |
 | `theme` | `true` | 隐藏主题切换，并停止写入 `data-folio-theme`；页面保持样式表默认（浅色）token。 |
-| `share` | `true` | 隐藏文章页的分享按钮。 |
+| `share` | `true` | 设为 `false` 隐藏移动 Header 分享；Article/Page 正文默认不带分享工具栏。 |
 | `docsShell` | `true` | `type: doc` 不再使用 `FolioDocsShell` 阅读布局，按普通页面渲染，没有侧栏、页内目录与上一篇／下一篇。 |
 | `footerOnDocs` | `true` | 文档阅读布局内同时隐藏站点 Footer 与 `articleFooter`；首页、文章与普通页面不受影响。 |
 | `defaultTheme` | `"system"` | 取值 `"light"`、`"dark"` 或 `"system"`，决定首次加载的明暗偏好。 |
