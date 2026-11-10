@@ -5,7 +5,7 @@ type: doc
 collection: 参考
 section: API
 order: 45
-status: draft
+status: published
 tags: [React, Pagination, API]
 ---
 
@@ -13,7 +13,7 @@ tags: [React, Pagination, API]
 
 ## 版本与发布状态
 
-本页描述当前 `dev` 源码。npm 最新发布版 `0.1.1`（Git tag `folio-v0.1.1`）**未导出** `FolioPageNav`，因此本页保持 `status: draft`。安装 `0.1.1` 时不能按本页示例导入该组件；本页适用于当前 `dev` 或包含该导出的后续版本。
+本页描述当前 `dev` 源码。npm 最新发布版 `0.1.1`（Git tag `folio-v0.1.1`）**未导出** `FolioPageNav`，。安装 `0.1.1` 时不能按本页示例导入该组件；本页适用于当前 `dev` 或包含该导出的后续版本。 `status: published` 仅表示文档内容已审校，不表示此组件已包含在 npm 0.1.1 中。
 
 ## 导入与最小用法
 

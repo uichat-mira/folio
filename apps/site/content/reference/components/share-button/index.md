@@ -5,7 +5,7 @@ type: doc
 collection: 参考
 section: API
 order: 80
-status: draft
+status: published
 tags: [Share, React, Browser]
 ---
 
@@ -13,7 +13,7 @@ tags: [Share, React, Browser]
 
 ## 版本与发布状态
 
-`FolioShareButton` 已包含在 npm 发布版 `0.1.1`（Git tag `folio-v0.1.1`）中；当前 `dev` 与发布版实现一致。页面本身随当前 `dev` 文档批次新增，因此保持 `status: draft`；组件能力已发布。本页适用于 `0.1.1` 及当前 `dev`。
+`FolioShareButton` 已包含在 npm 发布版 `0.1.1`（Git tag `folio-v0.1.1`）中；当前 `dev` 与发布版实现一致。页面已经完成内容审校，`status: published` 仅表示文档成熟，不表示新增 API 已发布；组件能力已发布。本页适用于 `0.1.1` 及当前 `dev`。
 
 ## 导入与最小用法
 
