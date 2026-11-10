@@ -14,14 +14,18 @@ tags:
 
 Folio 的写作单位是一个带 YAML Frontmatter 的 Markdown 文件。文件放进内容目录后，会被解析成 `FolioDoc`，同时获得路由、导航位置与静态页面。
 
-写一篇内容只需要三步：选类型、写 Frontmatter、写正文。
+这一页只讲实际写作流程：字段怎么写见 [Frontmatter 与元数据](/guide/frontmatter-fields)，放在哪、怎么排序见 [内容组织与排序](/guide/organizing-content)，正文语法与安全边界见 [Markdown 写作](/guide/markdown-runtime)。
 
 ## 写作流程
 
-1. 在 `content/` 下新建 `.md` 文件。
-2. 写 `title` 与 `description`，按需补充 `type`、`collection`、`section`、`order` 等字段。
-3. 用 h2–h4 组织正文；h1 由页面布局负责，不需要在正文里重复。
-4. 运行 `npm run dev`，打开对应路由检查排版、导航与链接。
+从新建文件到可阅读页面，按这个顺序走：
+
+1. **创建内容**：在 `content/` 下新建 `.md` 文件，路径按目标 URL 设计。
+2. **选择类型**：文档用 `doc`，按日期发布的长文用 `article`，独立阅读页用 `page`；布局差异见 [内容类型与路由](/guide/content-types)。
+3. **设置元数据**：先写 `title` 与 `description`，再按类型补导航与时间字段；文章加 `category` 与 `tags`。写法见 [Frontmatter 与元数据](/guide/frontmatter-fields)。
+4. **组织阅读**：把页面放进已有的 `collection` / `section`，用 `order` 固定顺序；文章选择单分类与多标签。见 [内容组织与排序](/guide/organizing-content)。
+5. **写 Markdown**：用 h2–h4 组织正文，h1 由页面布局负责，不需要在正文里重复。
+6. **本地检查**：运行 `npm run dev`，打开对应路由检查排版、导航与链接；提交前执行 typecheck 与站点 build。
 
 一个最小文档：
 
@@ -44,32 +48,23 @@ type: doc
 
 ## 选择内容类型
 
-| 类型 | 适合写什么 | 阅读布局 |
-| --- | --- | --- |
-| `doc` | 文档、指南、参考 | 左侧导航 + 页内目录 |
-| `article` | 博客、按日期阅读的长文 | 文章布局 + 页内目录 |
-| `page` | 独立案例、附录、自定义页面 | 普通页面，无侧栏 |
+三种类型的用途不同：
 
-未写 `type` 时，`blogs/*` 推断为 `article`，其他目录（包括 `projects/*`）推断为 `doc`。每种类型的布局差异与路由规则见 [内容类型与路由](/guide/content-types)。
+- `doc`：需要侧栏导航、连续阅读或父子层级的内容。
+- `article`：按 `date` 发布、需要文章布局与归档入口的内容。
+- `page`：不进入侧栏与分页的独立阅读材料，必须从至少一篇文档链入。
+
+未写 `type` 时，`blogs/*` 推断为 `article`，其他目录推断为 `doc`。每种类型的布局与路径规则见 [内容类型与路由](/guide/content-types)。
 
 ## Frontmatter 写什么
 
-| 字段 | 必填 | 作用 |
-| --- | --- | --- |
-| `title` | 是 | 页面、导航与 SEO 标题 |
-| `description` | 是 | 摘要与 metadata |
-| `type` | 推荐 | 决定阅读布局；缺省按目录推断 |
-| `group` | 推荐 | 侧栏分组；没有 `section` 时作为分组标题 |
-| `collection` / `section` | 按需 | 侧栏归属与分组 |
-| `order` | 推荐 | 组内排序，默认 99 |
-| `date` | 文章需要 | 文章之间按日期倒序 |
-| `tags` | 推荐 | 搜索与主题归类 |
-| `status` | 推荐 | `published`、`reference` 或 `active` |
-| `cover` | 按需 | 分享图与封面 |
-| `author` | 按需 | 署名；缺省使用 Git 首次提交作者 |
-| 其他字段 | 否 | 保留在 `doc.data`，由站点自行解释 |
+完整的逐字段说明只维护在 [Frontmatter 参考](/reference/frontmatter)；这里只列写作时先要满足的条件：
 
-字段默认值、类型推断与日期来源见 [Frontmatter 与元数据](/guide/frontmatter-fields) 和 [Frontmatter 参考](/reference/frontmatter)。
+- `title` 必填，作为页面、导航与 SEO 标题；`description` 写真实摘要。
+- `type` 决定阅读布局；缺省时按目录推断。
+- 文档用 `collection` / `section` 进入侧栏，`order` 默认 `99`。
+- 文章写 `date` 参与倒序排列，再写一个 `category` 和若干 `tags` 作为归档入口。
+- `author`、`cover`、`status` 等按站点约定添加；核心不认识的字段保留在 `doc.data`。
 
 ## 文件放在哪里
 
@@ -77,7 +72,7 @@ type: doc
 - `content/guide/start.md` → `/guide/start`
 - `content/guide/index.md` → `/guide`
 
-需要固定 URL 时，可以在 Frontmatter 里显式写 `path`。移动文件会改变默认路由，搬动前先检查站内链接与外部引用。
+需要固定 URL 时，可以在 Frontmatter 里显式写 `path`。显式 `path` 同时决定导航树中的位置；移动文件会改变默认路由，搬动前先检查站内链接与外部引用。
 
 ## 组织与排序
 
@@ -91,10 +86,13 @@ order: 11
 
 `collection` 决定侧栏，`section` 决定分组，`order` 决定组内顺序。文章按 `date` 倒序，独立页面不进入侧栏但必须从至少一篇文档链入。完整规则见 [内容组织与排序](/guide/organizing-content)。
 
+文章的分类与标签是另一套归档维度：`category` 只写一个值，`tags` 可以写多个；两者都不改变文章 URL、不进入侧栏，也不替代 `collection` / `section`。归档入口与配置见 [内容组织与排序](/guide/organizing-content)。
+
 ## 发布前检查
 
 - `title` 与 `description` 描述实际内容，不写营销口号。
 - `type`、`group`、`order` 与所在分区一致。
+- 文章只写一个 `category`，`tags` 先复用已有主题词。
 - 内部链接使用以 `/` 开头的真实 route，移动页面后同步更新引用。
 - 命令、字段与 API 名称对照当前源码，不把规划写成事实。
 - 运行 `npm run validate`，或至少执行 site 的 typecheck 与 build。
@@ -107,4 +105,5 @@ order: 11
 - [Frontmatter 与元数据](/guide/frontmatter-fields)
 - [内容组织与排序](/guide/organizing-content)
 - [Markdown 写作](/guide/markdown-runtime)
+- [Frontmatter 参考](/reference/frontmatter)
 - [内容协议](/guide/content-contract)
