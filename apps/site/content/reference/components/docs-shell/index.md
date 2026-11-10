@@ -69,13 +69,13 @@ type FolioDocsShellProps = {
 - 小于 780px：左侧导航收进菜单抽屉，页内目录仍用浮层；两者通过 `onNavigate` 在跳转后自动关闭。
 - 正文与分页之间是 `footer`；分页由独立的 [FolioPageNav](/reference/components/page-nav) 渲染，不占 `children` 的位置。
 
-## 与 FolioApp / slots 的组合
+## 与 FolioApp / Router / slots 的组合
 
+- 直接使用时必须位于 React Router 内；独立组合时先建立 Router，再接入 Header、本组件与 Footer。`FolioApp` 已提供 Router 并完成接线。
 - `FolioApp` 把 `slots.navigation` 接到 `renderNav`、`slots.docToc` 接到 `renderToc`，把 `slots.articleFooter` 接到 `footer`；`pageNeighbors` 由 Folio 默认推导。
 - `renderNav` 收到 `{ tree, currentPath, onNavigate }`，`renderToc` 收到 `{ headings, onNavigate }`；自定义渲染必须转发 `onNavigate`，否则移动端点击后抽屉或浮层不会关闭。
 - 文档页不受 `ui.footerOnDocs` 影响分页：分页槽位始终挂载，没有上一篇/下一篇时不输出标记；该选项只控制站点 Footer 与 `articleFooter`。
 - `ui.docsShell: false` 时整个组件不挂载，`type: doc` 按普通内容页渲染，没有侧栏、页内目录与上下篇。
-- 独立组合时，把 Router、`FolioHeader`、本组件和 `FolioFooter` 按站点需要拼装即可。
 
 ## React 与静态 HTML 边界
 

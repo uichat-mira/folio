@@ -98,9 +98,9 @@ updatedBy: Folio Maintainers
 
 浅克隆缺少首次提交证据时不推断创建者和创建时间；文件尚未提交时不假造历史记录。Frontmatter 显式 `author` 与 Git 首次提交作者不是同一个名字时，不会把提交者头像冒充文章作者。
 
-## 与 FolioDocumentBody / 静态输出的组合
+## 与 FolioApp / FolioDocumentBody 的组合
 
-- `FolioDocumentBody` 已内置 `<FolioDocMeta doc={doc} />`，文档页、文章页与独立 Page 都通过它复用，不需要逐篇再插一次。
+- 应用内由 `FolioDocumentBody` 自动渲染（它已内置 `<FolioDocMeta doc={doc} />`），文档页、文章页与独立 Page 都复用同一处；组件自身不需要 Router，也没有专用署名插槽。
 - 在 `FolioApp` 中没有专用的署名插槽：需要完全不同署名时，自行组合本组件或 `getFolioDocByline`，不要覆写 `.folio-doc-meta` 内部选择器。
 - 自建署名时使用 `getFolioDocByline(doc)`：它返回同一个 `{ author, date, readingMinutes }` 投影，React 与静态页共用。
 - 静态输出使用 `renderFolioStaticDocMeta(doc)`（`@uichat-mira/folio/vite`），与 React 端消费同一个 byline 模型和 `<time datetime>`。
@@ -118,6 +118,7 @@ updatedBy: Folio Maintainers
 - 没有作者、没有可信日期且正文为空时返回 `null`；这是正常空态，不是错误。
 - 头像只接受 `http(s)://` URL 或以单个 `/` 开头的站点路径；`//` 协议相对地址与 `data:` 会被忽略，回退首字。
 - 只有署名姓名与 Git 首次提交作者同名时才使用该提交者的 GitHub 头像。
+- `FolioDocMetaProps` 的 `Pick` 不含 `gitHistory`；要获得 Git 头像，传入的对象仍需带 `gitHistory`（实际构建产物传完整 `FolioDoc` 即可）。
 - 不显示 `updatedAt` / `updatedBy`；需要“最后更新”请用 `getFolioDocMeta`。
 - 阅读时长忽略代码，可能与页面字数统计不一致，也不代表实际阅读速度。
 - 组件不做作者身份认证；Git 作者只是提交历史证据。

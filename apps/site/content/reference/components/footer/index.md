@@ -106,8 +106,9 @@ export default defineFolioConfig({
 - 以 `/` 开头的 Logo 资源路径会按 `basename` 重写，其余 URL 原样使用。
 - `darkSrc` 存在时同时输出浅色与暗色两张图片，由 `[data-folio-theme="dark"]` 切换，不使用 CSS 滤镜反色；未提供时只显示 `src`。
 
-## 与 FolioApp / slots 的组合
+## 与 FolioApp / Router / slots 的组合
 
+- 直接使用时必须位于 React Router 内；`FolioApp` 已提供 Router，也会把 `basename` 传给站内链接与 `/` 开头的 Logo 路径。
 - `FolioApp` 默认在页面策略允许时渲染 `<FolioFooter footer={config.footer} siteTitle={config.title} />`。
 - 文档阅读页受 `ui.footerOnDocs` 控制（默认显示）；`ui.docsShell: false` 时 `type: doc` 不再算阅读布局，`footerOnDocs` 对它无效，站点 Footer 始终显示。
 - `slots.footer` 完全替换站点 Footer，消费站负责 `<footer>` landmark 与内部结构；Folio 不会在插槽外再包一层页脚。
