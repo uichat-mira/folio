@@ -68,7 +68,7 @@ test("Folio core static docs match the uncluttered runtime; articles retain thei
     assert.match(docHtml, /aria-label="文档目录"/);
     assert.match(docHtml, /class="folio-tree-nav folio-tree-nav--sections"/);
     assert.doesNotMatch(articleHtml, /folio-doc-toolbar|folio-eyebrow|folio-share-button/);
-    assert.match(articleHtml, /<main class="folio-doc-page"><h1>文章<\/h1>/);
+    assert.match(articleHtml, /<main class="folio-doc-page folio-article-main"><h1>文章<\/h1>/);
     assert.doesNotMatch(pageHtml, /folio-doc-toolbar|folio-eyebrow|folio-share-button/);
     assert.match(pageHtml, /<main class="folio-prerender"><h1>关于<\/h1>/);
   } finally {
