@@ -5,7 +5,7 @@ type: doc
 collection: 参考
 section: API
 order: 40
-status: draft
+status: published
 tags: [React, Docs, Layout]
 ---
 
@@ -98,7 +98,7 @@ type FolioDocsShellProps = {
 
 - 本文按 `dev` 源码 `packages/folio/src/docs-shell.tsx`、`ui/page-presentation.ts`（base `f49557c`）核对。
 - npm `0.1.1` 也导出 `FolioDocsShell`，但 Props 只有 `doc`、`docs`、`footer`、`share`、`children`；没有 `renderNav`、`renderToc`、`pageNeighbors`、`menuLabel`，当时的侧栏也不是统一 Core 导航树。
-- 页面状态保持 `draft`：本文描述的覆盖能力与统一导航树尚未随 `0.1.1` 发布。
+- 本页 `status: published` 只表示组件参考文档已经审校，并不表示 API 已随 npm 0.1.1 发布。具体可用版本以上文对照的公开导出与 Props 为准。
 
 ## 延伸阅读
 

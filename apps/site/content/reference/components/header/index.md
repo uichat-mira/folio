@@ -5,7 +5,7 @@ type: doc
 collection: 参考
 section: API
 order: 20
-status: draft
+status: published
 tags: [React, Header, Navigation]
 ---
 
@@ -108,7 +108,7 @@ type FolioHeaderProps = {
 
 - 本文按 `dev` 源码 `packages/folio/src/ui/header/Header.tsx` 的 `FolioHeaderProps`（base `f49557c`）核对。
 - npm `0.1.1` 也导出 `FolioHeader`，但 Props 只有 `config`、`navigation`、`currentDoc`、三个开关、`darkMode`、两个回调和 `actions`；没有 `docs` 与 `brand`，也没有下拉面板、`collection` 简称解析和分组面板。旧版只渲染 `{ label, href }` 一级链接。
-- 页面状态保持 `draft`：本文描述的是 dev 契约，已发布的 `0.1.1` 并不完整支持。
+- 本页 `status: published` 只表示组件参考文档已经审校，并不表示 API 已随 npm 0.1.1 发布。具体可用版本以上文对照的公开导出与 Props 为准。
 
 ## 延伸阅读
 

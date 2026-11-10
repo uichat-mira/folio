@@ -5,7 +5,7 @@ type: doc
 collection: 参考
 section: API
 order: 30
-status: draft
+status: published
 tags: [React, Footer, Configuration]
 ---
 
@@ -134,7 +134,7 @@ export default defineFolioConfig({
 
 - 本文按 `dev` 源码 `packages/folio/src/ui/footer/Footer.tsx`、`types.ts` 的 `FolioFooter*` 类型（base `f49557c`）核对。
 - npm `0.1.1` **没有导出 `FolioFooter`**；它的 `FolioConfig.footer` 只是 `string`，应用内固定渲染 `config.footer ?? "Built with Folio."`。结构化配置、`false` 与 `slots.footer` 都是 `0.1.1` 之后进入 dev 的候选能力。
-- 页面状态保持 `draft`：本文描述的结构化页脚尚未进入发布版本。
+- 本页 `status: published` 只表示组件参考文档已经审校，并不表示 API 已随 npm 0.1.1 发布。具体可用版本以上文对照的公开导出与 Props 为准。
 
 ## 延伸阅读
 

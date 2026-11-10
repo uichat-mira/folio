@@ -5,7 +5,7 @@ type: doc
 collection: 参考
 section: API
 order: 43
-status: draft
+status: published
 tags: [React, Metadata, Git, API]
 ---
 
@@ -127,7 +127,7 @@ updatedBy: Folio Maintainers
 
 - 本文按 `dev` 源码 `packages/folio/src/ui/doc-meta/DocMeta.tsx`、`core/doc-meta.ts`（base `f49557c`）核对。
 - npm `0.1.1` **不含** `FolioDocMeta`、`getFolioDocByline`、`getFolioDocMeta`；该版本的阅读页也不显示作者、日期与阅读时长。
-- 页面状态保持 `draft`：组件与数据模型尚未进入发布版本。
+- 本页 `status: published` 只表示组件参考文档已经审校，并不表示 API 已随 npm 0.1.1 发布。具体可用版本以上文对照的公开导出与 Props 为准。
 
 ## 延伸阅读
 

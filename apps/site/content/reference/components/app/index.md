@@ -5,7 +5,7 @@ type: doc
 collection: 参考
 section: API
 order: 10
-status: draft
+status: published
 tags: [React, Runtime, API]
 ---
 
@@ -155,7 +155,7 @@ import { FolioApp, FolioTreeNav, FolioToc } from "@uichat-mira/folio";
 
 - 本文按 `dev` 源码 `packages/folio/src/index.ts`、`ui-types.ts`、`app.tsx`（base `f49557c`）核对。
 - npm `0.1.1`（2026-11-01 发布）已导出 `FolioApp`，但其 `FolioSlots` 只有 `home`、`headerActions`、`articleFooter`；`ui` 没有 `footerOnDocs`；`config.footer` 只能是字符串；没有集合索引、归档路由以及 `headerBrand`/`navigation`/`docToc`/`footer` 插槽。
-- 页面状态保持 `draft`：本文描述的契约包含未随 `0.1.1` 发布的 dev 能力；改为 `published` 需要这些能力先进入发布版本。
+- 本页 `status: published` 只表示组件参考文档已经审校，并不表示 API 已随 npm 0.1.1 发布。具体可用版本以上文对照的公开导出与 Props 为准。
 
 ## 延伸阅读
 
