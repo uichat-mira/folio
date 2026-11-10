@@ -13,7 +13,7 @@ tags: [Navigation, Tree, Core, API, React]
 
 ## 版本与发布状态
 
-本页描述当前 `dev` 源码中的公开接口。npm 最新发布版 `0.1.1`（Git tag `folio-v0.1.1`）**未导出** `FolioTreeNav`、`buildFolioNavigationTree`、`buildFolioContentTree` 等能力，。安装 `0.1.1` 时不能按下面的示例导入这些符号；这些说明适用于包含上述导出的当前 `dev` 或后续发布版本。 `status: published` 仅表示文档内容已审校，不表示此组件已包含在 npm 0.1.1 中。
+本页描述当前 `dev` 源码中的公开接口。npm 最新发布版 `0.1.1`（Git tag `folio-v0.1.1`）**未导出** `FolioTreeNav`、`buildFolioNavigationTree`、`buildFolioContentTree` 等能力；安装 `0.1.1` 时不能按下面的示例导入这些符号；这些说明适用于包含上述导出的当前 `dev` 或后续发布版本。 `status: published` 仅表示文档内容已审校，不表示此组件已包含在 npm 0.1.1 中。
 
 ## 导入与最小用法
 

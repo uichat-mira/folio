@@ -13,7 +13,7 @@ tags: [Markdown, React, Rendering, Security]
 
 ## 版本与发布状态
 
-`FolioMarkdown` 与 `FolioMarkdownRenderOptions` 已包含在 npm 发布版 `0.1.1`（Git tag `folio-v0.1.1`）中；当前 `dev` 把实现文件从 `src/markdown.ts` 移到 `src/core/markdown.ts`，但渲染逻辑与公开 Props 一致。页面已经完成内容审校，`status: published` 仅表示文档成熟，不表示新增 API 已发布；组件能力已发布。本页适用于 `0.1.1` 及当前 `dev`。
+`FolioMarkdown` 与 `FolioMarkdownRenderOptions` 已包含在 npm 发布版 `0.1.1`（Git tag `folio-v0.1.1`）中；当前 `dev` 把实现文件从 `src/markdown.ts` 移到 `src/core/markdown.ts`，但渲染逻辑与公开 Props 一致。本页内容已审校，`status: published` 表示文档成熟；该组件已随 npm 0.1.1 发布。本页适用于 `0.1.1` 及当前 `dev`。
 
 ## 导入与最小用法
 
