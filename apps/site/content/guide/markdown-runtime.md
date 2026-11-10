@@ -14,6 +14,8 @@ tags:
 
 Folio 的正文使用 Markdown 编写。React 阅读页与静态输出共用同一个 `renderFolioMarkdown()` 渲染器，因此开发预览、线上页面与静态 HTML 的排版结果一致。
 
+这一页只讲正文里可见的语法与可信内容边界；Frontmatter 字段见 [Frontmatter 与元数据](/guide/frontmatter-fields)，页面组织见 [内容组织与排序](/guide/organizing-content)。
+
 ::: warning 只渲染可信仓库内容
 Folio 0.1.x 会原样保留 Markdown 里的原始 HTML、`::: html` 块与 Callout 正文，不做 HTML 清理，也不过滤 `javascript:` 链接。只应渲染经过审核并已合并的仓库内容；未经审核的投稿、抓取页面或外部 PR 预览不能直接交给当前渲染器。
 :::
