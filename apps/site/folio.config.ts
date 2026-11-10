@@ -17,12 +17,12 @@ export default defineFolioConfig({
     {
       path: "/guide",
       title: "指南",
-      description: "从定位、内容协议到运行时组合与静态发布的连续阅读路径。",
+      description: "从认识 Folio、运行首站、内容创作到配置与静态发布的连续学习路径。",
     },
     {
       path: "/reference",
       title: "参考",
-      description: "Frontmatter 字段、构建阶段、部署条件、案例与附录的查阅入口。",
+      description: "内容 API、React 组件、PWA、Article 归档、部署及历史资料的查阅入口。",
     },
     {
       path: "/blogs",
@@ -63,7 +63,7 @@ export default defineFolioConfig({
       {
         title: "Folio 资料",
         links: [
-          { label: "快速开始", href: "/guide/getting-started" },
+          { label: "首个可运行站点", href: "/guide/first-site" },
           { label: "关于 Folio", href: "/about" },
           { label: "Folio 源码", href: "https://github.com/uichat-mira/folio", newTab: true },
         ],

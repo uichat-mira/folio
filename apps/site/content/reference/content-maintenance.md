@@ -1,6 +1,6 @@
 ---
 title: 官方站点内容维护约定
-description: 官方站点文档的页面类型、Frontmatter、链接、事实核对规则与 26 篇既有内容审阅清单。
+description: 官方站页面分区、Frontmatter、编辑成熟度、版本核查与历史审阅记录的维护约定。
 group: 维护
 collection: 参考
 order: 90
@@ -16,10 +16,11 @@ tags:
 ## 内容边界
 
 - **开始**：第一次了解 Folio、内容协议和推荐阅读顺序。
-- **指南 · 入门**：安装、编写、Markdown 渲染。
-- **指南 · 概念**：内容模型、配置、导航、仓库边界。
-- **指南 · 组合**：React runtime 组合与静态发布。
-- **参考 · API**：按任务索引的 API、Frontmatter、Vite 与 SEO 契约。
+- **指南 · 入门**：产品定位、安装和首个可运行站点。
+- **指南 · 写作**：内容类型、Frontmatter、组织与 Markdown 渲染。
+- **指南 · 配置与组合**：导航、运行时、Core/UI/Build 边界。
+- **指南 · 发布**：静态构建、SEO 和部署。
+- **参考 · API**：Frontmatter、组件、Vite、PWA、Article 归档与静态 SEO。
 - **参考 · 部署 / 迁移 / 附录**：部署方式、迁移快照和独立附录。
 - **案例 / 博客 / 关于**：真实 consumer、设计研究和独立介绍页，不作为入门步骤。
 - **维护**：本页，供后续贡献者检查文档。
@@ -43,7 +44,7 @@ tags:
 - `group` 决定 sidebar 分组；新增文档应复用现有 group，不要为单页制造新分组。
 - `order` 决定组内顺序，保持稳定并留有间隔；文章优先按 `date` 排序。
 - `path` 只在需要固定 URL 时显式设置；默认由文件路径生成，修改文件位置前先检查旧链接。
-- `status` 建议使用 `published`（当前维护的正式内容）或 `reference`（导入或参考材料）。旧项目档案使用的 `active` 属于历史写法，不再作为新内容的推荐值。
+- `status` 是本站**内容编辑成熟度**：`published` 表示已审校的正式文档（即使它描述的是 dev-only API）；`draft` 表示待完成/待审校；`reference` 表示历史/外部参考。现有示例文章使用的 `dev-sample` 和退役项目中的 `active` 属历史值，不作为新文档的建议值。npm 发布状态始终另行说明。
 - `tags` 使用稳定主题词；新增前先复用已有标签。
 - 未识别的字段进入 `doc.data`。若 consumer 依赖该字段，必须在本页或对应 consumer 文档说明用途。
 
@@ -52,12 +53,12 @@ tags:
 ## 内容规则
 
 1. **先核对事实**：以当前 `dev` 的 `README.md`、`packages/folio/src`、公开导出、`apps/site/folio.config.ts`、`apps/site/vite.config.ts` 和真实构建结果为准。
-2. **区分源码与发布**：已发布 `0.1.1` 与 `dev` 候选契约必须明确标注。不要因为源码已实现就写成 npm 已发布能力。
+2. **区分源码与发布**：以 [消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md) 为单一权威，准确标注 npm 0.1.1 与 dev 能力差异；各页按需链接与简述，不复制第二份全量矩阵。`status: published` 不等于 npm API 已发布。
 3. **不把规划写成事实**：未实现能力、路线图和第三方研究必须标注状态与来源。
 4. **内部链接用真实路由**：跨分区链接使用 `/guide/...`、`/reference/...` 等以 `/` 开头的站点 route；官方站会在渲染时映射到 GitHub Pages base，不要写死 `/folio/`。避免依赖目录相对链接，因为静态尾斜杠与 React 路由解析不同。移动页面时同步更新所有引用。
 5. **代码示例可执行**：命令、字段和导出必须对应当前源码；已发布与未发布示例分开说明。
 6. **不重复维护政策**：Organization 政策、Issue 合同和发布流程链接到其所有者，不在站点内容中复制。
-7. **更新责任**：改变公开行为、配置字段或构建输出的 PR，必须同时更新对应文档和本页清单；只改文案的 PR 不需要扩张范围。
+7. **更新责任**：公开行为、配置或构建产物变化时，同步维护权威消费者契约和对应 Guide/Reference；不在本页重复维护当前全部文件清单。
 
 ## 提交前检查
 
@@ -68,43 +69,16 @@ tags:
 - 已发布能力与 `dev` 候选能力没有混写。
 - 运行 `npm run typecheck -w @uichat-mira/folio-site` 与 `npm run build -w @uichat-mira/folio-site`，并检查构建输出中的 route/链接。
 
-## 26 篇既有内容审阅清单
+## 历史审阅与当前覆盖
 
-本次治理只调整内容、信息架构和元数据，不搬动无必要的文件。
+[FOL-036（Issue #144）](https://github.com/uichat-mira/folio/issues/144) 在 2026-11-03 审阅的**26 篇**属于当时的历史记录，并非当前文档总数；FOL-035 此后还退役了旧 `projects/*` 页面。
 
-| 内容 | 目的 / 读者 | 处理结果 |
-| --- | --- | --- |
-| `guide/introduction.md` | 认识 Folio、理解边界 | 修正：更新 `0.1.1` 发布状态，补推荐阅读路径与维护入口。 |
-| `guide/content-contract.md` | 内容协议最小约定 | 修正：补核心字段、默认行为、扩展字段与相关文档。 |
-| `guide/runtime-composition.md` | 组合 React runtime 的公开边界 | 保留正文；重分组并补配置、导航、静态发布链接。 |
-| `guide/static-publishing.md` | 静态发布与无 JS 阅读边界 | 修正：说明代表路由与实际内容路由，补相关文档；重分组。 |
-| `reference/overview.md` | 原产品介绍与 API 入口重复 | 改写为按任务组织的「参考索引」：只放查证型入口，按顺序读的内容指向指南。 |
-| `guide/getting-started.md` | 仓库开发与 consumer 接入 | 修正：`0.1.1`、Node/CI 说明、虚拟模块类型说明、下一步路径。 |
-| `guide/authoring.md` | 创建文档、文章、独立页面 | 修正：字段表补 collection/section 与默认值，链接 Frontmatter 参考。 |
-| `guide/content-model.md` | `FolioDoc` 与路径规则 | 修正：类型补 collection/section/publishedAt/updatedAt，标注候选契约。 |
-| `guide/configuration.md` | `FolioConfig`、plugin、slots | 修正：补 `author`、静态选项状态与参考链接；重分组。 |
-| `guide/navigation.md` | virtual manifest、group 与导航 | 保留正文；重分组，排序规则由内容协议统一说明。 |
-| `guide/architecture.md` | 仓库、consumer 与 Skill 边界 | 修正：工作流路径改为 `.github/workflows`；重分组。 |
-| `guide/markdown-runtime.md` | Markdown、Callout、Mermaid、锚点 | 修正：版本表述改为 `0.1.x`，补标题锚点与相关链接；重分组。 |
-| `reference/migration-status.md` | MiraDocs → Folio 迁移事实 | 修正：明确为带日期的快照，指向 API 索引；重分组。 |
-| `reference/github-pages.md` | GitHub Pages 项目路径部署 | 修正：按 job 说明 build/deploy 权限与 `prod` 部署条件；重分组。 |
-| `reference/cloudflare-pages.md` | 下游 Cloudflare Pages 案例 | 保留正文；重分组，继续标注为非核心案例。 |
-| `reference/frontmatter.md` | 字段、默认值、日期、扩展 | 修正：补默认值表、collection/section、日期与 author 说明。 |
-| `reference/build-integration.md` | Vite plugin 与静态输出阶段 | 修正：发布版本更新为 `0.1.1`；重分组。 |
-| `reference/seo.md` | 静态 route、metadata、sitemap、robots | 修正：补 dev 候选字段、作者/日期与索引/feed 说明；重分组。 |
-| `reference/examples/apple.md` | Apple 设计研究参考 | 保留正文；核对站内入口与 `reference` 状态。 |
-| `reference/examples/claude.md` | Claude 设计研究参考 | 保留正文；核对站内入口与 `reference` 状态。 |
-| `reference/examples/product-design-system.md` | Claude 设计系统历史合并页 | 保留正文；核对锚点与 `reference` 状态。 |
-| `reference/examples/supabase.md` | Supabase 设计研究参考 | 保留正文；核对站内入口与 `reference` 状态。 |
-| `reference/typora-r2.md` | Typora 图片上传 R2 的写作工具附录 | 保留正文；重分组，保持独立 `page` 并由 API 索引链接。 |
-| `blogs/why-folio.md` | 为什么先 dogfood 官方站 | 保留正文；保持 `article` 与日期排序。 |
-| `reference/site.md` | 官方站作为公开 API 案例 | 修正：`status` 统一为 `published`，保持独立案例页。 |
-| `projects/folio.md`（历史，已退役） | 原项目状态与下一步 | 当时修正首发待办；FOL-035 后不再发布该项目档案，当前产品说明见 `about.md`。 |
+2026-11-10 合并 FOL-042～047 后，`dev` 的 `apps/site/content/**` 包含**48 篇 Markdown**：指南 15、参考 28、博客 4、关于 1。实际文档数量以 GitHub 内容树和构建路由为准，不再在本页手工维护会过时的逐篇清单。
 
-本次新增 `reference/content-maintenance.md`（即本页），不替代上述 26 篇的用户文档，只提供维护约定和审阅记录。表格保留原 26 篇治理时的历史审阅记录。除已明确标记退役的项目档案外，路径按「指南 / 参考」分区记录（`content/guide/`、`content/reference/`）；后续页面移动时应同步维护清单。
+重要新入口：[首个可运行站点](/guide/first-site)、[可选 PWA](/reference/pwa)、[Article 归档](/reference/article-archives)、[组件参考](/reference/components)。历史设计研究和 Typora 工具保留 URL，但不进入核心 API 学习路径。
 
 ## 已知保留项
 
 - 4 篇设计研究、Typora 附录和博客保留原有正文与来源说明；本次只核对入口、状态和链接，不重写第三方研究。
 - `reference/migration-status.md` 保留 2026-11-01 的发布快照；后续状态以 GitHub Releases、npm Registry 和当前源码为准。
-- `dev` 候选能力（日期、collection/home、feed、indexing）在相关页面标注为未包含在已发布 `0.1.1` 中，不在本站宣称已发布。
+- `collection` / `section` 已存在于 npm 0.1.1；`dev` 扩展的日期、首页、Feed、站点索引策略、归档与 PWA 需明确标注未进入已发布的 0.1.1。

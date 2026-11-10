@@ -48,11 +48,12 @@ author:
 | `order` | 组内排序数字 | `99` |
 | `collection` / `section` | consumer 级集合与章节 | 未设置 |
 | `date` | 文章日期 | 未设置；文章间按日期倒序 |
-| `tags` | 标签数组或 `|` / `,` 分隔字符串 | 空数组 |
-| `status` | 内容或项目状态 | 未设置 |
+| `tags` | 多标签：数组或 `|` / `,` / `，` 分隔字符串 | 空数组；Article 可生成标签归档（dev） |
+| `category` | Article 可选的单分类归档字段（dev） | 未设置；只有非空字符串有效 |
+| `status` | 可扩展的内容状态 | 未设置；本站的 `published` / `draft` / `reference` 是内容编辑成熟度，不是 npm 发布状态 |
 | `cover` | 封面或分享图 | 未设置 |
 
-`collection`、`section` 与下文的日期字段属于当前 `dev` 源码中的候选契约，尚未包含在已发布的 `0.1.1` 中。
+`collection`、`section` **已包含在 npm 0.1.1**。`category`、Article 归档与 Git-native 日期扩展则是当前 dev 已实现、尚未发布到 npm 0.1.1 的能力。参见 [Article 归档参考](/reference/article-archives) 与[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)。
 
 ## 日期字段
 
