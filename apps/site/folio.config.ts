@@ -5,11 +5,10 @@ export default defineFolioConfig({
   description: "Folio 是 Mira 组织的 Git-native 内容与门户发布引擎。以 Markdown 为内容源，在构建时组织并发布产品、文档与文章。",
   siteUrl: "https://uichat-mira.github.io",
   github: "https://github.com/uichat-mira/folio",
-  // Guide opens at its default collection landing; Reference deliberately
-  // opens the reviewed overview rather than the nested component catalogue.
+  // Both Guide and Reference open the first document in collection reading order.
   navigation: [
     { label: "指南", collection: "/guide" },
-    { label: "参考", href: "/reference/overview", collection: "/reference" },
+    { label: "参考", collection: "/reference" },
     { label: "博客", href: "/blogs" },
     { label: "关于", href: "/about" },
   ],

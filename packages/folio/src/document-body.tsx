@@ -4,7 +4,7 @@ import { FolioDocMeta } from "./ui/doc-meta";
 import type { FolioDoc } from "./types";
 
 /**
- * Shared reading content; outer shells own navigation, toolbars and footers.
+ * Shared reading content; outer shells own navigation and footers.
  * An explicit child replaces only the Markdown body, never document metadata.
  */
 export function FolioDocumentBody({

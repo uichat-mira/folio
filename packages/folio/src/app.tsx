@@ -22,7 +22,6 @@ import { FolioDocsShell } from "./docs-shell";
 import { FolioNavigationStateProvider } from "./ui/tree-nav/NavigationState";
 
 import { SearchIcon } from "./icons";
-import { FolioShareButton } from "./share";
 import { FolioDocumentBody } from "./document-body";
 import { FolioToc } from "./ui/toc";
 import { searchFolioDocs } from "./core/search";
@@ -64,24 +63,16 @@ function resolveInitialTheme(preference: FolioThemePreference): "light" | "dark"
 function DocumentPage({
   doc,
   footer,
-  share,
   tags,
 }: {
   doc: FolioDoc;
   footer?: ReactNode;
-  share: boolean;
   tags?: readonly FolioEntryTagLink[];
 }) {
   const articleToc = doc.type === "article" && doc.headings.length > 0;
   const mobileTocRef = useRef<HTMLDetailsElement>(null);
   const body = (
     <main className={"folio-doc-page" + (articleToc ? " folio-article-main" : "")}>
-      {doc.type !== "doc" ? (
-        <div className="folio-doc-toolbar">
-          <div className="folio-eyebrow">{doc.group}</div>
-          {share ? <FolioShareButton title={doc.title} text={doc.description} /> : null}
-        </div>
-      ) : null}
       {doc.type === "article" ? <FolioArticleTags links={tags} /> : null}
       <FolioDocumentBody doc={doc} />
       {footer}
@@ -652,7 +643,6 @@ function Shell({
                     <DocumentPage
                       doc={doc}
                       footer={articleFooter}
-                      share={shareEnabled}
                       tags={archive.tagsByDoc.get(doc.path)}
                     />
                   )

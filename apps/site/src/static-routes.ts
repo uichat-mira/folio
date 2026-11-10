@@ -27,12 +27,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { HomePage } from "./HomePage";
 
-const TYPE_LABEL: Record<string, string> = {
-  doc: "文档",
-  article: "文章",
-  page: "页面",
-};
-
 function href(base: string, path: string): string {
   const prefix = base === "/" ? "/" : base.replace(/\/+$/, "") + "/";
   const route = path.startsWith("/") ? path.slice(1) : path;
@@ -152,8 +146,6 @@ function renderArticle(
       "</nav>"
     : "";
   const article = '<main class="folio-doc-page folio-article-main">' +
-    '<div class="folio-doc-toolbar"><div class="folio-eyebrow">' +
-    folioEscapeHtml(doc.group) + '</div></div>' +
     tags +
     renderFolioStaticDocumentBody(doc, markdown(doc, context.base)) + '</main>';
   const toc = renderFolioStaticToc(doc.headings);
@@ -167,11 +159,7 @@ function renderGeneric(context: FolioStaticBuildContext, doc: FolioDoc): string 
   return (
     '<main class="folio-prerender folio-prerender--' +
     folioEscapeHtml(doc.type) +
-    '"><p class="folio-prerender__eyebrow">' +
-    folioEscapeHtml(doc.group) +
-    " · " +
-    folioEscapeHtml(TYPE_LABEL[doc.type] ?? doc.type) +
-    "</p><h1>" +
+    '"><h1>' +
     folioEscapeHtml(doc.title) +
     "</h1>" +
     (doc.description ? "<p>" + folioEscapeHtml(doc.description) + "</p>" : "") +

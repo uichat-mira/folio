@@ -50,6 +50,8 @@ assert.doesNotMatch(
 );
 assert.match(article, /folio-article-main/);
 assert.match(article, /folio-article-tags/);
+assert.doesNotMatch(article, /folio-doc-toolbar|folio-eyebrow/);
+assert.doesNotMatch(about, /folio-doc-toolbar|folio-prerender__eyebrow/);
 assert.match(category, /folio-archive-page/);
 assert.match(category, /folio-entry-list/);
 assert.match(category, /href="[^"]*\/blogs\/content-stays-in-git"/);

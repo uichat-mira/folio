@@ -133,8 +133,6 @@ export const REQUIRED_SELECTOR_FAMILIES = [
       ".folio-card-grid",
       ".folio-home",
       ".folio-doc-page",
-      ".folio-doc-toolbar",
-      ".folio-eyebrow",
       ".folio-lede",
       ".folio-not-found",
     ],

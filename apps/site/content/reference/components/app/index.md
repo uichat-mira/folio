@@ -56,7 +56,7 @@ type FolioAppProps = {
 | --- | --- | --- |
 | `search` | `true` | `false` 时不渲染搜索按钮、不注册 ⌘/Ctrl+K，也不在 404 页提供搜索入口 |
 | `theme` | `true` | `false` 时不写 `data-folio-theme`、不持久化主题 |
-| `share` | `true` | 控制移动端 Header 分享与非文档页工具栏分享 |
+| `share` | `true` | 控制移动端 Header 分享；普通内容页不再默认插入分享工具栏 |
 | `docsShell` | `true` | `false` 时 `type: doc` 也按普通内容页渲染，不再有侧栏、页内目录和上下篇 |
 | `footerOnDocs` | `true` | 只在文档阅读布局下生效，见下文“Footer 策略” |
 | `defaultTheme` | `"system"` | 依次读取 `localStorage("folio-theme")`、该偏好、系统主题 |
@@ -67,13 +67,13 @@ type FolioAppProps = {
 | --- | --- | --- |
 | `/` 首页 | `slots.home` → `config.home` → 内置编辑式首页 | 按此优先级取第一个可用入口，不会叠加 |
 | `type: doc` | `FolioDocsShell` | 左侧统一导航、页内目录、上/下篇、移动抽屉；`ui.docsShell: false` 时降级为普通内容页 |
-| `type: article` | 普通内容页 | 工具栏（`group` + 分享）、可选归档标签、正文、`articleFooter`；有标题时附页内目录 |
-| `type: page` | 普通内容页 | 工具栏、正文、`articleFooter`；不生成页内目录 |
+| `type: article` | 普通内容页 | 标题、元数据、可选归档标签、正文、`articleFooter`；有标题时附页内目录；无默认分组/分享工具栏 |
+| `type: page` | 普通内容页 | 标题、元数据、正文与 `articleFooter`；不生成页内目录，也无默认工具栏 |
 | `config.collections[]` | 集合索引页 | 条目列表，以及归档启用时的分类行与标签链接 |
 | `collections[].archive` | 分类/标签归档页 | 由 `buildFolioArticleArchiveModel` 派生，未知 slug 落 404 |
 | 其他路径 | 404 | 含返回首页与可选搜索入口 |
 
-“普通内容页”指 `DocumentPage`：它复用 `FolioDocumentBody`（标题、摘要、`FolioDocMeta`、Markdown），所以文档页与 Article/Page 的署名行为一致，只是外围壳不同。被降级的 `type: doc` 也没有 `group` 工具栏与分享按钮，因为该工具栏只对非 doc 类型渲染。
+“普通内容页”指 `DocumentPage`：它复用 `FolioDocumentBody`（标题、摘要、`FolioDocMeta`、Markdown），所以文档页与 Article/Page 的署名行为一致，只是外围壳不同。`DocumentPage` 不再自动注入分组/分享工具栏；消费者仍可独立组合 `FolioShareButton`，移动 Header 分享仍受 `ui.share` 控制。
 
 ## Footer 策略
 
@@ -140,7 +140,7 @@ import { FolioApp, FolioTreeNav, FolioToc } from "@uichat-mira/folio";
 ## React 与静态 HTML 边界
 
 - 插槽、`ui` 开关、主题、搜索、抽屉与展开状态都是运行时行为，不会写进静态 HTML。
-- 静态页面由 `@uichat-mira/folio/vite` 生成：`type: doc` 有等价的无 JS 阅读壳；`type: article` 保留工具栏外框（只有 `group`，没有分享按钮）、归档标签与页内目录；`type: page` 是简化正文；首页由静态首页或自定义 `routes` 生成。
+- 静态页面由 `@uichat-mira/folio/vite` 生成：`type: doc` 有等价的无 JS 阅读壳；`type: article` 保留归档标签与页内目录，但不再生成顶部工具栏；`type: page` 是没有顶部工具栏的简化正文；首页由静态首页或自定义 `routes` 生成。
 - 静态模板中的页头与页脚由消费站自己提供；Folio 的 React Header/Footer 不参与静态输出。
 
 ## 关键失败与限制

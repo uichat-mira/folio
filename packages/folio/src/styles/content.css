@@ -7,22 +7,6 @@
   padding: 64px 0 96px;
 }
 
-.folio-doc-toolbar {
-  display: flex;
-  min-height: 32px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 12px;
-}
-
-.folio-eyebrow {
-  color: var(--folio-primary-active);
-  font: 700 11px var(--folio-font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
 .folio-share-button {
   min-height: 32px;
   padding: 0 10px;

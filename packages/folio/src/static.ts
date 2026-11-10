@@ -938,8 +938,6 @@ function renderStaticArticle(
 ): string {
   const article = '<main class="folio-doc-page' +
     (doc.headings.length ? ' folio-article-main' : '') + '">' +
-    '<div class="folio-doc-toolbar"><div class="folio-eyebrow">' +
-    folioEscapeHtml(doc.group) + '</div></div>' +
     renderStaticArticleTags(doc, archive) +
     renderFolioStaticDocumentBody(doc) + '</main>';
   const toc = renderStaticToc(doc);
@@ -983,7 +981,7 @@ function defaultRoutes(context: FolioStaticBuildContext): FolioStaticRoute[] {
           ? renderStaticDocShell(context, doc)
           : doc.type === "article"
             ? renderStaticArticle(doc, archive)
-            : `<main class="folio-prerender"><p>${folioEscapeHtml(doc.group)}</p><h1>${folioEscapeHtml(doc.title)}</h1><p>${folioEscapeHtml(doc.description)}</p><article class="folio-markdown">${renderFolioMarkdown(doc.body, { removeH1: true })}</article></main>`,
+            : `<main class="folio-prerender"><h1>${folioEscapeHtml(doc.title)}</h1><p>${folioEscapeHtml(doc.description)}</p><article class="folio-markdown">${renderFolioMarkdown(doc.body, { removeH1: true })}</article></main>`,
       type: doc.type === "article" ? "article" : "website",
       image: doc.cover,
       doc,
