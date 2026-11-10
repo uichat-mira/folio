@@ -5,36 +5,104 @@ type: doc
 collection: 参考
 section: API
 order: 40
-status: draft
+status: published
 tags: [React, Docs, Layout]
 ---
 
-`FolioDocsShell` 是阅读页布局组件。它把内容、左侧导航、右侧页内目录和分页组合起来，**并不单独决定项目父子关系**。
+`FolioDocsShell` 是 `type: doc` 的阅读布局：左侧统一导航、正文、右侧页内目录、移动抽屉与上下篇分页都由它组合。它不决定内容父子关系，也不读取磁盘，**不是**项目专用阅读器。
 
-## 公共能力
+## 用途与导入
+
+~~~tsx
+import { FolioDocsShell, type FolioDocsShellProps } from "@uichat-mira/folio";
+~~~
+
+组件与 Props 类型都从包根导出，源码位于包内 `src/docs-shell.tsx`。内部通过 `Link` 渲染导航与分页，因此**必须位于 React Router 上下文内**；`FolioApp` 在 `doc.type === "doc"` 且 `ui.docsShell !== false` 时自动渲染它。
+
+## 最小示例
+
+~~~tsx
+import { FolioDocsShell } from "@uichat-mira/folio";
+
+<FolioDocsShell
+  doc={currentDoc}
+  docs={docs}
+  menuLabel="参考目录"
+  footer={<aside className="doc-note">本文档随 dev 源码更新。</aside>}
+/>;
+~~~
+
+## 公共 Props 与默认值
 
 ~~~ts
 type FolioDocsShellProps = {
   doc: FolioDoc;
   docs: FolioDoc[];
   footer?: ReactNode;
+  /** @deprecated 文档工具栏已移除，保留该选项仅为源码兼容。 */
+  share?: boolean;
   children?: ReactNode;
   renderNav?: (props: FolioTreeNavProps) => ReactNode;
   renderToc?: (props: FolioTocProps) => ReactNode;
-  pageNeighbors?: FolioPageNavNeighbors; // previous/next 仅需 path 与 title
-  menuLabel?: string;
-  share?: boolean; // 已弃用：文档工具栏已移除
+  pageNeighbors?: FolioPageNavNeighbors;
+  menuLabel?: string; // 默认 "文档菜单"
 };
 ~~~
 
-## 当前使用方式
+| Prop | 默认 | 说明 |
+| --- | --- | --- |
+| `doc` | 必填 | 当前文档；标题、摘要、[FolioDocMeta](/reference/components/doc-meta) 与标题锚点都来自它 |
+| `docs` | 必填 | 全量内容，用于构建统一导航树与默认分页顺序 |
+| `footer` | 无 | 正文之后、分页之前的节点；`FolioApp` 传入 `slots.articleFooter` |
+| `children` | 无 | **只替换 Markdown 正文**；标题、摘要与署名仍然保留 |
+| `renderNav` | 内置 `FolioTreeNav` | 同时接管桌面侧栏与移动抽屉 |
+| `renderToc` | 内置 `FolioToc` | 同时接管桌面目录与移动目录浮层 |
+| `pageNeighbors` | 由导航树推导 | 显式覆盖上一篇/下一篇，只需 `path` 与 `title` |
+| `menuLabel` | `"文档菜单"` | 移动抽屉的 `aria-label`，不影响可见文字 |
 
-- 普通文档与项目型内容：默认同一个 `FolioTreeNav`，数据来自 `buildFolioNavigationTree()`。
-- 阅读主体由 `FolioDocumentBody` 统一组合标题、摘要、[FolioDocMeta](/reference/components/doc-meta) 和 Markdown；Git 自动获取、Frontmatter 独立覆写。即使没有作者或日期，有正文时仍可显示阅读时间；全部缺失才不显示空容器。
-- 底部上一篇／下一篇由独立的 [FolioPageNav](/reference/components/page-nav) 呈现；默认按照与左侧 `FolioTreeNav` 相同的阅读顺序，组件子树末尾可以接到同一分类的普通文档。独立项目仍限制在项目内部，`FolioToc` 仍是页内标题目录。
-- 手机：左右导航可通过菜单抽屉访问，传入的 `onNavigate` 会在跳转后关闭抽屉。
-- 781–1100px：左侧导航仍在，右侧目录改为顶部「页面导航」浮层；打开时锁定背景滚动，支持 Escape、点击外部和关闭按钮退出。小于 780px 时浮层与菜单抽屉同时可用。
+## 阅读布局行为
 
-## 边界
+- 导航树由 `buildFolioNavigationTree(docs, doc)` 生成：`collection / section` 分组加真实内容父子，不再有独立的项目子树。
+- 分页默认取 `getFolioNavigationNeighbors(tree, doc.path)`，与左侧树同一阅读顺序；只有存在真实文档的节点才参与。
+- 桌面：左栏、正文、右栏三段式。
+- 781–1100px：左栏保留，右侧目录改为顶部“页面导航”浮层；打开时锁定背景滚动，支持 Escape、点击外部和关闭按钮退出。
+- 小于 780px：左侧导航收进菜单抽屉，页内目录仍用浮层；两者通过 `onNavigate` 在跳转后自动关闭。
+- 正文与分页之间是 `footer`；分页由独立的 [FolioPageNav](/reference/components/page-nav) 渲染，不占 `children` 的位置。
 
-它是已有阅读 UI 的组合层，不是页面编辑器；它也不会自行发现磁盘中的 Markdown，内容仍由构建层导入。
+## 与 FolioApp / Router / slots 的组合
+
+- 直接使用时必须位于 React Router 内；独立组合时先建立 Router，再接入 Header、本组件与 Footer。`FolioApp` 已提供 Router 并完成接线。
+- `FolioApp` 把 `slots.navigation` 接到 `renderNav`、`slots.docToc` 接到 `renderToc`，把 `slots.articleFooter` 接到 `footer`；`pageNeighbors` 由 Folio 默认推导。
+- `renderNav` 收到 `{ tree, currentPath, onNavigate }`，`renderToc` 收到 `{ headings, onNavigate }`；自定义渲染必须转发 `onNavigate`，否则移动端点击后抽屉或浮层不会关闭。
+- 文档页不受 `ui.footerOnDocs` 影响分页：分页槽位始终挂载，没有上一篇/下一篇时不输出标记；该选项只控制站点 Footer 与 `articleFooter`。
+- `ui.docsShell: false` 时整个组件不挂载，`type: doc` 按普通内容页渲染，没有侧栏、页内目录与上下篇。
+
+## React 与静态 HTML 边界
+
+- 静态构建不运行 React。默认静态路由在 `@uichat-mira/folio/vite` 中组合 `renderFolioStaticDocumentBody`、`renderFolioStaticTreeNav`、`renderFolioStaticToc` 与 `renderFolioStaticPageNav`，输出结构等价、无需 JavaScript 的阅读壳。
+- 静态版保留全部真实链接，但移动菜单与目录是原生 `<details>` 折叠块，而不是 React 抽屉：没有开合动画、焦点管理、背景滚动锁定，也不持久化手动展开状态。
+- React 与静态输出使用同一份 Core 导航树和 `FolioDocByline` 署名模型，避免两端排序或元数据漂移。
+- `renderFolioStaticProjectShell` 是已弃用的兼容别名，现在就是普通文档壳，不代表还存在项目专用布局。
+
+## 关键失败与限制
+
+- 不是页面编辑器，也不做内容发现；`docs` 必须来自构建层。
+- 不负责决定内容父子关系；`collection / section` 与路由推导在 Core 层完成。
+- 已没有项目专用语义：所有 `type: doc` 共用这套布局，分页按统一树先序，不会在“项目”边界内截断。
+- `share` 传入不会报错，但已无任何效果（文档工具栏已移除）。
+- `pageNeighbors` 只覆盖上下篇，不改变侧栏与页内目录。
+- 缺少 Router 上下文时，`Link` 渲染会抛错。
+- `renderNav` / `renderToc` 返回 `null` 或缺少导航结构时，移动端抽屉仍然存在但没有可操作内容；Folio 不补默认导航。
+
+## 版本与状态
+
+- 本文按 `dev` 源码 `packages/folio/src/docs-shell.tsx`、`ui/page-presentation.ts`（base `f49557c`）核对。
+- npm `0.1.1` 也导出 `FolioDocsShell`，但 Props 只有 `doc`、`docs`、`footer`、`share`、`children`；没有 `renderNav`、`renderToc`、`pageNeighbors`、`menuLabel`，当时的侧栏也不是统一 Core 导航树。
+- 本页 `status: published` 只表示组件参考文档已经审校，并不表示 API 已随 npm 0.1.1 发布。具体可用版本以上文对照的公开导出与 Props 为准。
+
+## 延伸阅读
+
+- [FolioTreeNav](/reference/components/tree-nav)
+- [FolioToc](/reference/components/toc)
+- [FolioPageNav](/reference/components/page-nav)
+- [内容类型与路由](/guide/content-types)

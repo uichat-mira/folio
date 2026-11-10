@@ -1,11 +1,11 @@
 ---
 title: FolioDocMeta
-description: 极简文章署名栏：头像、作者、日期和阅读时长；保留完整 Git 历史元数据。
+description: 极简文章署名栏：头像、作者、日期和阅读时长；完整 Git 历史仍保留在 FolioDoc。
 type: doc
 collection: 参考
 section: API
 order: 43
-status: draft
+status: published
 tags: [React, Metadata, Git, API]
 ---
 
@@ -13,15 +13,63 @@ tags: [React, Metadata, Git, API]
 
 示例：`[编] 编辑部 / 2026 年 11 月 5 日 / 约 6 分钟`
 
-- 作者优先使用 Frontmatter 的 `author`，否则使用 Git 首次提交作者（`createdBy`）；没有任何姓名时不杜撰作者。
-- 日期优先使用 `publishedAt`，否则使用 `createdAt`；不知道时不杜撰日期，且不使用构建时刻或文件 `mtime`。
-- 阅读时长根据正文估算（汉字每分钟约 350 字、其他文本约 225 词），忽略 Markdown 代码块；正文为空时不显示。
-- 头像优先使用 Frontmatter 显式图片；对于可确认身份的 GitHub 首次提交作者，自动使用 GitHub 头像；其余情况回退为 30px 方形首字头像。无需人物目录或 Gravatar。
-- 没有作者和可信日期时，有正文仍独立显示阅读时间；三者均不存在时不输出空白署名栏。
+## 用途与导入
 
-## 零配置与 Frontmatter
+~~~tsx
+import {
+  FolioDocMeta,
+  getFolioDocByline,
+  getFolioDocMeta,
+} from "@uichat-mira/folio";
+~~~
 
-四个 Git 历史字段仍然完整保存在 `FolioDoc`：
+组件、两个纯函数与 `FolioDocMetaProps` / `FolioDocByline` / `FolioDocMetaField` 类型都从包根导出，源码位于包内 `src/ui/doc-meta/` 与 `src/core/doc-meta.ts`。组件不依赖 Router，可以在任意 React 树中渲染。
+
+## 最小示例
+
+~~~tsx
+import { FolioDocMeta, FolioMarkdown } from "@uichat-mira/folio";
+
+<article>
+  <h1>{doc.title}</h1>
+  <FolioDocMeta doc={doc} className="my-document-meta" />
+  <FolioMarkdown source={doc.body} options={{ removeH1: true }} />
+</article>;
+~~~
+
+## 公共 Props 与默认值
+
+~~~ts
+type FolioDocMetaProps = {
+  doc: Pick<
+    FolioDoc,
+    "data" | "body" | "createdBy" | "createdAt" | "publishedAt"
+  >;
+  className?: string;
+};
+~~~
+
+| Prop | 默认 | 说明 |
+| --- | --- | --- |
+| `doc` | 必填 | 需要 Frontmatter 数据、正文，以及 `createdBy` / `createdAt` / `publishedAt` 三个字段；实际构建产物传整个 `FolioDoc` 即可 |
+| `className` | 无 | 追加到基础类 `folio-doc-meta` 之后 |
+
+当作者、日期、阅读时间全部无法确定时，组件返回 `null`，不会输出空容器。
+
+## 署名数据来源
+
+| 展示项 | 优先级 |
+| --- | --- |
+| 作者 | Frontmatter `author`（字符串或 `{ name, avatar }`，数组取第一项）→ `createdBy`；都没有则不显示作者 |
+| 头像 | Frontmatter `author.avatar` → 与署名同名的 Git 首次提交作者 GitHub 头像 → 30px 方形首字头像 |
+| 日期 | `publishedAt` → `createdAt`；按 UTC 格式化为 `YYYY 年 M 月 D 日`，同时输出 ISO `datetime` |
+| 阅读时长 | 从正文估算；正文为空时不显示 |
+
+阅读时长的规则是：忽略围栏代码块、行内代码、链接目标、URL、HTML 标签与 Markdown 标记后，按 CJK 字符数 ÷ 350 加其他单词数 ÷ 225 计算，向上取整且至少 1 分钟。它是估算值，不是精确统计。
+
+## 完整 Git 历史仍保留在 FolioDoc
+
+四个 Git 历史字段可以逐项被 Frontmatter 覆写，且不影响 `author`（作品署名）与 `publishedAt`（发表日期）的独立语义：
 
 | 元数据 | Git 默认来源 | Frontmatter 覆写 |
 | --- | --- | --- |
@@ -29,8 +77,6 @@ tags: [React, Metadata, Git, API]
 | `updatedAt` | 最近提交时间 | `updatedAt` |
 | `createdBy` | 首次提交作者 | `createdBy` |
 | `updatedBy` | 最近提交作者 | `updatedBy` |
-
-它们可以逐项覆写，不影响 `author`（作品署名）与 `publishedAt`（发表日期）的独立语义。浅克隆缺少首次提交证据时不推断创建者和创建时间；文件尚未提交时不假造历史记录。
 
 ~~~yaml
 ---
@@ -46,29 +92,46 @@ updatedBy: Folio Maintainers
 正文……
 ~~~
 
-`avatar` 可使用以 `/` 开头的站点路径或 `http(s)` 图片 URL（项目子路径部署时应提供可正确解析的 URL）。未设置 `author` 时，`createdBy` 会作为默认显示姓名；若显式 `author` 与 Git 首次提交作者不是同一个名字，不会将提交者头像冒充文章作者。
+`getFolioDocMeta(doc)` 返回上述四项的 `{ key, label, value, dateTime? }` 列表，供“最后更新”等自定义 UI 使用；`FolioDocMeta` 本身只显示作者、日期与阅读时长，不渲染 `updatedAt` / `updatedBy`。
 
-## 文档主体默认集成
+四项互不覆盖，`author` 与 `publishedAt` 也是独立字段。但署名日期在 `publishedAt` 缺失时会回退到 `createdAt`，因此覆写 `createdAt` 可能改变页面上显示的日期；需要固定发表日期时应写 `publishedAt`。
 
-`FolioDocumentBody` 将标题、摘要、`FolioDocMeta` 与 Markdown 正文组合为统一阅读主体。文章页、文档页和项目页通过各自的外围布局复用它，无需逐篇添加元信息组件。示例站的静态预渲染也通过 `renderFolioStaticDocumentBody` 复用相同结构，保留 Git/Frontmatter 优先级。
+浅克隆缺少首次提交证据时不推断创建者和创建时间；文件尚未提交时不假造历史记录。Frontmatter 显式 `author` 与 Git 首次提交作者不是同一个名字时，不会把提交者头像冒充文章作者。
 
-## 独立组合
+## 与 FolioApp / FolioDocumentBody 的组合
 
-~~~tsx
-import {
-  FolioDocMeta,
-  getFolioDocByline,
-  getFolioDocMeta,
-} from "@uichat-mira/folio";
+- 应用内由 `FolioDocumentBody` 自动渲染（它已内置 `<FolioDocMeta doc={doc} />`），文档页、文章页与独立 Page 都复用同一处；组件自身不需要 Router，也没有专用署名插槽。
+- 在 `FolioApp` 中没有专用的署名插槽：需要完全不同署名时，自行组合本组件或 `getFolioDocByline`，不要覆写 `.folio-doc-meta` 内部选择器。
+- 自建署名时使用 `getFolioDocByline(doc)`：它返回同一个 `{ author, date, readingMinutes }` 投影，React 与静态页共用。
+- 静态输出使用 `renderFolioStaticDocMeta(doc)`（`@uichat-mira/folio/vite`），与 React 端消费同一个 byline 模型和 `<time datetime>`。
+- 组件本身不访问 Git、文件系统或网络；Git 身份与头像在构建阶段写入 `FolioDoc.gitHistory`。
 
-<FolioDocMeta doc={currentDoc} className="my-document-meta" />;
+## React 与静态 HTML 边界
 
-// 对应单行展示的数据
-const byline = getFolioDocByline(currentDoc);
-// 完整四项历史字段仍供其他功能消费
-const historyFields = getFolioDocMeta(currentDoc);
-~~~
+- React 端与预渲染静态页都由构建层提供数据；组件只做投影，不改变 `FolioDoc`。
+- 静态页的署名 HTML 由 `renderFolioStaticDocMeta` 生成；自定义静态模板应调用它，而不是复制一份日期/阅读时长算法。
+- 浏览器端不会请求 GitHub API，也不会公开提交邮箱。
+- 构建层只对 GitHub 远端做有限次提交查询，单次子进程上限 5 秒；`FOLIO_GITHUB_AVATARS=0` 可完全关闭 API 查询（noreply 身份仍可离线解析）。无网、API 受限或账号不匹配时回退首字头像。
 
-React 阅读页与预渲染静态页消费同一个 `getFolioDocByline` 模型；自定义静态模板可以从 `@uichat-mira/folio/vite` 调用 `renderFolioStaticDocMeta(doc)`。两端都使用 `<time>` 保留准确的 ISO 日期。组件本身不访问 Git、文件系统或网络。构建层可识别 GitHub noreply 邮箱，或向 GitHub 查询有限数量的提交 SHA 来核实作者身份；不会在浏览器请求 GitHub API，也不会公开提交邮箱。无网、API 受限或账号不匹配时回退首字。可设置 `FOLIO_GITHUB_AVATARS=0` 禁用 API 查询（仍支持 noreply 身份）。
+## 关键失败与限制
 
-**设计边界：** 它是文章署名，不是员工档案。Git 作者只是提交历史证据，不等于平台身份认证或真实作品作者；完整历史字段可以由消费站在其他位置展示。
+- 没有作者、没有可信日期且正文为空时返回 `null`；这是正常空态，不是错误。
+- 头像只接受 `http(s)://` URL 或以单个 `/` 开头的站点路径；`//` 协议相对地址与 `data:` 会被忽略，回退首字。
+- 只有署名姓名与 Git 首次提交作者同名时才使用该提交者的 GitHub 头像。
+- `FolioDocMetaProps` 的 `Pick` 不含 `gitHistory`；要获得 Git 头像，传入的对象仍需带 `gitHistory`（实际构建产物传完整 `FolioDoc` 即可）。
+- 不显示 `updatedAt` / `updatedBy`；需要“最后更新”请用 `getFolioDocMeta`。
+- 阅读时长忽略代码，可能与页面字数统计不一致，也不代表实际阅读速度。
+- 组件不做作者身份认证；Git 作者只是提交历史证据。
+
+## 版本与状态
+
+- 本文按 `dev` 源码 `packages/folio/src/ui/doc-meta/DocMeta.tsx`、`core/doc-meta.ts`（base `f49557c`）核对。
+- npm `0.1.1` **不含** `FolioDocMeta`、`getFolioDocByline`、`getFolioDocMeta`；该版本的阅读页也不显示作者、日期与阅读时长。
+- 本页 `status: published` 只表示组件参考文档已经审校，并不表示 API 已随 npm 0.1.1 发布。具体可用版本以上文对照的公开导出与 Props 为准。
+
+## 延伸阅读
+
+- [Frontmatter 与元数据](/guide/frontmatter-fields)
+- [Frontmatter 参考](/reference/frontmatter)
+- [FolioDocsShell](/reference/components/docs-shell)
+- [静态发布不是只产出一个 SPA 壳](/guide/static-publishing)
