@@ -127,3 +127,23 @@ test("Xuanzhi and Xuanmo syntax roles meet readable contrast on their own code s
     }
   }
 });
+
+test("Editorial keeps its magazine identity while providing readable action contrast", () => {
+  const cases = [
+    [
+      ruleBody(':root:where([data-folio-preset="editorial"]) {'),
+      ruleBody(':root {'),
+    ],
+    [
+      ruleBody(':root:where([data-folio-theme="dark"][data-folio-preset="editorial"]) {'),
+      ruleBody('[data-folio-theme="dark"] {'),
+    ],
+  ];
+  for (const [preset, inherited] of cases) {
+    const canvas = declaration(inherited, "canvas");
+    const primary = declaration(preset, "primary");
+    assert.ok(contrast(primary, canvas) >= 4.5, "Editorial action accent on canvas");
+    assert.ok(contrast(declaration(preset, "on-primary"), primary) >= 4.5,
+      "Editorial action label on button");
+  }
+});
