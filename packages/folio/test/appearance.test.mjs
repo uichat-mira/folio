@@ -147,3 +147,19 @@ test("Editorial keeps its magazine identity while providing readable action cont
       "Editorial action label on button");
   }
 });
+
+
+test("Editorial system-dark media fallback keeps the readable override, not the legacy accent", () => {
+  const media = css.slice(css.indexOf('@media (prefers-color-scheme: dark) {'));
+  const selector = ':root:where(:not([data-folio-theme])[data-folio-preset="editorial"]) {';
+  const first = media.indexOf(selector);
+  const last = media.lastIndexOf(selector);
+  assert.ok(first >= 0 && last > first, "system-dark Editorial must pair inherited roles with readable accent overrides");
+  const original = media.slice(first + selector.length).split("}")[0];
+  const accent = media.slice(last + selector.length).split("}")[0];
+  const primary = declaration(accent, "primary");
+  assert.ok(contrast(primary, declaration(original, "canvas")) >= 4.5,
+    "Editorial system-dark accent must contrast against its dark canvas");
+  assert.ok(contrast(declaration(accent, "on-primary"), primary) >= 4.5,
+    "Editorial system-dark button text must contrast against its action fill");
+});
