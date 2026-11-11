@@ -91,7 +91,7 @@ test("Pearl and Graphite text/action contrast is readable in light and dark", ()
   for (const selector of selectors) {
     const body = ruleBody(selector);
     const canvas = declaration(body, "canvas");
-    for (const token of ["ink", "body", "muted", "primary"]) {
+    for (const token of ["ink", "body", "body-strong", "muted", "muted-soft", "primary"]) {
       assert.ok(contrast(declaration(body, token), canvas) >= 4.5, selector + ' ' + token);
     }
     assert.ok(contrast(declaration(body, "on-primary"), declaration(body, "primary")) >= 4.5, selector + ' button text');
