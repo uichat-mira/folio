@@ -21,6 +21,7 @@ import { renderFolioMarkdown } from "./core/markdown";
 import { buildFolioOutlineTree, type FolioOutlineNode } from "./core/outline";
 import { getFolioDocByline } from "./core/doc-meta";
 import { resolveFolioHome, type FolioHomeModel } from "./core/home";
+import { resolveFolioAppearance } from "./core/appearance";
 import {
   assertFolioSiteIndexing,
   FOLIO_NOT_FOUND_ROBOTS,
@@ -310,8 +311,24 @@ export function renderFolioStaticHtml(
 
   const transformed = options.transformTemplate?.(template, context) ?? template;
   const rootPlaceholder = options.rootPlaceholder || '<div id="root"></div>';
+  const appearance = resolveFolioAppearance(context.config);
+  // Only site-level values are emitted for static readers. A user's local
+  // light/dark choice belongs to the interactive app, not a static build.
+  const attributes = [
+    `data-folio-preset="${appearance.preset}"`,
+    `data-folio-code-palette="${appearance.codePalette}"`,
+    ...(appearance.scheme === "system"
+      ? []
+      : [`data-folio-theme="${appearance.scheme}"`]),
+  ];
+  const themedTemplate = transformed.replace(/<html\\b([^>]*)>/i, (_match, existing: string) => {
+    // A consumer template may have old appearance markers. The resolved site
+    // config is the single source of truth, so don't emit duplicate attributes.
+    const clean = existing.replace(/\\s+data-folio-(?:preset|code-palette|theme)\\s*=\\s*(?:"[^"]*"|'[^']*')/gi, "");
+    return `<html${clean} ${attributes.join(" ")}>`;
+  });
 
-  let html = transformed
+  let html = themedTemplate
     .replace(/<title>[\s\S]*?<\/title>/i, `<title>${folioEscapeHtml(pageTitle)}</title>`)
     .replace(/<meta name="description"[^>]*>\s*/gi, "")
     .replace(/<meta name="robots"[^>]*>\s*/gi, "")
