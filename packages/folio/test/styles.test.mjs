@@ -55,6 +55,7 @@ test("dist/styles.css preserves every registered module stylesheet in manifest o
       "src/ui/search/search.css",
       "src/ui/app/app.css",
       "src/ui/home/home.css",
+      "src/ui/home/portal.css",
       "src/ui/entry-list/entry-list.css",
       "src/ui/article-archive/article-archive.css",
       "src/styles/responsive.css",

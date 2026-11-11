@@ -62,6 +62,7 @@ const config = {
   ...(homeMode === "configured"
     ? {
         home: {
+          template: "editorial" as const,
           meta: { left: "CONFIGURED HOME", right: "TARBALL" },
           sections: [
             { type: "intro" as const, title: "Configured consumer home" },

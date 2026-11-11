@@ -249,6 +249,9 @@ export type FolioHomeSectionType =
   | "collections"
   | "about";
 
+/** Built-in home structure. `portal` is the default; `editorial` is opt-in. */
+export type FolioHomeTemplate = "portal" | "editorial";
+
 export type FolioHomeIntroSectionConfig = {
   type: "intro";
   /** Route collection shown by the intro link; defaults to the first collection. */
@@ -311,10 +314,15 @@ export type FolioHomeMetaConfig = {
 };
 
 export type FolioHomeConfig = {
-  /** Set to false to hide the editorial meta strip. */
+  /**
+   * Built-in home structure. Omit for the neutral `portal` template; set
+   * `editorial` to opt into the publication layout and journal defaults.
+   */
+  template?: FolioHomeTemplate;
+  /** Set to false to hide the meta strip. Portals only show it when configured. */
   meta?: false | FolioHomeMetaConfig;
   /**
-   * Ordered home blocks. Omitting this keeps the default editorial order:
+   * Ordered home blocks. Omitting this keeps the default order:
    * intro, featured, recent, collections, about. An empty array renders no
    * blocks beyond the optional meta strip.
    */

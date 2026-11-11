@@ -248,16 +248,19 @@ but an entry that resolves to a generated page fails the build.
 
 ## Home page customization
 
-The built-in home page has three supported levels. Without any configuration the
-current default editorial home, navigation, SEO metadata and static HTML stay
-as they are. `FolioConfig.collections` remains the only source for collection
-routes; home sections do not hardcode `/blogs` or `/projects`.
+The built-in home page has three supported levels. Without any configuration
+the neutral **Portal** home, navigation, SEO metadata and static HTML stay
+platform-neutral: headings, descriptions, collections and entries come from
+`FolioConfig` and the content model, never from journal-only default copy.
+`FolioConfig.collections` remains the only source for collection routes; home
+sections do not hardcode `/blogs` or `/projects`.
 
-1. **Use the default home.** Set no `home` and no `slots.home`.
-2. **Configure the built-in home.** `FolioConfig.home` controls block order,
-   visibility, the featured/recent collection source, limits and the small
-   amount of copy the default design needs. React and the default static build
-   consume the same resolved model.
+1. **Use the default Portal.** Set no `home` and no `slots.home`.
+2. **Configure the built-in home.** `FolioConfig.home` controls the template,
+   block order, visibility, the featured/recent collection source, limits and
+   the small amount of copy the design needs. Omit `home.template` for the
+   Portal, or set `template: "editorial"` for the publication layout. React and
+   the default static build consume the same resolved model.
 3. **Take full control.** `slots.home` replaces only the React `/` route.
    `staticRoutes.home` replaces only the generated static `/` route body and
    metadata; it does not require copying every other static route. For a fully
@@ -267,22 +270,53 @@ routes; home sections do not hardcode `/blogs` or `/projects`.
 
 ```ts
 const config = defineFolioConfig({
-  title: "Field notes",
-  description: "A small journal",
+  title: "Knowledge base",
+  description: "Guides, references and product notes.",
   collections: [
-    { path: "/notes", title: "Notes" },
-    { path: "/projects", title: "Projects" },
+    { path: "/guide", title: "Guide" },
+    { path: "/reference", title: "Reference" },
   ],
   home: {
     sections: [
-      { type: "intro", title: "Notes from the workshop" },
-      { type: "featured", collection: "/notes" },
-      { type: "recent", collection: "/notes", limit: 3 },
-      { type: "collections", paths: ["/projects"], limit: 2 },
-      { type: "about", path: "/info/about", linkLabel: "Read more" },
+      { type: "intro", title: "Start with the basics" },
+      { type: "recent", collection: "/guide", limit: 4 },
+      { type: "collections", paths: ["/reference"], limit: 3 },
     ],
   },
 });
+```
+
+The same `home` contract covers the three common consumer shapes:
+
+```ts
+// Documentation / knowledge portal: neutral Portal is the default.
+home: {
+  sections: [
+    { type: "intro", kicker: "Getting started" },
+    { type: "recent", collection: "/guide", title: "Recently updated", limit: 6 },
+  ],
+}
+
+// Brand / product portal: add configured metadata and a public about page.
+home: {
+  meta: { left: "PRODUCT", right: "DOCS" },
+  sections: [
+    { type: "intro", kicker: "Product and documentation" },
+    { type: "collections", paths: ["/guide", "/blogs"] },
+    { type: "about", path: "/info/about", linkLabel: "Read more" },
+  ],
+}
+
+// Personal publication: Editorial is explicit, never an implicit fallback.
+home: {
+  template: "editorial",
+  meta: { left: "ESSAYS", right: "NOTES" },
+  sections: [
+    { type: "intro", kicker: "Essays and observations" },
+    { type: "featured", collection: "/essays" },
+    { type: "recent", collection: "/essays" },
+  ],
+}
 ```
 
 Section order is the array order. Omitting `home.sections` keeps the default
@@ -290,7 +324,9 @@ Section order is the array order. Omitting `home.sections` keeps the default
 renders only the optional meta strip. Empty collections produce an explicit
 empty state, a featured/recent block without entries is omitted or shows the
 empty/end message, and a configured `path` that does not match a document fails
-the build instead of silently falling back.
+the build instead of silently falling back. Portal metadata is hidden unless it
+is configured; explicit `template: "editorial"` keeps the publication meta and
+copy defaults.
 
 For static-only customization, keep the default route set and override `/`:
 

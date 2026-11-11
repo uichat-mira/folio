@@ -33,7 +33,7 @@ import {
   assertNoFolioCollectionConflicts,
   type FolioCollectionIndex,
 } from "./core/collection-index";
-import { resolveFolioHome, type FolioHomeSection } from "./core/home";
+import { resolveFolioHome, type FolioHomeModel, type FolioHomeSection } from "./core/home";
 import { FolioEntryList, type FolioEntryTagLink } from "./ui/entry-list";
 import {
   buildFolioArticleArchiveModel,
@@ -107,130 +107,125 @@ function DocumentPage({
   );
 }
 
-function DefaultHome({
-  docs,
-  config,
-}: {
-  docs: FolioDoc[];
-  config: FolioConfig;
-}) {
-  const collections = folioCollectionIndexes(config);
-  const primary = collections[0];
-  const primaryDocs = primary
-    ? selectFolioCollectionDocs(docs, primary.path)
-    : docs.filter((doc) => doc.type !== "page");
-  const featured = primaryDocs[0];
-  const recent = primaryDocs.slice(1, 5);
-  const about = docs.find((doc) => doc.type === "page");
-
+function PortalHome({ model }: { model: FolioHomeModel }) {
   return (
-    <main className="folio-home folio-journal-home folio-editorial-home">
-      <div className="folio-editorial-meta" aria-label="站点首页">
-        <span>PERSONAL JOURNAL <span aria-hidden="true">✳</span></span>
-        <span>READ · COLLECT · REMEMBER</span>
-      </div>
-      <section className="folio-editorial-lead" aria-label="小站介绍与精选文章">
-        <div className="folio-editorial-intro">
-          <div className="folio-editorial-kicker">
-            <span className="folio-editorial-kicker-line" aria-hidden="true" />
-            写给生活的零碎记录
-          </div>
-          <h1>{config.title}</h1>
-          <p>{config.description}</p>
-          {primary && (
-            <Link className="folio-editorial-hero-link" to={primary.path}>
-              浏览{primary.title} <span aria-hidden="true">↗</span>
-            </Link>
-          )}
+    <main className="folio-home folio-home--portal">
+      {model.meta && (
+        <div className="folio-portal-meta" aria-label="站点首页">
+          {model.meta.left ? <span>{model.meta.left}</span> : null}
+          {model.meta.right ? <span>{model.meta.right}</span> : null}
         </div>
-        {featured && (
-          <Link className="folio-editorial-feature" to={href(featured.path)}>
-            <span className="folio-editorial-feature-label">
-              <span aria-hidden="true">✳</span> FEATURED STORY
-            </span>
-            <span className="folio-editorial-feature-body">
-              <span className="folio-editorial-feature-no">01 / {String(primaryDocs.length).padStart(2, "0")}</span>
-              <h2>{featured.title}</h2>
-              {featured.description && <p>{featured.description}</p>}
-            </span>
-            <span className="folio-editorial-feature-bottom">
-              开始阅读 <span aria-hidden="true">↗</span>
-            </span>
-          </Link>
-        )}
-      </section>
-      <div className="folio-editorial-rule">
-        <span>THE NOTEBOOK</span>
-        <span>{String(primaryDocs.length).padStart(2, "0")} ENTRIES</span>
-      </div>
-      <div className="folio-editorial-lower">
-        <section className="folio-editorial-recent" aria-label="文章选读">
-          <div className="folio-editorial-section-heading">
-            <div>
-              <span className="folio-editorial-section-label">01 / READING</span>
-              <h2>{primary?.title ?? "近期内容"}</h2>
-            </div>
-            {primary && (
-              <Link to={primary.path} className="folio-editorial-view-all">
-                全部{primary.title} <span aria-hidden="true">↗</span>
-              </Link>
-            )}
-          </div>
-          {recent.length ? (
-            <FolioEntryList entries={recent} headingLevel="h3" />
-          ) : !featured ? (
-            <p className="folio-collection-empty">这里还没有内容。</p>
-          ) : (
-            <p className="folio-editorial-endnote">更多记录，正在慢慢写下。</p>
-          )}
-        </section>
-        <div className="folio-editorial-aside">
-          {collections.slice(1).map((collection, index) => {
-            const entries = selectFolioCollectionDocs(docs, collection.path).slice(0, 3);
+      )}
+      {model.sections.map((section, index) => {
+        switch (section.type) {
+          case "intro":
             return (
-              <section className="folio-editorial-side-section" key={collection.path}>
-                <div className="folio-editorial-section-heading">
-                  <div>
-                    <span className="folio-editorial-section-label">
-                      {String(index + 2).padStart(2, "0")} / COLLECTION
-                    </span>
-                    <h2>{collection.title}</h2>
-                  </div>
-                  <Link to={collection.path} className="folio-editorial-view-all" aria-label={"全部" + collection.title}>
-                    ↗
+              <section className="folio-portal-hero" key={"intro-" + index}>
+                {section.kicker ? <p className="folio-portal-kicker">{section.kicker}</p> : null}
+                <h1>{section.title}</h1>
+                <p className="folio-portal-description">{section.description}</p>
+                {section.collection && (
+                  <Link className="folio-portal-hero-link" to={section.collection.path}>
+                    浏览{section.collection.title} <span aria-hidden="true">→</span>
                   </Link>
-                </div>
-                {entries.length ? (
-                  <FolioEntryList entries={entries} headingLevel="h3" />
-                ) : (
-                  <p className="folio-collection-empty">{collection.emptyMessage}</p>
                 )}
               </section>
             );
-          })}
-          {about && (
-            <aside className="folio-editorial-about">
-              <span className="folio-editorial-section-label">A LITTLE ABOUT</span>
-              <h2>{about.title}</h2>
-              <p>{about.description || config.description}</p>
-              <Link to={href(about.path)}>读读关于小站 <span aria-hidden="true">↗</span></Link>
-            </aside>
-          )}
-        </div>
-      </div>
+          case "featured":
+            return (
+              <section className="folio-portal-featured" key={"featured-" + index}>
+                <Link className="folio-portal-feature" to={href(section.doc.path)}>
+                  <span className="folio-portal-feature-label">{section.label}</span>
+                  <span className="folio-portal-feature-index">
+                    {String(section.number).padStart(2, "0")} / {String(section.total).padStart(2, "0")}
+                  </span>
+                  <h2>{section.doc.title}</h2>
+                  {section.doc.description && <p>{section.doc.description}</p>}
+                  <span className="folio-portal-feature-link">
+                    {section.readLabel} <span aria-hidden="true">→</span>
+                  </span>
+                </Link>
+              </section>
+            );
+          case "recent":
+            return (
+              <section
+                className="folio-portal-section folio-portal-recent"
+                aria-label={section.title}
+                key={"recent-" + index}
+              >
+                <div className="folio-portal-section-heading">
+                  <div>
+                    <span className="folio-portal-section-label">{section.label}</span>
+                    <h2>{section.title}</h2>
+                  </div>
+                  {section.collection && (
+                    <Link to={section.collection.path} className="folio-portal-view-all">
+                      全部{section.collection.title} <span aria-hidden="true">→</span>
+                    </Link>
+                  )}
+                </div>
+                {section.docs.length ? (
+                  <FolioEntryList entries={section.docs} headingLevel="h3" />
+                ) : section.hadEntries ? (
+                  <p className="folio-portal-endnote">{section.endMessage}</p>
+                ) : (
+                  <p className="folio-collection-empty">{section.emptyMessage}</p>
+                )}
+              </section>
+            );
+          case "collections":
+            return (
+              <section className="folio-portal-section folio-portal-collections" key={"collections-" + index}>
+                <div className="folio-portal-collection-grid">
+                  {section.collections.map((entry) => (
+                    <section className="folio-portal-collection" key={entry.collection.path}>
+                      <div className="folio-portal-section-heading">
+                        <div>
+                          <h2>{entry.collection.title}</h2>
+                          {entry.collection.description ? (
+                            <p className="folio-portal-collection-description">
+                              {entry.collection.description}
+                            </p>
+                          ) : null}
+                        </div>
+                        <Link
+                          to={entry.collection.path}
+                          className="folio-portal-view-all"
+                          aria-label={"全部" + entry.collection.title}
+                        >
+                          全部 <span aria-hidden="true">→</span>
+                        </Link>
+                      </div>
+                      {entry.docs.length ? (
+                        <FolioEntryList entries={entry.docs} headingLevel="h3" />
+                      ) : (
+                        <p className="folio-collection-empty">{entry.emptyMessage}</p>
+                      )}
+                    </section>
+                  ))}
+                </div>
+              </section>
+            );
+          case "about":
+            return (
+              <section className="folio-portal-section folio-portal-about-section" key={"about-" + index}>
+                <aside className="folio-portal-about">
+                  <h2>{section.title}</h2>
+                  <p>{section.description}</p>
+                  <Link to={href(section.doc.path)}>
+                    {section.linkLabel} <span aria-hidden="true">→</span>
+                  </Link>
+                </aside>
+              </section>
+            );
+        }
+      })}
     </main>
   );
 }
 
-function ConfiguredHome({
-  docs,
-  config,
-}: {
-  docs: FolioDoc[];
-  config: FolioConfig;
-}) {
-  const model = resolveFolioHome(config, docs);
-
+function EditorialHome({ model }: { model: FolioHomeModel }) {
   function renderSection(section: FolioHomeSection, index: number) {
     switch (section.type) {
       case "intro":
@@ -366,9 +361,10 @@ function Home({
   custom?: ReactNode;
 }) {
   if (custom) return <>{custom}</>;
-  return config.home
-    ? <ConfiguredHome docs={docs} config={config} />
-    : <DefaultHome docs={docs} config={config} />;
+  const model = resolveFolioHome(config, docs);
+  return model.template === "editorial"
+    ? <EditorialHome model={model} />
+    : <PortalHome model={model} />;
 }
 
 function CollectionIndex({

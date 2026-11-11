@@ -77,6 +77,12 @@
     "home": {
       "type": "object",
       "properties": {
+        "template": {
+          "enum": [
+            "portal",
+            "editorial"
+          ]
+        },
         "meta": {
           "oneOf": [
             {

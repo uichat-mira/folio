@@ -1,0 +1,221 @@
+/* Neutral Portal home. Structure only: colors, fonts and radii come from the
+   public Folio tokens so a theme preset can change the look without this file. */
+.folio-home.folio-home--portal {
+  width: min(1080px, calc(100% - 64px));
+  padding: clamp(44px, 6vw, 80px) 0 104px;
+}
+
+.folio-portal-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--folio-hairline);
+  color: var(--folio-muted);
+  font: 600 10px/1.6 var(--folio-font-mono);
+  letter-spacing: .14em;
+}
+
+.folio-portal-meta > span:first-child { color: var(--folio-primary-active); }
+
+.folio-portal-hero {
+  padding: clamp(44px, 6vw, 76px) 0 clamp(36px, 5vw, 60px);
+  border-bottom: 1px solid var(--folio-hairline);
+}
+
+.folio-portal-kicker {
+  margin: 0 0 16px;
+  color: var(--folio-primary-active);
+  font: 600 11px/1.5 var(--folio-font-mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.folio-portal-hero h1 {
+  max-width: 760px;
+  margin: 0 0 18px;
+  color: var(--folio-ink);
+  font-family: var(--folio-font-display);
+  font-size: clamp(36px, 5vw, 58px);
+  line-height: 1.16;
+  font-weight: 660;
+  letter-spacing: -.035em;
+  text-wrap: balance;
+}
+
+.folio-portal-description {
+  max-width: 680px;
+  margin: 0;
+  color: var(--folio-muted);
+  font-size: 16px;
+  line-height: 1.85;
+}
+
+.folio-portal-hero-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 28px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--folio-primary-active);
+  color: var(--folio-primary-active);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.folio-portal-section { padding-top: clamp(40px, 5vw, 64px); }
+
+.folio-portal-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 18px;
+  padding-bottom: 18px;
+}
+
+.folio-portal-section-heading h2,
+.folio-portal-about h2 {
+  margin: 6px 0 0;
+  color: var(--folio-ink);
+  font-family: var(--folio-font-display);
+  font-size: clamp(24px, 3vw, 32px);
+  line-height: 1.3;
+  font-weight: 650;
+  letter-spacing: -.025em;
+}
+
+.folio-portal-section-label {
+  color: var(--folio-primary-active);
+  font: 600 10px/1.5 var(--folio-font-mono);
+  letter-spacing: .14em;
+}
+
+.folio-portal-view-all {
+  flex: none;
+  padding: 6px 0;
+  color: var(--folio-primary-active);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.folio-portal-featured { padding-top: clamp(36px, 5vw, 56px); }
+
+.folio-portal-feature {
+  display: block;
+  padding: clamp(26px, 4vw, 42px);
+  border: 1px solid var(--folio-hairline);
+  border-radius: var(--folio-radius-lg);
+  background: var(--folio-surface-soft);
+  transition: border-color .15s ease;
+}
+
+.folio-portal-feature:hover { border-color: var(--folio-primary); }
+
+.folio-portal-feature-label,
+.folio-portal-feature-index {
+  color: var(--folio-primary-active);
+  font: 600 10px/1.6 var(--folio-font-mono);
+  letter-spacing: .14em;
+}
+
+.folio-portal-feature-index {
+  display: block;
+  margin-top: 10px;
+  color: var(--folio-muted-soft);
+}
+
+.folio-portal-feature h2 {
+  margin: 14px 0 12px;
+  color: var(--folio-ink);
+  font-family: var(--folio-font-display);
+  font-size: clamp(26px, 3.4vw, 40px);
+  line-height: 1.35;
+  font-weight: 650;
+  letter-spacing: -.025em;
+}
+
+.folio-portal-feature p {
+  max-width: 680px;
+  margin: 0;
+  color: var(--folio-muted);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.folio-portal-feature-link {
+  display: inline-block;
+  margin-top: 22px;
+  color: var(--folio-primary-active);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.folio-portal-collection-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(24px, 4vw, 44px);
+}
+
+.folio-portal-collection {
+  min-width: 0;
+  padding-top: 22px;
+  border-top: 1px solid var(--folio-hairline);
+}
+
+.folio-portal-collection-description {
+  margin: 8px 0 0;
+  color: var(--folio-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.folio-portal-about {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 28px;
+  margin-top: clamp(48px, 6vw, 72px);
+  padding: 24px 26px;
+  border: 1px solid var(--folio-hairline);
+  border-radius: var(--folio-radius-md);
+  background: var(--folio-surface-soft);
+}
+
+.folio-portal-about h2 { margin: 0; }
+
+.folio-portal-about p {
+  flex: 1;
+  min-width: 190px;
+  margin: 0;
+  color: var(--folio-body);
+  font-size: 14px;
+}
+
+.folio-portal-about a {
+  color: var(--folio-primary-active);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.folio-portal-endnote {
+  margin: 0;
+  padding-top: 8px;
+  color: var(--folio-muted);
+  font-size: 14px;
+}
+
+@media (max-width: 780px) {
+  .folio-home.folio-home--portal {
+    width: min(100% - 36px, 1080px);
+    padding-top: 44px;
+  }
+  .folio-portal-meta { font-size: 9px; letter-spacing: .08em; }
+  .folio-portal-hero { padding-top: 42px; }
+  .folio-portal-collection-grid { grid-template-columns: minmax(0, 1fr); }
+  .folio-portal-about { padding: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folio-portal-feature { transition: none; }
+}
