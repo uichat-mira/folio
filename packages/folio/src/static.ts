@@ -321,10 +321,10 @@ export function renderFolioStaticHtml(
       ? []
       : [`data-folio-theme="${appearance.scheme}"`]),
   ];
-  const themedTemplate = transformed.replace(/<html\\b([^>]*)>/i, (_match, existing: string) => {
+  const themedTemplate = transformed.replace(/<html\b([^>]*)>/i, (_match, existing: string) => {
     // A consumer template may have old appearance markers. The resolved site
     // config is the single source of truth, so don't emit duplicate attributes.
-    const clean = existing.replace(/\\s+data-folio-(?:preset|code-palette|theme)\\s*=\\s*(?:"[^"]*"|'[^']*')/gi, "");
+    const clean = existing.replace(/\s+data-folio-(?:preset|code-palette|theme)\s*=\s*(?:"[^"]*"|'[^']*')/gi, "");
     return `<html${clean} ${attributes.join(" ")}>`;
   });
 
