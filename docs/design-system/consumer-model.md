@@ -25,7 +25,7 @@
 | Portal | Pearl | dark | Xuanmo Dark | 同站夜间阅读 |
 | Editorial | Pearl | light | Xuanmo Dark | 个人刊物＋深色代码 |
 | Portal | Graphite | dark | Xuanmo Dark | 深色优先的技术门户 |
-| Editorial | Editorial | light | 当前既有代码高亮 | 不配置的新老消费者兼容 |
+| Portal | Pearl | light | Xuanzhi Light | 新一代的通用默认组合 |
 
 因此 **Graphite = 独立 Preset（暗色优先），不等于 Dark Scheme**；未来 Graphite 也必须有可用的 light 角色值，或在实施前明确拒绝不支持的组合，不能无提示把用户选择的 `light` 强制改成 `dark`。本合同推荐 **提供 light/dark 成对取值**，不支持时不得宣称完成三套“可自由组合”的主题。
 
@@ -47,22 +47,19 @@
 | React 与静态文档 | **[F] 都存在**，且 Markdown 共用纯 HTML 渲染器；无 JS 静态不自动包含站点级 Header/Footer、React Slot 或增强后的 Mermaid SVG | [`core/markdown.ts`](../../packages/folio/src/core/markdown.ts)，[`static.ts`](../../packages/folio/src/static.ts)，[FOL-019 历史测试](../research/fol-019-default-ui-baseline.md) |
 | 官方实例站 | **[F] 自己的 `apps/site/src/HomePage.tsx`**，通过 `slots.home` 替换 React 首页；`apps/site/src/static-routes.ts` 自己产静态首页 | [`apps/site/src/main.tsx`](../../apps/site/src/main.tsx)，[`apps/site/src/static-routes.ts`](../../apps/site/src/static-routes.ts) |
 
-**[F] 关键真实消费者**：[Moyu `prod` 配置](https://github.com/uichat-mira/moyu/blob/prod/folio.config.ts) 没有指定 `home` 或模板；[`src/main.tsx`](https://github.com/uichat-mira/moyu/blob/prod/src/main.tsx) 直接使用 `FolioApp`，无 `slots.home`；[`vite.config.ts`](https://github.com/uichat-mira/moyu/blob/prod/vite.config.ts) 用默认静态路由而非 `staticRoutes.home`。其 `package.json` 标示 `@uichat-mira/folio@0.1.1`，但 Moyu 仓库的构建说明还存在固定源码 SHA 的预览/发布路径，因此**不能把 package 声明简单等同当前所有部署产物版本**。无论如何，Moyu 的配置证明：**“未配置 = Editorial”已是实际消费路径**，不能在兼容版本中突然换成 Portal。
+**[F] 当前框架事实**：无 `config.home` 的 React/静态首页走内置 Editorial 路径。那是当前代码待修改的事实，不是决定下一代默认的产品证据。第一代试验站及旧发布版本不作为本合同的参考对象。
 
-## 2. 首页的产品身份：决定与保护条件
+## 2. 首页产品决策：Portal 是新默认，Editorial 是正式可选模板
 
-**[P] 产品方向**：Folio 未来应有**中性的通用 Portal 首页**，而不是让所有新消费者默认带 `PERSONAL JOURNAL` 及个人随笔叙事；Editorial 是另一种有价值的模板，**保留、不删除、不贬为过时样式**。模板只是首页结构，文档、导航、搜索、TOC、Footer 不随着模板选择重新造轮子。
+**[P] 新一代 Folio 的默认首页选 Portal，不再默认是个人刊物。** 即使 `config.home` 缺省或没有 `home.template`，新实现也应该选中性的 Portal；`home.template="editorial"` 才选择个人刊物。发行包的默认首页不由第一代试验性消费站反向决定。
 
-**[P] 当前兼容行为（不得破坏）**：
+- **Portal** 以真实 `config.title/description`、`collections`、`docs` 形成标题、介绍、栏目、精选/最近文章与中性空态；不用 `PERSONAL JOURNAL`、`写给生活的零碎记录` 等日记词句。
+- **Editorial** 是独立的、有辨识度的正式模板（刊物式大标题/精选/阅读列表），不是为了兼容某个旧站而保留的特殊支线。
+- `home.sections` 的五类分区和 `resolveFolioHome` 保持内容单一真相源；模板决定结构与默认语言，不能把两套内容选择规则独立维护。
+- React 与静态两端使用相同模板选择与中性/刊物默认文案，允许分别生成 JSX/HTML，但禁止默认身份错位。
+- **FOL-050 可以改变下一代未配置模板时的默认值**，不需额外申请一个旧消费者保护条件；仍要保证现有 `home` 配置、Slots、静态路由覆盖的**功能契约可达**，并通过当前版本测试证明。
 
-- 未声明新模板字段的旧 `FolioConfig`：继续获得目前的 **Editorial 默认首页**，包括已配置的 `home.meta` 和 `home.sections` 的既有语义、内容选择及样式。不能只给已有 Moyu 自动推断一个隐藏 `editorial` 标记然后将其他旧用户改成 Portal。
-- 需要 Portal 的**新消费者**：在 FOL-050 引入模板显式 opt-in 后选择 `portal`。框架提供中性缺省文案和最小区块集合；仍可使用现有五类 `home.sections` 对内容编排。
-- **未来是否把“没有配置模板”切成 Portal 是单独的、需要维护者批准的破坏性默认值迁移/版本决策**。本轮 FOL-050 **不直接切换所有用户默认值**，不靠站点名、路径、Logo 或个人资料推断身份。
-- 保留 Editorial 模板在 React 和静态 HTML 的统一能力；不可只改 React 让静态 SEO/分享产物仍使用旧文案。
-
-**[P] Portal 的最低内容合同**：站点标题/介绍来自 `config.title/description`；集合导航从 `config.collections` 派生；可选的精选、近期、栏目、关于来自真实 `docs` 和现有 `resolveFolioHome`；没有条目时显示中性、可读的空状态，不伪造文章、分类、日期。`meta` 默认应当为中性或隐藏，不使用“日记”“记录生活”作为缺省词。
-
-**[D] 需要产品决定、但不影响设计稿施工的唯一高影响取舍**：是否在**未来非兼容版本**把 Portal 改为未配置默认？建议“是”，但应先完成 opt-in 模板和真实消费站迁移证据，之后单独批准切换；此合同不在当下替用户触发该变更。
+**[P] 产品方向现已确认**：Portal 为默认，Editorial 显式选择；不用“未来版本是否切默认”作为待裁决事项。具体 Portal 的视觉质量和界面结构由 FOL-050 实现验证。
 
 ## 3. 未来最小公共 API 建议——全部尚未实现
 
@@ -72,7 +69,7 @@
 // PROPOSED ONLY — not present in current @uichat-mira/folio
 type FolioHomeTemplate = "editorial" | "portal";
 type FolioVisualPreset = "editorial" | "pearl" | "graphite";
-type FolioCodePalette = "legacy" | "xuanzhi" | "xuanmo" | "auto";
+type FolioCodePalette = "xuanzhi" | "xuanmo" | "auto";
 type FolioAppearance = {
   preset?: FolioVisualPreset;
   scheme?: "light" | "dark" | "system";
@@ -86,13 +83,13 @@ type FolioAppearance = {
 
 **[P] 字段放置理由及节约原则**：
 
-1. `home.template` 负责框架**首页 DOM**；`home.sections`/`home.meta` 仍负责首页内容。Template 选择只影响首页，不自动替换搜索、DocsShell、Footer 的内容与路由。
-2. `appearance.preset` 为站点视觉语义选取，**不进入 `home`**；全站 Header、阅读、列表、Footer、代码区域均能同一套视觉角色。未设置时维持现有基线，逻辑上相当于 legacy Editorial 色值。
-3. `appearance.scheme` 是新消费者未来共享的**站点级初始偏好**，以便静态 HTML 和 React 有相同取值依据；`ui.defaultTheme` 作为老消费者已存在的 React 层覆盖点继续可用，不删除旧类型。
-4. `appearance.codePalette` 属独立 Syntax Palette 配置：`legacy` 精确保留现有深色代码块语义；`xuanzhi`/`xuanmo` 显式指定；`auto` 在有效 light/dark 下分别选择 Xuanzhi/Xuanmo。**字段省略必须兼容目前的深色代码块，而不是偷偷改成 auto**。
-5. 不新增 `themeEngine`、`templateRegistry`、每组件 JSX 配置或新色板生成框架；颜色通过 FOL-033 已定义的 Semantic/必要 Component 变量传递。新 API 只在 FOL-049/FOL-050 有可验证真实消费者需求时才落地，必要时可采用同等简单、经维护者确认的命名。
+1. `home.template` 控制框架首页 DOM，**缺省为 portal**；`home.sections` / `home.meta` 保持内容配置，不能把模板选择塞进 `ui`。
+2. `appearance.preset` 控制全站视觉，**建议缺省为 pearl**；`editorial`、`graphite` 是平级预设，既可搭 Portal 也可搭 Editorial。
+3. `appearance.scheme` 建议缺省 `system`，新一代站点层共享初始偏好；`ui.defaultTheme` 是当前已存在 React API，实施时以明确优先级处理，不能无视正在使用的 props。
+4. `appearance.codePalette` 缺省建议 `auto`，随有效 light/dark 选择宣纸/玄墨，也支持显式选择。当前代码的深色背景不是一套需要维持的“legacy”产品主题。
+5. 只新增真实消费需要的最小配置，不造新的主题引擎、页面注册市场、CMS 或颜色 JSON 编译器。
 
-**[P] 明暗偏好的解析顺序（建议）**：用户在当前站点保存的显式 light/dark 选择 > 老 `ui.defaultTheme` 显式设置（React 兼容优先） > 新站点共享的 `appearance.scheme` > `system` / OS。原来 `app.tsx` 的真实逻辑是 saved > ui.defaultTheme > OS。新增 shared scheme 后不得覆盖旧消费者的显式选择；**因为 Vite 静态写入没有 React `ui`，配置冲突时不能承诺无 JS 与客户端完全一致**。建议新消费者只在 `appearance.scheme` 设置站点偏好；只有老消费者为兼容保留旧 `ui.defaultTheme`，并明确仅其 React 端优先。这是过渡规则，不应永久维护两个不同且可独立编辑的真相源。
+**[P] 模式选择顺序**：保存的用户 light/dark 选择 > 显式 `ui.defaultTheme` > 新共享 `appearance.scheme` > OS/system；静态 HTML 无法预知用户本地存储，须以真实 CSS/构建模式解释首屏降级。不做按站点名或历史版本自动推断的兼容逻辑。
 
 **[P] 底层实现最低边界**：
 
@@ -103,14 +100,15 @@ type FolioAppearance = {
 
 ## 4. 三套视觉方向与两套代码色板的合同
 
-| 预设 / 色板 | 核心语言 | 实施/兼容规则 |
+| 预设 / 色板 | 核心语言 | 实施规则 |
 |---|---|---|
-| **Pearl 珍珠白**（Preset） | 纸张暖白、墨色文字、细边框、中文/英文混排、克制留白 | 参照 [tomzlab-web `prod` CSS](https://github.com/uichat-mira/tomzlab-web/blob/prod/assets/css/site.css)；**不能复制站点品牌**。为 light/dark 分别定义可读 Semantic 角色 |
-| **Editorial 刊物**（Preset） | 保护现有 Folio 刊物的默认气质、字体与点缀色 | “未配置视觉”的兼容基线；不要求同时选择 Editorial 首页模板，可与 Portal 组合 |
-| **Graphite 石墨**（Preset） | 深色优先、低炫光、技术信息层级 | **不是** `Color Scheme.dark` 的新名字。必须明确 dark-first + 可用 light 角色；切换 `light` 不应自动变更 preset |
-| **Xuanzhi Light 宣纸**（Syntax Palette） | 亮色代码表面与相应语法角色 | 显式代码色板，与页面是否 Pearl 独立 |
-| **Xuanmo Dark 玄墨**（Syntax Palette） | 深色代码表面与相应语法角色 | 显式代码色板；与页面可以构成亮页深代码 |
-| **legacy（兼容代码配色）** | 保持当前 `markdown.css` 的深色块与 highlight.js 色值 | **省略配置时使用**，保证历史文章外观不被自动改写 |
+| **Pearl 珍珠白**（Preset） | 暖白纸张、墨色文字、细边界、留白与 CJK 阅读 | **新一代默认视觉候选**；参考 [tomzlab-web 视觉资产](https://github.com/uichat-mira/tomzlab-web/blob/prod/assets/css/site.css)，但不复制站点品牌；需有效 light/dark |
+| **Editorial 刊物**（Preset） | 强调排版和刊物式字体层级 | 作为正式可选预设；与 Editorial 首页模板独立组合 |
+| **Graphite 石墨**（Preset） | 暗色优先、克制的技术信息层级 | 独立 Preset，非 `Color Scheme.dark`，须在 light/dark 都可读 |
+| **Xuanzhi Light 宣纸**（Syntax Palette） | 浅色代码与语法色 | 可显式选择，或 `auto` + light |
+| **Xuanmo Dark 玄墨**（Syntax Palette） | 深色代码与语法色 | 可显式选择，或 `auto` + dark；允许浅页深代码 |
+
+**[P] 新默认目标**：`home.template="portal"`、`appearance.preset="pearl"`、`appearance.scheme="system"`、`appearance.codePalette="auto"`。这些是尚未实现的产品目标，不能误报为当前 `dev` 已支持。
 
 **[P] 代码规则**：`Reading Typography`、`Code Surface`、`Syntax Palette` 分离。`highlight.js` 只需语义色槽映射，不因主题需求自动升级成 Shiki。Mermaid 使用**有效站点主题语义**而非代码语法色；静态无 JS 必须留下可读原始图表代码或已有等价内容，不虚称构建时 SVG 已有。Callout 的信息/危险语义不能任意被品牌色取代。
 
@@ -179,7 +177,7 @@ export const config = defineFolioConfig({
 });
 ```
 
-**[P] FOL-050 完成后**，仅给 `home` 增加 `template: "portal"` 即可选择中性布局；站点不需要自建 React 首页或复制 `staticRoutes.routes`。如另需品牌定制，再由 FOL-049 的 Preset/Token 承担，不触碰文档导航逻辑。
+**[P] FOL-050 完成后**，不写 `home.template` 也会默认采用 Portal；显式写 `template: "portal"` 仅用于让配置意图更清晰。站点不需要自建 React 首页或复制 `staticRoutes.routes`。如另需品牌定制，再由 FOL-049 的 Preset/Token 承担，不触碰文档导航逻辑。
 
 ### 场景 B：品牌 / 产品门户
 
@@ -211,13 +209,30 @@ export const config = defineFolioConfig({
 
 **[F]** React 可另传 `slots.headerBrand` 或 `headerActions`；注意这不会进入默认无 JS 静态头部。[官方示例站 `main.tsx`](../../apps/site/src/main.tsx) 正是用独立的 `HomePage` 和品牌 CSS；那是**消费者自己的站点改造**，不构成 Folio 框架已经有 `home.template` 的证据。
 
-**[P]** 以后选 `home.template="portal"`、`appearance.preset="pearl"` 即可得到通用结构和暖白视觉。消费者的具体 Logo、介绍与文案仍由自身提供；Pearl 不等于 tomzlab 品牌直接移植。
+**[P]** 新一代默认 Portal / Pearl；显式选择同名模板和预设仅为固定站点设计意图。消费者的具体 Logo、介绍与文案仍由自身提供；Pearl 不等于 tomzlab 品牌直接移植。
 
-### 场景 C：个人刊物 / Editorial（真实兼容证据）
+### 场景 C：个人刊物 / Editorial（正式可选）
 
-**[F]** [Moyu 当前 `prod`](https://github.com/uichat-mira/moyu/blob/prod/folio.config.ts) 配置 `title/description/navigation/collections`，**不声明 `home`**；[Moyu 入口](https://github.com/uichat-mira/moyu/blob/prod/src/main.tsx) 直接使用 `<FolioApp config={...} docs={...}/>`，所以依赖目前的内置 Editorial 首页。在仍兼容的 Folio 中，不增任何新字段，继续保留这一条已存在的路径。
+下面是**当前真实支持**的结构化内容配置示例，但当前版本尚未支持模板选择字段：
 
-**[P]** FOL-050 可新增显式 `home.template="editorial"` 作为日后升级的迁移目标；不要求 Moyu 在此设计卡中立即改仓库，也不自动批准将其线上包或固定源码 SHA 升级。FOL-049 的 `appearance.preset="editorial"` 仅决定配色与排版气质；它既可以配个人刊物模板，也可以配 Portal，二者独立。
+```ts
+import { defineFolioConfig } from "@uichat-mira/folio";
+export const config = defineFolioConfig({
+  title: "个人刊物",
+  description: "文字、观察与收藏。",
+  collections: [{ path: "/essays", title: "文章" }],
+  home: {
+    meta: { left: "ESSAYS", right: "NOTES" },
+    sections: [
+      { type: "intro", kicker: "文字与观察" },
+      { type: "featured", collection: "/essays" },
+      { type: "recent", collection: "/essays" },
+    ],
+  },
+});
+```
+
+**[P]** 下一代要刊物首页则显式添加 `home.template="editorial"`；还希望采用刊物色彩则独立添加 `appearance.preset="editorial"`。不为了某个第一代试验站增加隐藏默认分支。
 
 ### 全局的预期配置示意（**全是拟议字段，当前不能编译**）
 
@@ -243,13 +258,13 @@ const exampleFutureConfig = {
 
 **[P] FOL-049 负责视觉**：[Issue #182](https://github.com/uichat-mira/folio/issues/182)。在现有根 Token、21 CSS 源、`styles/manifest.mjs` 与 `styles/contract.mjs` 上提供公共、可验证的 preset/code palette/Brand 覆写路径；检查 Reader、Table、Callout、Syntax、Mermaid 的明暗组合；保持 highlight.js 和唯一样式包入口，不改首页 DOM。
 
-**[P] FOL-050 负责结构**：[Issue #183](https://github.com/uichat-mira/folio/issues/183)。基于 `resolveFolioHome` 复用现有内容模型，实现显式 `portal/editorial` 首页模板，保护未配置的 Editorial 老消费者；维护 React/静态双路径实际等价和 HTML 转义/路由。不能改官方示例站 `apps/site` 品牌首页。
+**[P] FOL-050 负责结构**：[Issue #183](https://github.com/uichat-mira/folio/issues/183)。基于 `resolveFolioHome` 复用已有内容模型，实现**默认 Portal / 显式 Editorial** 首页；维护 React/静态内容等价、转义与路由，无历史站点专用特判。不能改官方示例站 `apps/site` 品牌首页。
 
 **[P] 合同验收矩阵**：
 
 | 维度 | FOL-049 要证明 | FOL-050 要证明 |
 |---|---|---|
-| 默认旧消费者 | 缺省 preset/代码配色不回归，Moyu 样式不被静默替换 | 缺省模板仍 Editorial，Moyu 原配置渲染不变 |
+| 下一代默认 | 缺省 Pearl + system + 自动代码色板，无影子 legacy theme | 缺省 Portal、无个人日志默认文案；Editorial 显式选用 |
 | 新消费者 | Pearl/Editorial/Graphite 与 scheme 独立，代码亮暗可组合 | 只加模板配置即得 Portal；不需要复制首页组件 |
 | React | 首屏有效 preset/scheme、主题切换、品牌色覆盖及 Mermaid | 模板 DOM、区块、链接、空态 |
 | 静态 / 无 JS | 构建出的 CSS 语义和 scheme 降级可读（不假装已有站点 Header） | 首页模块/文案/路由与 React 对齐 |
@@ -262,8 +277,8 @@ const exampleFutureConfig = {
 
 - 不修改 `packages/folio/src/**`、`styles/contract.mjs`、`styles/manifest.mjs`、`apps/site` 或任何下游站点。
 - 不引入 `config.appearance`、`home.template` 等**拟议字段**到实际 TypeScript；这些必须由 FOL-049/FOL-050 的实施 PR 实现与测试。
-- 不发布 npm、不部署测试/生产、不把历史消费者锁定版本偷偷升级。
+- 不发布 npm、不部署测试/生产；旧试验站的锁定版本不进入新一代默认行为验收。
 - 不将无 JS 静态页面的 Markdown 可读性误报为完整 React 交互可用；也不把现有 Code/Mermaid 固定色误报为已实现动态主题。
 - 不以本设计文档替代未来的 npm tarball、Windows、React/静态输出和必要无障碍/视觉验证。
 
-**设计成功的判据**：维护者仅从本合同就能分清“什么现在能配置、什么尚不存在、谁在什么文件实现、旧 Moyu 是否会变样、Portal 新消费者能否最小接入”。最终的页面视觉效果由有实际输出的实施 PR 决定。
+**设计成功的判据**：维护者仅从本合同就能分清“什么现在能配置、什么尚不存在、谁在什么文件实现、为何 Portal 是新默认、Editorial 如何显式选择”。最终的页面视觉效果由有实际输出的实施 PR 决定。
