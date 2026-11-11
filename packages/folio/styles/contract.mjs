@@ -190,6 +190,7 @@ export const REQUIRED_SELECTOR_FAMILIES = [
     id: "markdown",
     selectors: [
       ".folio-markdown",
+      ".folio-markdown .folio-table-scroll",
       ".folio-markdown pre",
       ".folio-markdown pre code.hljs",
       ".md-custom-block",
@@ -256,6 +257,8 @@ export const REQUIRED_DECLARATIONS = {
   ".folio-footer": "text-align: center",
   ".folio-not-found": "text-align: center",
   ".folio-markdown": "line-height: 1.78",
+  // Wide tables must scroll inside the reading column, never the document.
+  ".folio-markdown .folio-table-scroll": "overflow-x: auto",
   ".folio-search-overlay": "position: fixed",
   ".folio-search-dialog": "width: min(680px, 100%)",
   ".folio-docs-shell": "grid-template-columns: 250px",

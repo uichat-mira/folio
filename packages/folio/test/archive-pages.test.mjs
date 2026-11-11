@@ -88,7 +88,9 @@ function renderApp(pathname, { basePath = "/", siteConfig = config, siteDocs = d
 }
 
 function archiveChips(html) {
-  return [...html.matchAll(/class="folio-archive-chip" href="([^"]+)"/g)].map((match) => match[1]);
+  return [...html.matchAll(/class="folio-archive-chip"[^>]*?\shref="([^"]+)"/g)].map(
+    (match) => match[1],
+  );
 }
 
 function archiveEntryLinks(html) {
@@ -102,9 +104,11 @@ function entryTagLinks(html) {
 test("opted-in collection index exposes category entry points and clickable card tags", () => {
   const html = renderApp("/blogs");
 
-  assert.match(html, /class="folio-archive-row" aria-label="博客分类归档"/);
-  assert.match(html, /<span class="folio-archive-row__label">分类<\/span>/);
+  assert.match(html, /class="folio-archive-row" aria-label="博客分类归档"><ul class="folio-archive-row__list">/);
+  assert.equal(html.includes("folio-archive-row__label"), false);
+  assert.match(html, /aria-current="true"[^>]*>全部<\/a>/);
   assert.deepEqual(archiveChips(html), [
+    "/blogs",
     "/blogs/category/backend",
     "/blogs/category/frontend",
   ]);
@@ -176,7 +180,10 @@ test("archive routes derive from the configured collection path, not /blogs", ()
   ];
 
   const index = renderApp("/journal/2026", { siteConfig, siteDocs });
-  assert.deepEqual(archiveChips(index), ["/journal/2026/category/frontend"]);
+  assert.deepEqual(archiveChips(index), [
+    "/journal/2026",
+    "/journal/2026/category/frontend",
+  ]);
   assert.match(index, />前端<\/a>/);
   assert.doesNotMatch(index, /\/blogs\//);
 
@@ -242,6 +249,8 @@ test("an archive route that collides with a document or collection fails React r
 test("archive entry points ship the shared restrained styles and keyboard focus", () => {
   const css = readFileSync(new URL("../dist/styles.css", import.meta.url), "utf8");
   assert.match(css, /\.folio-archive-row\s*\{/);
+  assert.match(css, /\.folio-archive-row\s*\{[^}]*position:\s*sticky/s);
+  assert.match(css, /\.folio-archive-row\s*\{[^}]*top:\s*var\(--folio-header-height\)/s);
   assert.match(css, /\.folio-archive-row__list\s*\{/);
   assert.match(css, /\.folio-archive-chip\s*\{[^}]*var\(--folio-radius-pill\)/s);
   assert.match(css, /\.folio-archive-chip\s*\{[^}]*var\(--folio-hairline\)/s);

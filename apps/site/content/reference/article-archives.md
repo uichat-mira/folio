@@ -105,7 +105,10 @@ blogs/tag/folio/index.html
 
 `FolioApp` 自动读取 `collections[].archive`：
 
-- 开启归档的集合索引增加一行紧凑的分类入口（仅当存在分类时）；
+- 开启归档的集合索引增加一行紧凑的分类入口（仅当存在分类时），首项为 `全部`；普通左键点击只在当前集合列表内切换分类，不改变路由、不新增历史记录，分类切换与列表共用同一个阅读图层；
+- 分类行滚动时吸顶在站点 Header 下方（`top: var(--folio-header-height)`），复用 Header 的磨砂画布表面并向列表方向渐隐，不画贯穿内容列的下横线，条目经过时自然虚化；
+- 切换分类后列表自动复位到筛选结果的开头（位于吸顶行下方）；如果读者本来就在列表上方，则不会向下跳转，较短的筛选结果也不会把人留在页脚；
+- 分类 chip 保留真实的归档 URL，因此中键 / 修饰键点击、爬虫和无 JavaScript 的静态页仍然能到达 `<collection>/category/<slug>`；
 - 该集合的文章卡片与文章元信息把标签渲染为归档链接；
 - `<collection>/category/<slug>` 与 `<collection>/tag/<slug>` 渲染归档条目列表，并提供返回集合的链接；
 - 未知归档 slug 走普通 not-found；
@@ -122,7 +125,8 @@ blogs/tag/folio/index.html
 - 标题、描述与 canonical 来自归档 route，继承 `base` 与 `config.siteUrl`；
 - 归档 URL 会进入 `sitemap.xml`；
 - `siteIndexing: "noindex"` 对归档页与其他默认页面同样生效；
-- 归档页无 JavaScript 也能阅读，条目列表与排序和 React 一致，链接使用静态目录 URL。
+- 归档页无 JavaScript 也能阅读，条目列表与排序和 React 一致，链接使用静态目录 URL；
+- 集合索引的静态 HTML 首项是处于选中态的 `全部` chip，各 chip 都是普通归档链接；React 运行时加载后，分类行升级为上面的原地筛选。
 
 ### 自定义路由集
 

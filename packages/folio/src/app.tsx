@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -40,6 +41,7 @@ import {
   FolioArticleTags,
   type FolioArticleArchiveCollection,
 } from "./ui/article-archive";
+import type { FolioArticleArchiveGroup } from "./core/article-archive";
 import type { FolioDoc, FolioConfig } from "./types";
 import type {
   FolioAppProps,
@@ -369,7 +371,51 @@ function CollectionIndex({
   categories?: FolioArticleArchiveCollection["index"]["categories"];
   tagLinks?: ReadonlyMap<string, readonly FolioEntryTagLink[]>;
 }) {
-  const entries = selectFolioCollectionDocs(docs, collection.path);
+  // Category switching is one layer: the chips filter this list in place and
+  // never change the route. Archive URLs stay available to crawlers, new-tab
+  // links and the no-JS static collection page.
+  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const categoryRowRef = useRef<HTMLElement>(null);
+  const resetScroll = useRef(false);
+  const activeCategory = categories?.find(
+    (group) => group.id === activeCategoryId,
+  );
+  const entries = activeCategory?.docs ?? selectFolioCollectionDocs(docs, collection.path);
+
+  // A shorter filtered list otherwise clamps the reader near the footer. Once
+  // the new list is committed, bring its beginning back under the sticky
+  // header + category row, but never jump down when the reader is already above
+  // the list (for example while clicking chips at the top of the page).
+  useLayoutEffect(() => {
+    if (!resetScroll.current) return;
+    resetScroll.current = false;
+    const list = listRef.current;
+    const row = categoryRowRef.current;
+    if (!list || !row) return;
+    const stickyTop = Number.parseFloat(getComputedStyle(row).top) || 0;
+    const target =
+      window.scrollY +
+      list.getBoundingClientRect().top -
+      stickyTop -
+      row.getBoundingClientRect().height -
+      12;
+    if (target >= window.scrollY) return;
+    window.scrollTo({
+      top: target,
+      behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches
+        ? "auto"
+        : "smooth",
+    });
+  }, [activeCategoryId]);
+
+  const selectCategory = (group: FolioArticleArchiveGroup | null) => {
+    const next = group?.id ?? null;
+    if (next === activeCategoryId) return;
+    resetScroll.current = true;
+    setActiveCategoryId(next);
+  };
+
   return (
     <main className="folio-home folio-collection-page">
       <header className="folio-journal-hero folio-collection-hero">
@@ -380,16 +426,21 @@ function CollectionIndex({
       <FolioArchiveCategoryRow
         collection={collection}
         groups={categories ?? []}
+        activeId={activeCategory?.id ?? null}
+        onSelect={selectCategory}
+        rowRef={categoryRowRef}
       />
-      {entries.length ? (
-        <FolioEntryList
-          entries={entries}
-          headingLevel="h2"
-          tagLinks={tagLinks}
-        />
-      ) : (
-        <p className="folio-collection-empty">{collection.emptyMessage}</p>
-      )}
+      <div ref={listRef}>
+        {entries.length ? (
+          <FolioEntryList
+            entries={entries}
+            headingLevel="h2"
+            tagLinks={tagLinks}
+          />
+        ) : (
+          <p className="folio-collection-empty">{collection.emptyMessage}</p>
+        )}
+      </div>
     </main>
   );
 }

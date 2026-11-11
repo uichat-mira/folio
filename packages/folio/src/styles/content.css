@@ -67,6 +67,10 @@
   color: var(--folio-body);
   font-size: 16px;
   line-height: 1.78;
+  /* Long inline code such as `call(arg, arg)` still has to wrap in prose;
+     break-word only kicks in when a token cannot fit, so table intrinsic
+     widths keep driving the table scroll container instead. */
+  overflow-wrap: break-word;
 }
 
 .folio-markdown h1 {
@@ -139,9 +143,39 @@
   height: auto;
 }
 
+/* Wide GFM tables scroll inside the reading column instead of widening the
+   whole document. The wrapper is focusable so keyboards can pan it as well. */
+.folio-markdown .folio-table-scroll {
+  margin: 16px 0 24px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--folio-muted) 45%, transparent) transparent;
+}
+
+.folio-markdown .folio-table-scroll:focus-visible {
+  outline: 2px solid var(--folio-primary);
+  outline-offset: 4px;
+  border-radius: var(--folio-radius-sm);
+}
+
+.folio-markdown .folio-table-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.folio-markdown .folio-table-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.folio-markdown .folio-table-scroll::-webkit-scrollbar-thumb {
+  border-radius: var(--folio-radius-pill);
+  background: color-mix(in srgb, var(--folio-muted) 45%, transparent);
+}
+
 .folio-markdown table {
   width: 100%;
-  margin: 16px 0 24px;
+  margin: 0;
   border-collapse: collapse;
   font-size: 14px;
 }
@@ -511,18 +545,37 @@
 }
 
 /* FOL-041: opt-in Article category/tag archive entry points. Tokens only; the
-   row, chips and tag links stay secondary to the article titles. */
+   row, chips and tag links stay secondary to the article titles. The category
+   row also pins under the sticky header while the collection scrolls. It reuses
+   the header's frosted rail instead of a full-width rule: entries soften as
+   they pass underneath, so no hard line cuts across the reading column. */
 .folio-archive-row {
+  position: sticky;
+  top: var(--folio-header-height);
+  z-index: 20;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 8px 14px;
-  margin: 0 0 8px;
-  padding: 0 0 22px;
-  border-bottom: 1px solid var(--folio-hairline);
+  margin: 0;
+  padding: 8px 0;
+  /* Opaque fallback first: a bar over scrolling entries must never be clear. */
+  background: var(--folio-canvas);
+  background: color-mix(in srgb, var(--folio-canvas) 94%, transparent);
+  backdrop-filter: blur(14px);
 }
 
-.folio-archive-row__label,
+.folio-archive-row::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  height: 12px;
+  background: linear-gradient(to bottom, var(--folio-canvas), transparent);
+  pointer-events: none;
+}
+
 .folio-article-tags__label {
   color: var(--folio-muted);
   font: 600 11px/1.5 var(--folio-font-mono);
@@ -548,12 +601,17 @@
   color: var(--folio-body-strong);
   font-size: 12px;
   line-height: 1.4;
-  transition: border-color .15s ease, color .15s ease;
+  transition: border-color .15s ease, color .15s ease, background-color .15s ease;
 }
 
-.folio-archive-chip:hover {
+.folio-archive-chip:hover,
+.folio-archive-chip[aria-current="true"] {
   border-color: var(--folio-primary);
   color: var(--folio-primary-active);
+}
+
+.folio-archive-chip[aria-current="true"] {
+  background: color-mix(in srgb, var(--folio-primary) 10%, transparent);
 }
 
 .folio-entry-tags {
@@ -690,6 +748,20 @@
   .folio-card-grid { grid-template-columns: 1fr; }
   .folio-search-overlay { padding-top: 18px; }
   .folio-search-footer { display: none; }
+
+  /* Tighter cells keep more columns visible; the 10px mask lands on cell
+     padding at rest, so fitting tables keep every glyph intact. */
+  .folio-markdown .folio-table-scroll {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 10px, #000 calc(100% - 10px), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 10px, #000 calc(100% - 10px), transparent);
+  }
+
+  .folio-markdown table { font-size: 13px; }
+
+  .folio-markdown th,
+  .folio-markdown td { padding: 9px 12px; }
+
+  .folio-markdown th { font-size: 11px; }
 }
 
 

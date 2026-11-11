@@ -145,11 +145,13 @@ test("opted-in collections generate category and tag routes derived from their o
 
     // Entry points on the collection index and article metadata.
     const indexHtml = read("blogs/index.html");
-    assert.match(indexHtml, /class="folio-archive-row" aria-label="博客分类归档"/);
+    assert.match(indexHtml, /class="folio-archive-row" aria-label="博客分类归档"><ul class="folio-archive-row__list">/);
+    assert.doesNotMatch(indexHtml, /folio-archive-row__label/);
     assert.deepEqual(
       [...indexHtml.matchAll(/class="folio-archive-chip" href="([^"]*)"/g)].map((match) => match[1]),
-      ["/moyu/blogs/category/backend/", "/moyu/blogs/category/frontend/"],
+      ["/moyu/blogs/", "/moyu/blogs/category/backend/", "/moyu/blogs/category/frontend/"],
     );
+    assert.match(indexHtml, /aria-current="true"[^>]*>全部<\/a>/);
     assert.match(indexHtml, /class="folio-entry-tag" href="\/moyu\/blogs\/tag\/react\/">react</);
     assert.match(indexHtml, /class="folio-entry-tag" href="\/moyu\/blogs\/tag\/设计\/">设计</);
 
@@ -407,8 +409,8 @@ test("React and static archive surfaces publish the same content, order and link
 
   const stripBase = (href) => href.replace(/^\/moyu/, "").replace(/\/$/, "");
   const links = (html, className) =>
-    [...html.matchAll(new RegExp(`class="${className}" href="([^"]+)"`, "g"))].map((match) =>
-      stripBase(match[1]),
+    [...html.matchAll(new RegExp(`class="${className}"[^>]*?\\shref="([^"]+)"`, "g"))].map(
+      (match) => stripBase(match[1]),
     );
 
   withSite(({ context, read }) => {
@@ -473,7 +475,7 @@ test("missing categories or tags never create empty or meaningless entry points"
       const indexHtml = read("blogs/index.html");
       assert.deepEqual(
         [...indexHtml.matchAll(/class="folio-archive-chip" href="([^"]*)"/g)].map((match) => match[1]),
-        ["/moyu/blogs/category/frontend/"],
+        ["/moyu/blogs/", "/moyu/blogs/category/frontend/"],
       );
       assert.equal(exists("blogs/category/uncategorized"), false);
       // The untagged article keeps an entry without a tag row.

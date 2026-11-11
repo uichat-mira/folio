@@ -49,7 +49,8 @@ test("GFM tables render with semantic table markup", () => {
 | Folio | active |`,
   );
 
-  assert.match(html, /<table>/);
+  assert.match(html, /<div class="folio-table-scroll" tabindex="0"><table>/);
+  assert.match(html, /<\/table>\s*<\/div>/);
   assert.match(html, /<th>Name<\/th>/);
   assert.match(html, /<td>active<\/td>/);
 });
