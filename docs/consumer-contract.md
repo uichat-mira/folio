@@ -737,10 +737,12 @@ const config = defineFolioConfig({
   prerendered \`index.html\`, canonical, OG, JSON-LD and sitemap entry.
   The default view is a compact, serif editorial list with separators only
   **between** rows. Empty collections render a short empty state.
-- The default home previews the primary collection plus other configured
-  collections with the same selector. `config.home` can change the featured
-  source, recent limits, block order and visibility; both React and static
-  home use that same configuration without consumer-side custom components.
+- The default home is the neutral Portal template and previews the primary
+  collection plus other configured collections with the same selector.
+  `config.home` can choose the explicit `editorial` template, change the
+  featured source, recent limits, block order and visibility; both React and
+  static home use that same configuration without consumer-side custom
+  components.
 - \`staticRoutes.routes\` custom override remains authoritative. When a
   consumer explicitly supplies its own static route array, it owns adding
   any index pages to that array.
@@ -748,12 +750,17 @@ const config = defineFolioConfig({
 As this is an unreleased PR candidate, sites pinned to
 \`@uichat-mira/folio@0.1.1\` must not claim the feature is published.
 
-## Configurable built-in home (FOL-030 candidate, not published in 0.1.1)
+## Configurable built-in home (FOL-030 / FOL-050 candidate, not published in 0.1.1)
 
 `FolioConfig.home` is a lightweight, ordered contract for the built-in home.
 It is not a theme engine or a layout DSL. It reuses `FolioConfig.collections`,
 `FolioDoc`, and the same recursive collection selector as collection indexes;
 no `/blogs`, `/projects`, or document type is hardcoded.
+
+`home.template` selects the built-in structure. Omitting it (or setting
+`template: "portal"`) renders the neutral Portal; `template: "editorial"` opts
+into the publication layout, journal defaults and editorial CSS. There is no
+implicit historical fallback: a config without `template` is a Portal.
 
 ```ts
 const config = defineFolioConfig({
@@ -764,6 +771,7 @@ const config = defineFolioConfig({
     { path: "/projects", title: "Projects" },
   ],
   home: {
+    template: "editorial",
     meta: { left: "FIELD NOTES", right: "ARCHIVE" },
     sections: [
       { type: "intro", title: "Notes from the workshop" },
@@ -779,7 +787,8 @@ const config = defineFolioConfig({
 - Section array order is render order. Omitting `sections` preserves the
   default `intro`, `featured`, `recent`, `collections`, `about` order;
   `sections: []` renders only the optional meta strip. `meta: false` hides the
-  strip.
+  strip. Portal metadata appears only when configured; explicit editorial
+  keeps its publication meta defaults.
 - `featured` accepts `path` or a `collection` route. `recent` and `collections`
   read the same date-descending selector as collection pages. A featured entry
   is excluded from `recent` even when the featured section is placed later.
@@ -788,20 +797,22 @@ const config = defineFolioConfig({
   collection or `path` throws during resolution instead of silently falling
   back to unrelated content.
 - Resolution is centralised in the public `resolveFolioHome(config, docs)`
-  model. The React home and default static home consume that model, so selected
-  content, ordering, links and `basePath` handling stay aligned. Static config
-  text is HTML-escaped; only an explicit static override body is trusted raw
-  HTML.
+  model, which now carries the selected `template`. The React home and default
+  static home consume that model, so selected template, content, ordering,
+  links, empty states and `basePath` handling stay aligned. Static config text
+  is HTML-escaped; only an explicit static override body is trusted raw HTML.
 
 ### Three supported home paths
 
-1. **Default home.** Set neither `home` nor `slots.home`. Existing React output,
-   static `index.html`, SEO metadata, navigation and no-JS behavior stay on the
-   default path.
-2. **Configured home.** Set `config.home`. The React runtime and the default
-   static build both render it. If `staticRoutes.routes` supplies a complete
-   route array, that array remains authoritative and the consumer must include
-   a matching home route (reuse `renderFolioStaticHome(context)` if useful).
+1. **Default home.** Set neither `home` nor `slots.home`. React and static
+   output render the neutral Portal, keeping SEO metadata, navigation and no-JS
+   behavior on the default path.
+2. **Configured home.** Set `config.home`; omit `template` for Portal or set
+   `template: "editorial"` for the publication layout. The React runtime and
+   the default static build both render it. If `staticRoutes.routes` supplies a
+   complete route array, that array remains authoritative and the consumer must
+   include a matching home route (reuse `renderFolioStaticHome(context)` if
+   useful).
 3. **Advanced full override.** `slots.home` still replaces the React `/` route
    completely. `staticRoutes.home` replaces only the static `/` route body and
    metadata while keeping every other generated route, `404.html`,

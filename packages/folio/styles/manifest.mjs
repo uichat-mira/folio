@@ -38,8 +38,10 @@ export const STYLE_SOURCES = [
   "src/ui/search/search.css",
   // Application-level fallback page (404), shared buttons and prerender shell.
   "src/ui/app/app.css",
-  // Journal home, its card grid, collection hero/about and empty state.
+  // Home page frames, the card grid, collection hero/about and empty state.
   "src/ui/home/home.css",
+  // Neutral Portal home structure. Colors and typography stay on public tokens.
+  "src/ui/home/portal.css",
   // Article entry list shared by the home, collection and archive pages.
   "src/ui/entry-list/entry-list.css",
   // Article category/tag archive pages.

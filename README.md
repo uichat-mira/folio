@@ -42,7 +42,7 @@ The [migration status page](https://uichat-mira.github.io/folio/reference/migrat
 - Vite content discovery and `virtual:folio/content`
 - Generated routes, navigation roots, and heading extraction
 - Configurable static HTML generation
-- Lightweight built-in home configuration and home-only static override
+- Portal default home, explicit Editorial template, and home-only static override
 - Canonical, Open Graph, Twitter, and JSON-LD metadata
 - `404.html`, `sitemap.xml`, and `robots.txt`
 - GitHub Pages project-path and root-path support

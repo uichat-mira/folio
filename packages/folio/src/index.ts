@@ -126,6 +126,7 @@ export type {
   FolioHomeRecentSectionConfig,
   FolioHomeSectionConfig,
   FolioHomeSectionType,
+  FolioHomeTemplate,
   FolioEntryType,
   FolioHeading,
   FolioNavigationChild,
