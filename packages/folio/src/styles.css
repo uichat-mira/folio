@@ -40,6 +40,7 @@
   font-family: var(--folio-font-sans);
   color: var(--folio-ink);
   background: var(--folio-canvas);
+  color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
