@@ -33,8 +33,20 @@ export const STYLE_SOURCES = [
   "src/ui/markdown/markdown.css",
   // SearchOverlay shell, input, results and interaction states.
   "src/ui/search/search.css",
-  // Transitional: content rules whose component ownership lands in the next
-  // phases (Home, EntryList, ArticleArchive, DocsShell).
+  // Application-level fallback page (404), shared buttons and prerender shell.
+  "src/ui/app/app.css",
+  // Journal home, its card grid, collection hero/about and empty state.
+  "src/ui/home/home.css",
+  // Article entry list shared by the home, collection and archive pages.
+  "src/ui/entry-list/entry-list.css",
+  // Article category/tag archive pages.
+  "src/ui/article-archive/article-archive.css",
+  // Narrow-screen page-frame adaptations shared by reading and home.
+  "src/styles/responsive.css",
+  // Editorial home composition (Moyu-style magazine layout).
+  "src/ui/home/editorial.css",
+  // Transitional: DocsShell reading rules move to their owning module in the
+  // next phase.
   "src/styles/content-body.css",
   "src/ui/page-nav/page-nav.css",
   "src/ui/doc-meta/doc-meta.css",

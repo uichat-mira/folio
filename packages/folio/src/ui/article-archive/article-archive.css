@@ -1,0 +1,118 @@
+/* FOL-041: opt-in Article category/tag archive entry points. Tokens only; the
+   row, chips and tag links stay secondary to the article titles. The category
+   row also pins under the sticky header while the collection scrolls. It reuses
+   the header's frosted rail instead of a full-width rule: entries soften as
+   they pass underneath, so no hard line cuts across the reading column. */
+.folio-archive-row {
+  position: sticky;
+  top: var(--folio-header-height);
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin: 0;
+  padding: 8px 0;
+  /* Opaque fallback first: a bar over scrolling entries must never be clear. */
+  background: var(--folio-canvas);
+  background: color-mix(in srgb, var(--folio-canvas) 94%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+.folio-archive-row::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  height: 12px;
+  background: linear-gradient(to bottom, var(--folio-canvas), transparent);
+  pointer-events: none;
+}
+
+.folio-article-tags__label {
+  color: var(--folio-muted);
+  font: 600 11px/1.5 var(--folio-font-mono);
+  letter-spacing: .12em;
+}
+
+.folio-archive-row__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.folio-archive-chip {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid var(--folio-hairline);
+  border-radius: var(--folio-radius-pill);
+  color: var(--folio-body-strong);
+  font-size: 12px;
+  line-height: 1.4;
+  transition: border-color .15s ease, color .15s ease, background-color .15s ease;
+}
+
+.folio-archive-chip:hover,
+.folio-archive-chip[aria-current="true"] {
+  border-color: var(--folio-primary);
+  color: var(--folio-primary-active);
+}
+
+.folio-archive-chip[aria-current="true"] {
+  background: color-mix(in srgb, var(--folio-primary) 10%, transparent);
+}
+
+.folio-archive-chip:focus-visible,
+.folio-entry-tag:focus-visible,
+.folio-article-tag:focus-visible,
+.folio-archive-back:focus-visible {
+  outline: 2px solid var(--folio-primary);
+  outline-offset: 2px;
+}
+
+.folio-article-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 18px;
+}
+
+.folio-article-tag {
+  min-height: 28px;
+  padding: 1px 10px;
+}
+
+.folio-archive-back {
+  display: inline-flex;
+  margin-top: 16px;
+  color: var(--folio-primary-active);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.folio-archive-back:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.folio-archive-page .folio-entry-list {
+  margin-top: 24px;
+}
+
+@media (max-width: 780px) {
+  .folio-archive-row { padding-bottom: 18px; }
+  .folio-archive-chip { min-height: 30px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folio-archive-chip,
+  .folio-article-tag,
+  .folio-entry-tag { transition: none; }
+}
