@@ -16,6 +16,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { normalizeBasePath } from "./core/config";
+import { resolveFolioAppearance } from "./core/appearance";
 import { FolioHeader } from "./ui/header";
 import { FolioFooter } from "./ui/footer";
 import { resolveFolioReaderKind, shouldShowFolioPageFooter } from "./ui/page-presentation";
@@ -54,11 +55,21 @@ function href(path: string): string {
   return path === "/" ? "/" : path.replace(/\/$/, "");
 }
 
+// The prior "folio-theme" key also held an OS-derived effective color; it
+// therefore cannot identify an explicit user preference. Use a dedicated key.
+const USER_THEME_KEY = "folio-theme-choice";
+
+function savedUserTheme(): "light" | "dark" | undefined {
+  if (typeof window === "undefined") return undefined;
+  const value = window.localStorage.getItem(USER_THEME_KEY);
+  return value === "light" || value === "dark" ? value : undefined;
+}
+
 function resolveInitialTheme(preference: FolioThemePreference): "light" | "dark" {
-  if (typeof window === "undefined") return preference === "dark" ? "dark" : "light";
-  const saved = window.localStorage.getItem("folio-theme");
-  if (saved === "light" || saved === "dark") return saved;
-  if (preference === "light" || preference === "dark") return preference;
+  const saved = savedUserTheme();
+  if (saved) return saved;
+  if (preference !== "system") return preference;
+  if (typeof window === "undefined") return "light";
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
@@ -575,8 +586,10 @@ function Shell({
     ui?.footerOnDocs,
   );
   const showSiteFooter = footerVisible(current);
-  const themePreference = ui?.defaultTheme ?? "system";
+  const appearance = resolveFolioAppearance(config);
+  const themePreference = ui?.defaultTheme ?? appearance.scheme;
   const [searchOpen, setSearchOpen] = useState(false);
+  const [userTheme, setUserTheme] = useState(savedUserTheme);
   const [theme, setTheme] = useState<"light" | "dark">(
     () => resolveInitialTheme(themePreference),
   );
@@ -587,11 +600,24 @@ function Shell({
   }, [location.pathname]);
 
   useEffect(() => {
-    if (!themeEnabled) return;
+    // Automatic system resolution is never persisted as a deliberate choice.
+    if (userTheme) return;
+    const update = () => setTheme(resolveInitialTheme(themePreference));
+    update();
+    if (themePreference !== "system") return;
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, [themePreference, userTheme]);
+
+  useEffect(() => {
+    // Scheme and preset own the document scope; the Header toggle only changes
+    // the effective light/dark choice. This also updates Mermaid observers.
+    document.documentElement.dataset.folioPreset = appearance.preset;
+    document.documentElement.dataset.folioCodePalette = appearance.codePalette;
     document.documentElement.dataset.folioTheme = theme;
     document.documentElement.style.colorScheme = theme;
-    window.localStorage.setItem("folio-theme", theme);
-  }, [theme, themeEnabled]);
+  }, [theme, appearance.preset, appearance.codePalette]);
 
   useEffect(() => {
     if (!searchEnabled) return;
@@ -611,7 +637,10 @@ function Shell({
   }
 
   function toggleTheme() {
-    setTheme((value) => value === "dark" ? "light" : "dark");
+    const next = theme === "dark" ? "light" : "dark";
+    window.localStorage.setItem(USER_THEME_KEY, next);
+    setUserTheme(next);
+    setTheme(next);
   }
 
   return (
