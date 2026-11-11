@@ -108,3 +108,22 @@ test("the two syntax palettes are a separate selectable CSS surface", () => {
   assert.match(css, /background: var\(--folio-code-bg\)/);
   assert.match(css, /@media \(prefers-color-scheme: dark\)/);
 });
+
+test("Xuanzhi and Xuanmo syntax roles meet readable contrast on their own code surfaces", () => {
+  const selectors = [
+    ':root:where(:not([data-folio-code-palette="xuanmo"])) {',
+    ':root:where([data-folio-code-palette="xuanmo"], [data-folio-theme="dark"]:not([data-folio-code-palette="xuanzhi"])) {',
+  ];
+  for (const selector of selectors) {
+    const body = ruleBody(selector);
+    const background = declaration(body, "code-bg");
+    for (const role of [
+      "code-fg", "syntax-text", "syntax-comment", "syntax-keyword",
+      "syntax-function", "syntax-string", "syntax-number", "syntax-type",
+      "syntax-punctuation",
+    ]) {
+      assert.ok(contrast(declaration(body, role), background) >= 4.5,
+        selector + " " + role + " should be readable on the code surface");
+    }
+  }
+});
