@@ -145,6 +145,16 @@
 - **[F]** `.folio-shell` 内声明的 `--folio-home-frame-width` 和 `--folio-reading-frame-width` 会覆盖根级继承变量；`--folio-docs-mobile-bar-height` 也是组件局部值。不能声称当前消费者只在 `:root` 修改布局宽度就一定生效；后续实施须给出稳定扩展点。
 - **[F]** `--site-*` 是官方网站的别名，不是 Folio 发行包内置的双重 Token 来源。消费站品牌 CSS 不负责重定义 `src/styles.css` 的全局 `body/a/button` 规则。
 
+**[P] 明暗成对与跨模式固定值的明确边界**：
+
+| 类别 | Light/Dark 义务 | 代表角色（现有名称或未来语义） |
+|---|---|---|
+| 文字、画布、表面、边框、交互、反色内容 | **必须逐模式声明或显式证明复用同值满足对比度**，不能靠原色恰巧可读 | `--folio-ink`、`--folio-body`、`--folio-muted`、`--folio-canvas`、`--folio-surface-*`、`--folio-hairline`、`--folio-primary*`、`--folio-on-*` |
+| 状态、信息 Callout、代码容器与 Syntax Palette、Mermaid 文本/背景/连线 | **必须按最终使用背景验证 Light/Dark 组合**；即使值相同也需有逐模式证据。当前 warning/error/success 等只有根值，不表示暗色可读性已通过 | `--folio-success`、`--folio-warning`、`--folio-error`、未来 `--folio-syntax-*`、图表语义 |
+| 字族、间距、圆角、结构尺寸、响应式阈值 | **默认跨模式固定**；仅当布局/可达性场景有明确证据时引入模式差异。它们可以随 Brand/Preset 变，但不应仅因 Light/Dark 切换而变化 | `--folio-font-*`、`--folio-space-*`、`--folio-radius-*`、`--folio-header-height`、组件布局宽度和断点 |
+
+**[F/P 区分]** 当前机器合同只要求既有 **18** 个 dark 覆盖名及顺序；上表是**后续主题实施的检查合同**，不是声称当前其他颜色已实现暗色对值，也不授权本卡修改 `styles/contract.mjs`。
+
 ### 两个重点的真实参照
 
 **Pearl / 珍珠白**：现有 [`tomzlab-web@prod`](https://github.com/uichat-mira/tomzlab-web/blob/prod/assets/css/site.css) 为独立网站设计，`--paper:#faf9f6`、`--white:#fffefa`、`--ink:#252522`、`--line:#e7e6e0`，强调柔和纸张、细边界、CJK 字体回退和留白；**并非已通过 Folio 公开 API 实现的主题**。后续实现应以「不复制 Folio 组件源代码也能表现相近品牌视觉」作为真实消费者验收。
