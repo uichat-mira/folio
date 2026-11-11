@@ -92,6 +92,10 @@ const checks = [
         "function",
         "root entry does not export resolveFolioHome",
       );
+      assert.equal(typeof entry.resolveFolioAppearance, "function", "appearance resolver must ship in the tarball");
+      assert.equal(typeof entry.resolveFolioCodePalette, "function", "code palette resolver must ship in the tarball");
+      assert.deepEqual(entry.resolveFolioAppearance({}), { preset: "pearl", scheme: "system", codePalette: "auto" });
+      assert.equal(entry.resolveFolioCodePalette("xuanmo", "light"), "xuanmo");
 
       const doc = entry.parseFolioDoc(
         "docs/consumer.md",

@@ -45,6 +45,66 @@ export default defineConfig({
 
 The plugin discovers Markdown, parses YAML Frontmatter, and exposes content through `virtual:folio/content`. It can also generate route-level HTML, canonical and social metadata, JSON-LD, `404.html`, `sitemap.xml`, and `robots.txt`.
 
+## Visual presets and code highlighting (next release)
+
+The current source branch implements the FOL-049 appearance contract. **The npm
+`0.1.1` release above does not yet contain these settings.** After a release
+from the Folio `prod` lineage, the same `FolioConfig` drives both React and
+static output:
+
+```ts
+import { defineFolioConfig } from "@uichat-mira/folio";
+
+export default defineFolioConfig({
+  title: "Knowledge base",
+  description: "Engineering notes and product documentation",
+  appearance: {
+    preset: "graphite",   // "pearl" | "editorial" | "graphite"
+    scheme: "system",    // "light" | "dark" | "system"
+    codePalette: "auto", // "auto" | "xuanzhi" | "xuanmo"
+  },
+});
+```
+
+The **unconfigured defaults** are `pearl + system + auto`. Each preset has
+light and dark semantic colors. Graphite is a separate *dark-first visual
+preset*, not another Color Scheme. `auto` uses Xuanzhi for effective light,
+Xuanmo for effective dark; a site can explicitly choose dark code on a light
+page without changing the site's scheme. The built-in **home template** is a
+separate concern (FOL-050), not chosen by `appearance.preset`.
+
+Folio still has a **single stylesheet entry**:
+
+```ts
+import "@uichat-mira/folio/styles.css";
+import "./brand.css"; // optional site-owned token values, loaded afterwards
+```
+
+Consumer brand CSS can override public role tokens without copying Header,
+DocsShell or Markdown component selectors:
+
+```css
+:root {
+  --folio-primary: #27695b;
+  --folio-reading-frame-width: 1180px;
+  --folio-code-bg: #f7f5ef;
+}
+```
+
+The root frame width variables are inherited into `.folio-shell` rather than
+shadowed by it. Code colors are independently exposed as
+`--folio-code-bg`, `--folio-code-fg`, `--folio-code-border` and
+`--folio-syntax-*`. Mermaid resolves current semantic CSS color tokens at
+runtime; it is **not** statically pre-rendered as an SVG.
+
+Static output from `folio({ staticRoutes: true })` uses the same site-level
+`appearance` config and sets `data-folio-preset` /
+`data-folio-code-palette` on the HTML element. An explicit light/dark scheme
+also sets `data-folio-theme`; `system` leaves the mode to the reader's CSS
+media preference until JavaScript takes over. In React the user theme choice
+is stored only after an explicit toggle in `folio-theme-choice`; an automatic
+OS-derived effective color is **not** saved as a user preference.
+
 ## Optional PWA integration
 
 Folio can make a consumer site installable and keep readers on the current

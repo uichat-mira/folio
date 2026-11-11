@@ -57,6 +57,8 @@ export type {
   FolioArticleArchiveKind,
 } from "./core/article-archive";
 export { resolveFolioHome } from "./core/home";
+export { resolveFolioAppearance, resolveFolioCodePalette } from "./core/appearance";
+export type { FolioResolvedAppearance } from "./core/appearance";
 export {
   folioNavHref,
   isFolioNavItemActive,
@@ -102,6 +104,10 @@ export { renderFolioMarkdown } from "./core/markdown";
 export type { FolioMarkdownRenderOptions } from "./core/markdown";
 export type {
   FolioAuthor,
+  FolioAppearanceConfig,
+  FolioCodePalette,
+  FolioColorSchemePreference,
+  FolioVisualPreset,
   FolioArticleArchiveConfig,
   FolioGitHistory,
   FolioGitRevision,

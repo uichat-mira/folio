@@ -366,6 +366,20 @@ export type FolioFooterConfig = {
   legal?: FolioFooterLegal;
 };
 
+/** Visual configuration shared by the interactive app and static output. */
+export type FolioVisualPreset = "pearl" | "editorial" | "graphite";
+export type FolioCodePalette = "auto" | "xuanzhi" | "xuanmo";
+export type FolioColorSchemePreference = "light" | "dark" | "system";
+
+export type FolioAppearanceConfig = {
+  /** Semantic visual preset. Default: pearl; independent from the home template. */
+  preset?: FolioVisualPreset;
+  /** Initial light/dark preference (system by default). */
+  scheme?: FolioColorSchemePreference;
+  /** Syntax and code-surface palette (auto by default). */
+  codePalette?: FolioCodePalette;
+};
+
 export type FolioConfig = {
   title: string;
   description: string;
@@ -384,6 +398,8 @@ export type FolioConfig = {
   collections?: FolioCollectionConfig[];
   /** Optional lightweight configuration for the built-in home page. */
   home?: FolioHomeConfig;
+  /** Site-wide appearance, shared by React and generated static HTML. */
+  appearance?: FolioAppearanceConfig;
   /** Legacy text, structured portal footer, or false to hide it entirely. */
   footer?: string | FolioFooterConfig | false;
   github?: string;

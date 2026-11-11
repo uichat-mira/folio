@@ -17,10 +17,16 @@ import {
   parseFolioDoc,
   renderFolioMarkdown,
   resolveFolioHome,
+  resolveFolioAppearance,
+  resolveFolioCodePalette,
   resolveGithubPagesBase,
   searchFolioDocs,
   type FolioAppProps,
   type FolioConfig,
+  type FolioAppearanceConfig,
+  type FolioVisualPreset,
+  type FolioColorSchemePreference,
+  type FolioCodePalette,
   type FolioDateSource,
   type FolioDateSources,
   type FolioDoc,
@@ -98,6 +104,10 @@ type PublicTypeSurface = {
   pageNavTarget: FolioPageNavTarget;
   pageNavNeighbors: FolioPageNavNeighbors;
   config: FolioConfig;
+  appearance: FolioAppearanceConfig;
+  preset: FolioVisualPreset;
+  colorScheme: FolioColorSchemePreference;
+  codePalette: FolioCodePalette;
   navigationItem: FolioNavigationItem;
   slots: FolioSlots;
   themePreference: FolioThemePreference;
@@ -123,6 +133,7 @@ const config: FolioConfig = defineFolioConfig({
   description: "Standalone type check of the published package shape.",
   base: resolveGithubPagesBase("uichat-mira/folio"),
   navigation: [{ label: "Docs", href: "/docs" }],
+  appearance: { preset: "graphite", scheme: "system", codePalette: "xuanmo" },
   home: {
     sections: [
       { type: "intro", title: "Home" },
@@ -130,6 +141,10 @@ const config: FolioConfig = defineFolioConfig({
     ],
   },
 });
+
+const appearance = resolveFolioAppearance(config);
+const effectiveCodePalette: FolioCodePalette = resolveFolioCodePalette(appearance.codePalette, "light");
+void effectiveCodePalette;
 
 const docs: FolioDoc[] = [
   parseFolioDoc(

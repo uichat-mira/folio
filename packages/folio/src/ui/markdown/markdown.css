@@ -63,15 +63,16 @@
   margin: 16px 0 24px;
   padding: 18px 20px;
   border-radius: var(--folio-radius-lg);
-  background: var(--folio-surface-dark);
-  color: var(--folio-on-dark-soft);
+  background: var(--folio-code-bg);
+  color: var(--folio-code-fg);
+  border: 1px solid var(--folio-code-border);
   font: 13px/1.7 var(--folio-font-mono);
 }
 
 .folio-markdown pre code {
   padding: 0;
   background: none;
-  color: #eee8df;
+  color: var(--folio-code-fg);
 }
 
 /* Keep authored photos within narrow reading columns without altering source files. */
@@ -206,47 +207,47 @@
   display: block;
   padding: 0;
   background: transparent;
-  color: #e8e4dc;
+  color: var(--folio-syntax-text);
 }
 
 .folio-markdown pre .hljs-comment,
 .folio-markdown pre .hljs-quote {
-  color: #7f8b86;
+  color: var(--folio-syntax-comment);
   font-style: italic;
 }
 
 .folio-markdown pre .hljs-keyword,
 .folio-markdown pre .hljs-selector-tag,
 .folio-markdown pre .hljs-literal {
-  color: #72d8c1;
+  color: var(--folio-syntax-keyword);
 }
 
 .folio-markdown pre .hljs-title,
 .folio-markdown pre .hljs-title.function_,
 .folio-markdown pre .hljs-section {
-  color: #f0b58a;
+  color: var(--folio-syntax-function);
 }
 
 .folio-markdown pre .hljs-string,
 .folio-markdown pre .hljs-attr,
 .folio-markdown pre .hljs-template-variable {
-  color: #e7c27d;
+  color: var(--folio-syntax-string);
 }
 
 .folio-markdown pre .hljs-number,
 .folio-markdown pre .hljs-variable,
 .folio-markdown pre .hljs-symbol {
-  color: #9fc4f2;
+  color: var(--folio-syntax-number);
 }
 
 .folio-markdown pre .hljs-built_in,
 .folio-markdown pre .hljs-type {
-  color: #d8a8e8;
+  color: var(--folio-syntax-type);
 }
 
 .folio-markdown pre .hljs-meta,
 .folio-markdown pre .hljs-punctuation {
-  color: #a9aaa5;
+  color: var(--folio-syntax-punctuation);
 }
 
 .markdown-mermaid svg {
