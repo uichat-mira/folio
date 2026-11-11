@@ -41,7 +41,7 @@
 | 默认首页身份 | **[F] 现在是刊物**：`DefaultHome` 和 `renderDefaultStaticHome` 有 `PERSONAL JOURNAL`、`READ · COLLECT · REMEMBER`、`写给生活的零碎记录`；`core/home.ts` 的缺省 meta/kicker 也相同 | [`app.tsx`](../../packages/folio/src/app.tsx)，[`static.ts`](../../packages/folio/src/static.ts)，[`core/home.ts`](../../packages/folio/src/core/home.ts) |
 | React 首页整体覆写 | **[F] 已支持** `FolioSlots.home`；`Home` 优先取 truthy `custom`，其次 `config.home`，最后 `DefaultHome`；空值/false 不会触发完整覆写 | [`ui-types.ts`](../../packages/folio/src/ui-types.ts)，[`app.tsx`](../../packages/folio/src/app.tsx) |
 | 只覆写静态首页 | **[F] 已支持** `staticRoutes.home` 局部替换 `/` 的 HTML/metadata，不接管其他默认路由；优先顺序是 `routes?()` → `home` 局部覆写 → 页面输出 | [`static.ts`](../../packages/folio/src/static.ts) `FolioStaticBuildOptions`、`writeFolioStaticSite` |
-| Color Scheme 偏好 | **[F] 已支持** `FolioThemePreference = light/dark/system`，`ui.defaultTheme`，`localStorage["folio-theme"]` 和根级 `data-folio-theme`；当前首次解析优先 saved user > explicit UI default > OS | [`ui-types.ts`](../../packages/folio/src/ui-types.ts)，[`app.tsx`](../../packages/folio/src/app.tsx) |
+| Color Scheme 偏好 | **[F] 已支持** `FolioThemePreference = light/dark/system`，`ui.defaultTheme`，`localStorage["folio-theme"]` 和根级 `data-folio-theme`；当前首次解析优先**已存储 light/dark 值** > UI default > OS。但写入不限于用户点击：组件初始化后还会将系统/默认推导的模式写回 localStorage，因此**存储值并不证明用户主动选择** | [`ui-types.ts`](../../packages/folio/src/ui-types.ts)，[`app.tsx`](../../packages/folio/src/app.tsx) |
 | 显式视觉预设 | **[F] 尚无**独立 `preset` 公共选择 API；38 个根 Token/18 dark 覆盖，21 份 CSS 组成单一公开入口 | [`styles.css`](../../packages/folio/src/styles.css)、[`manifest.mjs`](../../packages/folio/styles/manifest.mjs)、[FOL-033](README.md) |
 | Markdown/语法高亮主题选择 | **[F] 尚无**独立 palette API；`markdown.css` 的 `hljs` 颜色固定，浅亮页面中的代码块仍为深底；Mermaid 浅色 JS 值写死 | [`markdown.css`](../../packages/folio/src/ui/markdown/markdown.css)、[`markdown-react.tsx`](../../packages/folio/src/markdown-react.tsx) |
 | React 与静态文档 | **[F] 都存在**，且 Markdown 共用纯 HTML 渲染器；无 JS 静态不自动包含站点级 Header/Footer、React Slot 或增强后的 Mermaid SVG | [`core/markdown.ts`](../../packages/folio/src/core/markdown.ts)，[`static.ts`](../../packages/folio/src/static.ts)，[FOL-019 历史测试](../research/fol-019-default-ui-baseline.md) |
@@ -89,7 +89,7 @@ type FolioAppearance = {
 4. `appearance.codePalette` 缺省建议 `auto`，随有效 light/dark 选择宣纸/玄墨，也支持显式选择。当前代码的深色背景不是一套需要维持的额外产品主题。
 5. 只新增真实消费需要的最小配置，不造新的主题引擎、页面注册市场、CMS 或颜色 JSON 编译器。
 
-**[P] 模式选择顺序**：保存的用户 light/dark 选择 > 显式 `ui.defaultTheme` > 新共享 `appearance.scheme` > OS/system；静态 HTML 无法预知用户本地存储，须以真实 CSS/构建模式解释首屏降级。不做按站点名或历史版本自动推断的兼容逻辑。
+**[P] 新一代模式选择合同**：**真正由用户主动保存的 light/dark 选择** > 显式 `ui.defaultTheme` > 新共享 `appearance.scheme` > OS/system。**这不是当前已经实现的偏好语义**：现有 `app.tsx` 的 `resolveInitialTheme` 先读 `localStorage["folio-theme"]`，而后续 effect 在每次启用主题的初始化/变化时都写回模式，即使该值来自 `ui.defaultTheme` 或 OS。因而 FOL-049 实施时必须明确区分“用户动作产生的显式偏好”和“自动解析的当前有效模式”，避免 system 解析结果在下次打开时被误认作用户选择，阻止系统偏好继续生效；同时设计迁移现有存储键的策略。纯静态 HTML 无法预知用户本地偏好，须明确静态初始配色与客户端生效模式的边界。不得按站点名或历史版本自动推断主题。
 
 **[P] 底层实现最低边界**：
 
