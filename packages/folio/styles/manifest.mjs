@@ -17,8 +17,9 @@
 //   4. Source bytes are preserved verbatim. The aggregate and its public
 //      cascade order are checked by `scripts/verify-styles.mjs`.
 //   5. A stylesheet owns the rules for its component; `src/styles/content.css`
-//      keeps only page-frame rules that several components share. The order of
-//      this list is the order those rule groups had when they were still in one
+//      keeps only page-frame rules that several components share
+//      (`.folio-content`, `.folio-doc-page`, `.folio-home`). The order of this
+//      list is the order those rule groups had when they were still in one
 //      file, so splitting ownership never reorders the cascade.
 export const STYLE_SOURCES = [
   // Public token/global entry remains first; all internal module CSS follows
@@ -29,6 +30,8 @@ export const STYLE_SOURCES = [
   "src/styles/content.css",
   // ShareButton default metrics.
   "src/ui/share/share.css",
+  // Document body title and lede shared by React and the static renderer.
+  "src/ui/document-body/document-body.css",
   // MarkdownView typography, code blocks, tables, Callouts, anchors, Mermaid.
   "src/ui/markdown/markdown.css",
   // SearchOverlay shell, input, results and interaction states.
@@ -45,9 +48,9 @@ export const STYLE_SOURCES = [
   "src/styles/responsive.css",
   // Editorial home composition (Moyu-style magazine layout).
   "src/ui/home/editorial.css",
-  // Transitional: DocsShell reading rules move to their owning module in the
-  // next phase.
-  "src/styles/content-body.css",
+  // DocsShell reading layout, mobile bar/drawer, static doc menu and
+  // TreeNav/TOC/PageNav placement inside the shell.
+  "src/ui/docs-shell/docs-shell.css",
   "src/ui/page-nav/page-nav.css",
   "src/ui/doc-meta/doc-meta.css",
   "src/ui/tree-nav/tree-nav.css",
