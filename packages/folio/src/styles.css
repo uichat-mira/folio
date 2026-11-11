@@ -65,6 +65,247 @@
   --folio-on-dark-soft: #a09d96;
 }
 
+
+/* FOL-049. The published :root token contract above stays intact. New visual
+   overrides deliberately keep :root specificity, so consumer CSS imported
+   after @uichat-mira/folio/styles.css can replace public values using :root. */
+:root:where(:not([data-folio-preset]), [data-folio-preset="pearl"]) {
+  --folio-primary: #94543d;
+  --folio-primary-active: #773c29;
+  --folio-primary-disabled: #d8c7bb;
+  --folio-ink: #252522;
+  --folio-body: #393934;
+  --folio-body-strong: #292921;
+  --folio-muted: #65655d;
+  --folio-muted-soft: #77756c;
+  --folio-hairline: #e4e1d8;
+  --folio-hairline-soft: #efede7;
+  --folio-canvas: #faf9f6;
+  --folio-surface-soft: #f3f1eb;
+  --folio-surface-card: #ebe8df;
+  --folio-surface-dark: #24231f;
+  --folio-surface-dark-elevated: #34312b;
+  --folio-on-primary: #fffefa;
+  --folio-on-dark: #fffefa;
+  --folio-on-dark-soft: #c7c1b5;
+  --folio-accent-teal: #23776d;
+  --folio-accent-amber: #a76f27;
+  --folio-success: #267443;
+  --folio-warning: #946600;
+  --folio-error: #b43d3d;
+  --folio-font-display: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+:root:where([data-folio-preset="graphite"]) {
+  --folio-primary: #275d7c;
+  --folio-primary-active: #174a6b;
+  --folio-primary-disabled: #b8cbd6;
+  --folio-ink: #18242f;
+  --folio-body: #334150;
+  --folio-body-strong: #253340;
+  --folio-muted: #5a6774;
+  --folio-muted-soft: #697887;
+  --folio-hairline: #ccd5dc;
+  --folio-hairline-soft: #dfe5ea;
+  --folio-canvas: #f3f5f6;
+  --folio-surface-soft: #e7edf1;
+  --folio-surface-card: #dce6ea;
+  --folio-surface-dark: #151f27;
+  --folio-surface-dark-elevated: #263541;
+  --folio-on-primary: #ffffff;
+  --folio-on-dark: #f3f5f6;
+  --folio-on-dark-soft: #c0cad2;
+  --folio-accent-teal: #176e64;
+  --folio-accent-amber: #935f28;
+  --folio-success: #24774e;
+  --folio-warning: #926515;
+  --folio-error: #b43f4a;
+  --folio-font-display: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+:root:where([data-folio-theme="dark"]):where(:not([data-folio-preset]), [data-folio-preset="pearl"]) {
+  --folio-primary: #e6aa8b;
+  --folio-primary-active: #f7c2a4;
+  --folio-primary-disabled: #684c3f;
+  --folio-ink: #f5f2eb;
+  --folio-body: #ddd8ca;
+  --folio-body-strong: #efe9dd;
+  --folio-muted: #c1baac;
+  --folio-muted-soft: #a39b8f;
+  --folio-hairline: #49453e;
+  --folio-hairline-soft: #393630;
+  --folio-canvas: #1c1d1a;
+  --folio-surface-soft: #282923;
+  --folio-surface-card: #30312a;
+  --folio-surface-dark: #121714;
+  --folio-surface-dark-elevated: #252b25;
+  --folio-on-primary: #271c16;
+  --folio-on-dark: #f5f2eb;
+  --folio-on-dark-soft: #b7bcb2;
+  --folio-accent-teal: #6bc3ad;
+  --folio-accent-amber: #dbaf71;
+  --folio-success: #75cb93;
+  --folio-warning: #edc271;
+  --folio-error: #f49595;
+  --folio-font-display: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+:root:where([data-folio-theme="dark"][data-folio-preset="graphite"]) {
+  --folio-primary: #99c5d9;
+  --folio-primary-active: #beddec;
+  --folio-primary-disabled: #3a5563;
+  --folio-ink: #f2f5f8;
+  --folio-body: #d2dae1;
+  --folio-body-strong: #e5ebef;
+  --folio-muted: #acb8c3;
+  --folio-muted-soft: #93a2b0;
+  --folio-hairline: #364550;
+  --folio-hairline-soft: #2b3841;
+  --folio-canvas: #151c23;
+  --folio-surface-soft: #1d2831;
+  --folio-surface-card: #283641;
+  --folio-surface-dark: #0d1318;
+  --folio-surface-dark-elevated: #24323e;
+  --folio-on-primary: #15242c;
+  --folio-on-dark: #f2f5f8;
+  --folio-on-dark-soft: #b9c8d3;
+  --folio-accent-teal: #85cfbc;
+  --folio-accent-amber: #e2ba81;
+  --folio-success: #8ddaab;
+  --folio-warning: #f0c681;
+  --folio-error: #ff9ca5;
+  --folio-font-display: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Static HTML uses a media query until a browser sets data-folio-theme.
+   Explicit light/dark always wins over the operating-system preference. */
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-folio-theme])) {
+    color-scheme: dark;
+  }
+  :root:where(:not([data-folio-theme])):where(:not([data-folio-preset]), [data-folio-preset="pearl"]) {
+  --folio-primary: #e6aa8b;
+  --folio-primary-active: #f7c2a4;
+  --folio-primary-disabled: #684c3f;
+  --folio-ink: #f5f2eb;
+  --folio-body: #ddd8ca;
+  --folio-body-strong: #efe9dd;
+  --folio-muted: #c1baac;
+  --folio-muted-soft: #a39b8f;
+  --folio-hairline: #49453e;
+  --folio-hairline-soft: #393630;
+  --folio-canvas: #1c1d1a;
+  --folio-surface-soft: #282923;
+  --folio-surface-card: #30312a;
+  --folio-surface-dark: #121714;
+  --folio-surface-dark-elevated: #252b25;
+  --folio-on-primary: #271c16;
+  --folio-on-dark: #f5f2eb;
+  --folio-on-dark-soft: #b7bcb2;
+  --folio-accent-teal: #6bc3ad;
+  --folio-accent-amber: #dbaf71;
+  --folio-success: #75cb93;
+  --folio-warning: #edc271;
+  --folio-error: #f49595;
+  --folio-font-display: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  :root:where(:not([data-folio-theme])[data-folio-preset="editorial"]) {
+    --folio-primary: #cc785c;
+    --folio-primary-active: #e09a82;
+    --folio-primary-disabled: #5f443a;
+    --folio-ink: #faf9f5;
+    --folio-body: #ebe6df;
+    --folio-body-strong: #f5f0e8;
+    --folio-muted: #c0b8ad;
+    --folio-muted-soft: #9e958b;
+    --folio-hairline: #514940;
+    --folio-hairline-soft: #403a34;
+    --folio-canvas: #181715;
+    --folio-surface-soft: #1f1e1b;
+    --folio-surface-card: #252320;
+    --folio-surface-dark: #11100f;
+    --folio-surface-dark-elevated: #252320;
+    --folio-on-primary: #fff;
+    --folio-on-dark: #faf9f5;
+    --folio-on-dark-soft: #a09d96;
+  }
+  :root:where(:not([data-folio-theme])[data-folio-preset="graphite"]) {
+  --folio-primary: #99c5d9;
+  --folio-primary-active: #beddec;
+  --folio-primary-disabled: #3a5563;
+  --folio-ink: #f2f5f8;
+  --folio-body: #d2dae1;
+  --folio-body-strong: #e5ebef;
+  --folio-muted: #acb8c3;
+  --folio-muted-soft: #93a2b0;
+  --folio-hairline: #364550;
+  --folio-hairline-soft: #2b3841;
+  --folio-canvas: #151c23;
+  --folio-surface-soft: #1d2831;
+  --folio-surface-card: #283641;
+  --folio-surface-dark: #0d1318;
+  --folio-surface-dark-elevated: #24323e;
+  --folio-on-primary: #15242c;
+  --folio-on-dark: #f2f5f8;
+  --folio-on-dark-soft: #b9c8d3;
+  --folio-accent-teal: #85cfbc;
+  --folio-accent-amber: #e2ba81;
+  --folio-success: #8ddaab;
+  --folio-warning: #f0c681;
+  --folio-error: #ff9ca5;
+  --folio-font-display: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+}
+
+:root:where([data-folio-theme="dark"]) { color-scheme: dark; }
+
+/* The code surface and syntax palette are independent of the site preset.
+   Unspecified/auto is Xuanzhi in light, Xuanmo in dark. A consumer can
+   override both by assigning the documented variables after Folio CSS. */
+:root:where(:not([data-folio-code-palette="xuanmo"])) {
+  --folio-code-bg: #f5f2eb;
+  --folio-code-fg: #25312d;
+  --folio-code-border: #ddd8ca;
+  --folio-syntax-text: #25312d;
+  --folio-syntax-comment: #607269;
+  --folio-syntax-keyword: #226353;
+  --folio-syntax-function: #915020;
+  --folio-syntax-string: #795513;
+  --folio-syntax-number: #315e92;
+  --folio-syntax-type: #734583;
+  --folio-syntax-punctuation: #57645e;
+}
+
+:root:where([data-folio-code-palette="xuanmo"], [data-folio-theme="dark"]:not([data-folio-code-palette="xuanzhi"])) {
+  --folio-code-bg: #161e1c;
+  --folio-code-fg: #eaf0e9;
+  --folio-code-border: #35443f;
+  --folio-syntax-text: #eaf0e9;
+  --folio-syntax-comment: #a2b9ae;
+  --folio-syntax-keyword: #7cdcc0;
+  --folio-syntax-function: #f2bc92;
+  --folio-syntax-string: #e9d18b;
+  --folio-syntax-number: #a6c9f1;
+  --folio-syntax-type: #d5b0ec;
+  --folio-syntax-punctuation: #b3c2ba;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-folio-theme]):not([data-folio-code-palette="xuanzhi"])) {
+  --folio-code-bg: #161e1c;
+  --folio-code-fg: #eaf0e9;
+  --folio-code-border: #35443f;
+  --folio-syntax-text: #eaf0e9;
+  --folio-syntax-comment: #a2b9ae;
+  --folio-syntax-keyword: #7cdcc0;
+  --folio-syntax-function: #f2bc92;
+  --folio-syntax-string: #e9d18b;
+  --folio-syntax-number: #a6c9f1;
+  --folio-syntax-type: #d5b0ec;
+  --folio-syntax-punctuation: #b3c2ba;
+  }
+}
+
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; background: var(--folio-canvas); color: var(--folio-ink); }
 a { color: inherit; text-decoration: none; }
