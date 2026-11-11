@@ -85,6 +85,7 @@ const PUBLIC_TYPE_NAMES = [
   "FolioHomeModel",
   "FolioHomeSectionConfig",
   "FolioHomeSectionType",
+  "FolioHomeTemplate",
   "FolioMarkdownProps",
   "FolioMarkdownRenderOptions",
   "FolioNavigationChild",

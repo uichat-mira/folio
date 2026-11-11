@@ -775,80 +775,104 @@ function renderStaticArticleTags(
     ).join("") + '</nav>';
 }
 
-function renderDefaultStaticHome(context: FolioStaticBuildContext): string {
-  const collections = folioCollectionIndexes(context.config);
-  const primary = collections[0];
-  const primaryDocs = primary
-    ? selectFolioCollectionDocs(context.docs, primary.path)
-    : context.docs.filter((doc) => doc.type !== "page");
-  const featured = primaryDocs[0];
-  const recent = primaryDocs.slice(1, 5);
-  const about = context.docs.find((doc) => doc.type === "page");
+function renderPortalStaticHome(
+  context: FolioStaticBuildContext,
+  model: FolioHomeModel,
+): string {
   const link = (path: string): string => folioEscapeHtml(staticRouteHref(context, path));
-
-  const hero = '<div class="folio-editorial-meta" aria-label="站点首页">' +
-    '<span>PERSONAL JOURNAL <span aria-hidden="true">✳</span></span>' +
-    '<span>READ · COLLECT · REMEMBER</span></div>' +
-    '<section class="folio-editorial-lead" aria-label="小站介绍与精选文章">' +
-    '<div class="folio-editorial-intro"><div class="folio-editorial-kicker">' +
-    '<span class="folio-editorial-kicker-line" aria-hidden="true"></span>' +
-    '写给生活的零碎记录</div><h1>' + folioEscapeHtml(context.config.title) + '</h1>' +
-    '<p>' + folioEscapeHtml(context.config.description) + '</p>' +
-    (primary ? '<a class="folio-editorial-hero-link" href="' + link(primary.path) +
-      '">浏览' + folioEscapeHtml(primary.title) + ' <span aria-hidden="true">↗</span></a>' : '') +
-    '</div>' +
-    (featured ? '<a class="folio-editorial-feature" href="' + link(featured.path) + '">' +
-      '<span class="folio-editorial-feature-label"><span aria-hidden="true">✳</span> FEATURED STORY</span>' +
-      '<span class="folio-editorial-feature-body">' +
-      '<span class="folio-editorial-feature-no">01 / ' + String(primaryDocs.length).padStart(2, "0") + '</span>' +
-      '<h2>' + folioEscapeHtml(featured.title) + '</h2>' +
-      (featured.description ? '<p>' + folioEscapeHtml(featured.description) + '</p>' : '') +
-      '</span><span class="folio-editorial-feature-bottom">开始阅读 <span aria-hidden="true">↗</span></span></a>' : '') +
-    '</section>';
-
-  const recentSection = '<section class="folio-editorial-recent" aria-label="文章选读">' +
-    '<div class="folio-editorial-section-heading"><div>' +
-    '<span class="folio-editorial-section-label">01 / READING</span>' +
-    '<h2>' + folioEscapeHtml(primary?.title ?? "近期内容") + '</h2></div>' +
-    (primary ? '<a class="folio-editorial-view-all" href="' + link(primary.path) + '">' +
-      '全部' + folioEscapeHtml(primary.title) + ' <span aria-hidden="true">↗</span></a>' : '') +
-    '</div>' +
-    (recent.length ? renderStaticEntryList(context, recent, "h3")
-      : !featured ? '<p class="folio-collection-empty">这里还没有内容。</p>'
-      : '<p class="folio-editorial-endnote">更多记录，正在慢慢写下。</p>') +
-    '</section>';
-
-  const sideSections = collections.slice(1).map((collection, index) => {
-    const entries = selectFolioCollectionDocs(context.docs, collection.path).slice(0, 3);
-    return '<section class="folio-editorial-side-section">' +
-      '<div class="folio-editorial-section-heading"><div>' +
-      '<span class="folio-editorial-section-label">' +
-      String(index + 2).padStart(2, "0") + ' / COLLECTION</span>' +
-      '<h2>' + folioEscapeHtml(collection.title) + '</h2></div>' +
-      '<a class="folio-editorial-view-all" aria-label="全部' + folioEscapeHtml(collection.title) +
-      '" href="' + link(collection.path) + '">↗</a></div>' +
-      (entries.length ? renderStaticEntryList(context, entries, "h3") :
-        '<p class="folio-collection-empty">' + folioEscapeHtml(collection.emptyMessage) + '</p>') +
-      '</section>';
-  }).join("");
-  const aboutSection = about
-    ? '<aside class="folio-editorial-about">' +
-      '<span class="folio-editorial-section-label">A LITTLE ABOUT</span>' +
-      '<h2>' + folioEscapeHtml(about.title) + '</h2>' +
-      '<p>' + folioEscapeHtml(about.description || context.config.description) + '</p>' +
-      '<a href="' + link(about.path) + '">读读关于小站 <span aria-hidden="true">↗</span></a></aside>'
+  const meta = model.meta
+    ? '<div class="folio-portal-meta" aria-label="站点首页">' +
+      (model.meta.left ? '<span>' + folioEscapeHtml(model.meta.left) + '</span>' : '') +
+      (model.meta.right ? '<span>' + folioEscapeHtml(model.meta.right) + '</span>' : '') +
+      '</div>'
     : "";
 
-  return '<main class="folio-home folio-journal-home folio-editorial-home">' +
-    hero +
-    '<div class="folio-editorial-rule"><span>THE NOTEBOOK</span><span>' +
-    String(primaryDocs.length).padStart(2, "0") + ' ENTRIES</span></div>' +
-    '<div class="folio-editorial-lower">' + recentSection +
-    '<div class="folio-editorial-aside">' + sideSections + aboutSection + '</div>' +
-    '</div></main>';
+  const sections = model.sections.map((section) => {
+    switch (section.type) {
+      case "intro": {
+        const collection = section.collection;
+        return '<section class="folio-portal-hero">' +
+          (section.kicker
+            ? '<p class="folio-portal-kicker">' + folioEscapeHtml(section.kicker) + '</p>'
+            : '') +
+          '<h1>' + folioEscapeHtml(section.title) + '</h1>' +
+          '<p class="folio-portal-description">' + folioEscapeHtml(section.description) + '</p>' +
+          (collection
+            ? '<a class="folio-portal-hero-link" href="' + link(collection.path) + '">浏览' +
+              folioEscapeHtml(collection.title) + ' <span aria-hidden="true">→</span></a>'
+            : '') +
+          '</section>';
+      }
+      case "featured":
+        return '<section class="folio-portal-featured">' +
+          '<a class="folio-portal-feature" href="' + link(section.doc.path) + '">' +
+          '<span class="folio-portal-feature-label">' + folioEscapeHtml(section.label) + '</span>' +
+          '<span class="folio-portal-feature-index">' +
+          String(section.number).padStart(2, "0") + ' / ' +
+          String(section.total).padStart(2, "0") + '</span>' +
+          '<h2>' + folioEscapeHtml(section.doc.title) + '</h2>' +
+          (section.doc.description
+            ? '<p>' + folioEscapeHtml(section.doc.description) + '</p>'
+            : '') +
+          '<span class="folio-portal-feature-link">' +
+          folioEscapeHtml(section.readLabel) + ' <span aria-hidden="true">→</span></span>' +
+          '</a></section>';
+      case "recent":
+        return '<section class="folio-portal-section folio-portal-recent" aria-label="' +
+          folioEscapeHtml(section.title) + '">' +
+          '<div class="folio-portal-section-heading"><div>' +
+          '<span class="folio-portal-section-label">' + folioEscapeHtml(section.label) + '</span>' +
+          '<h2>' + folioEscapeHtml(section.title) + '</h2></div>' +
+          (section.collection
+            ? '<a class="folio-portal-view-all" href="' + link(section.collection.path) + '">' +
+              '全部' + folioEscapeHtml(section.collection.title) +
+              ' <span aria-hidden="true">→</span></a>'
+            : '') +
+          '</div>' +
+          (section.docs.length
+            ? renderStaticEntryList(context, section.docs, "h3")
+            : section.hadEntries
+              ? '<p class="folio-portal-endnote">' + folioEscapeHtml(section.endMessage) + '</p>'
+              : '<p class="folio-collection-empty">' + folioEscapeHtml(section.emptyMessage) + '</p>') +
+          '</section>';
+      case "collections":
+        return '<section class="folio-portal-section folio-portal-collections">' +
+          '<div class="folio-portal-collection-grid">' +
+          section.collections.map((entry) =>
+            '<section class="folio-portal-collection">' +
+            '<div class="folio-portal-section-heading"><div>' +
+            '<h2>' + folioEscapeHtml(entry.collection.title) + '</h2>' +
+            (entry.collection.description
+              ? '<p class="folio-portal-collection-description">' +
+                folioEscapeHtml(entry.collection.description) + '</p>'
+              : '') +
+            '</div>' +
+            '<a class="folio-portal-view-all" aria-label="全部' +
+            folioEscapeHtml(entry.collection.title) + '" href="' +
+            link(entry.collection.path) + '">全部 <span aria-hidden="true">→</span></a></div>' +
+            (entry.docs.length
+              ? renderStaticEntryList(context, entry.docs, "h3")
+              : '<p class="folio-collection-empty">' +
+                folioEscapeHtml(entry.emptyMessage) + '</p>') +
+            '</section>',
+          ).join("") +
+          '</div></section>';
+      case "about":
+        return '<section class="folio-portal-section folio-portal-about-section">' +
+          '<aside class="folio-portal-about">' +
+          '<h2>' + folioEscapeHtml(section.title) + '</h2>' +
+          '<p>' + folioEscapeHtml(section.description) + '</p>' +
+          '<a href="' + link(section.doc.path) + '">' +
+          folioEscapeHtml(section.linkLabel) +
+          ' <span aria-hidden="true">→</span></a></aside></section>';
+    }
+  }).join("");
+
+  return '<main class="folio-home folio-home--portal">' +
+    meta + sections + '</main>';
 }
 
-function renderConfiguredStaticHome(
+function renderEditorialStaticHome(
   context: FolioStaticBuildContext,
   model: FolioHomeModel,
 ): string {
@@ -946,9 +970,10 @@ function renderConfiguredStaticHome(
 
 /** Renders the built-in home body, including `FolioConfig.home`. */
 export function renderFolioStaticHome(context: FolioStaticBuildContext): string {
-  return context.config.home
-    ? renderConfiguredStaticHome(context, resolveFolioHome(context.config, context.docs))
-    : renderDefaultStaticHome(context);
+  const model = resolveFolioHome(context.config, context.docs);
+  return model.template === "editorial"
+    ? renderEditorialStaticHome(context, model)
+    : renderPortalStaticHome(context, model);
 }
 
 function renderStaticArticle(

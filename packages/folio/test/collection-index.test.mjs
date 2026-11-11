@@ -100,19 +100,17 @@ test("static lists and home recursively publish arbitrary configured routes with
     assert.doesNotMatch(blogs,/href="\/moyu\/projects\/coffee\/"/);
     assert.match(projects,/<h1>好物<\/h1>/);
     assert.match(projects,/href="\/moyu\/projects\/coffee\/"/);
-    assert.match(home,/folio-journal-home folio-editorial-home/);
-    assert.match(home,/class="folio-editorial-feature"/);
-    assert.match(home,/class="folio-editorial-meta"/);
-    assert.match(home,/class="folio-editorial-lower"/);
-    assert.match(home,/class="folio-editorial-about"/);
-    assert.match(home,/class="folio-editorial-aside"/);
-    assert.match(home,/class="folio-editorial-recent"/);
+    assert.match(home,/folio-home folio-home--portal/);
+    assert.match(home,/class="folio-portal-feature"/);
+    assert.match(home,/folio-portal-collections/);
+    assert.match(home,/folio-portal-about/);
+    assert.match(home,/folio-portal-recent/);
     assert.match(home,/href="\/moyu\/blogs\/2026\/notes\/second\/"/);
     assert.match(home,/href="\/moyu\/blogs\/hello\/"/);
-    assert.equal((home.match(/class="folio-editorial-feature"/g)||[]).length,1,
+    assert.equal((home.match(/class="folio-portal-feature"/g)||[]).length,1,
       "one featured article, not repeated large cards");
     assert.doesNotMatch(home,/class="folio-card"/);
-    assert.match(home,/folio-journal-home/);
+    assert.match(home,/folio-home--portal/);
     assert.match(home,/<h2>博客<\/h2>/);
     assert.match(home,/<h2>好物<\/h2>/);
     assert.match(home,/href="\/moyu\/blogs\/"/);
@@ -144,7 +142,7 @@ test("nested indexes work with custom paths, zero entries, and no configured col
   fixture([], context => {
     const r=writeFolioStaticSite(context);
     assert.equal(r.routes,1);
-    assert.equal(readFileSync(resolve(context.outDir,"index.html"),"utf8").includes("folio-journal-home"),true);
+    assert.equal(readFileSync(resolve(context.outDir,"index.html"),"utf8").includes("folio-home--portal"),true);
   }, {title:"Docs only",description:"docs"});
 });
 
@@ -178,5 +176,5 @@ test("editorial home highlights exactly one featured story and renders the ordin
     assert.match(home,/href="\/moyu\/info\/about\/"/);
     assert.match(home,/href="\/moyu\/notes\/b\/"/);
     assert.equal((home.match(/class="folio-editorial-feature"/g)||[]).length,1);
-  }, {title:"Journal",description:"Notes",collections:[{path:"/notes",title:"阅读记录"}]});
+  }, {title:"Journal",description:"Notes",home:{template:"editorial"},collections:[{path:"/notes",title:"阅读记录"}]});
 });
