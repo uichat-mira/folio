@@ -1,0 +1,9 @@
+@media (max-width: 780px) {
+  .folio-doc-page,
+  .folio-home {
+    width: min(100% - 32px, 820px);
+    padding-top: 48px;
+  }
+
+  .folio-card-grid { grid-template-columns: 1fr; }
+}

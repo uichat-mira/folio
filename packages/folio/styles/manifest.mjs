@@ -16,12 +16,41 @@
 //      build is identical on Windows and POSIX.
 //   4. Source bytes are preserved verbatim. The aggregate and its public
 //      cascade order are checked by `scripts/verify-styles.mjs`.
+//   5. A stylesheet owns the rules for its component; `src/styles/content.css`
+//      keeps only page-frame rules that several components share
+//      (`.folio-content`, `.folio-doc-page`, `.folio-home`). The order of this
+//      list is the order those rule groups had when they were still in one
+//      file, so splitting ownership never reorders the cascade.
 export const STYLE_SOURCES = [
   // Public token/global entry remains first; all internal module CSS follows
   // in cascade order. Consumers continue to import one dist/styles.css file.
   "src/styles.css",
   "src/ui/header/header.css",
+  // Shared page frames; no single component owns these.
   "src/styles/content.css",
+  // ShareButton default metrics.
+  "src/ui/share/share.css",
+  // Document body title and lede shared by React and the static renderer.
+  "src/ui/document-body/document-body.css",
+  // MarkdownView typography, code blocks, tables, Callouts, anchors, Mermaid.
+  "src/ui/markdown/markdown.css",
+  // SearchOverlay shell, input, results and interaction states.
+  "src/ui/search/search.css",
+  // Application-level fallback page (404), shared buttons and prerender shell.
+  "src/ui/app/app.css",
+  // Journal home, its card grid, collection hero/about and empty state.
+  "src/ui/home/home.css",
+  // Article entry list shared by the home, collection and archive pages.
+  "src/ui/entry-list/entry-list.css",
+  // Article category/tag archive pages.
+  "src/ui/article-archive/article-archive.css",
+  // Narrow-screen page-frame adaptations shared by reading and home.
+  "src/styles/responsive.css",
+  // Editorial home composition (Moyu-style magazine layout).
+  "src/ui/home/editorial.css",
+  // DocsShell reading layout, mobile bar/drawer, static doc menu and
+  // TreeNav/TOC/PageNav placement inside the shell.
+  "src/ui/docs-shell/docs-shell.css",
   "src/ui/page-nav/page-nav.css",
   "src/ui/doc-meta/doc-meta.css",
   "src/ui/tree-nav/tree-nav.css",

@@ -81,7 +81,20 @@ its own archive URL must `encodeURIComponent` the slug segment.
 `FolioApp` reads `collections[].archive` automatically:
 
 - the opted-in collection index gains one compact category row (only when
-  categories exist);
+  categories exist) led by `全部`; a plain click filters that collection's entry
+  list in place and does **not** change the route or add a history entry, so the
+  category switch stays on one reading layer;
+- the category row sticks directly below the site header
+  (`top: var(--folio-header-height)`) while the collection list scrolls; it
+  reuses the header's frosted canvas surface and fades into the list instead of
+  drawing a full-width rule, so entries soften as they pass underneath;
+- switching category resets the scroll position to the beginning of the
+  filtered list when the reader has already scrolled past it (the list starts
+  just below the sticky row); a shorter result set therefore never leaves the
+  reader at the footer, and clicking a chip while already above the list does
+  not jump down;
+- the category chips keep their real archive URLs, so modified clicks, middle
+  clicks, crawlers and no-JS pages still reach `<collection>/category/<slug>`;
 - Article cards in that collection and the Article metadata area expose their
   tags as links;
 - `<collection>/category/<slug>` and `<collection>/tag/<slug>` render the
@@ -101,7 +114,9 @@ function) emits the same archive pages as HTML:
 - `siteIndexing: "noindex"` applies to archive pages exactly as to other
   default pages, so a preview build does not publish indexable archive pages;
 - the generated HTML is readable without JavaScript and uses the same entry
-  list, ordering and links as React.
+  list, ordering and links as React; its category row starts with the active
+  `全部` chip and each chip is a normal link to the archive page. Loading the
+  React runtime upgrades that row to the in-place filter described above.
 
 Consumers that supply their own static `routes` own that page markup, as with
 every other custom static route. They can still consume the same Core index

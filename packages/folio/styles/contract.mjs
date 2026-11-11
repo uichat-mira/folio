@@ -190,6 +190,7 @@ export const REQUIRED_SELECTOR_FAMILIES = [
     id: "markdown",
     selectors: [
       ".folio-markdown",
+      ".folio-markdown .folio-table-scroll",
       ".folio-markdown pre",
       ".folio-markdown pre code.hljs",
       ".md-custom-block",
@@ -256,6 +257,8 @@ export const REQUIRED_DECLARATIONS = {
   ".folio-footer": "text-align: center",
   ".folio-not-found": "text-align: center",
   ".folio-markdown": "line-height: 1.78",
+  // Wide tables must scroll inside the reading column, never the document.
+  ".folio-markdown .folio-table-scroll": "overflow-x: auto",
   ".folio-search-overlay": "position: fixed",
   ".folio-search-dialog": "width: min(680px, 100%)",
   ".folio-docs-shell": "grid-template-columns: 250px",
@@ -311,3 +314,15 @@ export const CONSUMER_CSS_SELECTORS = [
 // A token declaration must also reach the built CSS asset, proving the
 // aggregated file (not some unrelated stylesheet) was bundled.
 export const CONSUMER_CSS_TOKENS = ["--folio-primary", "--folio-canvas"];
+
+// Component ownership of the aggregated stylesheet. Every component-owned rule
+// lives in the module stylesheet registered in `styles/manifest.mjs`; only the
+// page frames below stay in `src/styles/content.css` because several
+// components (reading pages, collections, home) share them. The gate rejects
+// any other selector in that file, so component rules cannot silently drift
+// back into the shared source.
+export const CONTENT_SHARED_SELECTORS = [
+  ".folio-content",
+  ".folio-doc-page",
+  ".folio-home",
+];

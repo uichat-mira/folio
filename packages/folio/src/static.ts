@@ -682,8 +682,10 @@ function renderStaticArchiveCategoryRow(
   if (!groups.length) return "";
   return '<nav class="folio-archive-row" aria-label="' +
     folioEscapeHtml(collection.title + "分类归档") + '">' +
-    '<span class="folio-archive-row__label">分类</span>' +
     '<ul class="folio-archive-row__list">' +
+    '<li><a class="folio-archive-chip" href="' +
+    folioEscapeHtml(staticRouteHref(context, collection.path)) +
+    '" aria-current="true">全部</a></li>' +
     groups.map((group) =>
       '<li><a class="folio-archive-chip" href="' +
       folioEscapeHtml(staticRouteHref(context, `${collection.path}/category/${group.slug}`)) +

@@ -118,6 +118,12 @@ export function renderFolioMarkdown(
   });
 
   const renderer = new marked.Renderer();
+  // Tables keep their semantics but scroll inside the reading column: their
+  // min-content width comes from unbreakable inline code, so without a scroll
+  // container a wide table expands the whole document on narrow screens.
+  const renderTable = renderer.table.bind(renderer);
+  renderer.table = (token) =>
+    '<div class="folio-table-scroll" tabindex="0">' + renderTable(token) + "</div>";
   renderer.code = ({ text, lang }) => {
     const language = lang?.trim().toLowerCase();
     if (language === "mermaid") {

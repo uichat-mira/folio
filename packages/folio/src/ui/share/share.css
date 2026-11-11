@@ -1,0 +1,6 @@
+.folio-share-button {
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: var(--folio-radius-md);
+  font-size: 12px;
+}

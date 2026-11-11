@@ -1,3 +1,4 @@
+import type { MouseEvent, Ref } from "react";
 import { Link } from "react-router-dom";
 import { buildFolioArticleArchiveIndex } from "../../core/article-archive";
 import type {
@@ -166,19 +167,64 @@ export function buildFolioArticleArchiveModel(
   };
 }
 
-/** Compact category entry row for an opted-in collection index page. */
+/**
+ * Compact category entry row for an opted-in collection index page.
+ *
+ * The anchors keep real archive URLs so modified clicks, middle clicks, no-JS
+ * static pages and crawlers still reach the archive routes. When `onSelect` is
+ * provided, a plain left click switches the surrounding list in place instead
+ * of navigating, which is what makes the row behave as one filter layer.
+ */
 export function FolioArchiveCategoryRow({
   collection,
   groups,
+  activeId,
+  onSelect,
+  rowRef,
 }: {
   collection: FolioCollectionIndex;
   groups: readonly FolioArticleArchiveGroup[];
+  /** Active category id, or null/undefined for the unfiltered collection. */
+  activeId?: string | null;
+  /** Enables in-place filtering; omit to keep every chip a normal link. */
+  onSelect?: (group: FolioArticleArchiveGroup | null) => void;
+  /** Sticky row handle, used to measure the offset for scroll resets. */
+  rowRef?: Ref<HTMLElement>;
 }) {
   if (!groups.length) return null;
+
+  const select = (
+    event: MouseEvent<HTMLAnchorElement>,
+    group: FolioArticleArchiveGroup | null,
+  ) => {
+    if (!onSelect) return;
+    // Modifier and non-primary clicks keep the browser's normal link behavior.
+    if (
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+    event.preventDefault();
+    onSelect(group);
+  };
+
   return (
-    <nav className="folio-archive-row" aria-label={`${collection.title}分类归档`}>
-      <span className="folio-archive-row__label">分类</span>
+    <nav ref={rowRef} className="folio-archive-row" aria-label={`${collection.title}分类归档`}>
       <ul className="folio-archive-row__list">
+        <li>
+          <Link
+            className="folio-archive-chip"
+            to={routeHref(collection.path)}
+            aria-current={activeId ? undefined : "true"}
+            onClick={onSelect ? (event) => select(event, null) : undefined}
+          >
+            全部
+          </Link>
+        </li>
         {groups.map((group) => (
           <li key={group.id}>
             <Link
@@ -186,6 +232,8 @@ export function FolioArchiveCategoryRow({
               to={routeHref(
                 folioArticleArchiveRoutePath(collection.path, "category", group.slug),
               )}
+              aria-current={group.id === activeId ? "true" : undefined}
+              onClick={onSelect ? (event) => select(event, group) : undefined}
             >
               {group.title}
             </Link>

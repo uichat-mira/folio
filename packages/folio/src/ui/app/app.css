@@ -1,0 +1,39 @@
+.folio-not-found {
+  width: min(680px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 100px 0 120px;
+  text-align: center;
+}
+
+.folio-not-found > span {
+  color: var(--folio-primary);
+  font: 500 64px var(--folio-font-display);
+}
+
+.folio-not-found h1 { margin: 8px 0 10px; font-size: 32px; }
+.folio-not-found p { color: var(--folio-muted); }
+.folio-not-found > div { display: flex; justify-content: center; gap: 10px; margin-top: 24px; }
+
+.folio-button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  border: 1px solid var(--folio-hairline);
+  border-radius: var(--folio-radius-md);
+  background: var(--folio-canvas);
+  color: var(--folio-ink);
+  cursor: pointer;
+}
+
+.folio-button--primary {
+  border-color: var(--folio-primary);
+  background: var(--folio-primary);
+  color: var(--folio-on-primary);
+}
+
+.folio-prerender {
+  width: min(900px, calc(100% - 48px));
+  margin: 80px auto;
+}
