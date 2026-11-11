@@ -5,7 +5,14 @@
 // mutated copies of the real stylesheet.
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
@@ -13,6 +20,7 @@ import { fileURLToPath } from "node:url";
 
 import { aggregateStyles } from "../scripts/build-styles.mjs";
 import { STYLE_SOURCES } from "../styles/manifest.mjs";
+import { CONTENT_SHARED_SELECTORS } from "../styles/contract.mjs";
 import { verifyStylesheet } from "../scripts/verify-styles.mjs";
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -217,5 +225,51 @@ test("the gate CLI exits non-zero for a mutated stylesheet", () =>
       result.stderr,
       /\[selectors:markdown\] FAIL/,
       "the gate must name the broken invariant on stderr",
+    );
+  }));
+
+test("content.css owns only the shared page frames", () => {
+  const content = readFileSync(join(packageRoot, "src/styles/content.css"), "utf8");
+  const selectors = content
+    .split("}")
+    .flatMap((block) => {
+      const [prelude] = block.split("{");
+      if (!prelude || prelude.includes("@")) return [];
+      return prelude
+        .split(",")
+        .map((selector) => selector.replace(/\s+/g, " ").trim())
+        .filter(Boolean);
+    });
+  assert.deepEqual(
+    selectors,
+    [".folio-content", ".folio-doc-page", ".folio-home"],
+    "content.css must keep only the shared frame selectors registered in the contract",
+  );
+  assert.equal(
+    CONTENT_SHARED_SELECTORS.join(","),
+    selectors.join(","),
+    "the ownership contract and the shared source must stay in sync",
+  );
+});
+
+test("a component rule growing back into content.css fails the ownership gate", () =>
+  withTempDir((directory) => {
+    const sources = ["src/styles.css", "src/styles/content.css"];
+    mkdirSync(join(directory, "src", "styles"), { recursive: true });
+    cpSync(join(packageRoot, "src/styles.css"), join(directory, "src/styles.css"));
+    writeFileSync(
+      join(directory, "src/styles/content.css"),
+      ".folio-content { min-width: 0; }\n.folio-markdown { margin-top: 42px; }\n",
+    );
+    const { css } = aggregateStyles({ packageRoot: directory, sources });
+    writeFileSync(join(directory, "styles.css"), css);
+    const failures = verifyStylesheet({
+      packageRoot: directory,
+      sources,
+      file: "styles.css",
+    }).failures;
+    assert.ok(
+      failures.some((failure) => failure.id === "ownership:content"),
+      "a component rule in content.css must be reported by ownership:content",
     );
   }));

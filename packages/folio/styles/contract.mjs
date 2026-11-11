@@ -314,3 +314,15 @@ export const CONSUMER_CSS_SELECTORS = [
 // A token declaration must also reach the built CSS asset, proving the
 // aggregated file (not some unrelated stylesheet) was bundled.
 export const CONSUMER_CSS_TOKENS = ["--folio-primary", "--folio-canvas"];
+
+// Component ownership of the aggregated stylesheet. Every component-owned rule
+// lives in the module stylesheet registered in `styles/manifest.mjs`; only the
+// page frames below stay in `src/styles/content.css` because several
+// components (reading pages, collections, home) share them. The gate rejects
+// any other selector in that file, so component rules cannot silently drift
+// back into the shared source.
+export const CONTENT_SHARED_SELECTORS = [
+  ".folio-content",
+  ".folio-doc-page",
+  ".folio-home",
+];
