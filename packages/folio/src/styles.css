@@ -104,6 +104,14 @@
   --folio-font-display: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+/* Editorial remains its own active preset. Its warm accent is tuned for
+   readable button labels rather than preserving the old low-contrast red. */
+:root:where([data-folio-preset="editorial"]) {
+  --folio-primary: #a9583e;
+  --folio-primary-active: #8f462f;
+  --folio-on-primary: #ffffff;
+}
+
 :root:where([data-folio-preset="graphite"]) {
   --folio-primary: #275d7c;
   --folio-primary-active: #174a6b;
@@ -156,6 +164,12 @@
   --folio-warning: #edc271;
   --folio-error: #f49595;
   --folio-font-display: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+:root:where([data-folio-theme="dark"][data-folio-preset="editorial"]) {
+  --folio-primary: #e09a82;
+  --folio-primary-active: #f1b49d;
+  --folio-on-primary: #181715;
 }
 
 :root:where([data-folio-theme="dark"][data-folio-preset="graphite"]) {
@@ -236,6 +250,11 @@
     --folio-on-primary: #fff;
     --folio-on-dark: #faf9f5;
     --folio-on-dark-soft: #a09d96;
+  }
+  :root:where(:not([data-folio-theme])[data-folio-preset="editorial"]) {
+    --folio-primary: #e09a82;
+    --folio-primary-active: #f1b49d;
+    --folio-on-primary: #181715;
   }
   :root:where(:not([data-folio-theme])[data-folio-preset="graphite"]) {
   --folio-primary: #99c5d9;
