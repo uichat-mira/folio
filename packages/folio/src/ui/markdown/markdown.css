@@ -1,0 +1,257 @@
+/* Markdown runtime */
+.folio-markdown {
+  margin-top: 42px;
+  color: var(--folio-body);
+  font-size: 16px;
+  line-height: 1.78;
+  /* Long inline code such as `call(arg, arg)` still has to wrap in prose;
+     break-word only kicks in when a token cannot fit, so table intrinsic
+     widths keep driving the table scroll container instead. */
+  overflow-wrap: break-word;
+}
+
+.folio-markdown h1 {
+  margin: 40px 0 18px;
+  font: 500 clamp(38px, 5vw, 54px)/1.15 var(--folio-font-display);
+  letter-spacing: -.04em;
+}
+
+.folio-markdown h2 {
+  margin: 48px 0 14px;
+  padding-top: 13px;
+  border-top: 1px solid var(--folio-hairline);
+  font: 500 26px/1.2 var(--folio-font-display);
+}
+
+.folio-markdown h3 {
+  margin: 28px 0 8px;
+  font-size: 17px;
+}
+
+.folio-markdown p,
+.folio-markdown li { color: var(--folio-body); }
+
+.folio-markdown a {
+  color: var(--folio-primary-active);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.folio-markdown blockquote {
+  margin: 26px 0;
+  padding: 17px 21px;
+  border-left: 3px solid var(--folio-primary);
+  border-radius: 0 var(--folio-radius-md) var(--folio-radius-md) 0;
+  background: color-mix(in srgb, var(--folio-primary) 10%, transparent);
+}
+
+.folio-markdown blockquote p {
+  margin: 0;
+  color: var(--folio-ink);
+  font: 500 16px var(--folio-font-display);
+}
+
+.folio-markdown code {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--folio-surface-card);
+  font: 12px var(--folio-font-mono);
+}
+
+.folio-markdown pre {
+  overflow-x: auto;
+  margin: 16px 0 24px;
+  padding: 18px 20px;
+  border-radius: var(--folio-radius-lg);
+  background: var(--folio-surface-dark);
+  color: var(--folio-on-dark-soft);
+  font: 13px/1.7 var(--folio-font-mono);
+}
+
+.folio-markdown pre code {
+  padding: 0;
+  background: none;
+  color: #eee8df;
+}
+
+/* Keep authored photos within narrow reading columns without altering source files. */
+.folio-markdown img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Wide GFM tables scroll inside the reading column instead of widening the
+   whole document. The wrapper is focusable so keyboards can pan it as well. */
+.folio-markdown .folio-table-scroll {
+  margin: 16px 0 24px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--folio-muted) 45%, transparent) transparent;
+}
+
+.folio-markdown .folio-table-scroll:focus-visible {
+  outline: 2px solid var(--folio-primary);
+  outline-offset: 4px;
+  border-radius: var(--folio-radius-sm);
+}
+
+.folio-markdown .folio-table-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.folio-markdown .folio-table-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.folio-markdown .folio-table-scroll::-webkit-scrollbar-thumb {
+  border-radius: var(--folio-radius-pill);
+  background: color-mix(in srgb, var(--folio-muted) 45%, transparent);
+}
+
+.folio-markdown table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.folio-markdown th,
+.folio-markdown td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--folio-hairline);
+  text-align: left;
+  vertical-align: top;
+}
+
+.folio-markdown th {
+  color: var(--folio-muted);
+  font-size: 12px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.md-custom-block {
+  margin: 22px 0;
+  padding: 15px 18px;
+  border: 1px solid color-mix(in srgb, var(--folio-accent-teal) 35%, transparent);
+  border-radius: var(--folio-radius-md);
+  background: color-mix(in srgb, var(--folio-accent-teal) 8%, transparent);
+}
+
+.md-custom-block--warning {
+  border-color: color-mix(in srgb, var(--folio-warning) 42%, transparent);
+  background: color-mix(in srgb, var(--folio-warning) 10%, transparent);
+}
+
+.md-custom-block--danger {
+  border-color: color-mix(in srgb, var(--folio-error) 42%, transparent);
+  background: color-mix(in srgb, var(--folio-error) 9%, transparent);
+}
+
+.md-custom-block--note,
+.md-custom-block--info {
+  border-color: color-mix(in srgb, var(--folio-primary) 35%, transparent);
+  background: color-mix(in srgb, var(--folio-primary) 8%, transparent);
+}
+
+.md-custom-block__title {
+  color: var(--folio-ink);
+  font-size: 13px;
+}
+
+.md-custom-block__body > :first-child { margin-top: 6px; }
+.md-custom-block__body > :last-child { margin-bottom: 0; }
+
+.md-anchor {
+  margin-left: 8px;
+  color: transparent !important;
+  text-decoration: none !important;
+  font: 13px var(--folio-font-mono);
+}
+
+.folio-markdown h2:hover .md-anchor,
+.folio-markdown h3:hover .md-anchor,
+.md-anchor:focus-visible { color: var(--folio-primary) !important; }
+
+.markdown-mermaid {
+  width: 100%;
+  margin: 24px 0;
+  overflow-x: auto;
+}
+
+.markdown-mermaid-source {
+  margin: 0 !important;
+}
+
+@media (max-width: 780px) {
+  /* Tighter cells keep more columns visible; the 10px mask lands on cell
+     padding at rest, so fitting tables keep every glyph intact. */
+  .folio-markdown .folio-table-scroll {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 10px, #000 calc(100% - 10px), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 10px, #000 calc(100% - 10px), transparent);
+  }
+
+  .folio-markdown table { font-size: 13px; }
+
+  .folio-markdown th,
+  .folio-markdown td { padding: 9px 12px; }
+
+  .folio-markdown th { font-size: 11px; }
+}
+
+/* Syntax highlighting and diagram enhancement */
+.folio-markdown pre code.hljs {
+  display: block;
+  padding: 0;
+  background: transparent;
+  color: #e8e4dc;
+}
+
+.folio-markdown pre .hljs-comment,
+.folio-markdown pre .hljs-quote {
+  color: #7f8b86;
+  font-style: italic;
+}
+
+.folio-markdown pre .hljs-keyword,
+.folio-markdown pre .hljs-selector-tag,
+.folio-markdown pre .hljs-literal {
+  color: #72d8c1;
+}
+
+.folio-markdown pre .hljs-title,
+.folio-markdown pre .hljs-title.function_,
+.folio-markdown pre .hljs-section {
+  color: #f0b58a;
+}
+
+.folio-markdown pre .hljs-string,
+.folio-markdown pre .hljs-attr,
+.folio-markdown pre .hljs-template-variable {
+  color: #e7c27d;
+}
+
+.folio-markdown pre .hljs-number,
+.folio-markdown pre .hljs-variable,
+.folio-markdown pre .hljs-symbol {
+  color: #9fc4f2;
+}
+
+.folio-markdown pre .hljs-built_in,
+.folio-markdown pre .hljs-type {
+  color: #d8a8e8;
+}
+
+.folio-markdown pre .hljs-meta,
+.folio-markdown pre .hljs-punctuation {
+  color: #a9aaa5;
+}
+
+.markdown-mermaid svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}

@@ -16,12 +16,26 @@
 //      build is identical on Windows and POSIX.
 //   4. Source bytes are preserved verbatim. The aggregate and its public
 //      cascade order are checked by `scripts/verify-styles.mjs`.
+//   5. A stylesheet owns the rules for its component; `src/styles/content.css`
+//      keeps only page-frame rules that several components share. The order of
+//      this list is the order those rule groups had when they were still in one
+//      file, so splitting ownership never reorders the cascade.
 export const STYLE_SOURCES = [
   // Public token/global entry remains first; all internal module CSS follows
   // in cascade order. Consumers continue to import one dist/styles.css file.
   "src/styles.css",
   "src/ui/header/header.css",
+  // Shared page frames; no single component owns these.
   "src/styles/content.css",
+  // ShareButton default metrics.
+  "src/ui/share/share.css",
+  // MarkdownView typography, code blocks, tables, Callouts, anchors, Mermaid.
+  "src/ui/markdown/markdown.css",
+  // SearchOverlay shell, input, results and interaction states.
+  "src/ui/search/search.css",
+  // Transitional: content rules whose component ownership lands in the next
+  // phases (Home, EntryList, ArticleArchive, DocsShell).
+  "src/styles/content-body.css",
   "src/ui/page-nav/page-nav.css",
   "src/ui/doc-meta/doc-meta.css",
   "src/ui/tree-nav/tree-nav.css",

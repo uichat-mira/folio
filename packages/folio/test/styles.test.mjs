@@ -41,6 +41,10 @@ test("dist/styles.css preserves every registered module stylesheet in manifest o
     [
       "src/ui/header/header.css",
       "src/styles/content.css",
+      "src/ui/share/share.css",
+      "src/ui/markdown/markdown.css",
+      "src/ui/search/search.css",
+      "src/styles/content-body.css",
       "src/ui/page-nav/page-nav.css",
       "src/ui/doc-meta/doc-meta.css",
       "src/ui/tree-nav/tree-nav.css",
