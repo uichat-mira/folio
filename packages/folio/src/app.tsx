@@ -600,6 +600,9 @@ function Shell({
   }, [location.pathname]);
 
   useEffect(() => {
+    // Disabling theme controls preserves the package's fixed light appearance;
+    // the OS watcher must not keep changing runtime state behind that opt-out.
+    if (!themeEnabled) return;
     // Automatic system resolution is never persisted as a deliberate choice.
     if (userTheme) return;
     const update = () => setTheme(resolveInitialTheme(themePreference));
@@ -608,16 +611,19 @@ function Shell({
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
-  }, [themePreference, userTheme]);
+  }, [themePreference, userTheme, themeEnabled]);
 
   useEffect(() => {
     // Scheme and preset own the document scope; the Header toggle only changes
     // the effective light/dark choice. This also updates Mermaid observers.
     document.documentElement.dataset.folioPreset = appearance.preset;
     document.documentElement.dataset.folioCodePalette = appearance.codePalette;
-    document.documentElement.dataset.folioTheme = theme;
-    document.documentElement.style.colorScheme = theme;
-  }, [theme, appearance.preset, appearance.codePalette]);
+    // The disabled UI state is intentionally fixed-light. Setting an explicit
+    // light scope also suppresses the static CSS system media fallback.
+    const effective = themeEnabled ? theme : "light";
+    document.documentElement.dataset.folioTheme = effective;
+    document.documentElement.style.colorScheme = effective;
+  }, [theme, themeEnabled, appearance.preset, appearance.codePalette]);
 
   useEffect(() => {
     if (!searchEnabled) return;
