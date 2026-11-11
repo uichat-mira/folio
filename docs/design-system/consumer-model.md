@@ -57,7 +57,7 @@
 - **Editorial** 是独立的、有辨识度的正式模板（刊物式大标题/精选/阅读列表），不是为了兼容某个旧站而保留的特殊支线。
 - `home.sections` 的五类分区和 `resolveFolioHome` 保持内容单一真相源；模板决定结构与默认语言，不能把两套内容选择规则独立维护。
 - React 与静态两端使用相同模板选择与中性/刊物默认文案，允许分别生成 JSX/HTML，但禁止默认身份错位。
-- **FOL-050 可以改变下一代未配置模板时的默认值**，不需额外申请一个旧消费者保护条件；仍要保证现有 `home` 配置、Slots、静态路由覆盖的**功能契约可达**，并通过当前版本测试证明。
+- **FOL-050 可以改变下一代未配置模板时的默认值**，不需要根据第一代试验用途额外设计回退分支；仍要保证现有 `home` 配置、Slots、静态路由覆盖的**功能契约可达**，并通过当前版本测试证明。
 
 **[P] 产品方向现已确认**：Portal 为默认，Editorial 显式选择；不用“未来版本是否切默认”作为待裁决事项。具体 Portal 的视觉质量和界面结构由 FOL-050 实现验证。
 
@@ -86,7 +86,7 @@ type FolioAppearance = {
 1. `home.template` 控制框架首页 DOM，**缺省为 portal**；`home.sections` / `home.meta` 保持内容配置，不能把模板选择塞进 `ui`。
 2. `appearance.preset` 控制全站视觉，**建议缺省为 pearl**；`editorial`、`graphite` 是平级预设，既可搭 Portal 也可搭 Editorial。
 3. `appearance.scheme` 建议缺省 `system`，新一代站点层共享初始偏好；`ui.defaultTheme` 是当前已存在 React API，实施时以明确优先级处理，不能无视正在使用的 props。
-4. `appearance.codePalette` 缺省建议 `auto`，随有效 light/dark 选择宣纸/玄墨，也支持显式选择。当前代码的深色背景不是一套需要维持的“legacy”产品主题。
+4. `appearance.codePalette` 缺省建议 `auto`，随有效 light/dark 选择宣纸/玄墨，也支持显式选择。当前代码的深色背景不是一套需要维持的额外产品主题。
 5. 只新增真实消费需要的最小配置，不造新的主题引擎、页面注册市场、CMS 或颜色 JSON 编译器。
 
 **[P] 模式选择顺序**：保存的用户 light/dark 选择 > 显式 `ui.defaultTheme` > 新共享 `appearance.scheme` > OS/system；静态 HTML 无法预知用户本地存储，须以真实 CSS/构建模式解释首屏降级。不做按站点名或历史版本自动推断的兼容逻辑。
@@ -264,7 +264,7 @@ const exampleFutureConfig = {
 
 | 维度 | FOL-049 要证明 | FOL-050 要证明 |
 |---|---|---|
-| 下一代默认 | 缺省 Pearl + system + 自动代码色板，无影子 legacy theme | 缺省 Portal、无个人日志默认文案；Editorial 显式选用 |
+| 下一代默认 | 缺省 Pearl + system + 自动代码色板，不包含额外的历史兼容配色 | 缺省 Portal、无个人日志默认文案；Editorial 显式选用 |
 | 新消费者 | Pearl/Editorial/Graphite 与 scheme 独立，代码亮暗可组合 | 只加模板配置即得 Portal；不需要复制首页组件 |
 | React | 首屏有效 preset/scheme、主题切换、品牌色覆盖及 Mermaid | 模板 DOM、区块、链接、空态 |
 | 静态 / 无 JS | 构建出的 CSS 语义和 scheme 降级可读（不假装已有站点 Header） | 首页模块/文案/路由与 React 对齐 |
