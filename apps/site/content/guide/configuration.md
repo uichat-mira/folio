@@ -250,25 +250,42 @@ home: {
 
 ## 主题与品牌接口
 
-已实现的主题能力只有这些，没有额外的主题配置层：
+> **版本边界：** 以下 `appearance`、`home.template`、`FolioHome`、`useFolioAppearance()` 是当前 **`dev` 源码**的能力，**尚未进入 npm 0.1.1**。已经安装 npm 0.1.1 的项目不要直接复制使用；需等待包含这些 API 的版本正式发布。
 
-- `ui.defaultTheme` 接受 `"light" | "dark" | "system"`，默认 `"system"`。
-- `"system"` 读取 `prefers-color-scheme`；React 壳把解析后的明暗状态写进 `localStorage` 的 `folio-theme`，下次加载优先使用它。
-- 生效方式是 `<html data-folio-theme="light|dark">` 加 `color-scheme`，样式表按这个属性切换颜色；样式表本身没有 `prefers-color-scheme` 回退。
-- `ui.theme: false` 隐藏切换入口，同时不再写入 `data-folio-theme`：页面保持样式表的默认（浅色）token，`defaultTheme` 与系统偏好都不会生效。需要跟随系统时保留主题开关。
+`config.appearance` 定义三条互不绑定的外观维度，`home.template` 单独选择内置首页结构：
 
-品牌接口也是现有的，不需要 fork 组件：
+```ts
+import { defineFolioConfig } from "@uichat-mira/folio";
 
-- `config.logo` 与 `config.title` 决定默认 Header 品牌；`slots.headerBrand` 可替换品牌内容。
-- 结构化 Footer 的 `brand.logo.src` / `darkSrc` 提供深浅色两套素材。
-- `@uichat-mira/folio/styles.css` 定义 `--folio-*` 设计 token；消费站覆盖这些变量来表达品牌，而不是改组件选择器。
-- 组件级 CSS 不是独立公开入口，整体样式表按“整站默认样式”使用。
+export default defineFolioConfig({
+  title: "我的 Folio 站点",
+  description: "由 Folio 构建的内容与门户",
+  appearance: {
+    preset: "pearl",      // pearl | editorial | graphite
+    scheme: "system",     // system | light | dark
+    codePalette: "auto",  // auto | xuanzhi | xuanmo
+  },
+  home: { template: "portal" }, // portal | editorial
+});
+```
 
-设计规范、token 命名体系与模板／预设边界不属于本文范围：它们由独立的设计研究决定，本文只陈述上面已经实现并可验证的开关与接口。
+- **Preset** 决定整站语义颜色，**Scheme** 决定浅色 / 深色（`system` 随操作系统变化）；**Code Palette** 独立决定代码表面及语法高亮（`auto` 跟随最终明暗），不会替换整站的设计主题。
+- **Home Template** 仅决定框架**内置首页**的 Portal / Editorial 渲染方式。官网自身的 `slots.home` 是自定义首页，因此它在 Design 板块中只做模板预览，不替换官网首页。
+- 在 `FolioApp` 内，`useFolioAppearance()` 提供 `appearance`、`effectiveScheme`、`preview(partial)`、`resetPreview()`。`preview()` 只在当前会话临时覆盖外观，不写本地存储；`resetPreview()` 恢复读者已有的明确选择，然后是站点配置和系统偏好。
+- Header 的用户主动明暗切换才会持久化到 `folio-theme-choice`；操作系统的最终深浅值不会伪装成读者选择。旧的 `folio-theme` 不再作为显式用户选择读取。
+- `ui.defaultTheme` 仍接受 `"light" | "dark" | "system"`，它作为 React 应用的初始偏好，优先级高于 `config.appearance.scheme`，但低于读者明确选择及临时预览。
+- React 应用由 `FolioApp` 单独维护根元素上的 `data-folio-preset`、`data-folio-theme`、`data-folio-code-palette`。消费站不得自行争抢这些状态；静态 HTML 仍由 Folio 的 CSS `prefers-color-scheme` 回退照顾无 JS 场景。
+- `ui.theme: false` 关闭读者主题切换并固定浅色渲染；如要跟随系统，请保持主题功能启用。
+
+需在自定义 React 页面预览内置模板时，直接使用 `<FolioHome config={config} docs={docs} template="editorial" as="div" />`。它使用真实模型和 React Router 的 basePath；嵌入已有 `<main>` 时请指定 `as="div"`，不要生成嵌套 `main`。
+
+官网首页 [Design 主题实验区](/#portal-design-title) 可现场切换四维配置，并复制本节同形状的 `folio.config.ts`。它使用 `FolioMarkdown` 展示真实语法配色，而非仿制代码卡片。
+
+品牌接口保持独立：`config.logo` / `config.title` 和 `slots.headerBrand` 决定 Header 品牌内容，结构化 Footer 的 `brand.logo.src` / `darkSrc` 提供对应素材。公共 `@uichat-mira/folio/styles.css` 包含 `--folio-*` Token，消费站可以添加自己的 `--site-*` 透明别名；官网不再固定覆写所有预设的核心主色。
 
 ## 发布状态与 dev 标签
 
-`dev` 源码与 npm `0.1.1` 的差距集中在“配置驱动”的这几项。发表文章、写文档时不要把它们当成已发布能力：
+`dev` 源码与 npm `0.1.1` 的差异还包括新的主题与可组合首页 API。发表文章、写文档时不要把 `dev` 能力当成已发布能力：
 
 | 能力 | `dev` 源码 | npm `0.1.1` |
 | --- | --- | --- |
@@ -279,6 +296,8 @@ home: {
 | 结构化 `footer`、`footer: false` | 支持 | 不支持（只有字符串） |
 | `slots.headerBrand` / `navigation` / `docToc` / `footer` | 支持 | 不支持 |
 | `ui.footerOnDocs` | 支持 | 不支持 |
+| `appearance.preset` / `scheme` / `codePalette`、`home.template` | 支持 | 不支持 |
+| `useFolioAppearance()` / `FolioHome` 运行时组件 | 支持 | 不支持 |
 
 差异的权威描述与逐项行为在[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)；本文不把 `dev` 候选契约表述成已发布承诺。
 
