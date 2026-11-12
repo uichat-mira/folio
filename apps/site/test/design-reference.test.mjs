@@ -68,7 +68,8 @@ test("both articles belong in Reference / Design with static fallback", () => {
 test("named design tokens exist in Folio's current stylesheet", () => {
   for (const source of [principles, tokens]) {
     for (const match of source.matchAll(/--folio-[a-z][a-z-]*/g)) {
-      if (match[0] === "--folio-ref-") continue;
+      // Wildcard family prefixes are documentation, not standalone variables.
+      if (match[0].endsWith("-")) continue;
       assert.ok(publicCss.includes(match[0] + ":"), "Unknown token: " + match[0]);
     }
   }
