@@ -15,9 +15,7 @@ import {
 } from "@uichat-mira/folio";
 import config from "../folio.config";
 import { createFolioThemeConfig } from "./theme-explorer-config";
-
-type TokenEntry = { name: string; value: string };
-type TokenKind = "semantic" | "code" | "type" | "scale";
+import { collectFolioTokens, designTokenKind, type LiveFolioToken, type DesignTokenKind } from "./design-reference-tokens";
 
 const PRESETS: FolioVisualPreset[] = ["pearl", "editorial", "graphite"];
 const SCHEMES: FolioColorSchemePreference[] = ["system", "light", "dark"];
@@ -38,29 +36,8 @@ const CODE_EXAMPLE = [
   "~~~",
 ].join("\n");
 
-/** Classification affects documentation grouping, never the CSS contract. */
-export function designTokenKind(name: string): TokenKind {
-  if (name.startsWith("--folio-code-") || name.startsWith("--folio-syntax-")) return "code";
-  if (name.startsWith("--folio-font-")) return "type";
-  if (/^--folio-(space-|radius-|header-height$|.*-frame-width$)/.test(name)) return "scale";
-  return "semantic";
-}
-
-/**
- * The token catalogue is observed from the browser's *computed Folio CSS*.
- * No copied hex palette, hard-coded token-count or second token registry.
- */
-function readLiveTokens(): TokenEntry[] {
-  const computed = getComputedStyle(document.documentElement);
-  return Array.from({ length: computed.length }, (_, index) => computed.item(index))
-    .filter((name) => name.startsWith("--folio-"))
-    .map((name) => ({ name, value: computed.getPropertyValue(name).trim() }))
-    .filter((entry) => entry.value.length > 0)
-    .sort((a, b) => a.name.localeCompare(b.name));
-}
-
-function useLiveTokens(): TokenEntry[] {
-  const [tokens, setTokens] = useState<TokenEntry[]>([]);
+function useLiveTokens(): LiveFolioToken[] {
+  const [tokens, setTokens] = useState<LiveFolioToken[]>([]);
   useEffect(() => {
     const root = document.documentElement;
     let frame = 0;
@@ -68,7 +45,7 @@ function useLiveTokens(): TokenEntry[] {
       cancelAnimationFrame(frame);
       // FolioApp commits root attributes in a passive effect. Sampling on the
       // next frame reads the final cascade instead of a stale selection.
-      frame = requestAnimationFrame(() => setTokens(readLiveTokens()));
+      frame = requestAnimationFrame(() => setTokens(collectFolioTokens(getComputedStyle(root))));
     };
     const observer = new MutationObserver(refresh);
     observer.observe(root, {
@@ -178,7 +155,7 @@ function ThemeReference({ docs }: { docs: FolioDoc[] }) {
   );
 }
 
-function TokenCard({ entry }: { entry: TokenEntry }) {
+function TokenCard({ entry }: { entry: LiveFolioToken }) {
   const color = /^(?:#|rgb\(|rgba\(|hsl\(|hsla\(|oklch\(|color\()/i.test(entry.value);
   return (
     <div className="design-ref-token" aria-label={entry.name + " " + entry.value}>
@@ -192,7 +169,7 @@ function TokenCard({ entry }: { entry: TokenEntry }) {
   );
 }
 
-const GROUPS: { kind: TokenKind; name: string; note: string }[] = [
+const GROUPS: { kind: DesignTokenKind; name: string; note: string }[] = [
   { kind: "semantic", name: "Semantic · 语义颜色", note: "画布、层次、正文、边界、状态与动作" },
   { kind: "code", name: "Code · 代码与语法", note: "代码表面和语法角色来自同一套公共 CSS" },
   { kind: "type", name: "Type · 字族", note: "展示、正文、等宽三种职责" },
