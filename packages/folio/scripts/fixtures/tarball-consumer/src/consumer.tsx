@@ -1,5 +1,7 @@
 import {
   FolioApp,
+  FolioHome,
+  useFolioAppearance,
   FolioToc,
   FolioPageNav,
   FolioDocMeta,
@@ -22,6 +24,8 @@ import {
   resolveGithubPagesBase,
   searchFolioDocs,
   type FolioAppProps,
+  type FolioHomeProps,
+  type FolioAppearanceController,
   type FolioConfig,
   type FolioAppearanceConfig,
   type FolioVisualPreset,
@@ -79,6 +83,8 @@ import {
 // usable, without adding runtime code to the consumer.
 type PublicTypeSurface = {
   appProps: FolioAppProps;
+  homeProps: FolioHomeProps;
+  appearanceController: FolioAppearanceController;
   docsShellProps: FolioDocsShellProps;
   tocProps: FolioTocProps;
   tree: FolioContentTree;
@@ -189,8 +195,20 @@ const virtualModule: string = folioVirtualModule;
 const typedVirtualDocs: FolioDoc[] = virtualDocs;
 const typedVirtualRoots: string[] = virtualRoots;
 const plugin = folio(pluginOptions);
+function DesignControls() {
+  const { appearance, effectiveScheme, preview, resetPreview } = useFolioAppearance();
+  return <section>
+    <button onClick={() => preview({ preset: "graphite", scheme: "dark", codePalette: "xuanmo" })}>
+      {appearance.preset} / {effectiveScheme}
+    </button>
+    <button onClick={resetPreview}>Reset</button>
+  </section>;
+}
+const composedHome: FolioHomeProps = { config, docs, template: "editorial", as: "div" };
+const embeddedHome = <FolioHome {...composedHome} />;
 const app = <FolioApp config={config} docs={docs}
   slots={{
+    home: <DesignControls />,
     navigation: (props) => <FolioTreeNav {...props} />,
     docToc: (props) => <FolioToc {...props} />,
   }}
@@ -236,6 +254,7 @@ export function consumerSurface(): unknown[] {
     typedVirtualRoots,
     plugin,
     app,
+    embeddedHome,
     standaloneNav,
     standaloneToc,
     standaloneTree,

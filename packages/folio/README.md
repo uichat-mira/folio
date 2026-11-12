@@ -545,3 +545,41 @@ Verified on 2026-11-01:
 - **Separate work** — migrate downstream Mira Docs consumers from `@uichat-mira/docs`. Historical MiraDocs tag `v0.1.0` remains untouched. The OIDC publish is evidenced by GitHub Actions; the private npm settings dashboard is a distinct administrative UI.
 
 The predecessor `@uichat-mira/docs` package stays available for existing consumers during migration.
+
+## Appearance previews and composable homes (dev candidate, FOL-051)
+
+These APIs are available from source on `dev`; npm `0.1.1` does **not** include them yet. Import the single `@uichat-mira/folio/styles.css` entry as usual.
+
+```tsx
+import { FolioApp, FolioHome, useFolioAppearance } from "@uichat-mira/folio";
+
+function ThemeExplorer({ config, docs }: { config: FolioConfig; docs: FolioDoc[] }) {
+  const { appearance, effectiveScheme, isPreviewing, preview, resetPreview } = useFolioAppearance();
+  return (
+    <section aria-label="Theme explorer">
+      <button onClick={() => preview({ preset: "graphite", scheme: "dark", codePalette: "xuanmo" })}>
+        Preview Graphite ({effectiveScheme})
+      </button>
+      <button onClick={resetPreview} disabled={!isPreviewing}>Reset preview</button>
+      <p>Current preset: {appearance.preset}</p>
+      <FolioHome config={config} docs={docs} template="editorial" as="div" />
+    </section>
+  );
+}
+
+// Supply <ThemeExplorer config={config} docs={docs} /> inside a FolioApp slot
+// or descendant: the hook needs the FolioApp provider.
+```
+
+`preview()` merges a partial **session-only** appearance override; `resetPreview()`
+returns to the reader's explicit light/dark choice, then `ui.defaultTheme` /
+`config.appearance.scheme`, then the OS preference. The built-in Header toggle
+records a deliberate reader choice and wins over a temporary scheme preview;
+system resolution never creates a stored choice. `ui.theme: false` retains the
+existing fixed-light rendering semantics (even during a scheme preview).
+
+`FolioHome` renders the same Portal/Editorial component used by `FolioApp`'s
+default route; `template` overrides only that render, not `config.home`.
+Use `as="div"` when embedding inside an existing `main` landmark. It requires
+a parent React Router; its `basename` owns the deployment base path.
+Runtime previews do not rewrite already-built static HTML or `staticRoutes.home`.
