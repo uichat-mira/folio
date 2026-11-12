@@ -1,4 +1,8 @@
 export { FolioApp } from "./app";
+export { FolioHome } from "./ui/home/FolioHome";
+export type { FolioHomeProps } from "./ui/home/FolioHome";
+export { useFolioAppearance } from "./ui/appearance-react";
+export type { FolioAppearanceController } from "./ui/appearance-react";
 export { resolveFolioReaderKind, shouldShowFolioPageFooter } from "./ui/page-presentation";
 export type { FolioReaderKind } from "./ui/page-presentation";
 export { FolioHeader } from "./ui/header";

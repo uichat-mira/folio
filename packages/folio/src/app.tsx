@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -17,6 +18,9 @@ import {
 } from "react-router-dom";
 import { normalizeBasePath } from "./core/config";
 import { resolveFolioAppearance } from "./core/appearance";
+import type { FolioResolvedAppearance } from "./core/appearance";
+import { FolioAppearanceContext, type FolioAppearanceController } from "./ui/appearance-react";
+import { FolioHome } from "./ui/home/FolioHome";
 import { FolioHeader } from "./ui/header";
 import { FolioFooter } from "./ui/footer";
 import { resolveFolioReaderKind, shouldShowFolioPageFooter } from "./ui/page-presentation";
@@ -33,7 +37,6 @@ import {
   assertNoFolioCollectionConflicts,
   type FolioCollectionIndex,
 } from "./core/collection-index";
-import { resolveFolioHome, type FolioHomeModel, type FolioHomeSection } from "./core/home";
 import { FolioEntryList, type FolioEntryTagLink } from "./ui/entry-list";
 import {
   buildFolioArticleArchiveModel,
@@ -47,7 +50,6 @@ import type { FolioDoc, FolioConfig } from "./types";
 import type {
   FolioAppProps,
   FolioSlots,
-  FolioThemePreference,
   FolioUiOptions,
 } from "./ui-types";
 
@@ -65,10 +67,7 @@ function savedUserTheme(): "light" | "dark" | undefined {
   return value === "light" || value === "dark" ? value : undefined;
 }
 
-function resolveInitialTheme(preference: FolioThemePreference): "light" | "dark" {
-  const saved = savedUserTheme();
-  if (saved) return saved;
-  if (preference !== "system") return preference;
+function currentSystemTheme(): "light" | "dark" {
   if (typeof window === "undefined") return "light";
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
@@ -107,250 +106,6 @@ function DocumentPage({
   );
 }
 
-function PortalHome({ model }: { model: FolioHomeModel }) {
-  return (
-    <main className="folio-home folio-home--portal">
-      {model.meta && (
-        <div className="folio-portal-meta" aria-label="站点首页">
-          {model.meta.left ? <span>{model.meta.left}</span> : null}
-          {model.meta.right ? <span>{model.meta.right}</span> : null}
-        </div>
-      )}
-      {model.sections.map((section, index) => {
-        switch (section.type) {
-          case "intro":
-            return (
-              <section className="folio-portal-hero" key={"intro-" + index}>
-                {section.kicker ? <p className="folio-portal-kicker">{section.kicker}</p> : null}
-                <h1>{section.title}</h1>
-                <p className="folio-portal-description">{section.description}</p>
-                {section.collection && (
-                  <Link className="folio-portal-hero-link" to={section.collection.path}>
-                    浏览{section.collection.title} <span aria-hidden="true">→</span>
-                  </Link>
-                )}
-              </section>
-            );
-          case "featured":
-            return (
-              <section className="folio-portal-featured" key={"featured-" + index}>
-                <Link className="folio-portal-feature" to={href(section.doc.path)}>
-                  <span className="folio-portal-feature-label">{section.label}</span>
-                  <span className="folio-portal-feature-index">
-                    {String(section.number).padStart(2, "0")} / {String(section.total).padStart(2, "0")}
-                  </span>
-                  <h2>{section.doc.title}</h2>
-                  {section.doc.description && <p>{section.doc.description}</p>}
-                  <span className="folio-portal-feature-link">
-                    {section.readLabel} <span aria-hidden="true">→</span>
-                  </span>
-                </Link>
-              </section>
-            );
-          case "recent":
-            return (
-              <section
-                className="folio-portal-section folio-portal-recent"
-                aria-label={section.title}
-                key={"recent-" + index}
-              >
-                <div className="folio-portal-section-heading">
-                  <div>
-                    <span className="folio-portal-section-label">{section.label}</span>
-                    <h2>{section.title}</h2>
-                  </div>
-                  {section.collection && (
-                    <Link to={section.collection.path} className="folio-portal-view-all">
-                      全部{section.collection.title} <span aria-hidden="true">→</span>
-                    </Link>
-                  )}
-                </div>
-                {section.docs.length ? (
-                  <FolioEntryList entries={section.docs} headingLevel="h3" />
-                ) : section.hadEntries ? (
-                  <p className="folio-portal-endnote">{section.endMessage}</p>
-                ) : (
-                  <p className="folio-collection-empty">{section.emptyMessage}</p>
-                )}
-              </section>
-            );
-          case "collections":
-            return (
-              <section className="folio-portal-section folio-portal-collections" key={"collections-" + index}>
-                <div className="folio-portal-collection-grid">
-                  {section.collections.map((entry) => (
-                    <section className="folio-portal-collection" key={entry.collection.path}>
-                      <div className="folio-portal-section-heading">
-                        <div>
-                          <h2>{entry.collection.title}</h2>
-                          {entry.collection.description ? (
-                            <p className="folio-portal-collection-description">
-                              {entry.collection.description}
-                            </p>
-                          ) : null}
-                        </div>
-                        <Link
-                          to={entry.collection.path}
-                          className="folio-portal-view-all"
-                          aria-label={"全部" + entry.collection.title}
-                        >
-                          全部 <span aria-hidden="true">→</span>
-                        </Link>
-                      </div>
-                      {entry.docs.length ? (
-                        <FolioEntryList entries={entry.docs} headingLevel="h3" />
-                      ) : (
-                        <p className="folio-collection-empty">{entry.emptyMessage}</p>
-                      )}
-                    </section>
-                  ))}
-                </div>
-              </section>
-            );
-          case "about":
-            return (
-              <section className="folio-portal-section folio-portal-about-section" key={"about-" + index}>
-                <aside className="folio-portal-about">
-                  <h2>{section.title}</h2>
-                  <p>{section.description}</p>
-                  <Link to={href(section.doc.path)}>
-                    {section.linkLabel} <span aria-hidden="true">→</span>
-                  </Link>
-                </aside>
-              </section>
-            );
-        }
-      })}
-    </main>
-  );
-}
-
-function EditorialHome({ model }: { model: FolioHomeModel }) {
-  function renderSection(section: FolioHomeSection, index: number) {
-    switch (section.type) {
-      case "intro":
-        return (
-          <section className="folio-editorial-lead folio-editorial-lead--single" key={"intro-" + index}>
-            <div className="folio-editorial-intro">
-              <div className="folio-editorial-kicker">
-                <span className="folio-editorial-kicker-line" aria-hidden="true" />
-                {section.kicker}
-              </div>
-              <h1>{section.title}</h1>
-              <p>{section.description}</p>
-              {section.collection && (
-                <Link className="folio-editorial-hero-link" to={section.collection.path}>
-                  浏览{section.collection.title} <span aria-hidden="true">↗</span>
-                </Link>
-              )}
-            </div>
-          </section>
-        );
-      case "featured":
-        return (
-          <section className="folio-editorial-lead folio-editorial-lead--single" key={"featured-" + index}>
-            <Link className="folio-editorial-feature" to={href(section.doc.path)}>
-              <span className="folio-editorial-feature-label">
-                <span aria-hidden="true">✳</span> {section.label}
-              </span>
-              <span className="folio-editorial-feature-body">
-                <span className="folio-editorial-feature-no">
-                  {String(section.number).padStart(2, "0")} / {String(section.total).padStart(2, "0")}
-                </span>
-                <h2>{section.doc.title}</h2>
-                {section.doc.description && <p>{section.doc.description}</p>}
-              </span>
-              <span className="folio-editorial-feature-bottom">
-                {section.readLabel} <span aria-hidden="true">↗</span>
-              </span>
-            </Link>
-          </section>
-        );
-      case "recent":
-        return (
-          <section className="folio-editorial-lower folio-editorial-lower--single" key={"recent-" + index}>
-            <section className="folio-editorial-recent" aria-label="文章选读">
-              <div className="folio-editorial-section-heading">
-                <div>
-                  <span className="folio-editorial-section-label">{section.label}</span>
-                  <h2>{section.title}</h2>
-                </div>
-                {section.collection && (
-                  <Link to={section.collection.path} className="folio-editorial-view-all">
-                    全部{section.collection.title} <span aria-hidden="true">↗</span>
-                  </Link>
-                )}
-              </div>
-              {section.docs.length ? (
-                <FolioEntryList entries={section.docs} headingLevel="h3" />
-              ) : section.hadEntries ? (
-                <p className="folio-editorial-endnote">{section.endMessage}</p>
-              ) : (
-                <p className="folio-collection-empty">{section.emptyMessage}</p>
-              )}
-            </section>
-          </section>
-        );
-      case "collections":
-        return (
-          <section className="folio-editorial-lower folio-editorial-lower--single" key={"collections-" + index}>
-            <div className="folio-editorial-aside">
-              {section.collections.map((entry, entryIndex) => (
-                <section className="folio-editorial-side-section" key={entry.collection.path}>
-                  <div className="folio-editorial-section-heading">
-                    <div>
-                      <span className="folio-editorial-section-label">
-                        {String(entryIndex + 2).padStart(2, "0")} / COLLECTION
-                      </span>
-                      <h2>{entry.collection.title}</h2>
-                    </div>
-                    <Link
-                      to={entry.collection.path}
-                      className="folio-editorial-view-all"
-                      aria-label={"全部" + entry.collection.title}
-                    >
-                      ↗
-                    </Link>
-                  </div>
-                  {entry.docs.length ? (
-                    <FolioEntryList entries={entry.docs} headingLevel="h3" />
-                  ) : (
-                    <p className="folio-collection-empty">{entry.emptyMessage}</p>
-                  )}
-                </section>
-              ))}
-            </div>
-          </section>
-        );
-      case "about":
-        return (
-          <section className="folio-editorial-lower folio-editorial-lower--single" key={"about-" + index}>
-            <aside className="folio-editorial-about">
-              <span className="folio-editorial-section-label">A LITTLE ABOUT</span>
-              <h2>{section.title}</h2>
-              <p>{section.description}</p>
-              <Link to={href(section.doc.path)}>
-                {section.linkLabel} <span aria-hidden="true">↗</span>
-              </Link>
-            </aside>
-          </section>
-        );
-    }
-  }
-
-  return (
-    <main className="folio-home folio-journal-home folio-editorial-home">
-      {model.meta && (
-        <div className="folio-editorial-meta" aria-label="站点首页">
-          <span>{model.meta.left}</span>
-          <span>{model.meta.right}</span>
-        </div>
-      )}
-      {model.sections.map(renderSection)}
-    </main>
-  );
-}
-
 function Home({
   docs,
   config,
@@ -361,10 +116,7 @@ function Home({
   custom?: ReactNode;
 }) {
   if (custom) return <>{custom}</>;
-  const model = resolveFolioHome(config, docs);
-  return model.template === "editorial"
-    ? <EditorialHome model={model} />
-    : <PortalHome model={model} />;
+  return <FolioHome config={config} docs={docs} />;
 }
 
 function CollectionIndex({
@@ -582,13 +334,47 @@ function Shell({
     ui?.footerOnDocs,
   );
   const showSiteFooter = footerVisible(current);
-  const appearance = resolveFolioAppearance(config);
-  const themePreference = ui?.defaultTheme ?? appearance.scheme;
+  const configuredAppearance = useMemo(() => resolveFolioAppearance(config), [config]);
+  const themePreference = ui?.defaultTheme ?? configuredAppearance.scheme;
   const [searchOpen, setSearchOpen] = useState(false);
   const [userTheme, setUserTheme] = useState(savedUserTheme);
-  const [theme, setTheme] = useState<"light" | "dark">(
-    () => resolveInitialTheme(themePreference),
-  );
+  const [systemTheme, setSystemTheme] = useState<"light" | "dark">(currentSystemTheme);
+  const [appearancePreview, setAppearancePreview] =
+    useState<Partial<FolioResolvedAppearance> | null>(null);
+
+  // Single selection chain: temporary preview > explicit reader choice >
+  // site configuration > operating system. Only Header clicks are persisted.
+  const selectedScheme = appearancePreview?.scheme ?? userTheme ?? themePreference;
+  const effectiveTheme = !themeEnabled ? "light"
+    : selectedScheme === "system" ? systemTheme : selectedScheme;
+  const activeAppearance: FolioResolvedAppearance = {
+    preset: appearancePreview?.preset ?? configuredAppearance.preset,
+    scheme: selectedScheme,
+    codePalette: appearancePreview?.codePalette ?? configuredAppearance.codePalette,
+  };
+
+  const preview = useCallback((changes: Partial<FolioResolvedAppearance>) => {
+    if (Object.keys(changes).length === 0) return;
+    setAppearancePreview(current => {
+      const next = { ...current, ...changes };
+      // Reuse the strict Core allow-lists; invalid runtime values never reach
+      // document attributes, even if a JS consumer bypasses TypeScript.
+      resolveFolioAppearance({ appearance: { ...configuredAppearance, ...next } });
+      return next;
+    });
+  }, [configuredAppearance]);
+
+  const resetPreview = useCallback(() => setAppearancePreview(null), []);
+  const appearanceControls: FolioAppearanceController = useMemo(() => ({
+    appearance: activeAppearance,
+    effectiveScheme: effectiveTheme,
+    isPreviewing: appearancePreview !== null,
+    preview,
+    resetPreview,
+  }), [
+    activeAppearance.preset, activeAppearance.scheme, activeAppearance.codePalette,
+    effectiveTheme, appearancePreview !== null, preview, resetPreview,
+  ]);
 
   useEffect(() => {
     setSearchOpen(false);
@@ -596,30 +382,22 @@ function Shell({
   }, [location.pathname]);
 
   useEffect(() => {
-    // Disabling theme controls preserves the package's fixed light appearance;
-    // the OS watcher must not keep changing runtime state behind that opt-out.
-    if (!themeEnabled) return;
-    // Automatic system resolution is never persisted as a deliberate choice.
-    if (userTheme) return;
-    const update = () => setTheme(resolveInitialTheme(themePreference));
-    update();
-    if (themePreference !== "system") return;
+    if (!themeEnabled || selectedScheme !== "system") return;
     const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const update = () => setSystemTheme(media.matches ? "dark" : "light");
+    update();
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
-  }, [themePreference, userTheme, themeEnabled]);
+  }, [themeEnabled, selectedScheme]);
 
   useEffect(() => {
-    // Scheme and preset own the document scope; the Header toggle only changes
-    // the effective light/dark choice. This also updates Mermaid observers.
-    document.documentElement.dataset.folioPreset = appearance.preset;
-    document.documentElement.dataset.folioCodePalette = appearance.codePalette;
-    // The disabled UI state is intentionally fixed-light. Setting an explicit
-    // light scope also suppresses the static CSS system media fallback.
-    const effective = themeEnabled ? theme : "light";
-    document.documentElement.dataset.folioTheme = effective;
-    document.documentElement.style.colorScheme = effective;
-  }, [theme, themeEnabled, appearance.preset, appearance.codePalette]);
+    // FolioApp is the sole owner of root appearance markers. Consumers preview
+    // via context rather than competing effects writing document.dataset.
+    document.documentElement.dataset.folioPreset = activeAppearance.preset;
+    document.documentElement.dataset.folioCodePalette = activeAppearance.codePalette;
+    document.documentElement.dataset.folioTheme = effectiveTheme;
+    document.documentElement.style.colorScheme = effectiveTheme;
+  }, [effectiveTheme, activeAppearance.preset, activeAppearance.codePalette]);
 
   useEffect(() => {
     if (!searchEnabled) return;
@@ -639,13 +417,20 @@ function Shell({
   }
 
   function toggleTheme() {
-    const next = theme === "dark" ? "light" : "dark";
+    const next = effectiveTheme === "dark" ? "light" : "dark";
     window.localStorage.setItem(USER_THEME_KEY, next);
     setUserTheme(next);
-    setTheme(next);
+    // A deliberate Header click wins over a temporary scheme preview, but
+    // leaves preset/code previews untouched until their explicit reset.
+    setAppearancePreview(current => {
+      if (!current || current.scheme === undefined) return current;
+      const { scheme: _discard, ...remaining } = current;
+      return Object.keys(remaining).length ? remaining : null;
+    });
   }
 
   return (
+    <FolioAppearanceContext.Provider value={appearanceControls}>
     <div className="folio-shell">
       <FolioHeader
         config={config}
@@ -655,7 +440,7 @@ function Shell({
         searchEnabled={searchEnabled}
         themeEnabled={themeEnabled}
         shareEnabled={shareEnabled}
-        darkMode={theme === "dark"}
+        darkMode={effectiveTheme === "dark"}
         onSearch={openSearch}
         onToggleTheme={toggleTheme}
         brand={slots?.headerBrand}
@@ -751,6 +536,7 @@ function Shell({
 
       {searchOpen ? <SearchOverlay docs={docs} onClose={() => setSearchOpen(false)} /> : null}
     </div>
+    </FolioAppearanceContext.Provider>
   );
 }
 

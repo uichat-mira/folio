@@ -67,6 +67,8 @@ const checks = [
 
       const entry = await import("@uichat-mira/folio");
       assert.equal(typeof entry.FolioApp, "function", "root entry does not export FolioApp");
+      assert.equal(typeof entry.FolioHome, "function", "root entry does not export composable FolioHome");
+      assert.equal(typeof entry.useFolioAppearance, "function", "root entry does not export runtime appearance hook");
       assert.equal("FolioDocNav" in entry, false, "obsolete separate sidebar entry is still exported");
       assert.equal(typeof entry.FolioToc, "function", "root entry does not export FolioToc");
       assert.equal(typeof entry.FolioPageNav, "function", "root entry does not export FolioPageNav");
