@@ -813,7 +813,10 @@
   margin-top: 19px;
 }
 
-.portal-workflow h2 em { color: var(--site-accent-teal); }
+.portal-workflow h2 em {
+  /* Inverse headings must remain readable even with Pearl/Graphite light accents. */
+  color: color-mix(in srgb, var(--site-accent-teal) 45%, var(--site-on-dark));
+}
 
 .portal-workflow__intro > p {
   margin: 0 0 9px;
