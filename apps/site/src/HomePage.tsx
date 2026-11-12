@@ -1,5 +1,6 @@
 import type { FolioDoc } from "@uichat-mira/folio";
 import { Link } from "react-router-dom";
+import { ThemeExplorerGate } from "./ThemeExplorer";
 
 type HomePageProps = { docs: FolioDoc[] };
 
@@ -245,6 +246,7 @@ export function HomePage({ docs }: HomePageProps) {
               <div className="portal-design-card__bottom"><strong>组合而非复制</strong><span>Header、Popover 与可演进的布局</span></div>
             </div>
           </div>
+          <ThemeExplorerGate docs={docs} />
         </div>
       </section>
 
