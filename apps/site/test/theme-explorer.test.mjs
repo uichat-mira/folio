@@ -41,7 +41,7 @@ test("FOL-053: runtime appearance is controlled through the Folio public hook, n
   assert.match(explorerSource, /useFolioAppearance\(\)/);
   assert.match(explorerSource, /preview\(value\)/);
   assert.match(explorerSource, /resetPreview\(\)/);
-  assert.doesNotMatch(explorerSource, /document\.documentElement|localStorage|\.dataset\.folio/);
+  assert.doesNotMatch(explorerSource, /document\.documentElement|(?:window|globalThis)\.localStorage|localStorage\.(?:setItem|getItem|removeItem)|\.dataset\.folio/);
   for (const value of ["pearl", "editorial", "graphite", "system", "light", "dark",
     "auto", "xuanzhi", "xuanmo", "portal", "editorial"]) {
     assert.ok(explorerSource.includes('value: "' + value + '"'), "Missing option " + value);

@@ -6,6 +6,7 @@ import {
   type FolioCodePalette,
   type FolioColorSchemePreference,
   type FolioDoc,
+  type FolioConfig,
   type FolioHomeTemplate,
   type FolioVisualPreset,
 } from "@uichat-mira/folio";
@@ -49,7 +50,8 @@ export function ThemeExplorerGate({ docs }: { docs: FolioDoc[] }) {
 function ThemeExplorer({ docs }: { docs: FolioDoc[] }) {
   const { appearance, effectiveScheme, isPreviewing, preview, resetPreview } =
     useFolioAppearance();
-  const initialTemplate: FolioHomeTemplate = config.home?.template ?? "portal";
+  const siteConfig: FolioConfig = config;
+  const initialTemplate: FolioHomeTemplate = siteConfig.home?.template ?? "portal";
   const [template, setTemplate] = useState<FolioHomeTemplate>(initialTemplate);
   const [copyMessage, setCopyMessage] = useState("");
   const [manualCopy, setManualCopy] = useState(false);
