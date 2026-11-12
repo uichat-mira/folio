@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { test } from "node:test";
+// The workspace validate script intentionally runs this single site test entry.
+import "./theme-explorer.test.mjs";
 
 const siteSrc = new URL("../src/", import.meta.url);
 const siteCssFiles = readdirSync(siteSrc).filter((file) => file.endsWith(".css"));
