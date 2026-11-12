@@ -37,6 +37,8 @@ tags:
 | 站点配置、导航集合、运行时组合 | [配置指南](/guide/configuration) · [导航指南](/guide/navigation) |
 | Article 单分类、多标签及 `collections[].archive`（dev） | [Article 分类与标签归档](/reference/article-archives) |
 | React 组件、Props、slots 与阅读壳 | [React 组件 API](/reference/components) |
+| 设计思想、主题预设与真实模板演示（dev） | [设计系统：秩序与气质](/reference/design/principles) |
+| 语义 Token、代码色板与实时变量图鉴（dev） | [Token 图鉴](/reference/design/tokens) |
 
 ## 构建与发布 API
 
