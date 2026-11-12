@@ -1,7 +1,6 @@
 :root {
-  /* Official Folio brand kit v1; consumer sites keep their own tokens. */
-  --folio-primary: #BE6240;
-  --folio-primary-active: #A65333;
+  /* Folio presets own all semantic colors. The official site owns its
+     logo, typography, content and composition instead of overriding them. */
   --site-primary: var(--folio-primary);
   --site-primary-active: var(--folio-primary-active);
   --site-ink: var(--folio-ink);
@@ -15,14 +14,19 @@
   --site-surface-dark: var(--folio-surface-dark);
   --site-on-dark: var(--folio-on-dark);
   --site-on-dark-soft: var(--folio-on-dark-soft);
+  --site-on-primary: var(--folio-on-primary);
+  --site-surface-dark-elevated: var(--folio-surface-dark-elevated);
+  --site-accent-teal: var(--folio-accent-teal);
+  --site-accent-amber: var(--folio-accent-amber);
+  --site-code-bg: var(--folio-code-bg);
+  --site-code-fg: var(--folio-code-fg);
+  --site-code-border: var(--folio-code-border);
+  --site-syntax-comment: var(--folio-syntax-comment);
+  --site-syntax-keyword: var(--folio-syntax-keyword);
+  --site-syntax-string: var(--folio-syntax-string);
   --site-display: var(--folio-font-display);
   --site-sans: var(--folio-font-sans);
   --site-mono: var(--folio-font-mono);
-}
-
-[data-folio-theme="dark"] {
-  --folio-primary: #BE6240;
-  --folio-primary-active: #E1A38A;
 }
 
 html { scroll-behavior: smooth; }
@@ -52,7 +56,7 @@ html { scroll-behavior: smooth; }
   padding: 0 16px;
   border-radius: 8px;
   background: var(--site-primary);
-  color: #fff;
+  color: var(--site-on-primary);
   font-size: 14px;
   font-weight: 500;
 }
