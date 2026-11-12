@@ -18,6 +18,8 @@ function page(route) {
   return readFileSync(file, "utf8");
 }
 const home = page("/");
+const designPrinciples = page("/reference/design/principles");
+const designTokens = page("/reference/design/tokens");
 const about = page("/about");
 const guide = page("/guide/introduction");
 const reference = page("/reference/overview");
@@ -35,6 +37,12 @@ assert.match(about, /folio-prerender--page/);
 assert.match(about, /<article class="folio-markdown">/);
 assert.match(about, /Git-native/);
 assert.match(home, /\/about/);
+assert.match(designPrinciples, /id="design-ref-theme-slot"/);
+assert.match(designTokens, /id="design-ref-tokens-slot"/);
+assert.match(designPrinciples, /class="design-ref-fallback"/);
+assert.match(designTokens, /class="design-ref-fallback"/);
+assert.doesNotMatch(designPrinciples, /<select[^>]*design-ref/i);
+assert.doesNotMatch(designTokens, /<select[^>]*design-ref/i);
 for(const [label, html] of [["Guide",guide],["Reference",reference],["Components",component]]) {
   assert.match(html, /folio-docs-shell/, label + " lost the reading shell");
   assert.match(html, /folio-tree-nav/, label + " lost the sidebar");
