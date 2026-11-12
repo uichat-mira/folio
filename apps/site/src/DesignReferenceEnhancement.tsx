@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLocation } from "react-router-dom";
 import {
@@ -251,19 +251,33 @@ function TokensReference() {
  */
 export function DesignReferenceEnhancement({ docs }: { docs: FolioDoc[] }) {
   const location = useLocation();
+  const marker = useRef<HTMLSpanElement>(null);
   const [host, setHost] = useState<HTMLElement | null>(null);
   const [kind, setKind] = useState<"theme" | "tokens" | null>(null);
 
   useEffect(() => {
+    // FolioHeader intentionally renders the consumer actions in desktop and
+    // mobile containers. Only the first *site-owned* marker may portal into
+    // trusted Markdown, avoiding duplicated controls and competing state.
+    // Do not depend on private Header class names or modify document root.
+    if (document.querySelector("[data-design-reference-bridge]") !== marker.current) {
+      setHost(null);
+      setKind(null);
+      return;
+    }
     const theme = document.getElementById("design-ref-theme-slot");
     const tokens = document.getElementById("design-ref-tokens-slot");
     setHost(theme ?? tokens);
     setKind(theme ? "theme" : tokens ? "tokens" : null);
   }, [location.pathname]);
 
-  if (!host || !kind) return null;
-  return createPortal(
-    kind === "theme" ? <ThemeReference docs={docs} /> : <TokensReference />,
-    host,
+  return (
+    <>
+      <span ref={marker} hidden data-design-reference-bridge="" />
+      {host && kind ? createPortal(
+        kind === "theme" ? <ThemeReference docs={docs} /> : <TokensReference />,
+        host,
+      ) : null}
+    </>
   );
 }

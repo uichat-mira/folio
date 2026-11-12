@@ -79,6 +79,9 @@ test("embedded lab uses actual public Folio APIs, not a second state machine", (
   for (const name of ["useFolioAppearance", "FolioHome", "FolioMarkdown", "resolveFolioCodePalette"])
     assert.ok(ui.includes(name), "Missing API " + name);
   assert.match(ui, /createPortal\(/);
+  assert.match(ui, /document\.querySelector\("\[data-design-reference-bridge\]"\) !== marker\.current/);
+  assert.match(ui, /<span ref=\{marker\} hidden data-design-reference-bridge/);
+  assert.doesNotMatch(ui, /folio-consumer-header-actions|folio-mobile-panel__custom-actions/);
   assert.match(ui, /useLocation\(\)/);
   assert.match(ui, /resetPreview\(\)/);
   assert.match(ui, /<FolioHome config=\{config\} docs=\{docs\} template=\{template\} as="div"/);
