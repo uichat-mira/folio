@@ -228,7 +228,7 @@ export function HomePage({ docs }: HomePageProps) {
             </div>
             <div className="portal-design-card portal-design-card--color">
               <div className="portal-design-card__top"><span>FOUNDATION / TOKENS</span><span>02</span></div>
-              <div className="portal-design-card__swatches" aria-label="Folio 当前设计色彩">
+              <div className="portal-design-card__swatches" role="img" aria-label="当前主题的主色、辅助色、文字墨色、强调色和卡片背景">
                 <span /><span /><span /><span /><span />
               </div>
               <div className="portal-design-card__bottom"><strong>统一而可配置</strong><span>颜色、间距与视觉契约</span></div>
