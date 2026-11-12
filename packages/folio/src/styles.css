@@ -78,8 +78,8 @@
    overrides deliberately keep :root specificity, so consumer CSS imported
    after @uichat-mira/folio/styles.css can replace public values using :root. */
 :root:where(:not([data-folio-preset]), [data-folio-preset="pearl"]) {
-  --folio-primary: #94543d;
-  --folio-primary-active: #773c29;
+  --folio-primary: #a83d22;
+  --folio-primary-active: #862f1d;
   --folio-primary-disabled: #d8c7bb;
   --folio-ink: #252522;
   --folio-body: #393934;
@@ -88,7 +88,7 @@
   --folio-muted-soft: #706e66;
   --folio-hairline: #e4e1d8;
   --folio-hairline-soft: #efede7;
-  --folio-canvas: #faf9f6;
+  --folio-canvas: #f6f1e8;
   --folio-surface-soft: #f3f1eb;
   --folio-surface-card: #ebe8df;
   --folio-surface-dark: #24231f;

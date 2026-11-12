@@ -16,10 +16,10 @@
   letter-spacing: -.04em;
 }
 
+/* Heading hierarchy comes from typography and spacing. A horizontal rule
+   must come from an authored Markdown separator, not every ## heading. */
 .folio-markdown h2 {
   margin: 48px 0 14px;
-  padding-top: 13px;
-  border-top: 1px solid var(--folio-hairline);
   font: 500 26px/1.2 var(--folio-font-display);
 }
 

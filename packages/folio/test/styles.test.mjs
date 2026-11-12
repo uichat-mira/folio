@@ -82,6 +82,15 @@ test("dist/styles.css preserves every registered module stylesheet in manifest o
   }
 });
 
+test("Markdown h2 is a heading, not an implicit horizontal separator", () => {
+  const rule = stylesheet.match(/\.folio-markdown h2\s*\{([^}]*)\}/);
+  assert.ok(rule, "public stylesheet must include the Markdown h2 rule");
+  assert.match(rule[1], /font:/, "keep the existing heading typography");
+  assert.match(rule[1], /margin:\s*48px 0 14px/, "keep section spacing");
+  assert.doesNotMatch(rule[1], /border(?:-top)?\s*:/, "Markdown headings must not add separators");
+  assert.doesNotMatch(rule[1], /padding-top\s*:/, "remove compensatory padding with the border");
+});
+
 test("aggregation is deterministic and preserves the manifest order", () =>
   withTempDir((directory) => {
     writeFileSync(join(directory, "tokens.css"), "/* a */\n.a { color: red; }\n");

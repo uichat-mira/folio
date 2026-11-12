@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useHref } from "react-router-dom";
 import {
   FolioHome,
   FolioMarkdown,
@@ -12,6 +13,7 @@ import {
 } from "@uichat-mira/folio";
 import config from "../folio.config";
 import { createFolioThemeConfig } from "./theme-explorer-config";
+import { ThemeSelect } from "./ThemeSelect";
 
 const presets: { value: FolioVisualPreset; name: string }[] = [
   { value: "pearl", name: "Pearl · 珍珠白" },
@@ -42,9 +44,17 @@ const templates: { value: FolioHomeTemplate; name: string }[] = [
  * once FolioApp mounts, its public appearance Context owns all changes.
  */
 export function ThemeExplorerGate({ docs }: { docs: FolioDoc[] }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  return mounted ? <ThemeExplorer docs={docs} /> : null;
+  // Do not mount the configuration panel or its iframe on phone screens.
+  // A lightweight, SSR-friendly SVG illustrates this section instead.
+  const [desktop, setDesktop] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 701px)");
+    const update = () => setDesktop(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  return desktop ? <ThemeExplorer docs={docs} /> : null;
 }
 
 function ThemeExplorer({ docs }: { docs: FolioDoc[] }) {
@@ -57,6 +67,17 @@ function ThemeExplorer({ docs }: { docs: FolioDoc[] }) {
   const [manualCopy, setManualCopy] = useState(false);
 
   const configText = createFolioThemeConfig(appearance, template);
+  // The iframe has its own real 390px viewport so Folio's @media rules
+  // respond as they would on a phone, instead of to the parent desktop.
+  const homeHref = useHref("/");
+  const phoneQuery = new URLSearchParams({
+    "folio-preview": "mobile",
+    preset: appearance.preset,
+    scheme: appearance.scheme,
+    codePalette: appearance.codePalette,
+    template,
+  });
+  const phoneSrc = homeHref + "?" + phoneQuery.toString();
   // Render the actual Markdown pipeline (including Folio's syntax tokens), not
   // a hand-painted code snippet. This source is also exactly what users copy.
   const markdownSource = "### folio.config.ts\n\n" +
@@ -101,81 +122,57 @@ function ThemeExplorer({ docs }: { docs: FolioDoc[] }) {
         <div>
           <p className="portal-section__index">EXPLORE / 4 INDEPENDENT CONTROLS</p>
           <h3 id="portal-explorer-title">把喜欢的气质，调出来。</h3>
-          <p>外观立即作用于整个站点；首页模板只在下方预览，不替换 Folio 官网。</p>
+          <p>左边调整外观，右边看真实的移动端页面。主题变更也会作用于当前官网；首页模板只影响手机预览。</p>
         </div>
         <span className="portal-explorer__availability">DEV API · 尚未发布 npm 0.1.1</span>
       </div>
 
-      <div className="portal-explorer__controls" role="group" aria-label="主题组合控制">
-        <label className="portal-explorer__control" htmlFor="portal-explorer-preset">
-          <span>Preset <small>外观预设</small></span>
-          <select id="portal-explorer-preset" value={appearance.preset}
-            onChange={(event) => changeAppearance({ preset: event.currentTarget.value as FolioVisualPreset })}>
-            {presets.map((item) =>
-              <option key={item.value} value={item.value}>{item.name}</option>)}
-          </select>
-        </label>
-        <label className="portal-explorer__control" htmlFor="portal-explorer-scheme">
-          <span>Scheme <small>显示模式</small></span>
-          <select id="portal-explorer-scheme" value={appearance.scheme}
-            onChange={(event) => changeAppearance({ scheme: event.currentTarget.value as FolioColorSchemePreference })}>
-            {schemes.map((item) =>
-              <option key={item.value} value={item.value}>{item.name}</option>)}
-          </select>
-        </label>
-        <label className="portal-explorer__control" htmlFor="portal-explorer-palette">
-          <span>Code Palette <small>代码色板</small></span>
-          <select id="portal-explorer-palette" value={appearance.codePalette}
-            onChange={(event) => changeAppearance({ codePalette: event.currentTarget.value as FolioCodePalette })}>
-            {palettes.map((item) =>
-              <option key={item.value} value={item.value}>{item.name}</option>)}
-          </select>
-        </label>
-        <label className="portal-explorer__control" htmlFor="portal-explorer-template">
-          <span>Home Template <small>首页模板</small></span>
-          <select id="portal-explorer-template" value={template}
-            onChange={(event) => changeTemplate(event.currentTarget.value as FolioHomeTemplate)}>
-            {templates.map((item) =>
-              <option key={item.value} value={item.value}>{item.name}</option>)}
-          </select>
-        </label>
-      </div>
+      <div className="portal-explorer__studio">
+        <div className="portal-explorer__settings">
+          <div className="portal-explorer__panel-heading">
+            <span className="portal-section__index">01 / CONFIGURATION</span>
+            <h4>配置主题</h4>
+            <p>每个选项都独立生效。外观使用框架公开 API；复制的配置可以直接放进项目。</p>
+          </div>
+          <div className="portal-explorer__controls" role="group" aria-label="主题组合控制">
+            <ThemeSelect id="portal-explorer-preset" label="Preset" hint="外观预设"
+              value={appearance.preset} options={presets}
+              onChange={(preset) => changeAppearance({ preset })} />
+            <ThemeSelect id="portal-explorer-scheme" label="Scheme" hint="显示模式"
+              value={appearance.scheme} options={schemes}
+              onChange={(scheme) => changeAppearance({ scheme })} />
+            <ThemeSelect id="portal-explorer-palette" label="Code Palette" hint="代码色板"
+              value={appearance.codePalette} options={palettes}
+              onChange={(codePalette) => changeAppearance({ codePalette })} />
+            <ThemeSelect id="portal-explorer-template" label="Home Template" hint="首页模板"
+              value={template} options={templates}
+              onChange={changeTemplate} />
+          </div>
 
-      <div className="portal-explorer__actions">
-        <span className="portal-explorer__effective">
-          当前生效：{effectiveScheme === "dark" ? "Dark" : "Light"} · {appearance.preset}
-          {isPreviewing ? " · 临时预览" : ""}
-        </span>
-        <button type="button" className="portal-explorer__button portal-explorer__button--reset"
-          onClick={restoreDefaults} disabled={!isPreviewing && template === initialTemplate}>
-          恢复默认
-        </button>
-        <button type="button" className="portal-explorer__button portal-explorer__button--copy"
-          onClick={() => void copyConfig()}>
-          复制当前配置
-        </button>
-      </div>
-      <p className="portal-explorer__notice" role="status" aria-live="polite">{copyMessage}</p>
-
-      <div className="portal-explorer__results">
-        <section className="portal-explorer__result" aria-labelledby="portal-explorer-template-title">
-          <div className="portal-explorer__result-heading">
-            <h4 id="portal-explorer-template-title">真实首页模板</h4>
-            <span>{template.toUpperCase()} / PUBLIC FOLIO HOME</span>
+          <div className="portal-explorer__selection">
+            <span className="portal-explorer__effective">
+              当前生效：{effectiveScheme === "dark" ? "Dark" : "Light"} · {appearance.preset}
+              {isPreviewing ? " · 临时预览" : ""}
+            </span>
+            <span className="portal-explorer__selection-note">预览不会覆盖已经保存的读者偏好</span>
           </div>
-          <p>以下直接渲染框架的 FolioHome，使用本站真实文章与路由。</p>
-          <div className="portal-explorer__viewport" aria-label={template + " 首页模板预览"} role="region" tabIndex={0}>
-            <FolioHome config={config} docs={docs} template={template} as="div" />
+          <div className="portal-explorer__actions">
+            <button type="button" className="portal-explorer__button portal-explorer__button--reset"
+              onClick={restoreDefaults} disabled={!isPreviewing && template === initialTemplate}>
+              恢复默认
+            </button>
+            <button type="button" className="portal-explorer__button portal-explorer__button--copy"
+              onClick={() => void copyConfig()}>
+              复制当前配置
+            </button>
           </div>
-        </section>
-        <section className="portal-explorer__result" aria-labelledby="portal-explorer-code-title">
-          <div className="portal-explorer__result-heading">
-            <h4 id="portal-explorer-code-title">真实 Markdown / 代码色板</h4>
-            <span>{appearance.codePalette.toUpperCase()} / FOLIO MARKDOWN</span>
-          </div>
-          <p>渲染与真实文章共用 FolioMarkdown，代码色板独立于网站明暗。</p>
-          <FolioMarkdown source={markdownSource}
-            className="folio-markdown portal-explorer__markdown" />
+          <p className="portal-explorer__notice" role="status" aria-live="polite">{copyMessage}</p>
+          <section className="portal-explorer__code-panel" aria-label="当前生成的配置及代码高亮">
+            <h5>当前配置 · folio.config.ts</h5>
+            <p>真实 FolioMarkdown 渲染，代码色板可以独立于站点明暗切换。</p>
+            <FolioMarkdown source={markdownSource}
+              className="folio-markdown portal-explorer__markdown" />
+          </section>
           {manualCopy ? (
             <label className="portal-explorer__manual-copy">
               手动复制配置
@@ -183,8 +180,52 @@ function ThemeExplorer({ docs }: { docs: FolioDoc[] }) {
                 onFocus={(event) => event.currentTarget.select()} />
             </label>
           ) : null}
-        </section>
+        </div>
+        <div className="portal-explorer__device-pane">
+          <div className="portal-explorer__panel-heading portal-explorer__device-heading">
+            <span className="portal-section__index">02 / LIVE MOBILE VIEW</span>
+            <h4>手机实时预览</h4>
+            <p>独立手机视口，直接渲染 Folio 页面与真实内容。</p>
+          </div>
+          <div className="portal-explorer__phone" aria-label="手机外观预览">
+            <div className="portal-explorer__phone-top" aria-hidden="true"><span /></div>
+            <iframe
+              title={template === "editorial" ? "Editorial 手机预览" : "Portal 手机预览"}
+              className="portal-explorer__phone-screen"
+              src={phoneSrc}
+              loading="lazy"
+            />
+            <div className="portal-explorer__phone-bottom" aria-hidden="true"><span /></div>
+          </div>
+          <p className="portal-explorer__device-caption">
+            真实移动端断点 · 可以滚动及点开链接 · 本站 {docs.length} 篇内容
+          </p>
+        </div>
       </div>
+    </div>
+  );
+}
+
+
+/** Dedicated iframe surface: same FolioApp + Router + CSS, but a real mobile viewport. */
+export function ThemePreviewHome({ docs, search }: { docs: FolioDoc[]; search: string }) {
+  const params = new URLSearchParams(search);
+  // Query strings are user-editable: accept only values from public contracts.
+  const preset = presets.find((item) => item.value === params.get("preset"))?.value ?? "pearl";
+  const scheme = schemes.find((item) => item.value === params.get("scheme"))?.value ?? "system";
+  const codePalette = palettes.find((item) => item.value === params.get("codePalette"))?.value ?? "auto";
+  const template = templates.find((item) => item.value === params.get("template"))?.value ?? "portal";
+  const { preview } = useFolioAppearance();
+
+  useEffect(() => {
+    // The iframe is a separate document. This uses Folio's only appearance
+    // controller and never touches the reader's persisted preference.
+    preview({ preset, scheme, codePalette });
+  }, [preset, scheme, codePalette, preview]);
+
+  return (
+    <div className="portal-explorer__phone-content">
+      <FolioHome config={config} docs={docs} template={template} as="div" />
     </div>
   );
 }

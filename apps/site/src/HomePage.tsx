@@ -1,6 +1,7 @@
 import type { FolioDoc } from "@uichat-mira/folio";
-import { Link } from "react-router-dom";
-import { ThemeExplorerGate } from "./ThemeExplorer";
+import { Link, useLocation } from "react-router-dom";
+import { ThemeExplorerGate, ThemePreviewHome } from "./ThemeExplorer";
+import { DesignMobileMotion } from "./DesignMobileMotion";
 
 type HomePageProps = { docs: FolioDoc[] };
 
@@ -37,6 +38,13 @@ const publishSteps = [
 ] as const;
 
 export function HomePage({ docs }: HomePageProps) {
+  const location = useLocation();
+  // This URL remains the normal Folio homepage for all other visitors.
+  // The query mode is used only inside the Design panel's real phone iframe.
+  if (new URLSearchParams(location.search).get("folio-preview") === "mobile") {
+    return <ThemePreviewHome docs={docs} search={location.search} />;
+  }
+
   const reading = ["/guide/getting-started", "/blogs/why-folio", "/reference/overview"]
     .map((path) => docs.find((doc) => doc.path === path))
     .filter((doc): doc is FolioDoc => doc !== undefined);
@@ -247,6 +255,7 @@ export function HomePage({ docs }: HomePageProps) {
             </div>
           </div>
           <ThemeExplorerGate docs={docs} />
+          <DesignMobileMotion />
         </div>
       </section>
 
