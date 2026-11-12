@@ -151,6 +151,13 @@ function ThemeReference({ docs }: { docs: FolioDoc[] }) {
         这里渲染的是框架公开的 FolioHome，不是缩略图或模仿模板；
         只改变局部模板预览，绝不替换 Folio 官网首页。
       </p>
+      <div className="design-ref-code-sample">
+        <div className="design-ref-code-caption">
+          <strong>FolioMarkdown / 真实代码色板</strong>
+          <span>{resolveFolioCodePalette(appearance.codePalette, effectiveScheme)}</span>
+        </div>
+        <FolioMarkdown source={CODE_EXAMPLE} className="folio-markdown design-ref-markdown" />
+      </div>
     </div>
   );
 }
