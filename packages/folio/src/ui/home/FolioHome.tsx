@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import { resolveFolioHome, type FolioHomeModel, type FolioHomeSection } from "./core/home";
-import { FolioEntryList } from "./ui/entry-list";
-import type { FolioConfig, FolioDoc, FolioHomeTemplate } from "./types";
+import { resolveFolioHome, type FolioHomeModel, type FolioHomeSection } from "../../core/home";
+import { FolioEntryList } from "../entry-list";
+import type { FolioConfig, FolioDoc, FolioHomeTemplate } from "../../types";
 
 function href(path: string): string {
   return path === "/" ? "/" : path.replace(/\/$/, "");

@@ -551,7 +551,7 @@ The predecessor `@uichat-mira/docs` package stays available for existing consume
 These APIs are available from source on `dev`; npm `0.1.1` does **not** include them yet. Import the single `@uichat-mira/folio/styles.css` entry as usual.
 
 ```tsx
-import { FolioApp, FolioHome, useFolioAppearance } from "@uichat-mira/folio";
+import { FolioApp, FolioHome, useFolioAppearance, type FolioConfig, type FolioDoc } from "@uichat-mira/folio";
 
 function ThemeExplorer({ config, docs }: { config: FolioConfig; docs: FolioDoc[] }) {
   const { appearance, effectiveScheme, isPreviewing, preview, resetPreview } = useFolioAppearance();

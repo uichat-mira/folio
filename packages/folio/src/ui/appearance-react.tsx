@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import type { FolioResolvedAppearance } from "./core/appearance";
+import type { FolioResolvedAppearance } from "../core/appearance";
 
 export type FolioAppearanceController = {
   /** Selected preset, preferred scheme (possibly system), and syntax palette. */

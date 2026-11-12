@@ -19,8 +19,8 @@ import {
 import { normalizeBasePath } from "./core/config";
 import { resolveFolioAppearance } from "./core/appearance";
 import type { FolioResolvedAppearance } from "./core/appearance";
-import { FolioAppearanceContext, type FolioAppearanceController } from "./appearance-react";
-import { FolioHome } from "./home";
+import { FolioAppearanceContext, type FolioAppearanceController } from "./ui/appearance-react";
+import { FolioHome } from "./ui/home/FolioHome";
 import { FolioHeader } from "./ui/header";
 import { FolioFooter } from "./ui/footer";
 import { resolveFolioReaderKind, shouldShowFolioPageFooter } from "./ui/page-presentation";
