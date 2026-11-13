@@ -24,7 +24,7 @@
   font-weight: 700;
 }
 
-.folio-card h2 { margin: 12px 0 8px; font-size: 20px; }
+.folio-card h2 { margin: 12px 0 8px; font-family: var(--folio-font-reading-heading); font-size: 20px; font-weight: var(--folio-reading-heading-weight); }
 .folio-card p { margin: 0; color: var(--folio-muted); line-height: 1.6; }
 
 /* Editorial, content-first defaults: lists rather than oversized card walls.
@@ -50,10 +50,10 @@
 
 .folio-journal-hero h1 {
   margin: 18px 0 14px;
-  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", Georgia, serif;
+  font-family: var(--folio-font-reading-heading);
   font-size: clamp(38px, 5vw, 58px);
   line-height: 1.16;
-  font-weight: 680;
+  font-weight: var(--folio-reading-heading-weight);
   letter-spacing: -0.045em;
 }
 
@@ -75,10 +75,11 @@
 }
 
 .folio-section-heading h2 {
-  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", Georgia, serif;
+  font-family: var(--folio-font-reading-heading);
   margin: 9px 0 0;
   color: var(--folio-ink);
   font-size: clamp(24px, 3vw, 30px);
+  font-weight: var(--folio-reading-heading-weight);
   line-height: 1.3;
   letter-spacing: -0.03em;
 }

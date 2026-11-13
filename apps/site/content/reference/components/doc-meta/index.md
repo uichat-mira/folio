@@ -43,7 +43,7 @@ import { FolioDocMeta, FolioMarkdown } from "@uichat-mira/folio";
 type FolioDocMetaProps = {
   doc: Pick<
     FolioDoc,
-    "data" | "body" | "createdBy" | "createdAt" | "publishedAt"
+    "data" | "body" | "createdBy" | "createdAt" | "publishedAt" | "gitHistory"
   >;
   className?: string;
 };
@@ -51,7 +51,7 @@ type FolioDocMetaProps = {
 
 | Prop | 默认 | 说明 |
 | --- | --- | --- |
-| `doc` | 必填 | 需要 Frontmatter 数据、正文，以及 `createdBy` / `createdAt` / `publishedAt` 三个字段；实际构建产物传整个 `FolioDoc` 即可 |
+| `doc` | 必填 | 需要 Frontmatter、正文和署名日期字段；可选的 `gitHistory` 提供已验证的 GitHub 头像；实际构建产物传整个 `FolioDoc` 即可 |
 | `className` | 无 | 追加到基础类 `folio-doc-meta` 之后 |
 
 当作者、日期、阅读时间全部无法确定时，组件返回 `null`，不会输出空容器。
@@ -111,7 +111,7 @@ updatedBy: Folio Maintainers
 - React 端与预渲染静态页都由构建层提供数据；组件只做投影，不改变 `FolioDoc`。
 - 静态页的署名 HTML 由 `renderFolioStaticDocMeta` 生成；自定义静态模板应调用它，而不是复制一份日期/阅读时长算法。
 - 浏览器端不会请求 GitHub API，也不会公开提交邮箱。
-- 构建层只对 GitHub 远端做有限次提交查询，单次子进程上限 5 秒；`FOLIO_GITHUB_AVATARS=0` 可完全关闭 API 查询（noreply 身份仍可离线解析）。无网、API 受限或账号不匹配时回退首字头像。
+- 构建层只对 GitHub 远端做有限次提交查询，并以最长 8 秒的子进程保证构建不会无限等待。失败结果最多缓存 60 秒，后续构建可重新尝试；`FOLIO_GITHUB_AVATARS=0` 可完全关闭 API 查询（noreply 身份仍可离线解析）。无网、API 受限或账号不匹配时回退首字头像。
 
 ## 关键失败与限制
 

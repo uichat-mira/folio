@@ -100,3 +100,9 @@ test("document visuals consume public variables without fixed color copies", () 
   assert.match(css, /max-width:\s*100%/);
   assert.match(css, /:has\(> \.design-ref-interactive\)/);
 });
+
+
+test("Pearl reference panels borrow the card surface without tinting other presets", () => {
+  assert.match(css, /\.design-ref-slot\s*\{[^}]*background:\s*var\(--folio-surface-soft\)/);
+  assert.match(css, /:root:where\(:not\(\[data-folio-preset\]\), \[data-folio-preset="pearl"\]\) \.design-ref-slot\s*\{\s*background:\s*var\(--folio-surface-card\)/);
+});

@@ -91,31 +91,78 @@ function protectFencedCode(source: string): {
   return { source: output.join("\n"), blocks };
 }
 
+/** Only standalone ::: directives are blocks. Inline examples such as
+ * ::: html in code spans are ordinary Markdown and must not swallow prose.
+ * Fenced code has already been replaced by placeholders at this point. */
+function protectCustomBlocks(source: string): {
+  source: string;
+  htmlBlocks: string[];
+  callouts: Array<{ kind: string; body: string }>;
+} {
+  const lines = source.split(/\r?\n/);
+  const output: string[] = [];
+  const htmlBlocks: string[] = [];
+  const callouts: Array<{ kind: string; body: string }> = [];
+  const openingPattern = /^[ \t]{0,3}:::[ \t]*(html|tip|info|note|warning|danger)(?:[ \t]+(.*))?[ \t]*$/;
+  const inlinePattern = /^[ \t]{0,3}:::[ \t]*(html|tip|info|note|warning|danger)[ \t]+(.+?)[ \t]*:::[ \t]*$/;
+  const closingPattern = /^[ \t]{0,3}:::[ \t]*$/;
+
+  for (let i = 0; i < lines.length; i++) {
+    const inline = lines[i].match(inlinePattern);
+    if (inline) {
+      const kind = inline[1];
+      const body = inline[2].trim();
+      if (kind === "html") {
+        output.push("FOLIO_HTML_BLOCK_" + (htmlBlocks.push(body) - 1));
+      } else {
+        output.push("FOLIO_CALLOUT_BLOCK_" + (callouts.push({ kind, body }) - 1));
+      }
+      continue;
+    }
+
+    const opening = lines[i].match(openingPattern);
+    if (!opening) {
+      output.push(lines[i]);
+      continue;
+    }
+
+    let closingIndex = i + 1;
+    while (closingIndex < lines.length && !closingPattern.test(lines[closingIndex])) {
+      closingIndex++;
+    }
+    if (closingIndex === lines.length) {
+      // Unfinished directives remain Markdown, not a license to consume
+      // everything following the opener.
+      output.push(lines[i]);
+      continue;
+    }
+
+    const kind = opening[1];
+    const firstLine = opening[2]?.trim();
+    const inner = lines.slice(i + 1, closingIndex).join("\n");
+    const body = (firstLine ? firstLine + "\n" : "") + inner;
+    if (kind === "html") {
+      output.push("FOLIO_HTML_BLOCK_" + (htmlBlocks.push(body.trim()) - 1));
+    } else {
+      output.push("FOLIO_CALLOUT_BLOCK_" + (callouts.push({ kind, body: body.trim() }) - 1));
+    }
+    i = closingIndex;
+  }
+
+  return { source: output.join("\n"), htmlBlocks, callouts };
+}
+
 export function renderFolioMarkdown(
   source: string,
   options: FolioMarkdownRenderOptions = {},
 ): string {
-  const htmlBlocks: string[] = [];
-  const callouts: Array<{ kind: string; body: string }> = [];
   const input = options.removeH1 ? removeMarkdownH1(source) : source;
   const fenced = protectFencedCode(input);
-
-  let prepared = fenced.source
-    .replace(/::: html\s*([\s\S]*?):::/g, (_, html: string) => {
-      const index = htmlBlocks.push(html.trim()) - 1;
-      return "FOLIO_HTML_BLOCK_" + index;
-    })
-    .replace(
-      /:::\s*(tip|info|note|warning|danger)\s+([\s\S]*?):::/g,
-      (_, kind: string, body: string) => {
-        const index = callouts.push({ kind, body: body.trim() }) - 1;
-        return "FOLIO_CALLOUT_BLOCK_" + index;
-      },
-    );
-
-  fenced.blocks.forEach((block, index) => {
-    prepared = prepared.replace("FOLIO_FENCE_BLOCK_" + index, block);
-  });
+  const { source: blockSource, htmlBlocks, callouts } = protectCustomBlocks(fenced.source);
+  const restoreFencedCode = (value: string): string =>
+    value.replace(/FOLIO_FENCE_BLOCK_(\d+)/g, (placeholder, index: string) =>
+      fenced.blocks[Number(index)] ?? placeholder);
+  const prepared = restoreFencedCode(blockSource);
 
   const renderer = new marked.Renderer();
   // Tables keep their semantics but scroll inside the reading column: their
@@ -142,7 +189,27 @@ export function renderFolioMarkdown(
       language && /^[a-z0-9-]+$/.test(language)
         ? " language-" + language
         : "";
-    return '<pre><code class="hljs' + languageClass + '">' + highlighted + "</code></pre>";
+    // A semantic frame belongs to the Markdown renderer, not to a second
+    // client-only wrapper. Do not synthesize shell prompts into copyable code.
+    const terminal = Boolean(language && /^(?:sh|bash|zsh|shell|console|terminal|powershell|ps1)$/.test(language));
+    const displayNames: Record<string, string> = {
+      ts: "TypeScript", typescript: "TypeScript", tsx: "TSX",
+      js: "JavaScript", javascript: "JavaScript", jsx: "JSX",
+      py: "Python", python: "Python", json: "JSON",
+      yml: "YAML", yaml: "YAML", html: "HTML", css: "CSS",
+      md: "Markdown", markdown: "Markdown",
+    };
+    const caption = terminal
+      ? "Terminal"
+      : language && /^[a-z0-9+#.-]{1,24}$/.test(language)
+        ? displayNames[language] ?? language.toUpperCase()
+        : "Code";
+    return '<figure class="folio-code-frame' +
+      (terminal ? ' folio-code-frame--terminal' : '') +
+      '"><figcaption class="folio-code-frame__header"><span class="folio-code-frame__mark" aria-hidden="true"></span>' +
+      '<span>' + escapeHtml(caption) + '</span></figcaption>' +
+      '<pre><code class="hljs' + languageClass + '">' + highlighted +
+      "</code></pre></figure>";
   };
 
   let html = marked.parse(prepared, { gfm: true, renderer }) as string;
@@ -151,14 +218,14 @@ export function renderFolioMarkdown(
     const placeholder = "FOLIO_HTML_BLOCK_" + index;
     html = html.replace(
       new RegExp("<p>" + placeholder + "<\\/p>|" + placeholder, "g"),
-      block,
+      restoreFencedCode(block),
     );
   });
 
   callouts.forEach(({ kind, body }, index) => {
     const placeholder = "FOLIO_CALLOUT_BLOCK_" + index;
     const label = calloutLabels[kind] ?? kind;
-    const bodyHtml = marked.parse(body, { gfm: true, renderer }) as string;
+    const bodyHtml = marked.parse(restoreFencedCode(body), { gfm: true, renderer }) as string;
     const block =
       '<aside class="md-custom-block md-custom-block--' +
       kind +

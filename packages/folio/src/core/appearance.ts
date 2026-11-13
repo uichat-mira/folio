@@ -14,7 +14,7 @@ export type FolioResolvedAppearance = {
 
 const PRESETS: readonly FolioVisualPreset[] = ["pearl", "editorial", "graphite"];
 const SCHEMES: readonly FolioColorSchemePreference[] = ["light", "dark", "system"];
-const CODE_PALETTES: readonly FolioCodePalette[] = ["auto", "xuanzhi", "xuanmo"];
+const CODE_PALETTES: readonly FolioCodePalette[] = ["auto", "xuanzhi", "xuanmo", "porcelain"];
 
 function option<T extends string>(
   value: T | undefined,
@@ -41,12 +41,13 @@ export function resolveFolioAppearance(
   };
 }
 
-/** Code surface selection is orthogonal to the site appearance preset. */
+/** Explicit code palettes stay independent; auto favors Porcelain on light Pearl. */
 export function resolveFolioCodePalette(
   preference: FolioCodePalette,
   effectiveScheme: "light" | "dark",
+  preset?: FolioVisualPreset,
 ): Exclude<FolioCodePalette, "auto"> {
-  return preference === "auto"
-    ? effectiveScheme === "dark" ? "xuanmo" : "xuanzhi"
-    : preference;
+  if (preference !== "auto") return preference;
+  if (effectiveScheme === "dark") return "xuanmo";
+  return preset === "pearl" ? "porcelain" : "xuanzhi";
 }

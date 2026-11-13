@@ -19,12 +19,12 @@ import { collectFolioTokens, designTokenKind, type LiveFolioToken, type DesignTo
 
 const PRESETS: FolioVisualPreset[] = ["pearl", "editorial", "graphite"];
 const SCHEMES: FolioColorSchemePreference[] = ["system", "light", "dark"];
-const PALETTES: FolioCodePalette[] = ["auto", "xuanzhi", "xuanmo"];
+const PALETTES: FolioCodePalette[] = ["auto", "xuanzhi", "xuanmo", "porcelain"];
 const TEMPLATES: FolioHomeTemplate[] = ["portal", "editorial"];
 
 const CODE_EXAMPLE = [
   "~~~ts",
-  "// The code palette is independent of the website preset.",
+  "// Explicit code palettes are independent; auto adapts to preset and scheme.",
   'import { defineFolioConfig } from "@uichat-mira/folio";',
   "",
   "export default defineFolioConfig({",
@@ -154,7 +154,7 @@ function ThemeReference({ docs }: { docs: FolioDoc[] }) {
       <div className="design-ref-code-sample">
         <div className="design-ref-code-caption">
           <strong>FolioMarkdown / 真实代码色板</strong>
-          <span>{resolveFolioCodePalette(appearance.codePalette, effectiveScheme)}</span>
+          <span>{resolveFolioCodePalette(appearance.codePalette, effectiveScheme, appearance.preset)}</span>
         </div>
         <FolioMarkdown source={CODE_EXAMPLE} className="folio-markdown design-ref-markdown" />
       </div>
@@ -186,7 +186,7 @@ const GROUPS: { kind: DesignTokenKind; name: string; note: string }[] = [
 function TokensReference() {
   const { appearance, effectiveScheme, preview, resetPreview } = useFolioAppearance();
   const tokens = useLiveTokens();
-  const resolvedPalette = resolveFolioCodePalette(appearance.codePalette, effectiveScheme);
+  const resolvedPalette = resolveFolioCodePalette(appearance.codePalette, effectiveScheme, appearance.preset);
 
   return (
     <div className="design-ref-interactive">

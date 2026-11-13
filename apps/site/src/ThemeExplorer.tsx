@@ -28,9 +28,10 @@ const schemes: { value: FolioColorSchemePreference; name: string }[] = [
 ];
 
 const palettes: { value: FolioCodePalette; name: string }[] = [
-  { value: "auto", name: "Auto · 随明暗" },
+  { value: "auto", name: "Auto · 随主题与明暗" },
   { value: "xuanzhi", name: "Xuanzhi · 宣纸" },
   { value: "xuanmo", name: "Xuanmo · 玄墨" },
+  { value: "porcelain", name: "Porcelain · 瓷白" },
 ];
 
 const templates: { value: FolioHomeTemplate; name: string }[] = [
@@ -58,12 +59,12 @@ export function ThemeExplorerGate({ docs }: { docs: FolioDoc[] }) {
 }
 
 function ThemeExplorer({ docs }: { docs: FolioDoc[] }) {
-  const { appearance, effectiveScheme, isPreviewing, preview, resetPreview } =
+  const { appearance, isPreviewing, preview, resetPreview } =
     useFolioAppearance();
   const siteConfig: FolioConfig = config;
   const initialTemplate: FolioHomeTemplate = siteConfig.home?.template ?? "portal";
   const [template, setTemplate] = useState<FolioHomeTemplate>(initialTemplate);
-  const [copyMessage, setCopyMessage] = useState("");
+  const [copied, setCopied] = useState(false);
   const [manualCopy, setManualCopy] = useState(false);
 
   const configText = createFolioThemeConfig(appearance, template);
@@ -80,18 +81,17 @@ function ThemeExplorer({ docs }: { docs: FolioDoc[] }) {
   const phoneSrc = homeHref + "?" + phoneQuery.toString();
   // Render the actual Markdown pipeline (including Folio's syntax tokens), not
   // a hand-painted code snippet. This source is also exactly what users copy.
-  const markdownSource = "### folio.config.ts\n\n" +
-    "```ts\n" + configText + "\n```";
+  const markdownSource = "```ts\n" + configText + "\n```";
 
   function changeAppearance(value: Parameters<typeof preview>[0]) {
     preview(value);
-    setCopyMessage("");
+    setCopied(false);
     setManualCopy(false);
   }
 
   function changeTemplate(next: FolioHomeTemplate) {
     setTemplate(next);
-    setCopyMessage("");
+    setCopied(false);
     setManualCopy(false);
   }
 
@@ -100,7 +100,7 @@ function ThemeExplorer({ docs }: { docs: FolioDoc[] }) {
     // It never writes a new light/dark setting into localStorage.
     resetPreview();
     setTemplate(initialTemplate);
-    setCopyMessage("已恢复站点预设和读者原有明暗偏好");
+    setCopied(false);
     setManualCopy(false);
   }
 
@@ -108,11 +108,11 @@ function ThemeExplorer({ docs }: { docs: FolioDoc[] }) {
     try {
       if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
       await navigator.clipboard.writeText(configText);
-      setCopyMessage("配置已复制，可粘贴到 folio.config.ts（dev API）");
+      setCopied(true);
       setManualCopy(false);
     } catch {
       setManualCopy(true);
-      setCopyMessage("无法写入剪贴板，请从下方文本框手动复制");
+      setCopied(false);
     }
   }
 
@@ -120,20 +120,14 @@ function ThemeExplorer({ docs }: { docs: FolioDoc[] }) {
     <div className="portal-explorer" aria-labelledby="portal-explorer-title">
       <div className="portal-explorer__intro">
         <div>
-          <p className="portal-section__index">EXPLORE / 4 INDEPENDENT CONTROLS</p>
-          <h3 id="portal-explorer-title">把喜欢的气质，调出来。</h3>
-          <p>左边调整外观，右边看真实的移动端页面。主题变更也会作用于当前官网；首页模板只影响手机预览。</p>
+          <p className="portal-section__index">THEME LAB</p>
+          <h3 id="portal-explorer-title">把你的风格，调出来。</h3>
+          <p className="portal-explorer__description">Folio 精选了几套视觉预设，让你的内容拥有自己的气质。</p>
         </div>
-        <span className="portal-explorer__availability">DEV API · 尚未发布 npm 0.1.1</span>
       </div>
 
       <div className="portal-explorer__studio">
         <div className="portal-explorer__settings">
-          <div className="portal-explorer__panel-heading">
-            <span className="portal-section__index">01 / CONFIGURATION</span>
-            <h4>配置主题</h4>
-            <p>每个选项都独立生效。外观使用框架公开 API；复制的配置可以直接放进项目。</p>
-          </div>
           <div className="portal-explorer__controls" role="group" aria-label="主题组合控制">
             <ThemeSelect id="portal-explorer-preset" label="Preset" hint="外观预设"
               value={appearance.preset} options={presets}
@@ -149,13 +143,6 @@ function ThemeExplorer({ docs }: { docs: FolioDoc[] }) {
               onChange={changeTemplate} />
           </div>
 
-          <div className="portal-explorer__selection">
-            <span className="portal-explorer__effective">
-              当前生效：{effectiveScheme === "dark" ? "Dark" : "Light"} · {appearance.preset}
-              {isPreviewing ? " · 临时预览" : ""}
-            </span>
-            <span className="portal-explorer__selection-note">预览不会覆盖已经保存的读者偏好</span>
-          </div>
           <div className="portal-explorer__actions">
             <button type="button" className="portal-explorer__button portal-explorer__button--reset"
               onClick={restoreDefaults} disabled={!isPreviewing && template === initialTemplate}>
@@ -163,13 +150,11 @@ function ThemeExplorer({ docs }: { docs: FolioDoc[] }) {
             </button>
             <button type="button" className="portal-explorer__button portal-explorer__button--copy"
               onClick={() => void copyConfig()}>
-              复制当前配置
+              {copied ? "已复制" : "复制当前配置"}
             </button>
           </div>
-          <p className="portal-explorer__notice" role="status" aria-live="polite">{copyMessage}</p>
           <section className="portal-explorer__code-panel" aria-label="当前生成的配置及代码高亮">
-            <h5>当前配置 · folio.config.ts</h5>
-            <p>真实 FolioMarkdown 渲染，代码色板可以独立于站点明暗切换。</p>
+            <h5>folio.config.ts</h5>
             <FolioMarkdown source={markdownSource}
               className="folio-markdown portal-explorer__markdown" />
           </section>
@@ -181,13 +166,8 @@ function ThemeExplorer({ docs }: { docs: FolioDoc[] }) {
             </label>
           ) : null}
         </div>
-        <div className="portal-explorer__device-pane">
-          <div className="portal-explorer__panel-heading portal-explorer__device-heading">
-            <span className="portal-section__index">02 / LIVE MOBILE VIEW</span>
-            <h4>手机实时预览</h4>
-            <p>独立手机视口，直接渲染 Folio 页面与真实内容。</p>
-          </div>
-          <div className="portal-explorer__phone" aria-label="手机外观预览">
+        <div className="portal-explorer__device-pane" aria-label="手机外观预览">
+          <div className="portal-explorer__phone">
             <div className="portal-explorer__phone-top" aria-hidden="true"><span /></div>
             <iframe
               title={template === "editorial" ? "Editorial 手机预览" : "Portal 手机预览"}
@@ -197,9 +177,6 @@ function ThemeExplorer({ docs }: { docs: FolioDoc[] }) {
             />
             <div className="portal-explorer__phone-bottom" aria-hidden="true"><span /></div>
           </div>
-          <p className="portal-explorer__device-caption">
-            真实移动端断点 · 可以滚动及点开链接 · 本站 {docs.length} 篇内容
-          </p>
         </div>
       </div>
     </div>

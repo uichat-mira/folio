@@ -2,7 +2,7 @@ import { getFolioDocByline } from "../../core/doc-meta";
 import type { FolioDoc } from "../../types";
 
 export type FolioDocMetaProps = {
-  doc: Pick<FolioDoc, "data" | "body" | "createdBy" | "createdAt" | "publishedAt">;
+  doc: Pick<FolioDoc, "data" | "body" | "createdBy" | "createdAt" | "publishedAt" | "gitHistory">;
   className?: string;
 };
 

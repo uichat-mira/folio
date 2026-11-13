@@ -30,7 +30,7 @@ export function DesignMobileMotion() {
         </g>
 
         <g className="portal-design__motion-tokens" aria-hidden="true">
-          <circle className="portal-design__motion-token portal-design__motion-token--one" cx="45" cy="74" r="17" fill="var(--site-primary)" />
+          <circle className="portal-design__motion-token portal-design__motion-token--one" cx="45" cy="74" r="17" fill="var(--site-brand-accent)" />
           <circle className="portal-design__motion-token portal-design__motion-token--two" cx="94" cy="110" r="13" fill="var(--site-accent-teal)" />
           <circle className="portal-design__motion-token portal-design__motion-token--three" cx="48" cy="164" r="10" fill="var(--site-ink)" />
           <circle cx="44" cy="74" r="4" fill="var(--site-on-primary)" opacity=".85" />
@@ -43,13 +43,13 @@ export function DesignMobileMotion() {
         </g>
         <g className="portal-design__motion-sheet portal-design__motion-sheet--mid" aria-hidden="true">
           <rect x="143" y="17" width="151" height="205" rx="10" fill="var(--site-surface-soft)" stroke="var(--site-hairline)" />
-          <rect x="158" y="34" width="49" height="7" rx="3.5" fill="var(--site-primary)" opacity=".55" />
+          <rect x="158" y="34" width="49" height="7" rx="3.5" fill="var(--site-brand-accent)" opacity=".55" />
           <rect x="158" y="52" width="95" height="5" rx="2.5" fill="var(--site-muted-soft)" opacity=".6" />
         </g>
 
         <g className="portal-design__motion-sheet portal-design__motion-sheet--front">
           <rect x="124" y="12" width="158" height="216" rx="10" fill="url(#folio-mobile-paper)" stroke="var(--site-hairline)" strokeWidth="1.3" />
-          <rect x="139" y="27" width="28" height="5" rx="2.5" fill="var(--site-primary)" />
+          <rect x="139" y="27" width="28" height="5" rx="2.5" fill="var(--site-brand-accent)" />
           <rect x="238" y="27" width="28" height="4" rx="2" fill="var(--site-muted-soft)" opacity=".65" />
           <path d="M139 43 H266" stroke="var(--site-hairline)" />
           <rect x="139" y="55" width="94" height="11" rx="2" fill="var(--site-ink)" />
@@ -65,11 +65,11 @@ export function DesignMobileMotion() {
             <rect x="198" y="161" width="36" height="4" rx="2" fill="var(--site-muted-soft)" />
           </g>
           <path d="M139 200 H266" stroke="var(--site-hairline)" />
-          <rect x="139" y="208" width="49" height="5" rx="2.5" fill="var(--site-primary)" />
+          <rect x="139" y="208" width="49" height="5" rx="2.5" fill="var(--site-brand-accent)" />
           <rect x="240" y="208" width="26" height="4" rx="2" fill="var(--site-muted-soft)" />
         </g>
 
-        <g className="portal-design__motion-spark" fill="var(--site-primary)" aria-hidden="true">
+        <g className="portal-design__motion-spark" fill="var(--site-brand-accent)" aria-hidden="true">
           <path d="M313 78l4 8 8 4-8 4-4 8-4-8-8-4 8-4z" opacity=".85" />
           <circle cx="312" cy="175" r="3" opacity=".65" />
           <circle cx="85" cy="210" r="2.5" opacity=".75" />

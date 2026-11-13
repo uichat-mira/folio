@@ -8,14 +8,19 @@
 // Changing a list here is a contract change: it must be justified by a task
 // that is allowed to touch the design system, not by a build refactor.
 
-// `:root` token declarations in source order (38 tokens). Order is asserted
+// `:root` token declarations in source order (54 tokens). Order is asserted
 // exactly, so renaming, removing or reordering a token fails the gate.
 export const ROOT_TOKEN_ORDER = [
   "--folio-primary",
   "--folio-primary-active",
   "--folio-primary-disabled",
+  "--folio-brand-accent",
+  "--folio-selection-bg",
   "--folio-ink",
   "--folio-body",
+  "--folio-prose-body",
+  "--folio-prose-leading",
+  "--folio-prose-paragraph-gap",
   "--folio-body-strong",
   "--folio-muted",
   "--folio-muted-soft",
@@ -24,6 +29,7 @@ export const ROOT_TOKEN_ORDER = [
   "--folio-canvas",
   "--folio-surface-soft",
   "--folio-surface-card",
+  "--folio-blockquote-bg",
   "--folio-surface-dark",
   "--folio-surface-dark-elevated",
   "--folio-on-primary",
@@ -36,6 +42,16 @@ export const ROOT_TOKEN_ORDER = [
   "--folio-error",
   "--folio-font-sans",
   "--folio-font-display",
+  "--folio-font-reading-heading",
+  "--folio-font-article-title",
+  "--folio-reading-heading-weight",
+  "--folio-reading-article-title-font",
+  "--folio-reading-article-title-tracking",
+  "--folio-reading-doc-title-font",
+  "--folio-reading-doc-title-tracking",
+  "--folio-reading-section-title-font",
+  "--folio-reading-section-title-tracking",
+  "--folio-reading-section-title-margin",
   "--folio-font-mono",
   "--folio-header-height",
   "--folio-radius-sm",
@@ -256,7 +272,7 @@ export const REQUIRED_DECLARATIONS = {
   ".folio-card": "border-radius: var(--folio-radius-xl)",
   ".folio-footer": "text-align: center",
   ".folio-not-found": "text-align: center",
-  ".folio-markdown": "line-height: 1.78",
+  ".folio-markdown": "line-height: var(--folio-prose-leading)",
   // Wide tables must scroll inside the reading column, never the document.
   ".folio-markdown .folio-table-scroll": "overflow-x: auto",
   ".folio-search-overlay": "position: fixed",

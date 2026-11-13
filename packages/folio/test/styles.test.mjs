@@ -86,9 +86,124 @@ test("Markdown h2 is a heading, not an implicit horizontal separator", () => {
   const rule = stylesheet.match(/\.folio-markdown h2\s*\{([^}]*)\}/);
   assert.ok(rule, "public stylesheet must include the Markdown h2 rule");
   assert.match(rule[1], /font:/, "keep the existing heading typography");
-  assert.match(rule[1], /margin:\s*48px 0 14px/, "keep section spacing");
+  assert.match(rule[1], /margin:\s*var\(--folio-reading-section-title-margin\)/, "keep section spacing owned by the reading preset");
   assert.doesNotMatch(rule[1], /border(?:-top)?\s*:/, "Markdown headings must not add separators");
   assert.doesNotMatch(rule[1], /padding-top\s*:/, "remove compensatory padding with the border");
+});
+
+test("navigation selection is a restrained state, not an elevated card", () => {
+  const row = stylesheet.match(/\.folio-tree-nav__row\.is-active,[^{]*\{([^}]*)\}/);
+  assert.ok(row, "selected navigation row must be styled");
+  assert.match(row[1], /background:\s*var\(--folio-surface-soft\)/);
+  assert.doesNotMatch(row[1], /var\(--folio-surface-card\)/);
+  assert.match(row[1], /color:\s*var\(--folio-ink\)/);
+  assert.doesNotMatch(stylesheet, /\.folio-tree-nav__row\.is-active::before\s*\{/,
+    "selected navigation must not draw an ink edge marker");
+});
+
+test("inline code is recessed while fenced code retains its own palette", () => {
+  const inline = stylesheet.match(/\.folio-markdown code\s*\{([^}]*)\}/);
+  const fenced = stylesheet.match(/\.folio-markdown pre code\s*\{([^}]*)\}/);
+  assert.ok(inline && fenced, "both inline and fenced code must remain styled");
+  assert.match(inline[1], /background:\s*var\(--folio-surface-soft\)/);
+  assert.match(inline[1], /color:\s*var\(--folio-body-strong\)/);
+  assert.doesNotMatch(inline[1], /var\(--folio-surface-card\)/);
+  assert.match(fenced[1], /background:\s*none/);
+  assert.match(fenced[1], /color:\s*var\(--folio-code-fg\)/);
+  assert.match(fenced[1], /font:\s*14px\/1\.65 var\(--folio-font-mono\)/,
+    "fenced code must not inherit the smaller inline-code shorthand");
+});
+
+test("Pearl reading typography can breathe without recoloring site navigation", () => {
+  const root = stylesheet.match(/:root\s*\{([^}]*)\}/);
+  const pearl = stylesheet.match(/:root:where\(:not\(\[data-folio-preset\]\), \[data-folio-preset="pearl"\]\)\s*\{([^}]*)\}/);
+  const markdown = stylesheet.match(/\.folio-markdown\s*\{([^}]*)\}/);
+  const prose = stylesheet.match(/\.folio-markdown p,\s*\.folio-markdown li\s*\{([^}]*)\}/);
+  const paragraphs = stylesheet.match(/\.folio-markdown > p\s*\{([^}]*)\}/);
+  assert.ok(root && pearl && markdown && prose && paragraphs);
+  assert.match(root[1], /--folio-prose-body:\s*var\(--folio-body\)/);
+  assert.match(root[1], /--folio-prose-leading:\s*1\.78/);
+  assert.match(root[1], /--folio-prose-paragraph-gap:\s*1em/);
+  assert.match(pearl[1], /--folio-prose-body:\s*var\(--folio-body-strong\)/);
+  assert.match(pearl[1], /--folio-prose-leading:\s*1\.95/);
+  assert.match(pearl[1], /--folio-prose-paragraph-gap:\s*1\.2em/);
+  assert.match(markdown[1], /line-height:\s*var\(--folio-prose-leading\)/);
+  assert.match(prose[1], /color:\s*var\(--folio-prose-body\)/);
+  assert.match(paragraphs[1], /margin-block-end:\s*var\(--folio-prose-paragraph-gap\)/);
+});
+
+test("Pearl uses Old Style and Songti for reading and home headings", () => {
+  const root = stylesheet.match(/:root\s*\{([^}]*)\}/);
+  const pearl = stylesheet.match(/:root:where\(:not\(\[data-folio-preset\]\), \[data-folio-preset="pearl"\]\)\s*\{([^}]*)\}/);
+  const heading = stylesheet.match(/\.folio-markdown h2\s*\{([^}]*)\}/);
+  const article = stylesheet.match(/\.folio-doc-page > h1,\s*\.folio-hero h1\s*\{([^}]*)\}/);
+  const docs = stylesheet.match(/\.folio-doc-main > h1\s*\{([^}]*)\}/);
+  assert.ok(root && pearl && heading && article && docs);
+  assert.match(root[1], /--folio-font-reading-heading:\s*var\(--folio-font-display\)/);
+  assert.match(root[1], /--folio-font-article-title:\s*var\(--folio-font-sans\)/);
+  assert.match(root[1], /--folio-reading-heading-weight:\s*500/);
+  assert.match(pearl[1], /--folio-font-reading-heading:\s*"Iowan Old Style", "Songti SC"/);
+  assert.match(pearl[1], /--folio-font-article-title:\s*var\(--folio-font-reading-heading\)/);
+  assert.match(pearl[1], /--folio-reading-heading-weight:\s*400/);
+  assert.match(root[1], /--folio-reading-section-title-font:[^;]*var\(--folio-font-reading-heading\)/);
+  assert.match(pearl[1], /--folio-reading-section-title-font:[^;]*var\(--folio-font-reading-heading\)/);
+  assert.match(root[1], /--folio-reading-article-title-font:[^;]*var\(--folio-font-article-title\)/);
+  assert.match(root[1], /--folio-reading-doc-title-font:[^;]*var\(--folio-font-reading-heading\)/);
+  assert.match(heading[1], /font:\s*var\(--folio-reading-section-title-font\)/);
+  assert.match(article[1], /font:\s*var\(--folio-reading-article-title-font\)/);
+  assert.match(docs[1], /font:\s*var\(--folio-reading-doc-title-font\)/);
+});
+
+test("built-in home titles follow the theme heading font and weight", () => {
+  const sourceRules = [
+    ["src/ui/home/home.css", 3],
+    ["src/ui/home/portal.css", 3],
+    ["src/ui/home/editorial.css", 3],
+    ["src/ui/entry-list/entry-list.css", 1],
+  ];
+  for (const [file, expected] of sourceRules) {
+    const css = readFileSync(join(packageRoot, file), "utf8");
+    const families = css.match(/font-family:\s*var\(--folio-font-reading-heading\)/g) ?? [];
+    const weights = css.match(/font-weight:\s*var\(--folio-reading-heading-weight\)/g) ?? [];
+    assert.equal(families.length, expected, `${file} title families must follow the preset`);
+    assert.equal(weights.length, expected, `${file} title weights must follow the preset`);
+    assert.doesNotMatch(css, /font-family:\s*"Songti SC"/, `${file} must not hardcode the serif stack`);
+  }
+  const pearl = stylesheet.match(/:root:where\(:not\(\[data-folio-preset\]\), \[data-folio-preset="pearl"\]\)\s*\{([^}]*)\}/);
+  assert.ok(pearl);
+  assert.match(pearl[1], /--folio-reading-heading-weight:\s*400/);
+  assert.match(pearl[1], /--folio-font-reading-heading:\s*"Iowan Old Style", "Songti SC"/);
+});
+
+test("Pearl restrained study A keeps reading type roles separate from other presets", () => {
+  const root = stylesheet.match(/:root\s*\{([^}]*)\}/);
+  const pearl = stylesheet.match(/:root:where\(:not\(\[data-folio-preset\]\), \[data-folio-preset="pearl"\]\)\s*\{([^}]*)\}/);
+  const article = stylesheet.match(/\.folio-doc-page > h1,\s*\.folio-hero h1\s*\{([^}]*)\}/);
+  const docs = stylesheet.match(/\.folio-doc-main > h1\s*\{([^}]*)\}/);
+  const h2 = stylesheet.match(/\.folio-markdown h2\s*\{([^}]*)\}/);
+  assert.ok(root && pearl && article && docs && h2);
+  assert.match(root[1], /--folio-reading-section-title-margin:\s*48px 0 14px/);
+  assert.match(root[1], /--folio-reading-article-title-font:\s*650 clamp\(36px, 4\.6vw, 52px\)\/1\.12/);
+  assert.match(root[1], /--folio-reading-doc-title-font:\s*var\(--folio-reading-heading-weight\) clamp\(36px, 4\.4vw, 44px\)\/1\.12/);
+  assert.match(pearl[1], /--folio-reading-article-title-font:\s*var\(--folio-reading-heading-weight\) clamp\(36px, 4\.6vw, 50px\)\/1\.24/);
+  assert.match(pearl[1], /--folio-reading-doc-title-font:\s*var\(--folio-reading-heading-weight\) clamp\(36px, 4\.4vw, 42px\)\/1\.24/);
+  assert.match(pearl[1], /--folio-reading-section-title-font:\s*var\(--folio-reading-heading-weight\) 28px\/1\.34/);
+  assert.match(pearl[1], /--folio-reading-section-title-margin:\s*54px 0 18px/);
+  assert.match(article[1], /font:\s*var\(--folio-reading-article-title-font\)/);
+  assert.match(docs[1], /font:\s*var\(--folio-reading-doc-title-font\)/);
+  assert.match(h2[1], /font:\s*var\(--folio-reading-section-title-font\)/);
+  assert.doesNotMatch(h2[1], /border(?:-top)?\s*:/);
+});
+
+test("blockquote surface is semantic and Pearl uses the recessed soft surface", () => {
+  const root = stylesheet.match(/:root\s*\{([^}]*)\}/);
+  const pearl = stylesheet.match(/:root:where\(:not\(\[data-folio-preset\]\), \[data-folio-preset="pearl"\]\)\s*\{([^}]*)\}/);
+  const quote = stylesheet.match(/\.folio-markdown blockquote\s*\{([^}]*)\}/);
+  assert.ok(root && pearl && quote);
+  assert.match(root[1], /--folio-blockquote-bg:\s*color-mix\(in srgb, var\(--folio-primary\) 10%, transparent\)/);
+  assert.match(pearl[1], /--folio-blockquote-bg:\s*var\(--folio-surface-soft\)/);
+  assert.match(quote[1], /background:\s*var\(--folio-blockquote-bg\)/);
+  assert.match(quote[1], /border-left:\s*3px solid var\(--folio-primary\)/);
 });
 
 test("aggregation is deterministic and preserves the manifest order", () =>

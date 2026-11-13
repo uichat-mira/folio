@@ -106,7 +106,7 @@
 
 
 .folio-tree-nav__children a.active {
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .folio-tree-nav__directory {
@@ -144,7 +144,7 @@
 .folio-tree-nav__row.is-active,
 .folio-tree-nav__row.is-active:hover,
 .folio-tree-nav__row.is-active:focus-within {
-  background: var(--folio-surface-card);
+  background: var(--folio-surface-soft);
   color: var(--folio-ink);
 }
 

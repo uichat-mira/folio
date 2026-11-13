@@ -61,16 +61,17 @@ export default defineFolioConfig({
   appearance: {
     preset: "graphite",   // "pearl" | "editorial" | "graphite"
     scheme: "system",    // "light" | "dark" | "system"
-    codePalette: "auto", // "auto" | "xuanzhi" | "xuanmo"
+    codePalette: "auto", // "auto" | "xuanzhi" | "xuanmo" | "porcelain"
   },
 });
 ```
 
 The **unconfigured defaults** are `pearl + system + auto`. Each preset has
 light and dark semantic colors. Graphite is a separate *dark-first visual
-preset*, not another Color Scheme. `auto` uses Xuanzhi for effective light,
-Xuanmo for effective dark; a site can explicitly choose dark code on a light
-page without changing the site's scheme. The built-in **home template** is a
+preset*, not another Color Scheme. Auto uses Porcelain on light Pearl,
+Xuanzhi on other light presets, and Xuanmo on effective dark. A site can
+explicitly choose any of the three code palettes without changing the
+site's scheme. The built-in **home template** is a
 separate concern (FOL-050), not chosen by `appearance.preset`.
 
 Folio still has a **single stylesheet entry**:

@@ -376,7 +376,7 @@ export type FolioFooterConfig = {
 
 /** Visual configuration shared by the interactive app and static output. */
 export type FolioVisualPreset = "pearl" | "editorial" | "graphite";
-export type FolioCodePalette = "auto" | "xuanzhi" | "xuanmo";
+export type FolioCodePalette = "auto" | "xuanzhi" | "xuanmo" | "porcelain";
 export type FolioColorSchemePreference = "light" | "dark" | "system";
 
 export type FolioAppearanceConfig = {
