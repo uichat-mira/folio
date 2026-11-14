@@ -37,6 +37,32 @@ test("one document navigation tree includes nested authored routes without a pro
   assert.ok(!JSON.stringify(fromDocument.roots).includes("/guide"));
 });
 
+test("an authored section does not repeat its sole un-authored route folder",()=>{
+  const principles=doc("/reference/design/principles","秩序与气质","doc","设计",10);
+  const tokens=doc("/reference/design/tokens","Token 图鉴","doc","设计",20);
+  const refs=[...source,principles,tokens];
+  const tree=buildFolioNavigationTree(refs,principles);
+  const section=tree.roots.find(node=>node.title==="设计");
+  assert.ok(section);
+  assert.equal(section.kind,"section");
+  assert.deepEqual(section.children.map(node=>node.path),[
+    "/reference/design/principles","/reference/design/tokens",
+  ]);
+  assert.ok(section.children.every(node=>node.doc && node.children.length===0));
+  assert.equal(getFolioNavigationNeighbors(tree,principles.path).next.path,tokens.path);
+
+  const staticHtml=renderFolioStaticTreeNav({
+    docs:refs,base:"/folio/",config:{title:"Folio"},roots:[],outDir:"",
+  },principles);
+  assert.match(staticHtml,/<h2>设计<\/h2>/);
+  assert.match(staticHtml,/href="\/folio\/reference\/design\/principles\/"/);
+  assert.match(staticHtml,/href="\/folio\/reference\/design\/tokens\/"/);
+  assert.doesNotMatch(staticHtml,/>design<\/span>/);
+  // The actual authored overview remains a real ancestor in another section.
+  const api=tree.roots.find(node=>node.title==="API");
+  assert.ok(api.children.some(node=>node.path==="/reference/components" && node.doc));
+});
+
 test("static document navigation renders nested links, section labels and one active route",()=>{
   const context={docs:source,base:"/folio/",config:{title:"Folio"},roots:[],outDir:""};
   for (const current of [overview,componentSlots]) {

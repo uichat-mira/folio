@@ -8,8 +8,10 @@ export type GithubAvatarCandidate = { email: string; sha: string };
 export type GithubAvatarIdentity = { login: string; avatarUrl: string };
 
 const MAX_AUTHORS_PER_REPOSITORY = 12;
-const REQUEST_TIMEOUT_MS = 2_000;
-const cache = new Map<string, GithubAvatarIdentity | null>();
+// A brief GitHub/connection failure must not turn into a permanent missing avatar
+// for the lifetime of a Vite dev server. Successful identities can stay cached.
+const FAILED_LOOKUP_RETRY_MS = 60_000;
+const cache = new Map<string, { identity: GithubAvatarIdentity | null; retryAfter?: number }>();
 
 const GH_LOOKUP_SCRIPT = String.raw`
 const https = require("node:https");
@@ -24,7 +26,7 @@ async function lookup(item) {
   return new Promise((resolve) => {
     const path = "/repos/" + input.repo + "/commits/" + item.sha;
     let body = "";
-    const req = https.get({ hostname: "api.github.com", path, headers, timeout: 2000 }, (res) => {
+    const req = https.get({ hostname: "api.github.com", path, headers, timeout: 5000 }, (res) => {
       if (res.statusCode !== 200) { res.resume(); resolve(null); return; }
       res.setEncoding("utf8");
       res.on("data", (chunk) => {
@@ -89,9 +91,12 @@ export function githubAvatarsForAuthors(
     }
     if (!repo || !allowApi || resolved.has(candidate.email) || pending.some((p) => p.email === candidate.email)) continue;
     const key = `${repo.toLowerCase()}|${candidate.email.toLowerCase()}`;
-    if (cache.has(key)) {
-      const cached = cache.get(key);
-      if (cached) resolved.set(candidate.email, cached);
+    const cached = cache.get(key);
+    if (cached?.identity) {
+      resolved.set(candidate.email, cached.identity);
+    } else if (cached?.retryAfter && cached.retryAfter > Date.now()) {
+      // Suppress repeated network attempts during rapid development rebuilds.
+      continue;
     } else if (pending.length < MAX_AUTHORS_PER_REPOSITORY) {
       pending.push(candidate);
     }
@@ -100,12 +105,12 @@ export function githubAvatarsForAuthors(
   if (!repo || !pending.length) return resolved;
 
   try {
-    // The synchronous Vite virtual-module contract is preserved. Each HTTPS
-    // query is asynchronous in the child, bounded by one 5-second subprocess.
+    // The synchronous Vite virtual-module contract is preserved. HTTPS
+    // lookups run concurrently in one subprocess with a fixed upper bound.
     const output = execFileSync(process.execPath, [
       "-e", GH_LOOKUP_SCRIPT,
       JSON.stringify({ repo, commits: pending.map(({ sha }) => ({ sha })) }),
-    ], { encoding: "utf8", timeout: 5_000, maxBuffer: 64 * 1024, windowsHide: true,
+    ], { encoding: "utf8", timeout: 8_000, maxBuffer: 64 * 1024, windowsHide: true,
       stdio: ["ignore", "pipe", "ignore"] });
     const users: unknown = JSON.parse(output);
     pending.forEach((candidate, index) => {
@@ -116,13 +121,16 @@ export function githubAvatarsForAuthors(
         typeof user.id === "number" && Number.isSafeInteger(user.id) && user.id > 0
         ? { login: user.login, avatarUrl: `https://avatars.githubusercontent.com/u/${user.id}?s=64` }
         : null;
-      cache.set(key, identity);
+      cache.set(key, identity
+        ? { identity }
+        : { identity: null, retryAfter: Date.now() + FAILED_LOOKUP_RETRY_MS });
       if (identity) resolved.set(candidate.email, identity);
     });
   } catch {
     // Never block or fail a local/offline build on GitHub availability.
     for (const candidate of pending) {
-      cache.set(`${repo.toLowerCase()}|${candidate.email.toLowerCase()}`, null);
+      cache.set(`${repo.toLowerCase()}|${candidate.email.toLowerCase()}`,
+        { identity: null, retryAfter: Date.now() + FAILED_LOOKUP_RETRY_MS });
     }
   }
   return resolved;

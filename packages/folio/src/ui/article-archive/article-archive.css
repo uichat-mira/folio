@@ -47,11 +47,11 @@
 
 .folio-archive-chip {
   display: inline-flex;
-  min-height: 32px;
+  min-height: 30px;
   align-items: center;
-  padding: 0 12px;
+  padding: 0 10px;
   border: 1px solid var(--folio-hairline);
-  border-radius: var(--folio-radius-pill);
+  border-radius: var(--folio-radius-sm);
   color: var(--folio-body-strong);
   font-size: 12px;
   line-height: 1.4;

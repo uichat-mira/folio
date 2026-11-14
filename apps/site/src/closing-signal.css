@@ -1,0 +1,59 @@
+/* A cropped, imperfect orbital system rather than a complete atom pictogram. */
+.portal-closing__signal {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+  opacity: .94;
+  mask-image: linear-gradient(90deg, transparent 32%, black 55%, black 95%, transparent 100%);
+}
+
+.portal-closing__orbit {
+  /* The offset SVG groups own position; each plane tilts about its own center. */
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.portal-closing__orbit--level { transform: rotate(-22deg); }
+.portal-closing__orbit--rising { transform: rotate(42deg); }
+.portal-closing__orbit--falling { transform: rotate(-64deg); }
+.portal-closing__orbit-line {
+  stroke: var(--site-on-dark-soft);
+  stroke-width: 1.35;
+  opacity: .66;
+}
+.portal-closing__orbit--falling .portal-closing__orbit-line { opacity: .34; }
+.portal-closing__orbit-glint {
+  stroke: var(--site-accent-amber);
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-dasharray: 20 980;
+  opacity: .8;
+  animation: portal-orbit-travel 68s linear infinite;
+}
+.portal-closing__orbit--rising .portal-closing__orbit-glint {
+  animation-duration: 81s;
+  animation-direction: reverse;
+  animation-delay: -24s;
+}
+.portal-closing__orbit--falling .portal-closing__orbit-glint {
+  opacity: .38;
+  animation-duration: 90s;
+  animation-delay: -33s;
+}
+
+@keyframes portal-orbit-travel {
+  to { stroke-dashoffset: -1000; }
+}
+
+@media (max-width: 720px) {
+  .portal-closing__signal {
+    opacity: .62;
+    mask-image: linear-gradient(90deg, transparent 5%, black 65%, transparent 100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portal-closing__orbit-glint { animation: none; }
+}

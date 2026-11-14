@@ -252,7 +252,8 @@ test("archive entry points ship the shared restrained styles and keyboard focus"
   assert.match(css, /\.folio-archive-row\s*\{[^}]*position:\s*sticky/s);
   assert.match(css, /\.folio-archive-row\s*\{[^}]*top:\s*var\(--folio-header-height\)/s);
   assert.match(css, /\.folio-archive-row__list\s*\{/);
-  assert.match(css, /\.folio-archive-chip\s*\{[^}]*var\(--folio-radius-pill\)/s);
+  assert.match(css, /\.folio-archive-chip\s*\{[^}]*border-radius:\s*var\(--folio-radius-sm\)/s);
+  assert.doesNotMatch(css, /\.folio-archive-chip\s*\{[^}]*var\(--folio-radius-pill\)/s);
   assert.match(css, /\.folio-archive-chip\s*\{[^}]*var\(--folio-hairline\)/s);
   assert.match(css, /\.folio-entry-tags\s*\{/);
   assert.match(css, /\.folio-article-tags\s*\{/);

@@ -80,11 +80,8 @@
 
 .folio-doc-main > h1 {
   margin: 0;
-  font-family: var(--folio-font-display);
-  font-size: clamp(36px, 4.4vw, 44px);
-  font-weight: 500;
-  line-height: 1.12;
-  letter-spacing: -.025em;
+  font: var(--folio-reading-doc-title-font);
+  letter-spacing: var(--folio-reading-doc-title-tracking);
 }
 
 .folio-markdown h2,

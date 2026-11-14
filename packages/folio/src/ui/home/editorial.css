@@ -74,9 +74,9 @@
   max-width: 660px;
   margin: 20px 0 24px;
   color: var(--folio-ink);
-  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", Georgia, serif;
+  font-family: var(--folio-font-reading-heading);
   font-size: clamp(48px, 6.1vw, 83px);
-  font-weight: 670;
+  font-weight: var(--folio-reading-heading-weight);
   letter-spacing: -.075em;
   line-height: 1.22;
   text-wrap: balance;
@@ -174,9 +174,9 @@
 .folio-editorial-feature h2 {
   position: relative;
   margin: 14px 0 18px;
-  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", Georgia, serif;
+  font-family: var(--folio-font-reading-heading);
   font-size: clamp(29px, 3.2vw, 43px);
-  font-weight: 620;
+  font-weight: var(--folio-reading-heading-weight);
   letter-spacing: -.04em;
   line-height: 1.45;
   text-wrap: pretty;
@@ -236,11 +236,11 @@
 .folio-editorial-about h2 {
   margin: 10px 0 0;
   color: var(--folio-ink);
-  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", Georgia, serif;
+  font-family: var(--folio-font-reading-heading);
   font-size: clamp(25px, 3vw, 34px);
   line-height: 1.35;
   letter-spacing: -.05em;
-  font-weight: 650;
+  font-weight: var(--folio-reading-heading-weight);
 }
 
 .folio-editorial-view-all {

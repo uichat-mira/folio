@@ -2,8 +2,14 @@
   --folio-primary: #cc785c;
   --folio-primary-active: #a9583e;
   --folio-primary-disabled: #e6dfd8;
+  /* Brand accent is separate from the primary action surface. */
+  --folio-brand-accent: var(--folio-primary);
+  --folio-selection-bg: color-mix(in srgb, var(--folio-brand-accent) 24%, transparent);
   --folio-ink: #141413;
   --folio-body: #3d3d3a;
+  --folio-prose-body: var(--folio-body);
+  --folio-prose-leading: 1.78;
+  --folio-prose-paragraph-gap: 1em;
   --folio-body-strong: #252523;
   --folio-muted: #6c6a64;
   --folio-muted-soft: #8e8b82;
@@ -12,6 +18,7 @@
   --folio-canvas: #faf9f5;
   --folio-surface-soft: #f5f0e8;
   --folio-surface-card: #efe9de;
+  --folio-blockquote-bg: color-mix(in srgb, var(--folio-primary) 10%, transparent);
   --folio-surface-dark: #181715;
   --folio-surface-dark-elevated: #252320;
   --folio-on-primary: #fff;
@@ -24,6 +31,17 @@
   --folio-error: #c64545;
   --folio-font-sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --folio-font-display: "Cormorant Garamond", Garamond, "Times New Roman", serif;
+  --folio-font-reading-heading: var(--folio-font-display);
+  --folio-font-article-title: var(--folio-font-sans);
+  --folio-reading-heading-weight: 500;
+  /* Complete role-specific title metrics; typography lives with the preset. */
+  --folio-reading-article-title-font: 650 clamp(36px, 4.6vw, 52px)/1.12 var(--folio-font-article-title);
+  --folio-reading-article-title-tracking: -.035em;
+  --folio-reading-doc-title-font: var(--folio-reading-heading-weight) clamp(36px, 4.4vw, 44px)/1.12 var(--folio-font-reading-heading);
+  --folio-reading-doc-title-tracking: -.025em;
+  --folio-reading-section-title-font: var(--folio-reading-heading-weight) 26px/1.2 var(--folio-font-reading-heading);
+  --folio-reading-section-title-tracking: 0em;
+  --folio-reading-section-title-margin: 48px 0 14px;
   --folio-font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
   --folio-header-height: 64px;
   --folio-radius-sm: 6px;
@@ -78,19 +96,27 @@
    overrides deliberately keep :root specificity, so consumer CSS imported
    after @uichat-mira/folio/styles.css can replace public values using :root. */
 :root:where(:not([data-folio-preset]), [data-folio-preset="pearl"]) {
-  --folio-primary: #94543d;
-  --folio-primary-active: #773c29;
-  --folio-primary-disabled: #d8c7bb;
+  /* Porcelain White: luminous neutral porcelain, ink actions,
+     with vermilion reserved for sparse brand punctuation. */
+  --folio-primary: #252522;
+  --folio-primary-active: #42423b;
+  --folio-primary-disabled: #c7c8c3;
+  --folio-brand-accent: #a83d22;
+  --folio-selection-bg: #e3e6db;
   --folio-ink: #252522;
-  --folio-body: #393934;
-  --folio-body-strong: #292921;
-  --folio-muted: #65655d;
-  --folio-muted-soft: #706e66;
-  --folio-hairline: #e4e1d8;
-  --folio-hairline-soft: #efede7;
+  --folio-body: #4a4c47;
+  --folio-prose-body: var(--folio-body-strong);
+  --folio-prose-leading: 1.95;
+  --folio-prose-paragraph-gap: 1.2em;
+  --folio-body-strong: #30312d;
+  --folio-muted: #5f605c;
+  --folio-muted-soft: #696b65;
+  --folio-hairline: #e7e6e0;
+  --folio-hairline-soft: #f0efe9;
   --folio-canvas: #faf9f6;
-  --folio-surface-soft: #f3f1eb;
-  --folio-surface-card: #ebe8df;
+  --folio-surface-soft: #f5f4f0;
+  --folio-surface-card: #fffefa;
+  --folio-blockquote-bg: var(--folio-surface-soft);
   --folio-surface-dark: #24231f;
   --folio-surface-dark-elevated: #34312b;
   --folio-on-primary: #fffefa;
@@ -102,6 +128,18 @@
   --folio-warning: #946600;
   --folio-error: #b43d3d;
   --folio-font-display: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* Reading and built-in home headings share the Old Style / Songti voice. */
+  --folio-font-reading-heading: "Iowan Old Style", "Songti SC", "Noto Serif SC", "Source Han Serif SC", "STSong", "SimSun", serif;
+  --folio-font-article-title: var(--folio-font-reading-heading);
+  --folio-reading-heading-weight: 400;
+  /* Restraint study A: more breathing room, without column-editorial scale. */
+  --folio-reading-article-title-font: var(--folio-reading-heading-weight) clamp(36px, 4.6vw, 50px)/1.24 var(--folio-font-article-title);
+  --folio-reading-article-title-tracking: -.02em;
+  --folio-reading-doc-title-font: var(--folio-reading-heading-weight) clamp(36px, 4.4vw, 42px)/1.24 var(--folio-font-reading-heading);
+  --folio-reading-doc-title-tracking: -.02em;
+  --folio-reading-section-title-font: var(--folio-reading-heading-weight) 28px/1.34 var(--folio-font-reading-heading);
+  --folio-reading-section-title-tracking: -.01em;
+  --folio-reading-section-title-margin: 54px 0 18px;
 }
 
 /* Editorial remains its own active preset. Its warm accent is tuned for
@@ -148,6 +186,7 @@
   --folio-body-strong: #efe9dd;
   --folio-muted: #c1baac;
   --folio-muted-soft: #a39b8f;
+  --folio-selection-bg: #43564a;
   --folio-hairline: #49453e;
   --folio-hairline-soft: #393630;
   --folio-canvas: #1c1d1a;
@@ -214,6 +253,7 @@
   --folio-body-strong: #efe9dd;
   --folio-muted: #c1baac;
   --folio-muted-soft: #a39b8f;
+  --folio-selection-bg: #43564a;
   --folio-hairline: #49453e;
   --folio-hairline-soft: #393630;
   --folio-canvas: #1c1d1a;
@@ -286,13 +326,15 @@
 
 :root:where([data-folio-theme="dark"]) { color-scheme: dark; }
 
-/* The code surface and syntax palette are independent of the site preset.
-   Unspecified/auto is Xuanzhi in light, Xuanmo in dark. A consumer can
-   override both by assigning the documented variables after Folio CSS. */
+/* Explicit code palettes are preset-independent. Auto picks Porcelain for
+   light Pearl, Xuanzhi for other light presets, and Xuanmo for effective dark.
+   Consumers may override these roles through the documented CSS variables. */
 :root:where(:not([data-folio-code-palette="xuanmo"])) {
   --folio-code-bg: #f5f2eb;
   --folio-code-fg: #25312d;
   --folio-code-border: #ddd8ca;
+  --folio-code-header-bg: #efece5;
+  --folio-code-header-fg: #52655b;
   --folio-syntax-text: #25312d;
   --folio-syntax-comment: #607269;
   --folio-syntax-keyword: #226353;
@@ -303,10 +345,12 @@
   --folio-syntax-punctuation: #57645e;
 }
 
-:root:where([data-folio-code-palette="xuanmo"], [data-folio-theme="dark"]:not([data-folio-code-palette="xuanzhi"])) {
+:root:where([data-folio-code-palette="xuanmo"], [data-folio-theme="dark"]:not([data-folio-code-palette="xuanzhi"]):not([data-folio-code-palette="porcelain"])) {
   --folio-code-bg: #161e1c;
   --folio-code-fg: #eaf0e9;
   --folio-code-border: #35443f;
+  --folio-code-header-bg: #202b28;
+  --folio-code-header-fg: #b3c3ba;
   --folio-syntax-text: #eaf0e9;
   --folio-syntax-comment: #a2b9ae;
   --folio-syntax-keyword: #7cdcc0;
@@ -317,11 +361,32 @@
   --folio-syntax-punctuation: #b3c2ba;
 }
 
+
+/* Porcelain is selectable independently. Light Pearl uses it only for auto;
+   explicit Xuanzhi/Xuanmo always win, even when the page preset changes. */
+:root:where([data-folio-code-palette="porcelain"], [data-folio-preset="pearl"][data-folio-code-palette="auto"]:not([data-folio-theme="dark"])) {
+  --folio-code-bg: #fffefa;
+  --folio-code-fg: #30312d;
+  --folio-code-border: #e7e6e0;
+  --folio-code-header-bg: #f5f4f0;
+  --folio-code-header-fg: #686a66;
+  --folio-syntax-text: #30312d;
+  --folio-syntax-comment: #626762;
+  --folio-syntax-keyword: #965024;
+  --folio-syntax-function: #935124;
+  --folio-syntax-string: #805512;
+  --folio-syntax-number: #315e92;
+  --folio-syntax-type: #74517d;
+  --folio-syntax-punctuation: #646864;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root:where(:not([data-folio-theme]):not([data-folio-code-palette="xuanzhi"])) {
+  :root:where(:not([data-folio-theme]):not([data-folio-code-palette="xuanzhi"]):not([data-folio-code-palette="porcelain"])) {
   --folio-code-bg: #161e1c;
   --folio-code-fg: #eaf0e9;
   --folio-code-border: #35443f;
+  --folio-code-header-bg: #202b28;
+  --folio-code-header-fg: #b3c3ba;
   --folio-syntax-text: #eaf0e9;
   --folio-syntax-comment: #a2b9ae;
   --folio-syntax-keyword: #7cdcc0;
@@ -332,6 +397,10 @@
   --folio-syntax-punctuation: #b3c2ba;
   }
 }
+
+/* Selection is an interaction state, not a brand accent. Consumers can
+   override the semantic token without fighting an official-site rule. */
+::selection { background: var(--folio-selection-bg); }
 
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; background: var(--folio-canvas); color: var(--folio-ink); }

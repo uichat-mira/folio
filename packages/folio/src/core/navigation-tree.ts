@@ -73,7 +73,23 @@ function sectionPages(docs: readonly FolioDoc[], rootPath: string): FolioNavigat
   // directories, but never fabricated as clickable pages.
   const includesRoot = docs.some((doc) => normalizedPath(doc.path) === rootPath);
   const scope = includesRoot ? parentDirectory(rootPath) : rootPath;
-  return buildFolioContentTree(docs, { rootPath: scope }).roots;
+
+  // A section is already a visible heading. If all of its pages are siblings
+  // inside one un-authored directory immediately under the collection root,
+  // do not display that directory again (e.g. 设计 > design > articles).
+  // Keep route paths intact, and preserve authored overviews and deeper trees.
+  const parentPaths = new Set(docs.map((doc) => parentDirectory(doc.path)));
+  const onlyParent = parentPaths.size === 1 ? [...parentPaths][0] : undefined;
+  const sectionRoot = docs.length > 1
+    && onlyParent !== undefined
+    && onlyParent !== scope
+    && isWithin(onlyParent, scope)
+    && pathSegments(onlyParent).length === pathSegments(scope).length + 1
+    && !docs.some((doc) => normalizedPath(doc.path) === onlyParent)
+    ? onlyParent
+    : scope;
+
+  return buildFolioContentTree(docs, { rootPath: sectionRoot }).roots;
 }
 
 /**

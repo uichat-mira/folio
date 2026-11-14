@@ -73,6 +73,26 @@ test("code and Mermaid source are safely escaped", () => {
 });
 
 
+test("fenced code has a safe language caption and a single accessible frame", () => {
+  const html = renderFolioMarkdown(
+    "~~~bash\nopencode pair\n~~~\n\n~~~typescript\nconst value = 42;\n~~~",
+  );
+  assert.equal((html.match(/<figure class="folio-code-frame/g) ?? []).length, 2);
+  assert.match(html, /class="folio-code-frame folio-code-frame--terminal"/);
+  assert.match(html, /<figcaption class="folio-code-frame__header">[\s\S]*?<span>Terminal<\/span>/);
+  assert.match(html, /<span>TypeScript<\/span>/);
+  assert.match(html, /<pre><code class="hljs language-bash">/);
+  assert.match(html, /<pre><code class="hljs language-typescript">/);
+  assert.doesNotMatch(html, /\$ opencode pair/, "terminal caption must not modify code");
+});
+
+test("Mermaid keeps its independent source and does not become a code frame", () => {
+  const html = renderFolioMarkdown("~~~mermaid\ngraph TD\n A-->B\n~~~");
+  assert.match(html, /class="markdown-mermaid"/);
+  assert.doesNotMatch(html, /folio-code-frame/);
+  assert.match(html, /<pre class="markdown-mermaid-source">/);
+});
+
 test("callout syntax inside fenced code remains verbatim", () => {
   const html = renderFolioMarkdown(
     "```md\n::: warning This is documentation, not a live callout :::\n```",
@@ -85,6 +105,75 @@ test("callout syntax inside fenced code remains verbatim", () => {
   );
 });
 
+
+test("inline directive examples cannot swallow following code fences or callouts", () => {
+  const source = [
+    "::: warning Only trusted documents",
+    "The syntax of raw HTML includes a literal backtick-wrapped " + String.fromCharCode(96) + "::: html" + String.fromCharCode(96) + " example.",
+    ":::",
+    "",
+    "## Code examples",
+    "~~~md",
+    "## Heading",
+    "~~~",
+    "",
+    "~~~md",
+    "::: tip",
+    "This is only a code example.",
+    ":::",
+    "~~~",
+    "",
+    "::: tip",
+    "This is a real callout.",
+    ":::",
+    "",
+    "## After callout",
+  ].join("\n");
+  const html = renderFolioMarkdown(source);
+  assert.equal((html.match(/class="folio-code-frame"/g) ?? []).length, 2);
+  assert.equal((html.match(/<aside class="md-custom-block /g) ?? []).length, 2);
+  assert.match(html, /<code>::: html<\/code>/);
+  assert.match(html, /Only trusted documents/);
+  assert.match(html, /This is a real callout/);
+  assert.match(html, /This is only a code example/);
+  assert.match(html, /<h2 id="after-callout">/);
+  assert.doesNotMatch(html, /FOLIO_(?:FENCE|HTML|CALLOUT)_BLOCK_\d+/);
+});
+
+test("standalone HTML directives keep raw HTML and leave inline examples as text", () => {
+  const html = renderFolioMarkdown([
+    "Syntax includes " + String.fromCharCode(96) + "::: html" + String.fromCharCode(96) + ".",
+    "",
+    "::: html",
+    "<div class=\"owned\">inside</div>",
+    ":::",
+    "",
+    "## Afterwards",
+  ].join("\n"));
+  assert.match(html, /<code>::: html<\/code>/);
+  assert.match(html, /<div class="owned">inside<\/div>/);
+  assert.match(html, /<h2 id="afterwards">/);
+  assert.doesNotMatch(html, /FOLIO_(?:FENCE|HTML|CALLOUT)_BLOCK_\d+/);
+});
+
+test("fenced code inside a callout survives placeholder restoration", () => {
+  const html = renderFolioMarkdown([
+    "::: note",
+    "Some code:",
+    "",
+    "~~~ts",
+    "const answer = 42;",
+    "~~~",
+    ":::",
+    "",
+    "Paragraph afterwards.",
+  ].join("\n"));
+  assert.match(html, /md-custom-block--note/);
+  assert.match(html, /<figure class="folio-code-frame">/);
+  assert.match(html, /<span>TypeScript<\/span>/);
+  assert.match(html, /Paragraph afterwards/);
+  assert.doesNotMatch(html, /FOLIO_(?:FENCE|HTML|CALLOUT)_BLOCK_\d+/);
+});
 
 test("renderer preserves explicit heading IDs and keeps generated IDs aligned", () => {
   const html = renderFolioMarkdown(

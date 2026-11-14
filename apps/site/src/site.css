@@ -3,6 +3,7 @@
      logo, typography, content and composition instead of overriding them. */
   --site-primary: var(--folio-primary);
   --site-primary-active: var(--folio-primary-active);
+  --site-brand-accent: var(--folio-brand-accent);
   --site-ink: var(--folio-ink);
   --site-body: var(--folio-body);
   --site-muted: var(--folio-muted);
@@ -21,19 +22,19 @@
   --site-code-bg: var(--folio-code-bg);
   --site-code-fg: var(--folio-code-fg);
   --site-code-border: var(--folio-code-border);
+  --site-code-header-bg: var(--folio-code-header-bg);
+  --site-code-header-fg: var(--folio-code-header-fg);
   --site-syntax-comment: var(--folio-syntax-comment);
   --site-syntax-keyword: var(--folio-syntax-keyword);
   --site-syntax-string: var(--folio-syntax-string);
   --site-display: var(--folio-font-display);
+  --site-reading-heading: var(--folio-font-reading-heading);
+  --site-reading-heading-weight: var(--folio-reading-heading-weight);
   --site-sans: var(--folio-font-sans);
   --site-mono: var(--folio-font-mono);
 }
 
 html { scroll-behavior: smooth; }
-
-::selection {
-  background: color-mix(in srgb, var(--folio-primary) 24%, transparent);
-}
 
 /* The official wordmark is content supplied through Folio's headerBrand slot.
    This style owns only the site-provided element, not the shared Header. */
@@ -72,7 +73,7 @@ html { scroll-behavior: smooth; }
 }
 
 .site-article-proof > span {
-  color: var(--site-primary-active);
+  color: var(--site-brand-accent);
   font-family: var(--site-mono);
   font-size: 11px;
   letter-spacing: .08em;

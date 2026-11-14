@@ -10,6 +10,7 @@ import { DesignReferenceEnhancement } from "./DesignReferenceEnhancement";
 import { withFolioBaseLinks } from "./content-links";
 import "./site.css";
 import "./home.css";
+import "./closing-signal.css";
 import "./legacy-claude-visual.css";
 import "./design-reference.css";
 

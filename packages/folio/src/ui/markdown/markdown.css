@@ -3,7 +3,7 @@
   margin-top: 42px;
   color: var(--folio-body);
   font-size: 16px;
-  line-height: 1.78;
+  line-height: var(--folio-prose-leading);
   /* Long inline code such as `call(arg, arg)` still has to wrap in prose;
      break-word only kicks in when a token cannot fit, so table intrinsic
      widths keep driving the table scroll container instead. */
@@ -12,15 +12,16 @@
 
 .folio-markdown h1 {
   margin: 40px 0 18px;
-  font: 500 clamp(38px, 5vw, 54px)/1.15 var(--folio-font-display);
+  font: var(--folio-reading-heading-weight) clamp(38px, 5vw, 54px)/1.15 var(--folio-font-reading-heading);
   letter-spacing: -.04em;
 }
 
+/* Heading hierarchy comes from typography and spacing. A horizontal rule
+   must come from an authored Markdown separator, not every ## heading. */
 .folio-markdown h2 {
-  margin: 48px 0 14px;
-  padding-top: 13px;
-  border-top: 1px solid var(--folio-hairline);
-  font: 500 26px/1.2 var(--folio-font-display);
+  margin: var(--folio-reading-section-title-margin);
+  font: var(--folio-reading-section-title-font);
+  letter-spacing: var(--folio-reading-section-title-tracking);
 }
 
 .folio-markdown h3 {
@@ -29,7 +30,11 @@
 }
 
 .folio-markdown p,
-.folio-markdown li { color: var(--folio-body); }
+.folio-markdown li { color: var(--folio-prose-body); }
+
+/* Give top-level paragraphs room to breathe without loosening list items,
+   callouts, tables and other technical content containers. */
+.folio-markdown > p { margin-block-end: var(--folio-prose-paragraph-gap); }
 
 .folio-markdown a {
   color: var(--folio-primary-active);
@@ -42,7 +47,7 @@
   padding: 17px 21px;
   border-left: 3px solid var(--folio-primary);
   border-radius: 0 var(--folio-radius-md) var(--folio-radius-md) 0;
-  background: color-mix(in srgb, var(--folio-primary) 10%, transparent);
+  background: var(--folio-blockquote-bg);
 }
 
 .folio-markdown blockquote p {
@@ -51,11 +56,58 @@
   font: 500 16px var(--folio-font-display);
 }
 
+/* Inline code sits within prose instead of borrowing the elevated card
+   surface; fenced blocks continue to own the independent code palette. */
 .folio-markdown code {
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: var(--folio-surface-card);
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: var(--folio-surface-soft);
+  color: var(--folio-body-strong);
   font: 12px var(--folio-font-mono);
+}
+
+/* Fenced code is a reading surface with a small language/terminal caption.
+   The renderer owns its semantic structure; the selectable code palette owns
+   all colors, including the frame header. Mermaid stays independent. */
+.folio-markdown .folio-code-frame {
+  margin: 16px 0 24px;
+  overflow: hidden;
+  border: 1px solid var(--folio-code-border);
+  border-radius: var(--folio-radius-sm);
+  background: var(--folio-code-bg);
+}
+
+.folio-markdown .folio-code-frame__header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 38px;
+  padding: 9px 15px;
+  border-bottom: 1px solid var(--folio-code-border);
+  background: var(--folio-code-header-bg);
+  color: var(--folio-code-header-fg);
+  font: 11px/1.4 var(--folio-font-mono);
+}
+
+.folio-code-frame__mark {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 15px;
+  height: 12px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  font: 9px/1 var(--folio-font-mono);
+}
+
+.folio-code-frame__mark::before { content: ">_"; }
+
+.folio-markdown .folio-code-frame > pre {
+  margin: 0;
+  padding: 20px 22px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .folio-markdown pre {
@@ -69,10 +121,13 @@
   font: 13px/1.7 var(--folio-font-mono);
 }
 
+/* Inline code is deliberately compact; fenced code needs its own readable
+   metrics instead of inheriting the 12px shorthand from inline code. */
 .folio-markdown pre code {
   padding: 0;
   background: none;
   color: var(--folio-code-fg);
+  font: 14px/1.65 var(--folio-font-mono);
 }
 
 /* Keep authored photos within narrow reading columns without altering source files. */

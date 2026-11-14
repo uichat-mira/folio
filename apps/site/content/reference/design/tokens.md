@@ -36,7 +36,7 @@ tags: [Design Tokens, CSS, Code Theme]
 交互模式的两个重要事实：
 
 - **Site Theme** 对阅读框架、界面和内容生效。Preset 负责视觉气质，Scheme 负责最终明暗。
-- **Code Theme** 只负责代码表面、基础文字和语法角色。Code Palette 设为 `auto` 时，在有效浅色模式选择 **Xuanzhi（宣纸）**，有效深色模式选择 **Xuanmo（玄墨）**；也可以明确指定一个与网站明暗不同的色板。
+- **Code Theme** 只负责代码表面、基础文字和语法角色。Code Palette 设为 `auto` 时，Pearl 浅色选择 **Porcelain（瓷白）**、其他浅色选择 **Xuanzhi（宣纸）**、深色选择 **Xuanmo（玄墨）**；显式选定的色板不受页面预设限制。
 
 上方代码示例来自真正的 `FolioMarkdown` 与 `highlight.js` 输出，**没有手写 `.hljs-* ` 色值**。它不是 PNG，也不是专门为文档造的代码模型。
 
@@ -47,9 +47,13 @@ Folio 根 Token 的名字本身就在传达设计契约。下表只给出角色�
 | 角色 | CSS Token | 使用时机 |
 | --- | --- | --- |
 | 主交互 | `--folio-primary`、`--folio-primary-active`、`--folio-primary-disabled`、`--folio-on-primary` | 主按钮、交互强调、禁用与反色前景；不要直接拿品牌色代表错误状态 |
+| 品牌点缀 | `--folio-brand-accent` | 少量标记、识别性强调；Pearl 朱砂色不承担默认实心按钮底色 |
+| 文本选中 | `--folio-selection-bg` | 独立于品牌点缀；Pearl 浅色采用 Tomzlab 的灰绿、深色使用更深的灰绿，其他主题沿用原先的弱品牌色选中效果 |
 | 文字层级 | `--folio-ink`、`--folio-body`、`--folio-body-strong` | 主标题、长文正文、强调文字 |
+| 长文排版 | `--folio-prose-body`、`--folio-prose-leading`、`--folio-prose-paragraph-gap` | 正文色、行高与段距；非 Pearl 保持原值，Pearl 使用更有力量的墨灰正文与舒展的阅读节奏 |
 | 弱化文本 | `--folio-muted`、`--folio-muted-soft` | 元信息、注解、占位与次级信息；不等于可以无限降低对比度 |
 | 页面与层级 | `--folio-canvas`、`--folio-surface-soft`、`--folio-surface-card` | 阅读背景、轻分区、卡片与承载面 |
+| 引用底色 | `--folio-blockquote-bg` | 引用块独立表面角色；Pearl 使用轻微下沉的柔和表面，其他预设延续原着色 |
 | 反色表面 | `--folio-surface-dark`、`--folio-surface-dark-elevated`、`--folio-on-dark`、`--folio-on-dark-soft` | 深色衬底与对应文字 |
 | 分隔 | `--folio-hairline`、`--folio-hairline-soft` | 列表、导航与面板边界 |
 | 点缀 | `--folio-accent-teal`、`--folio-accent-amber` | 罕量强调、图表与视觉提示 |
@@ -64,6 +68,8 @@ Folio 根 Token 的名字本身就在传达设计契约。下表只给出角色�
 | 类型 | Token | 设计边界 |
 | --- | --- | --- |
 | 字族 | `--folio-font-sans`、`--folio-font-display`、`--folio-font-mono` | 界面、标题和代码；用真实系统 fallback，中文与英文分别核查 |
+| 阅读标题 | `--folio-font-reading-heading`、`--folio-font-article-title`、`--folio-reading-heading-weight` | H1/H2 阅读标题独立于站点品牌与菜单；Pearl 借鉴 Tomzlab 的人文衬线字体栈，其他主题沿用现有字体 |
+| 标题节奏 | `--folio-reading-article-title-font`、`--folio-reading-doc-title-font`、`--folio-reading-section-title-font`、`--folio-reading-section-title-margin` | 文章 H1、文档 H1 与 Markdown H2 的字号、字重、行高和章节间距；Pearl 采用克制书卷 A，栏目夸张排版暂不混入 |
 | 圆角 | `--folio-radius-sm / md / lg / xl / pill` | 供组件一致消费；圆角不是一张统一值的命令 |
 | 间距 | `--folio-space-xs / sm / md / lg / xl / 2xl` | 公开尺度；部分当前包内组件仍使用局部尺寸，不宣称全部间距均已 Token 化 |
 | 框架宽度 | `--folio-home-frame-width`、`--folio-reading-frame-width` | 入口页面与阅读页面的独立宽度 |
@@ -75,11 +81,12 @@ Folio 根 Token 的名字本身就在传达设计契约。下表只给出角色�
 
 ## 四、代码主题：表面与语法是两张表
 
-**Code Surface** 决定“代码被放在哪张纸上”，**Syntax Palette** 决定“这张纸上的词如何分辨”。二者共同受 `codePalette` 控制，却独立于网站 `preset`：
+**Code Surface** 决定“代码被放在哪张纸上”，**Syntax Palette** 决定“这张纸上的词如何分辨”。二者共同受 `codePalette` 控制；显式选择不受 `preset` 限制，而 `auto` 在 Pearl 浅色下优先使用瓷白：
 
 | 层级 | Token | 对应职责 |
 | --- | --- | --- |
 | 代码表面 | `--folio-code-bg`、`--folio-code-fg`、`--folio-code-border` | 代码块底色、一般文字、边界 |
+| 代码标题栏 | `--folio-code-header-bg`、`--folio-code-header-fg` | Code Frame 标题栏的背景与文字；与语法色板一同切换 |
 | 一般语法文字 | `--folio-syntax-text` | 代码高亮的默认前景 |
 | 注释 | `--folio-syntax-comment` | 辅助信息及注释 |
 | 关键字 | `--folio-syntax-keyword` | 语言关键字、字面量与选择器 |
@@ -88,6 +95,17 @@ Folio 根 Token 的名字本身就在传达设计契约。下表只给出角色�
 | 数字 | `--folio-syntax-number` | 数值与标量 |
 | 类型 | `--folio-syntax-type` | 类型与内建类型 |
 | 标点 | `--folio-syntax-punctuation` | 标点、meta 与语法辅助 |
+
+Porcelain 参考 OpenCode 文档的轻量终端框：白瓷底、细边框、轻标题栏。Terminal 和 TypeScript 使用 Folio 的同一个 Markdown 渲染器；Mermaid 不进入 Code Frame。
+
+~~~bash
+opencode pair
+~~~
+
+~~~ts
+const codePalette = "porcelain";
+console.log(codePalette);
+~~~
 
 Folio 的 `marked` + `highlight.js` 负责从 Markdown 产生标准的高亮类；CSS 再将 `.hljs-*` 映射到上面这些 Token。**渲染器和配色分开治理**，主题变更不需要复制 Markdown AST 或运行两套 syntax highlighter。
 
@@ -134,7 +152,7 @@ export default defineFolioConfig({
 });
 ~~~
 
-- `scheme: "system"` 跟随操作系统，`codePalette: "auto"` 再依据**最终生效**的明暗选择 Xuanzhi 或 Xuanmo；
+- `scheme: "system"` 跟随操作系统，`codePalette: "auto"` 根据**最终生效**的明暗及 Pearl 预设选择 Porcelain、Xuanzhi 或 Xuanmo；
 - 用户经 Header 明确选择过 Light/Dark 时，那个选择应被保留；主题实验区调用的 `preview()` 不持久化；
 - `resetPreview()` 恢复读者选择及网站默认值；它**不是**“强行改成浅色”的快捷键；
 - `FolioHome` 的 `template` 和整个网站的视觉 Preset 是两条轴，切换模板不是切换品牌色。

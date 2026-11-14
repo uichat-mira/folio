@@ -35,11 +35,11 @@
 }
 
 .folio-entry-title {
-  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", Georgia, serif;
+  font-family: var(--folio-font-reading-heading);
   margin: 0;
   color: var(--folio-ink);
   font-size: clamp(19px, 2.2vw, 23px);
-  font-weight: 650;
+  font-weight: var(--folio-reading-heading-weight);
   letter-spacing: -0.025em;
   line-height: 1.45;
 }

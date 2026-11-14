@@ -32,9 +32,14 @@ test("visual preset, scheme and code palette have independent defaults", () => {
     preset: "graphite", scheme: "light", codePalette: "xuanmo",
   } }), { preset: "graphite", scheme: "light", codePalette: "xuanmo" });
   assert.equal(resolveFolioCodePalette("auto", "light"), "xuanzhi");
+  assert.equal(resolveFolioCodePalette("auto", "light", "pearl"), "porcelain");
+  assert.equal(resolveFolioCodePalette("auto", "light", "editorial"), "xuanzhi");
+  assert.equal(resolveFolioCodePalette("auto", "dark", "pearl"), "xuanmo");
+  assert.equal(resolveFolioCodePalette("porcelain", "dark", "graphite"), "porcelain");
   assert.equal(resolveFolioCodePalette("auto", "dark"), "xuanmo");
   assert.equal(resolveFolioCodePalette("xuanmo", "light"), "xuanmo");
   assert.equal(resolveFolioCodePalette("xuanzhi", "dark"), "xuanzhi");
+  assert.deepEqual(resolveFolioAppearance({ appearance: {codePalette:"porcelain"} }).codePalette, "porcelain");
 });
 
 test("invalid appearance values fail clearly instead of silently selecting another theme", () => {
@@ -81,6 +86,20 @@ function contrast(a, b) {
   return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
 }
 
+test("selection is a separate public interaction token with a Pearl light/dark pair", () => {
+  const root = ruleBody(":root {");
+  const pearl = ruleBody(':root:where(:not([data-folio-preset]), [data-folio-preset="pearl"]) {');
+  const dark = ruleBody(':root:where([data-folio-theme="dark"]):where(:not([data-folio-preset]), [data-folio-preset="pearl"]) {');
+  const systemDark = ruleBody(':root:where(:not([data-folio-theme])):where(:not([data-folio-preset]), [data-folio-preset="pearl"]) {');
+  assert.equal(declaration(root, "selection-bg"), "color-mix(in srgb, var(--folio-brand-accent) 24%, transparent)");
+  assert.equal(declaration(pearl, "selection-bg"), "#e3e6db");
+  assert.equal(declaration(dark, "selection-bg"), "#43564a");
+  assert.equal(declaration(systemDark, "selection-bg"), "#43564a");
+  assert.match(css, /::selection\s*\{\s*background:\s*var\(--folio-selection-bg\)/);
+  assert.ok(contrast(declaration(dark, "selection-bg"), declaration(dark, "ink")) >= 4.5,
+    "selected dark Pearl text must remain readable");
+});
+
 test("Pearl and Graphite text/action contrast is readable in light and dark", () => {
   const selectors = [
     ':root:where(:not([data-folio-preset]), [data-folio-preset="pearl"]) {',
@@ -98,9 +117,10 @@ test("Pearl and Graphite text/action contrast is readable in light and dark", ()
   }
 });
 
-test("the two syntax palettes are a separate selectable CSS surface", () => {
+test("all code palettes expose independent surfaces and syntax roles", () => {
   assert.match(css, /data-folio-code-palette="xuanmo"/);
   assert.match(css, /data-folio-code-palette="xuanzhi"/);
+  assert.match(css, /data-folio-code-palette="porcelain"/);
   for (const property of ["code-bg", "code-fg", "code-border", "syntax-text", "syntax-comment", "syntax-keyword", "syntax-function", "syntax-string", "syntax-number", "syntax-type", "syntax-punctuation"]) {
     assert.match(css, new RegExp("--folio-" + property + ":"));
   }
@@ -109,14 +129,17 @@ test("the two syntax palettes are a separate selectable CSS surface", () => {
   assert.match(css, /@media \(prefers-color-scheme: dark\)/);
 });
 
-test("Xuanzhi and Xuanmo syntax roles meet readable contrast on their own code surfaces", () => {
+test("Xuanzhi, Xuanmo and Porcelain meet readable contrast on code surfaces", () => {
   const selectors = [
     ':root:where(:not([data-folio-code-palette="xuanmo"])) {',
-    ':root:where([data-folio-code-palette="xuanmo"], [data-folio-theme="dark"]:not([data-folio-code-palette="xuanzhi"])) {',
+    ':root:where([data-folio-code-palette="xuanmo"], [data-folio-theme="dark"]:not([data-folio-code-palette="xuanzhi"]):not([data-folio-code-palette="porcelain"])) {',
+    ':root:where([data-folio-code-palette="porcelain"], [data-folio-preset="pearl"][data-folio-code-palette="auto"]:not([data-folio-theme="dark"])) {',
   ];
   for (const selector of selectors) {
     const body = ruleBody(selector);
     const background = declaration(body, "code-bg");
+    assert.ok(contrast(declaration(body,"code-header-fg"),declaration(body,"code-header-bg"))>=4.5,
+      selector + " header label contrast");
     for (const role of [
       "code-fg", "syntax-text", "syntax-comment", "syntax-keyword",
       "syntax-function", "syntax-string", "syntax-number", "syntax-type",

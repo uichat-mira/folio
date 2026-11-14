@@ -3,3 +3,6 @@ dist/
 .vite/
 .DS_Store
 *.log
+
+# Local agent-team run state; never commit conversation/runtime artifacts.
+/.agent-teams/

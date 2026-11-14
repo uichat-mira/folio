@@ -263,13 +263,13 @@ export default defineFolioConfig({
   appearance: {
     preset: "pearl",      // pearl | editorial | graphite
     scheme: "system",     // system | light | dark
-    codePalette: "auto",  // auto | xuanzhi | xuanmo
+    codePalette: "auto",  // auto | xuanzhi | xuanmo | porcelain
   },
   home: { template: "portal" }, // portal | editorial
 });
 ```
 
-- **Preset** 决定整站语义颜色，**Scheme** 决定浅色 / 深色（`system` 随操作系统变化）；**Code Palette** 独立决定代码表面及语法高亮（`auto` 跟随最终明暗），不会替换整站的设计主题。
+- **Preset** 决定整站语义颜色，**Scheme** 决定浅色 / 深色（`system` 随操作系统变化）；**Code Palette** 显式选择时独立决定代码表面及语法高亮。`auto` 在 Pearl 浅色下使用 Porcelain（瓷白）、其他浅色预设使用 Xuanzhi（宣纸）、深色使用 Xuanmo（玄墨）。不会替换整站的设计主题。
 - **Home Template** 仅决定框架**内置首页**的 Portal / Editorial 渲染方式。官网自身的 `slots.home` 是自定义首页，因此它在 Design 板块中只做模板预览，不替换官网首页。
 - 在 `FolioApp` 内，`useFolioAppearance()` 提供 `appearance`、`effectiveScheme`、`preview(partial)`、`resetPreview()`。`preview()` 只在当前会话临时覆盖外观，不写本地存储；`resetPreview()` 恢复读者已有的明确选择，然后是站点配置和系统偏好。
 - Header 的用户主动明暗切换才会持久化到 `folio-theme-choice`；操作系统的最终深浅值不会伪装成读者选择。旧的 `folio-theme` 不再作为显式用户选择读取。
