@@ -28,6 +28,10 @@ tags:
 - **路径 A 的 peer 依赖**：Vite `^7`、React `^19`、React DOM `^19`、React Router DOM `^7`。版本不匹配时 npm 会给出 peer 警告，构建也可能失败。
 - **路径 B 额外需要** Git。
 
+> **开发中：npx 初始化器**。本地已增加 `@uichat-mira/create-folio`，
+> 未来发布后可用 `npx @uichat-mira/create-folio my-site --install`。
+> **当前尚未发布到 npm**，本页的正式安装路径仍是下文的 0.1.1。
+
 ## 路径 A：消费已发布的 0.1.1
 
 适合：已有或新建的 Vite 7 + React 19 项目，只使用 npm 上的公开包。

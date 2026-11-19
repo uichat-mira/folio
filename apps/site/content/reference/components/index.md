@@ -19,6 +19,7 @@ tags: [API, React, Components]
 | 组件 | 功能与详细说明 |
 | --- | --- |
 | [FolioApp](/reference/components/app) | 应用入口、路由、UI 配置、`FolioSlots` 及导航插槽 |
+| [FolioEntryList / FolioListPage](/reference/components/entry-list) | 开放书籍、项目、文章的列表与栏目页，支持外链、封面和主题 Token |
 | [FolioHeader](/reference/components/header) | 全局导航、菜单、搜索与主题按钮 |
 | [FolioFooter](/reference/components/footer) | 结构化页脚、品牌、深浅色 Logo、链接分组和法律字段 |
 | [FolioDocsShell](/reference/components/docs-shell) | 文档阅读布局、移动抽屉与组合式分页 |

@@ -13,6 +13,27 @@ The root `README.md`, `packages/folio/README.md`, and the Markdown/static docume
 - **The published package includes virtual-module types.** Strict Registry-installed consumers resolve `default` and `roots` without writing a local `declare module`.
 - **Article archives are opt-in per collection.** Without `collections[].archive`, a site gets no archive routes, entry points or tag links. With it, Folio derives `<collection>/category/<slug>` and `<collection>/tag/<slug>` from the FOL-040 Core index for both React and static output.
 
+## Public list components and custom list pages (unreleased dev)
+
+The next source release adds `FolioEntryList`, `FolioListPage` and
+`FolioListEntry` to the root package exports. `FolioDoc` continues to work
+unchanged for first-party articles; external resources instead use a canonical
+HTTP(S) `href`, plus optional cover, category, date, description, meta and
+link target. `variant="editorial"` preserves the internal editorial list.
+`variant="shelf"` renders a responsive, non-nested publication row styled
+exclusively by the Folio semantic tokens. No surrogate local FolioDoc or
+local detail route is created for an external resource.
+
+`FolioListPage` wraps the entry list with a standard single-H1 content frame.
+`FolioApp.slots.pages` can register that page inside the native header,
+footer and theme shell; duplicate document, collection, archive and custom
+routes are rejected. It is an opt-in React route: a static-site consumer still
+must supply the matching `staticRoutes.routes` output, because arbitrary
+ReactNode slots are not serialized automatically. The existing Folio
+`config.collections` index remains automatic for React and static builds.
+
+See [the component reference](../apps/site/content/reference/components/entry-list/index.md).
+
 ## Article category and tag archives (FOL-040 / FOL-041)
 
 Category and tag archives are an opt-in reading surface for Article content. A
