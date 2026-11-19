@@ -1,4 +1,6 @@
 export { FolioApp } from "./app";
+export { useFolioJsonSubscription } from "./ui/subscription/Subscription";
+export type { FolioJsonSubscriptionOptions, FolioJsonSubscriptionResult, FolioJsonSubscriptionStatus } from "./ui/subscription/Subscription";
 export { FolioHome } from "./ui/home/FolioHome";
 export type { FolioHomeProps } from "./ui/home/FolioHome";
 export { useFolioAppearance } from "./ui/appearance-react";
