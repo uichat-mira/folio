@@ -7,6 +7,9 @@ import type { FolioTreeNavProps } from "./ui/tree-nav";
 
 export type FolioSlots = {
   home?: ReactNode;
+  /** Custom content routes, rendered inside the shared Folio header/footer.
+   * If statically publishing, register corresponding staticRoutes separately. */
+  pages?: ReadonlyArray<{ path: string; element: ReactNode }>;
   /** Site-provided header brand content; Folio still owns the header layout. */
   headerBrand?: ReactNode;
   headerActions?: ReactNode;

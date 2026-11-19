@@ -33,6 +33,7 @@ import { FolioToc } from "./ui/toc";
 import { searchFolioDocs } from "./core/search";
 import {
   folioCollectionIndexes,
+  normalizeFolioCollectionPath,
   selectFolioCollectionDocs,
   assertNoFolioCollectionConflicts,
   type FolioCollectionIndex,
@@ -318,6 +319,23 @@ function Shell({
     () => buildFolioArticleArchiveModel(docs, config),
     [docs, config],
   );
+  // Custom list pages share the Folio shell; duplicate route ownership is
+  // rejected rather than silently hiding a document or a collection.
+  const customPagePaths = new Set<string>();
+  const ownedPaths = new Set([
+    "/",
+    ...docs.map((doc) => href(doc.path)),
+    ...folioCollectionIndexes(config).map((collection) => collection.path),
+    ...archive.routes.map((route) => route.path),
+  ]);
+  for (const page of slots?.pages ?? []) {
+    const path = normalizeFolioCollectionPath(page.path);
+    if (ownedPaths.has(path) || customPagePaths.has(path)) {
+      throw new Error("folio custom page route conflict: " + JSON.stringify(path));
+    }
+    customPagePaths.add(path);
+  }
+
   const current = docs.find((doc) => href(doc.path) === href(location.pathname));
   const navigation = config.navigation ?? [
     { label: "文档", href: "/docs" },
@@ -459,6 +477,9 @@ function Shell({
               />
             }
           />
+          {(slots?.pages ?? []).map((page) => (
+            <Route key={page.path} path={page.path} element={page.element} />
+          ))}
           {folioCollectionIndexes(config).map((collection) => (
             <Route
               key={collection.path}

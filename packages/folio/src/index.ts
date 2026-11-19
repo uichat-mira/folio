@@ -1,5 +1,9 @@
 export { FolioApp } from "./app";
 export { FolioHome } from "./ui/home/FolioHome";
+export { FolioEntryList } from "./ui/entry-list/EntryList";
+export { FolioListPage } from "./ui/entry-list/ListPage";
+export type { FolioListEntry, FolioListRow, FolioEntryListProps, FolioEntryTagLink } from "./ui/entry-list/EntryList";
+export type { FolioListPageProps } from "./ui/entry-list/ListPage";
 export type { FolioHomeProps } from "./ui/home/FolioHome";
 export { useFolioAppearance } from "./ui/appearance-react";
 export type { FolioAppearanceController } from "./ui/appearance-react";

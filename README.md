@@ -20,6 +20,24 @@ npm run release:check
 
 That builds the package, audits the packed file list, and installs the resulting tarball into an isolated Vite + React consumer.
 
+### One-command project initialization (dev candidate)
+
+A new, independently packed CLI lives at `packages/create-folio`:
+
+```sh
+# Available only after @uichat-mira/create-folio is published:
+npx @uichat-mira/create-folio my-site --install
+# Equivalent npm initializer:
+npm create @uichat-mira/folio my-site -- --install
+```
+
+The CLI scaffolds a working Vite/React/Folio site with Markdown content, config,
+static build and a safe no-overwrite policy. `--install` is optional; without
+it, run `cd my-site && npm install`. The candidate has been exercised as a
+**local npm tarball through npm exec**, but is **not yet on the public Registry**.
+Do not confuse source verification with publication.
+
+
 ## Consumer contract
 
 The unchanged 0.1.x consumer boundaries are defined once in [docs/consumer-contract.md](docs/consumer-contract.md):
@@ -41,6 +59,7 @@ The [migration status page](https://uichat-mira.github.io/folio/reference/migrat
 - Documentation, article, project, and page entry types
 - Vite content discovery and `virtual:folio/content`
 - Generated routes, navigation roots, and heading extraction
+- Theme-aware `FolioEntryList` / `FolioListPage` for first-party or external publications (dev candidate)
 - Configurable static HTML generation
 - Portal default home, explicit Editorial template, and home-only static override
 - Canonical, Open Graph, Twitter, and JSON-LD metadata
