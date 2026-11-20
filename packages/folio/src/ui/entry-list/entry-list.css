@@ -163,9 +163,10 @@
   letter-spacing: .13em;
   text-transform: uppercase;
 }
+/* Shelf entries are list items, not hero headings. Keep one level below H1. */
 .folio-entry-list--shelf .folio-entry-title {
-  font-size: clamp(23px, 3vw, 38px);
-  line-height: 1.22;
+  font-size: clamp(20px, 1.6vw, 25px);
+  line-height: 1.38;
 }
 .folio-entry-list--shelf .folio-entry-description {
   margin-top: 11px;
@@ -198,7 +199,7 @@
     grid-template-columns: clamp(66px, 21vw, 94px) minmax(0, 1fr);
   }
   .folio-entry-list--shelf .folio-entry-arrow { display: none; }
-  .folio-entry-list--shelf .folio-entry-title { font-size: 23px; }
+  .folio-entry-list--shelf .folio-entry-title { font-size: 19px; }
   .folio-entry-list--shelf .folio-entry-description { font-size: 12px; }
   .folio-entry-list--shelf .folio-entry-meta { font-size: 10px; }
 }
