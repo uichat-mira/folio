@@ -356,3 +356,31 @@ slots={{ home: <SiteHome docs={content} /> }}
 - [Core、UI、Build 与站点边界](/guide/architecture)：分层、公开入口与默认壳的所有权。
 - [静态发布](/guide/static-publishing)：构建阶段实际写出的文件与无 JS 阅读。
 - [FolioApp](/reference/components/app)：Props、`FolioSlots` 与插槽示例的参考页。
+
+## 在定制首页消费外部 JSON 订阅（dev）
+
+Folio dev 公开 `useFolioJsonSubscription`，提供浏览器中的**周期拉取、响应校验、静态初始数据及失败保留上次内容**。它不包含服务端代理、Webhook、Feed 自动解析、HTML 抓取或持久化缓存；每种发布者的协议校验由消费站自行提供。
+
+```tsx
+import { useFolioJsonSubscription } from "@uichat-mira/folio";
+
+const initial = { schemaVersion: 1, books: [] }; // 构建期已确认的快照
+const isCatalog = (value: unknown): value is typeof initial =>
+  typeof value === "object" && value !== null &&
+  "schemaVersion" in value && value.schemaVersion === 1 &&
+  "books" in value && Array.isArray(value.books);
+
+function ConsumerBooks() {
+  const { data, status } = useFolioJsonSubscription({
+    url: "https://publisher.example/books/catalog.json",
+    initialData: initial,
+    validate: isCatalog,
+    refreshMs: 300_000,
+  });
+  return <section>{data.books.length} books ({status})</section>;
+}
+```
+
+首屏及静态 HTML 使用 `initialData`，网络仅由 React 挂载后的 Effect 发起；每次收到 JSON 均重新校验，校验失败和断网都不抹掉既有数据。Hook 在挂载期间最多每 5 分钟检查一次（`refreshMs` 下限 60 秒），使用浏览器原生 HTTP cache/ETag 策略，组件卸载后停止；不保证实时推送。
+
+生产消费者应使用严格的 Schema 和外链域名校验。静态兜底内容也要注明来源时间，不能将旧书目谎称为当前结果。具体的书籍 Schema 属于发布者，例如 tomz.io 的 `/books/catalog.json`，不属于 Folio Core。
