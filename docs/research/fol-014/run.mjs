@@ -97,7 +97,7 @@ const INTERACTIONS = {
     label: "desktop: TOC link to 页面结构",
   },
   desktopSidebar: {
-    selector: '.folio-docnav a[href="/docs/intro"]',
+    selector: '.folio-docs-shell > .folio-tree-nav a[href="/docs/intro"]',
     label: "desktop: sidebar link to /docs/intro",
   },
   drawerDoc: {
@@ -354,8 +354,8 @@ const MEASURE = String.raw`(() => {
   };
 
   const header = document.querySelector('.folio-header');
-  const sidebar = document.querySelector('.folio-docnav');
-  const toc = document.querySelector('.folio-toc');
+  const sidebar = document.querySelector('.folio-docs-shell > .folio-tree-nav') || document.querySelector('.folio-tree-nav');
+  const toc = document.querySelector('.folio-docs-shell > .folio-toc') || document.querySelector('.folio-toc');
   const main = document.querySelector('.folio-doc-main');
   const h1 = document.querySelector('.folio-doc-main h1') || document.querySelector('h1');
   const paragraph = document.querySelector('.folio-markdown p') || document.querySelector('p');
@@ -409,6 +409,7 @@ const MEASURE = String.raw`(() => {
   const offenders = [];
   const contained = [];
   for (const el of Array.from(document.querySelectorAll('body *'))) {
+    if (!isVisible(el)) continue;
     const r = el.getBoundingClientRect();
     if (r.width < 1 || r.height < 1) continue;
     if (r.right <= vw + 1 && r.left >= -1) continue;
@@ -447,8 +448,8 @@ const MEASURE = String.raw`(() => {
   }
 
   const mainRect = rect(main);
-  const sidebarRect = rect(sidebar);
-  const tocRect = rect(toc);
+  const sidebarRect = isVisible(sidebar) ? rect(sidebar) : null;
+  const tocRect = isVisible(toc) ? rect(toc) : null;
   const intersects = (a, b) => Boolean(a && b && a.x < b.right && a.right > b.x && a.y < b.bottom && a.bottom > b.y);
 
   return {
@@ -458,7 +459,7 @@ const MEASURE = String.raw`(() => {
     theme: {
       attribute: document.documentElement.getAttribute('data-folio-theme'),
       colorScheme: document.documentElement.style.colorScheme || null,
-      stored: (() => { try { return localStorage.getItem('folio-theme'); } catch { return null; } })(),
+      stored: (() => { try { return localStorage.getItem('folio-theme-choice'); } catch { return null; } })(),
       prefersDark: window.matchMedia('(prefers-color-scheme: dark)').matches,
     },
     consumer: {
@@ -474,7 +475,7 @@ const MEASURE = String.raw`(() => {
     },
     header: { visible: isVisible(header), rect: rect(header), position: header ? getComputedStyle(header).position : null },
     layout: {
-      sidebar: { visible: isVisible(sidebar), rect: sidebarRect, collection: sidebar ? (sidebar.querySelector('.folio-docnav__collection')?.textContent || '').trim() : null, sections: sidebar ? Array.from(sidebar.querySelectorAll('section > h2')).map((el) => (el.textContent || '').trim()) : [], links: sidebarLinks },
+      sidebar: { visible: isVisible(sidebar), rect: sidebarRect, collection: sidebar ? (sidebar.querySelector('.folio-tree-nav__title')?.textContent || '').trim() : null, sections: sidebar ? Array.from(sidebar.querySelectorAll('.folio-tree-nav__row--section h2')).map((el) => (el.textContent || '').trim()) : [], links: sidebarLinks },
       toc: { visible: isVisible(toc), rect: tocRect, items: tocItems, activeHref: toc ? (toc.querySelector('a[aria-current]')?.getAttribute('href') || null) : null },
       pager: { visible: isVisible(pager), rect: rect(pager), links: pagerLinks },
       mobileBar: { visible: isVisible(mobileBar), rect: rect(mobileBar), buttons: mobileButtons },
@@ -528,11 +529,11 @@ const NAV_STATE = String.raw`(() => ({
   dataTheme: document.documentElement.getAttribute('data-folio-theme'),
   h1: (document.querySelector('.folio-doc-main h1') || document.querySelector('h1'))?.textContent?.trim() || null,
   scrollY: Math.round(window.scrollY),
-  sidebarActiveHref: document.querySelector('.folio-docnav a[aria-current="page"]')?.getAttribute('href') || null,
-  tocActiveHref: document.querySelector('.folio-toc a[aria-current="location"]')?.getAttribute('href') || null,
-  drawerPresent: Boolean(document.querySelector('.folio-docs-drawer')),
-  mobileTocPresent: Boolean(document.querySelector('.folio-mobile-toc')),
-  drawerLinkCount: document.querySelectorAll('.folio-docs-drawer .folio-docnav a').length,
+  sidebarActiveHref: document.querySelector('.folio-docs-shell > .folio-tree-nav a[aria-current="page"]')?.getAttribute('href') || null,
+  tocActiveHref: document.querySelector('.folio-docs-shell > .folio-toc a[aria-current="location"]')?.getAttribute('href') || null,
+  drawerPresent: document.querySelector('.folio-docs-overlay')?.classList.contains('is-open') === true,
+  mobileTocPresent: document.querySelector('.folio-mobile-toc')?.classList.contains('is-open') === true,
+  drawerLinkCount: document.querySelectorAll('.folio-docs-drawer .folio-tree-nav a').length,
   mobileTocLinkCount: document.querySelectorAll('.folio-mobile-toc .folio-toc a').length,
   horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth,
   scrollWidth: document.documentElement.scrollWidth,
@@ -593,7 +594,7 @@ const STATIC_MEASURE = String.raw`(() => {
   // The static shell contains the docs nav/toc twice: once in the closed mobile
   // <details> menu and once as direct children of .folio-docs-shell. Measure the
   // shell copy so the desktop geometry reflects what is actually visible.
-  const nav = document.querySelector('.folio-docs-shell > .folio-docnav') || document.querySelector('.folio-docnav');
+  const nav = document.querySelector('.folio-docs-shell > .folio-tree-nav') || document.querySelector('.folio-tree-nav');
   const toc = document.querySelector('.folio-docs-shell > .folio-toc') || document.querySelector('.folio-toc');
   const pager = document.querySelector('.folio-page-nav');
   const article = document.querySelector('.folio-markdown');
@@ -625,8 +626,8 @@ const STATIC_MEASURE = String.raw`(() => {
     nav: nav ? {
       rect: rect(nav),
       display: getComputedStyle(nav).display,
-      collection: text(nav.querySelector('.folio-docnav__collection')),
-      sections: Array.from(nav.querySelectorAll('section > h2')).map(text),
+      collection: text(nav.querySelector('.folio-tree-nav__title')),
+      sections: Array.from(nav.querySelectorAll('.folio-tree-nav__row--section h2')).map(text),
       links: Array.from(nav.querySelectorAll('a')).map((a) => ({
         text: text(a),
         href: a.getAttribute('href'),
@@ -1030,7 +1031,7 @@ async function main() {
         "Page.addScriptToEvaluateOnNewDocument",
         {
           source:
-            "try { localStorage.setItem('folio-theme', 'light'); } catch (error) { window.__folioSeedError = String(error); }",
+            "try { localStorage.setItem('folio-theme-choice', 'light'); } catch (error) { window.__folioSeedError = String(error); }",
         },
         sessionId,
       );
@@ -1285,7 +1286,7 @@ async function main() {
     );
     await cdp.send(
       "Page.addScriptToEvaluateOnNewDocument",
-      { source: "try { localStorage.removeItem('folio-theme'); } catch (error) {}" },
+      { source: "try { localStorage.removeItem('folio-theme-choice'); } catch (error) {}" },
       systemPage,
     );
     await goto(systemPage, `${origin}${START_PATH}`);
@@ -1544,7 +1545,7 @@ async function main() {
             staticCssText.includes(".showcase-home") ||
             staticCssText.includes(".claude-visual"),
           defaultSelectorsPresent: [
-            ".folio-docnav",
+            ".folio-tree-nav",
             ".folio-toc",
             ".folio-page-nav",
             ".folio-static-doc-menu",
