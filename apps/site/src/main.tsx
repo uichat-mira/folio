@@ -6,11 +6,13 @@ import docs from "virtual:folio/content";
 import config from "../folio.config";
 import { HomePage } from "./HomePage";
 import { HeaderVersionPopover } from "./HeaderVersionPopover";
+import { DesignReferenceEnhancement } from "./DesignReferenceEnhancement";
 import { withFolioBaseLinks } from "./content-links";
 import "./site.css";
-import "./showcase.css";
 import "./home.css";
+import "./closing-signal.css";
 import "./legacy-claude-visual.css";
+import "./design-reference.css";
 
 const basePath = import.meta.env.BASE_URL;
 const content = (docs as FolioDoc[]).map((doc) => ({
@@ -35,9 +37,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       basePath={basePath}
       ui={{ footerOnDocs: false }}
       slots={{
+        headerBrand: <span className="site-header-wordmark" role="img" aria-label="Folio" />,
         home: <HomePage docs={content} />,
         articleFooter,
-        headerActions: <HeaderVersionPopover />,
+        headerActions: <><HeaderVersionPopover /><DesignReferenceEnhancement docs={content} /></>,
       }}
     />
   </React.StrictMode>,

@@ -55,23 +55,29 @@ export function FolioMarkdown({
         const { default: mermaid } = await import("mermaid");
         if (cancelled) return;
 
-        const dark =
-          document.documentElement.dataset.folioTheme === "dark";
+        // Diagram colors follow the effective semantic palette, never the
+        // code highlighter theme. Computed values handle brand CSS overrides.
+        const rootStyle = getComputedStyle(document.documentElement);
+        const token = (name: string) =>
+          rootStyle.getPropertyValue(`--folio-${name}`).trim();
 
         mermaid.initialize({
           startOnLoad: false,
           securityLevel: "strict",
-          theme: dark ? "dark" : "base",
-          themeVariables: dark
-            ? undefined
-            : {
-                fontFamily: "Public Sans, sans-serif",
-                primaryColor: "#efe9de",
-                primaryTextColor: "#141413",
-                lineColor: "#cc785c",
-                secondaryColor: "#f5f0e8",
-                tertiaryColor: "#faf9f5",
-              },
+          theme: "base",
+          themeVariables: {
+            fontFamily: token("font-sans"),
+            background: token("canvas"),
+            primaryColor: token("surface-card"),
+            primaryTextColor: token("ink"),
+            primaryBorderColor: token("hairline"),
+            secondaryColor: token("surface-soft"),
+            tertiaryColor: token("canvas"),
+            lineColor: token("primary"),
+            textColor: token("body"),
+            mainBkg: token("surface-card"),
+            nodeBorder: token("hairline"),
+          },
         });
 
         for (const node of nodes) {
@@ -85,6 +91,14 @@ export function FolioMarkdown({
             );
             if (!cancelled) node.innerHTML = result.svg;
           } catch (error) {
+            // A theme change may fail *after* a previous SVG succeeded. Always
+            // restore readable source, not a stale diagram in the wrong theme.
+            if (!cancelled) {
+              const pre = document.createElement("pre");
+              pre.className = "markdown-mermaid-source";
+              pre.textContent = sourceCode;
+              node.replaceChildren(pre);
+            }
             console.warn(
               "Folio Mermaid render failed; source fallback is preserved.",
               error,
@@ -112,7 +126,7 @@ export function FolioMarkdown({
     });
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ["data-folio-theme"],
+      attributeFilter: ["data-folio-theme", "data-folio-preset"],
     });
 
     return () => {

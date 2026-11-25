@@ -1,5 +1,8 @@
 import type { FolioDoc } from "@uichat-mira/folio";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { ThemeExplorerGate, ThemePreviewHome } from "./ThemeExplorer";
+import { DesignMobileMotion } from "./DesignMobileMotion";
+import { ClosingSignal } from "./ClosingSignal";
 
 type HomePageProps = { docs: FolioDoc[] };
 
@@ -17,8 +20,8 @@ function Arrow({ diagonal = false }: { diagonal?: boolean }) {
 
 const portalModes = [
   { number: "01", label: "PRODUCT / ORGANIZATION", title: "产品与组织门户",
-    description: "介绍产品、串联项目、归档官方信息。清晰的入口，比堆砌页面更重要。",
-    href: "/showcase/content-map", action: "查看内容组织", variant: "product" },
+    description: "介绍产品、组织内容、发布官方信息。清晰的入口，比堆砌页面更重要。",
+    href: "/about", action: "了解 Folio", variant: "product" },
   { number: "02", label: "DOCS / KNOWLEDGE", title: "文档与知识中心",
     description: "导航、集合、页内目录与搜索，让信息有结构，也让人找得到。",
     href: "/guide/introduction", action: "进入文档指南", variant: "knowledge" },
@@ -36,9 +39,12 @@ const publishSteps = [
 ] as const;
 
 export function HomePage({ docs }: HomePageProps) {
-  const reading = ["/guide/getting-started", "/blogs/why-folio", "/reference/overview"]
-    .map((path) => docs.find((doc) => doc.path === path))
-    .filter((doc): doc is FolioDoc => doc !== undefined);
+  const location = useLocation();
+  // This URL remains the normal Folio homepage for all other visitors.
+  // The query mode is used only inside the Design panel's real phone iframe.
+  if (new URLSearchParams(location.search).get("folio-preview") === "mobile") {
+    return <ThemePreviewHome docs={docs} search={location.search} />;
+  }
 
   return (
     <main className="folio-portal-home">
@@ -52,8 +58,8 @@ export function HomePage({ docs }: HomePageProps) {
               在构建时完成组织、渲染与静态发布。从一个产品页面，到整个组织的信息世界。
             </p>
             <div className="portal-hero__actions">
-              <Link className="portal-button portal-button--primary" to="/showcase">
-                探索 Folio 的能力 <Arrow />
+              <Link className="portal-button portal-button--primary" to="/about">
+                认识 Folio <Arrow />
               </Link>
               <Link className="portal-button portal-button--outline" to="/guide/getting-started">
                 快速开始 <Arrow diagonal />
@@ -76,7 +82,7 @@ export function HomePage({ docs }: HomePageProps) {
               <div className="portal-stage__page">
                 <div className="portal-stage__nav">
                   <strong>folio<span>.</span></strong>
-                  <span>STORIES &nbsp; / &nbsp; GUIDES &nbsp; / &nbsp; WORK</span>
+                  <span>STORIES &nbsp; / &nbsp; GUIDES &nbsp; / &nbsp; ABOUT</span>
                 </div>
                 <div className="portal-stage__eyebrow">A HOME FOR EVERY IDEA <span>— 001</span></div>
                 <div className="portal-stage__title">Content is<br />a living <em>thing.</em></div>
@@ -99,12 +105,6 @@ export function HomePage({ docs }: HomePageProps) {
               </div>
             </div>
           </div>
-        </div>
-        <div className="portal-container portal-hero__baseline">
-          <span>FOLIO / 01</span><span>为结构化内容，创造自由表达。</span>
-          <a href="#portal-capabilities" aria-label="向下了解 Folio 的门户能力">
-            DISCOVER <span aria-hidden="true">↓</span>
-          </a>
         </div>
       </section>
 
@@ -176,7 +176,7 @@ export function HomePage({ docs }: HomePageProps) {
             <div className="portal-config__foot">
               <span className="portal-config__check" aria-hidden="true">✓</span>
               <span>已有 API · 首页组合能力仍在扩展</span>
-              <Link to="/showcase/guides/organize-content" aria-label="查看内容组织实践"><Arrow diagonal /></Link>
+              <Link to="/guide/organizing-content" aria-label="查看内容组织实践"><Arrow diagonal /></Link>
             </div>
           </div>
         </div>
@@ -214,7 +214,7 @@ export function HomePage({ docs }: HomePageProps) {
           <div className="portal-section__heading">
             <div>
               <p className="portal-section__index">04 / A SYSTEM, NOT A TEMPLATE</p>
-              <h2 id="portal-design-title">保持同一种秩序。<br /><em>拥有不一样的气质。</em></h2>
+              <h2 id="portal-design-title">同一种秩序。<br /><em>不一样的气质。</em></h2>
             </div>
             <p className="portal-section__aside">
               设计系统负责一致性，站点负责表达。Folio 提供基础 Token 与组件能力，门户布局模式继续生长。
@@ -228,7 +228,7 @@ export function HomePage({ docs }: HomePageProps) {
             </div>
             <div className="portal-design-card portal-design-card--color">
               <div className="portal-design-card__top"><span>FOUNDATION / TOKENS</span><span>02</span></div>
-              <div className="portal-design-card__swatches" aria-label="Folio 当前设计色彩">
+              <div className="portal-design-card__swatches" role="img" aria-label="当前主题的主色、辅助色、文字墨色、强调色和卡片背景">
                 <span /><span /><span /><span /><span />
               </div>
               <div className="portal-design-card__bottom"><strong>统一而可配置</strong><span>颜色、间距与视觉契约</span></div>
@@ -245,6 +245,8 @@ export function HomePage({ docs }: HomePageProps) {
               <div className="portal-design-card__bottom"><strong>组合而非复制</strong><span>Header、Popover 与可演进的布局</span></div>
             </div>
           </div>
+          <ThemeExplorerGate docs={docs} />
+          <DesignMobileMotion />
         </div>
       </section>
 
@@ -258,12 +260,12 @@ export function HomePage({ docs }: HomePageProps) {
           </div>
           <div className="portal-audience__grid">
             <article className="portal-audience__panel portal-audience__panel--mira">
-              <span className="portal-audience__number">01 / MIRA ORGANIZATION</span>
-              <div className="portal-audience__symbol" aria-hidden="true">M.</div>
+              <span className="portal-audience__number">01 / MIRA IN PRACTICE</span>
+              <div className="portal-audience__symbol portal-audience__symbol--mira" aria-hidden="true">M.</div>
               <div>
-                <h3>组织的官方信息发布底座</h3>
-                <p>产品、文档、项目、文章与公告，用一套可信的内容链路持续维护。</p>
-                <span className="portal-audience__footnote">真实需求驱动引擎演进</span>
+                <h3>从 Mira 的真实实践中生长</h3>
+                <p>围绕产品官网、技术文档、工程博客与公告，Mira 持续打磨内容组织和发布链路。这些经验沉淀为 Folio，服务于官方对外信息发布。</p>
+                <span className="portal-audience__footnote">由真实发布需求驱动</span>
               </div>
             </article>
             <article className="portal-audience__panel portal-audience__panel--builders">
@@ -280,6 +282,7 @@ export function HomePage({ docs }: HomePageProps) {
       </section>
 
       <section className="portal-closing" aria-labelledby="portal-closing-title">
+        <ClosingSignal />
         <div className="portal-container portal-closing__inner">
           <div>
             <span>BUILD SOMETHING THAT LASTS.</span>
@@ -291,12 +294,6 @@ export function HomePage({ docs }: HomePageProps) {
           </div>
         </div>
       </section>
-      <div className="portal-container portal-read-next" aria-label="继续阅读">
-        <span>KEEP EXPLORING /</span>
-        {reading.map((doc) => (
-          <Link to={doc.path} key={doc.path}>{doc.title} <Arrow diagonal /></Link>
-        ))}
-      </div>
     </main>
   );
 }

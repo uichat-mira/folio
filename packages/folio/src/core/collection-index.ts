@@ -36,7 +36,12 @@ export function folioCollectionIndexes(config: FolioConfig): FolioCollectionInde
     if (seen.has(path)) throw new Error("folio duplicate collection route: " + JSON.stringify(path));
     seen.add(path);
     const title = collection.title ??
-      config.navigation?.find((item) => item.href.replace(/\/+$/, "") === path)?.label ??
+      config.navigation?.find((item) =>
+        (typeof item.href === "string" &&
+          item.href.replace(/\/+$/, "") === path) ||
+        (typeof item.collection === "string" &&
+          normalizeFolioCollectionPath(item.collection) === path),
+      )?.label ??
       path.split("/").at(-1)!;
     return {
       path,

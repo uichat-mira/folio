@@ -11,8 +11,7 @@
 /* Mobile header disclosures are sections of the navigation, not floating cards.
    Mega-menu descriptions are omitted here; the full information stays on desktop. */
 @media (max-width: 780px) {
-  .folio-mobile-panel nav > a,
-  .folio-mobile-panel .folio-mobile-group__trigger {
+  .folio-mobile-panel nav > a {
     border-bottom: 1px solid var(--folio-hairline);
   }
 
@@ -60,28 +59,52 @@
     color: var(--folio-primary-active);
   }
 
-  .folio-mobile-panel__custom-actions .folio-utility-popover__panel {
+  .folio-mobile-panel .folio-mobile-panel__custom-actions .folio-utility-popover__panel {
     position: static;
-    display: none;
+    /* Collapse one grid row instead of snapping display, matching the
+       navigation accordion. The body clips its own content. */
+    display: grid;
+    grid-template-rows: 0fr;
     width: 100%;
     min-width: 0;
     max-width: none;
-    padding: 6px 0 10px 12px;
+    padding: 0;
     border: 0;
     border-radius: 0;
     background: transparent;
     box-shadow: none;
     visibility: hidden;
-    opacity: 0;
+    opacity: 1;
     transform: none;
     pointer-events: none;
-    transition: none;
+    transition: grid-template-rows .18s ease, visibility .18s;
   }
 
-  .folio-mobile-panel__custom-actions .folio-utility-popover__panel.is-open {
-    display: block;
+  .folio-mobile-panel .folio-mobile-panel__custom-actions .folio-utility-popover__panel.is-open {
+    grid-template-rows: 1fr;
     visibility: visible;
-    opacity: 1;
     pointer-events: auto;
+  }
+
+  /* Padding stays on the children: padding on the collapsing box itself would
+     keep a residual height when the grid row reaches zero. */
+  .folio-mobile-panel__custom-actions .folio-utility-popover__body {
+    min-height: 0;
+    overflow: hidden;
+    padding-left: 12px;
+  }
+
+  .folio-mobile-panel__custom-actions .folio-utility-popover__body > :first-child {
+    margin-top: 6px;
+  }
+
+  .folio-mobile-panel__custom-actions .folio-utility-popover__body > :last-child {
+    margin-bottom: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folio-mobile-panel .folio-mobile-panel__custom-actions .folio-utility-popover__panel {
+    transition: none;
   }
 }

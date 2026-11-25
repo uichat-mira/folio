@@ -1,0 +1,169 @@
+{
+  "meta": {
+    "purpose": "FOL-041 (#163) required commands, evidence harness runs and full release:check",
+    "commit": "716f5e4071c397b250fe3b57774b492e2f6cd235",
+    "base": "c6ecaef540f33a69ba583680ed0ce02a83e69cec",
+    "branch": "feat/folio-article-archives",
+    "node": "v22.23.2",
+    "platform": "darwin arm64",
+    "chrome": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "capturedAt": "2026-11-09T08:41:18.208Z",
+    "workingTreeStatus": "?? docs/research/fol-041/",
+    "logPolicy": "Raw *.log files are intentionally not tracked (repository .gitignore ignores *.log). Command exit codes and captured output tails are embedded here; per-check detail is in site.json and consumer.json.",
+    "note": "npm_config_cache=$PWD/.npm-cache npm_config_logs_dir=$PWD/.npm-logs was exported for every command"
+  },
+  "commands": [
+    {
+      "id": "typecheck",
+      "command": "npm run typecheck -w @uichat-mira/folio",
+      "exitCode": 0,
+      "outputTail": [
+        "",
+        "> @uichat-mira/folio@0.1.1 typecheck",
+        "> tsc --noEmit"
+      ]
+    },
+    {
+      "id": "package-tests",
+      "command": "npm test -w @uichat-mira/folio",
+      "exitCode": 0,
+      "outputTail": [
+        "1..331",
+        "# tests 331",
+        "# suites 0",
+        "# pass 331",
+        "# fail 0",
+        "# cancelled 0",
+        "# skipped 0",
+        "# todo 0",
+        "# duration_ms 15554.329417"
+      ],
+      "note": "331 tests (existing + FOL-041), 0 fail, 0 skipped"
+    },
+    {
+      "id": "layer-gate",
+      "command": "npm run layers:check -w @uichat-mira/folio",
+      "exitCode": 0,
+      "outputTail": [
+        "> node scripts/dependency-layers.mjs",
+        "",
+        "[layers] ok  60 modules (31 ui, 11 build, 17 core, 1 entry), 147 relative edges, 0 non-module specifier(s) ignored"
+      ]
+    },
+    {
+      "id": "pack-verify",
+      "command": "npm run pack:verify -w @uichat-mira/folio",
+      "exitCode": 0,
+      "outputTail": [
+        "",
+        "styles.css verified: 10 ordered source(s), 69624 bytes, tokens + global rules + component/static selectors + cascade order",
+        "npm pack verified: uichat-mira-folio-0.1.1.tgz, 17 files, 403129 bytes unpacked"
+      ]
+    },
+    {
+      "id": "site-evidence-harness",
+      "command": "node docs/research/fol-041/verify-site.mjs",
+      "exitCode": 0,
+      "summary": "32/32 checks passed",
+      "outputTail": [
+        "PASS  site-archive-composition-consumes-core-helpers (2ms)",
+        "",
+        "32/32 checks passed",
+        "results: docs/research/fol-041/results/site.json"
+      ]
+    },
+    {
+      "id": "consumer-evidence-harness",
+      "command": "node docs/research/fol-041/verify-consumer.mjs",
+      "exitCode": 0,
+      "summary": "23/23 checks passed",
+      "outputTail": [
+        "PASS  external-consumer-browser-has-no-page-exceptions (0ms)",
+        "",
+        "23/23 checks passed",
+        "results: docs/research/fol-041/results/consumer.json"
+      ]
+    }
+  ],
+  "releaseCheck": {
+    "command": "npm run release:check",
+    "exitCode": 0,
+    "summary": [
+      "validate: repository typecheck + package build + site typecheck + style ownership + OG worker test + 331 package tests + official site build (63 HTML routes)",
+      "pack:verify: uichat-mira-folio-0.1.1.tgz, 17 files, 403129 bytes unpacked",
+      "pack:consumer: tarball sha256 68fd00d46dccc7ff0c2cda6388d5d51d0ee9386ef3a3bc79775bde4cc722aad5; entrypoints, types, Vite build, static routes/base/sitemap/robots/feeds/siteIndexing, PWA and counter-proofs all ok"
+    ],
+    "outputTail": [
+      "[static]   ok  404.html  noindex,nofollow",
+      "[static]   ok  blogs/ and projects/ indexes are prerendered",
+      "[static]   ok  sitemap.xml  four base-prefixed routes, trusted lastmod only, no 404",
+      "[static]   ok  robots.txt  points at the base-prefixed sitemap",
+      "[static]   ok  siteIndexing: \"noindex\" build  every page noindex,nofollow, canonicals unchanged, preview robots.txt, sitemap unadvertised",
+      "[static]   ok  no feeds configured: no feed files and no alternate links",
+      "[static]   ok  rss.xml  one base-prefixed item, absolute GUID, trusted pubDate",
+      "[static]   ok  atom.xml  permalink ids and trusted updated/published dates only",
+      "[static]   ok  feeds/blogs.xml  zero-item RSS for an empty directory, no Atom",
+      "[static]   ok  feeds  three absolute base-prefixed alternate links on every page including 404",
+      "[static]   ok  configured home uses config text, collection links and base path",
+      "[static]   ok  static-only home override keeps every other route, canonical and sitemap entry",
+      "[static]   ok  SEO fixture: parsed JSON-LD author precedence/dates and parsed sitemap lastmod",
+      "[static]   ok  staticRoutes: false produced no static files (counter-proof)",
+      "[pwa:root]   ok  base /: manifest scope/start_url, 8 precache entries (no HTML, no fallback), manifest link on 5 pages, content version 85417657b8b8…",
+      "[pwa:subpath]   ok  base /folio-smoke/: manifest scope/start_url, 8 precache entries (no HTML, no fallback), manifest link on 5 pages, content version 4fdd0ff5b479…",
+      "[pwa:content] ok  Markdown-only change: identical 3 asset(s), new version c23ff69baab6… -> be4dc3e0a8a2…, worker bytes changed",
+      "[pwa:stable] ok  unchanged rebuild keeps the same content version",
+      "[pwa:assets] ok  JS change rotates the hashed asset and the worker precache",
+      "[pwa:auto] ok  auto-update mode activates and claims without the prompt",
+      "[pwa:guard] ok  manifestTransforms cannot inject a page (directory, encoded and .html URLs rejected)",
+      "[pwa:off]   ok  disable: true emits no PWA output and keeps the static site",
+      "",
+      "Tarball consumer verification passed for @uichat-mira/folio@0.1.1 (716f5e4071c397b250fe3b57774b492e2f6cd235 (working tree dirty))"
+    ]
+  },
+  "evidence": {
+    "site": "docs/research/fol-041/results/site.json",
+    "consumer": "docs/research/fol-041/results/consumer.json",
+    "screenshots": "docs/research/fol-041/results/screenshots/",
+    "tarball": {
+      "fileName": "uichat-mira-folio-0.1.1.tgz",
+      "sha256": "68fd00d46dccc7ff0c2cda6388d5d51d0ee9386ef3a3bc79775bde4cc722aad5",
+      "bytes": 99811,
+      "entryCount": 17,
+      "unpackedSize": 403129,
+      "files": [
+        "LICENSE",
+        "README.md",
+        "dist/chunk-HT25YDIZ.js",
+        "dist/chunk-LTT6SMBZ.js",
+        "dist/index.d.ts",
+        "dist/index.js",
+        "dist/pwa-react.d.ts",
+        "dist/pwa-react.js",
+        "dist/pwa-update-BrGEBxoo.d.ts",
+        "dist/pwa.d.ts",
+        "dist/pwa.js",
+        "dist/styles.css",
+        "dist/types-qxPkY5wF.d.ts",
+        "dist/virtual.d.ts",
+        "dist/vite.d.ts",
+        "dist/vite.js",
+        "package.json"
+      ]
+    },
+    "totals": {
+      "siteChecks": {
+        "status": "passed",
+        "total": 32,
+        "passed": 32,
+        "failed": 0
+      },
+      "consumerChecks": {
+        "status": "passed",
+        "total": 23,
+        "passed": 23,
+        "failed": 0
+      },
+      "combined": 55
+    }
+  }
+}

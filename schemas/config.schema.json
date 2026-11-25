@@ -77,6 +77,12 @@
     "home": {
       "type": "object",
       "properties": {
+        "template": {
+          "enum": [
+            "portal",
+            "editorial"
+          ]
+        },
         "meta": {
           "oneOf": [
             {
@@ -230,6 +236,37 @@
               }
             ]
           }
+        }
+      },
+      "additionalProperties": false
+    },
+    "appearance": {
+      "type": "object",
+      "description": "Visual preset, site color scheme and independent syntax palette shared by React and static rendering.",
+      "properties": {
+        "preset": {
+          "type": "string",
+          "enum": [
+            "pearl",
+            "editorial",
+            "graphite"
+          ]
+        },
+        "scheme": {
+          "type": "string",
+          "enum": [
+            "light",
+            "dark",
+            "system"
+          ]
+        },
+        "codePalette": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "xuanzhi",
+            "xuanmo"
+          ]
         }
       },
       "additionalProperties": false

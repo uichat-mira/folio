@@ -1,9 +1,16 @@
 import {
   FolioApp,
-  FolioDocNav,
+  FolioHome,
+  useFolioAppearance,
   FolioToc,
+  FolioPageNav,
+  FolioDocMeta,
+  getFolioDocMeta,
   FolioTreeNav,
+  resolveFolioReaderKind,
+  shouldShowFolioPageFooter,
   buildFolioContentTree,
+  buildFolioNavigationTree,
   resolveFolioProjectTree,
   getFolioTreeNeighbors,
   buildFolioDocStructure,
@@ -12,20 +19,39 @@ import {
   parseFolioDoc,
   renderFolioMarkdown,
   resolveFolioHome,
+  resolveFolioAppearance,
+  resolveFolioCodePalette,
   resolveGithubPagesBase,
   searchFolioDocs,
   type FolioAppProps,
+  type FolioHomeProps,
+  type FolioAppearanceController,
   type FolioConfig,
+  type FolioAppearanceConfig,
+  type FolioVisualPreset,
+  type FolioColorSchemePreference,
+  type FolioCodePalette,
   type FolioDateSource,
   type FolioDateSources,
   type FolioDoc,
   type FolioDocCollection,
   type FolioDocSection,
   type FolioDocsShellProps,
-  type FolioDocNavProps,
+  type FolioDocMetaProps,
+  type FolioDocMetaField,
+  type FolioGitHistory,
+  type FolioGitRevision,
+  type FolioPageNavProps,
+  type FolioPageNavTarget,
+  type FolioPageNavNeighbors,
   type FolioTocProps,
   type FolioContentTree,
   type FolioTreeNavProps,
+  type FolioTreeExpansionProps,
+  type FolioNavigationTree,
+  type FolioNavigationNode,
+  type FolioNavigationTreeOptions,
+  type FolioReaderKind,
   type FolioDocStructure,
   type FolioEntryType,
   type FolioHeaderProps,
@@ -57,11 +83,17 @@ import {
 // usable, without adding runtime code to the consumer.
 type PublicTypeSurface = {
   appProps: FolioAppProps;
+  homeProps: FolioHomeProps;
+  appearanceController: FolioAppearanceController;
   docsShellProps: FolioDocsShellProps;
-  docNavProps: FolioDocNavProps;
   tocProps: FolioTocProps;
   tree: FolioContentTree;
   treeNavProps: FolioTreeNavProps;
+  treeExpansionProps: FolioTreeExpansionProps;
+  navigationTree: FolioNavigationTree;
+  navigationNode: FolioNavigationNode;
+  navigationTreeOptions: FolioNavigationTreeOptions;
+  pageReader: FolioReaderKind;
   headerProps: FolioHeaderProps;
   shareButtonProps: FolioShareButtonProps;
   markdownProps: FolioMarkdownProps;
@@ -70,7 +102,18 @@ type PublicTypeSurface = {
   section: FolioDocSection;
   structure: FolioDocStructure;
   doc: FolioDoc;
+  docMetaProps: FolioDocMetaProps;
+  docMetaField: FolioDocMetaField;
+  gitHistory: FolioGitHistory;
+  gitRevision: FolioGitRevision;
+  pageNavProps: FolioPageNavProps;
+  pageNavTarget: FolioPageNavTarget;
+  pageNavNeighbors: FolioPageNavNeighbors;
   config: FolioConfig;
+  appearance: FolioAppearanceConfig;
+  preset: FolioVisualPreset;
+  colorScheme: FolioColorSchemePreference;
+  codePalette: FolioCodePalette;
   navigationItem: FolioNavigationItem;
   slots: FolioSlots;
   themePreference: FolioThemePreference;
@@ -96,6 +139,7 @@ const config: FolioConfig = defineFolioConfig({
   description: "Standalone type check of the published package shape.",
   base: resolveGithubPagesBase("uichat-mira/folio"),
   navigation: [{ label: "Docs", href: "/docs" }],
+  appearance: { preset: "graphite", scheme: "system", codePalette: "xuanmo" },
   home: {
     sections: [
       { type: "intro", title: "Home" },
@@ -103,6 +147,10 @@ const config: FolioConfig = defineFolioConfig({
     ],
   },
 });
+
+const appearance = resolveFolioAppearance(config);
+const effectiveCodePalette: FolioCodePalette = resolveFolioCodePalette(appearance.codePalette, "light");
+void effectiveCodePalette;
 
 const docs: FolioDoc[] = [
   parseFolioDoc(
@@ -134,6 +182,9 @@ const pluginOptions: FolioPluginOptions = {
 
 const structure = buildFolioDocStructure(docs);
 const neighbors = getFolioDocNeighbors(docs, docs[0]);
+const standalonePager = <FolioPageNav next={{ path: "/docs/next", title: "Next" }} />;
+const standaloneMetadata = <FolioDocMeta doc={docs[0]} />;
+const metadataFields = getFolioDocMeta(docs[0]);
 const results = searchFolioDocs(docs, "intro");
 const html: string = renderFolioMarkdown("# Intro");
 const homeModel: FolioHomeModel = resolveFolioHome(config, docs);
@@ -144,19 +195,38 @@ const virtualModule: string = folioVirtualModule;
 const typedVirtualDocs: FolioDoc[] = virtualDocs;
 const typedVirtualRoots: string[] = virtualRoots;
 const plugin = folio(pluginOptions);
+function DesignControls() {
+  const { appearance, effectiveScheme, preview, resetPreview } = useFolioAppearance();
+  return <section>
+    <button onClick={() => preview({ preset: "graphite", scheme: "dark", codePalette: "xuanmo" })}>
+      {appearance.preset} / {effectiveScheme}
+    </button>
+    <button onClick={resetPreview}>Reset</button>
+  </section>;
+}
+const composedHome: FolioHomeProps = { config, docs, template: "editorial", as: "div" };
+const embeddedHome = <FolioHome {...composedHome} />;
 const app = <FolioApp config={config} docs={docs}
   slots={{
-    docNav: (props) => <FolioDocNav {...props} />,
+    home: <DesignControls />,
+    navigation: (props) => <FolioTreeNav {...props} />,
     docToc: (props) => <FolioToc {...props} />,
-    projectNav: (props) => <FolioTreeNav {...props} />,
   }}
 />;
-const standaloneNav = <FolioDocNav doc={docs[0]} docs={docs} ariaLabel="Consumer docs" />;
+const standaloneNav = (
+  <FolioTreeNav
+    tree={buildFolioNavigationTree(docs, docs[0])}
+    currentPath={docs[0].path}
+    ariaLabel="Consumer docs"
+  />
+);
 const standaloneToc = <FolioToc headings={docs[0].headings} />;
 const contentTree = buildFolioContentTree(docs);
 const projectTree = resolveFolioProjectTree(docs, docs[0]);
 const standaloneTree = <FolioTreeNav tree={contentTree} currentPath={docs[0].path} />;
 const treeNeighbors = getFolioTreeNeighbors(projectTree, docs[0].path);
+const navigationTree = buildFolioNavigationTree(docs, docs[0]);
+const footerAllowed = shouldShowFolioPageFooter(resolveFolioReaderKind(docs[0], true), false);
 
 // @ts-expect-error FolioConfig requires both title and description.
 const missingDescription: FolioConfig = { title: "Only a title" };
@@ -168,6 +238,9 @@ export function consumerSurface(): unknown[] {
   return [
     structure,
     neighbors,
+    standalonePager,
+    standaloneMetadata,
+    metadataFields,
     results,
     html,
     escaped,
@@ -181,10 +254,13 @@ export function consumerSurface(): unknown[] {
     typedVirtualRoots,
     plugin,
     app,
+    embeddedHome,
     standaloneNav,
     standaloneToc,
     standaloneTree,
     treeNeighbors,
+    navigationTree,
+    footerAllowed,
     missingDescription,
     missingConfig,
   ];

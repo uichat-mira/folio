@@ -8,32 +8,32 @@ export function HeaderVersionPopover() {
       label="Folio 发布版本与资源"
       className="site-version-popover"
       trigger={
-        <>
-          <span className="site-version-popover__caption">v0.1.1</span>
+        <span className="site-version-popover__trigger">
+          <span className="site-version-popover__caption">v0.2.0</span>
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="m6 9 6 6 6-6" />
           </svg>
-        </>
+        </span>
       }
     >
       <div className="site-version-popover__current" aria-label="当前已发布版本">
         <span>当前版本</span>
-        <strong>v0.1.1</strong>
+        <strong>v0.2.0</strong>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>
       </div>
-      <a href="https://www.npmjs.com/package/@uichat-mira/folio/v/0.1.0" target="_blank" rel="noreferrer">
+      <a className="site-version-popover__link" href="https://www.npmjs.com/package/@uichat-mira/folio/v/0.1.0" target="_blank" rel="noreferrer">
         <span>v0.1.0 · 早期版本</span>
         <span aria-hidden="true">↗</span>
       </a>
-      <a href="https://github.com/uichat-mira/folio/releases/tag/folio-v0.1.1" target="_blank" rel="noreferrer">
+      <a className="site-version-popover__link" href="https://github.com/uichat-mira/folio/releases/tag/folio-v0.2.0" target="_blank" rel="noreferrer">
         <span>版本发布页</span>
         <span aria-hidden="true">↗</span>
       </a>
-      <a href="https://github.com/uichat-mira/folio/releases" target="_blank" rel="noreferrer">
+      <a className="site-version-popover__link" href="https://github.com/uichat-mira/folio/releases" target="_blank" rel="noreferrer">
         <span>更新记录</span>
         <span aria-hidden="true">↗</span>
       </a>
-      <a href="https://github.com/uichat-mira/folio/issues" target="_blank" rel="noreferrer">
+      <a className="site-version-popover__link" href="https://github.com/uichat-mira/folio/issues" target="_blank" rel="noreferrer">
         <span>参与贡献</span>
         <span aria-hidden="true">↗</span>
       </a>

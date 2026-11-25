@@ -284,8 +284,8 @@ export function verifyStaticConsumer({ consumerDir, appDir, log }) {
   );
   check(
     "static:home",
-    staticIndex.includes('<div id="root"><main class="folio-home folio-journal-home folio-editorial-home">'),
-    "the home page did not receive prerendered content inside #root",
+    staticIndex.includes('<div id="root"><main class="folio-home folio-home--portal">'),
+    "the home page did not receive prerendered Portal content inside #root",
   );
   check(
     "static:home",
@@ -832,6 +832,11 @@ export function verifyStaticConsumer({ consumerDir, appDir, log }) {
     "static:home:configured",
     join(configuredDir, "index.html"),
     "the configured home page",
+  );
+  check(
+    "static:home:configured",
+    configuredIndex.includes('<main class="folio-home folio-journal-home folio-editorial-home">'),
+    "the configured editorial home did not render the editorial template",
   );
   check(
     "static:home:configured",

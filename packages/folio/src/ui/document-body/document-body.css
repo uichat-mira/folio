@@ -1,0 +1,14 @@
+.folio-doc-page > h1,
+.folio-hero h1 {
+  margin: 0;
+  font: var(--folio-reading-article-title-font);
+  letter-spacing: var(--folio-reading-article-title-tracking);
+}
+
+.folio-lede,
+.folio-hero p {
+  max-width: 720px;
+  color: var(--folio-muted);
+  font-size: 17px;
+  line-height: 1.7;
+}

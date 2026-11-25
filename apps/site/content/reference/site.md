@@ -43,7 +43,7 @@ Folio 不会丢掉它们。未知字段会进入 `doc.data`，首页再从真实
 
 ### Content model
 
-当前仓库同时存在 `doc`、`article`、`project` 与 `page`。
+当前仓库的常规类型为 `doc`、`article` 与 `page`；显式旧 `project` 数据仅作迁移兼容。
 
 首页上的 entry 数量、heading 数量和 tag 数量全部来自 virtual manifest，不维护第二份统计数据。
 

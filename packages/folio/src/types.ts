@@ -1,7 +1,7 @@
 // Core content/config types. This module must stay free of React (and of every
 // other UI runtime) so Core and Build code can depend on it directly.
 
-export type FolioEntryType = "doc" | "article" | "project" | "page" | string;
+export type FolioEntryType = "doc" | "article" | "page" | string;
 
 export type FolioHeading = {
   depth: number;
@@ -43,9 +43,25 @@ export type FolioDateSources = {
 /**
  * One author for generated Article/TechArticle structured data. A string is a
  * display name; the object form adds an optional canonical profile URL to the
- * emitted Schema.org `Person`.
+ * emitted Schema.org `Person`, plus an optional image for the byline avatar.
  */
-export type FolioAuthor = string | { name: string; url?: string };
+export type FolioAuthor = string | { name: string; url?: string; avatar?: string };
+
+/** Git records are file-history evidence, not editorial authorship or publication dates. */
+export type FolioGitRevision = {
+  committedAt: string;
+  /** The Git commit's author name, used exactly as recorded (no email). */
+  author?: string;
+  /** GitHub commit-associated avatar (when verifiable at build time). */
+  githubAvatarUrl?: string;
+};
+
+export type FolioGitHistory = {
+  /** Omitted for shallow/incomplete history; earliest visible is not the first. */
+  first?: FolioGitRevision;
+  /** Latest available commit affecting this content path. */
+  last?: FolioGitRevision;
+};
 
 export type FolioDoc = {
   id: string;
@@ -66,16 +82,41 @@ export type FolioDoc = {
    * adapter may fill it from local Git history.
    */
   publishedAt?: string;
-  /** ISO 8601 UTC timestamp, or `undefined` when no trustworthy source exists. */
+  /** Git first commit by default; frontmatter createdAt takes precedence. */
+  createdAt?: string;
+  /** ISO 8601 UTC timestamp, or undefined when no trustworthy source exists. */
   updatedAt?: string;
+  /** Git first author by default; frontmatter createdBy takes precedence. */
+  createdBy?: string;
+  /** Git latest author by default; frontmatter updatedBy takes precedence. */
+  updatedBy?: string;
   /** Provenance for `publishedAt` / `updatedAt`; set by `parseFolioDoc`. */
   dateSources?: FolioDateSources;
+  /** Build-time Git provenance, omitted for untracked files or unavailable history. */
+  gitHistory?: FolioGitHistory;
+  /**
+   * Optional single Article archive category. It is a pure archive dimension,
+   * not a column, route directory or navigation level: it never changes
+   * `path`, `group`, `section`, `collection` or collection recursion. Missing,
+   * empty and non-string frontmatter values mean uncategorized.
+   */
+  category?: string;
+  /** Zero or more Article/topic labels. Empty entries are ignored. */
   tags: string[];
   status?: string;
   cover?: string;
   body: string;
   headings: FolioHeading[];
   data: Record<string, unknown>;
+};
+
+/** A page navigation target needs a route and a title, not an entire document. */
+export type FolioPageNavTarget = Pick<FolioDoc, "path" | "title">;
+
+/** The reading context calculates neighbors; presentation consumes them. */
+export type FolioPageNavNeighbors = {
+  previous?: FolioPageNavTarget;
+  next?: FolioPageNavTarget;
 };
 
 /**
@@ -145,7 +186,18 @@ export type FolioNavigationPanel = {
  */
 export type FolioNavigationItem = {
   label: string;
-  href: string;
+  /**
+   * Explicit destination. It wins over `collection` when both are present.
+   * An item needs at least one of `href` or `collection`.
+   */
+  href?: string;
+  /**
+   * Route collection that supplies the section entry. The destination becomes
+   * the first `type: doc` entry in read order (or the first entry overall when
+   * the collection has no documents), falling back to the collection index
+   * when empty. The collection root automatically marks the entry active.
+   */
+  collection?: string;
   /**
    * Extra route prefixes that should mark this entry as current, in addition to
    * `href` itself. A section whose pages live under more than one route
@@ -159,6 +211,22 @@ export type FolioNavigationItem = {
   panel?: FolioNavigationPanel;
 };
 
+/**
+ * Opt-in Article category/tag archive data for a collection (FOL-040). This is
+ * data configuration only: Core derives the groups, and the Build/UI layers
+ * decide whether and where archive routes are rendered.
+ */
+export type FolioArticleArchiveConfig = {
+  /**
+   * Category display labels keyed by category id, or by any spelling that
+   * normalizes to it (`Frontend` / `frontend`). The archive `id` and URL
+   * identifier stay derived from the category frontmatter value, so changing a
+   * display label never changes routing. Empty values fall back to the source
+   * spelling.
+   */
+  categoryLabels?: Record<string, string>;
+};
+
 export type FolioCollectionConfig = {
   /** Route directory; descendants at any depth are indexed. */
   path: string;
@@ -166,6 +234,12 @@ export type FolioCollectionConfig = {
   title?: string;
   description?: string;
   emptyMessage?: string;
+  /**
+   * Opt in to Article category/tag archive pages for this collection. `true`
+   * uses source labels; an object configures category display labels. Omitted
+   * or `false` keeps the existing collection behavior.
+   */
+  archive?: boolean | FolioArticleArchiveConfig;
 };
 
 export type FolioHomeSectionType =
@@ -174,6 +248,9 @@ export type FolioHomeSectionType =
   | "recent"
   | "collections"
   | "about";
+
+/** Built-in home structure. `portal` is the default; `editorial` is opt-in. */
+export type FolioHomeTemplate = "portal" | "editorial";
 
 export type FolioHomeIntroSectionConfig = {
   type: "intro";
@@ -237,10 +314,15 @@ export type FolioHomeMetaConfig = {
 };
 
 export type FolioHomeConfig = {
-  /** Set to false to hide the editorial meta strip. */
+  /**
+   * Built-in home structure. Omit for the neutral `portal` template; set
+   * `editorial` to opt into the publication layout and journal defaults.
+   */
+  template?: FolioHomeTemplate;
+  /** Set to false to hide the meta strip. Portals only show it when configured. */
   meta?: false | FolioHomeMetaConfig;
   /**
-   * Ordered home blocks. Omitting this keeps the default editorial order:
+   * Ordered home blocks. Omitting this keeps the default order:
    * intro, featured, recent, collections, about. An empty array renders no
    * blocks beyond the optional meta strip.
    */
@@ -292,6 +374,20 @@ export type FolioFooterConfig = {
   legal?: FolioFooterLegal;
 };
 
+/** Visual configuration shared by the interactive app and static output. */
+export type FolioVisualPreset = "pearl" | "editorial" | "graphite";
+export type FolioCodePalette = "auto" | "xuanzhi" | "xuanmo" | "porcelain";
+export type FolioColorSchemePreference = "light" | "dark" | "system";
+
+export type FolioAppearanceConfig = {
+  /** Semantic visual preset. Default: pearl; independent from the home template. */
+  preset?: FolioVisualPreset;
+  /** Initial light/dark preference (system by default). */
+  scheme?: FolioColorSchemePreference;
+  /** Syntax and code-surface palette (auto by default). */
+  codePalette?: FolioCodePalette;
+};
+
 export type FolioConfig = {
   title: string;
   description: string;
@@ -310,6 +406,8 @@ export type FolioConfig = {
   collections?: FolioCollectionConfig[];
   /** Optional lightweight configuration for the built-in home page. */
   home?: FolioHomeConfig;
+  /** Site-wide appearance, shared by React and generated static HTML. */
+  appearance?: FolioAppearanceConfig;
   /** Legacy text, structured portal footer, or false to hide it entirely. */
   footer?: string | FolioFooterConfig | false;
   github?: string;

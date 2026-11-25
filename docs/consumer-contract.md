@@ -11,6 +11,165 @@ The root `README.md`, `packages/folio/README.md`, and the Markdown/static docume
 - **The default static document shell works without JavaScript.** Sidebar, in-page TOC, and previous/next survive with JS disabled. Sites that supply custom static route bodies own that markup and do not get the shell.
 - **`@uichat-mira/folio@0.1.1` is publicly published through GitHub Release and npm OIDC.** The release workflow's second attempt passed independent Registry-installed consumer checks; the initial 0.1.0 bootstrap was manual.
 - **The published package includes virtual-module types.** Strict Registry-installed consumers resolve `default` and `roots` without writing a local `declare module`.
+- **Article archives are opt-in per collection.** Without `collections[].archive`, a site gets no archive routes, entry points or tag links. With it, Folio derives `<collection>/category/<slug>` and `<collection>/tag/<slug>` from the FOL-040 Core index for both React and static output.
+
+## Public list components and custom list pages (unreleased dev)
+
+The next source release adds `FolioEntryList`, `FolioListPage` and
+`FolioListEntry` to the root package exports. `FolioDoc` continues to work
+unchanged for first-party articles; external resources instead use a canonical
+HTTP(S) `href`, plus optional cover, category, date, description, meta and
+link target. `variant="editorial"` preserves the internal editorial list.
+`variant="shelf"` renders a responsive, non-nested publication row styled
+exclusively by the Folio semantic tokens. No surrogate local FolioDoc or
+local detail route is created for an external resource.
+
+`FolioListPage` wraps the entry list with a standard single-H1 content frame.
+`FolioApp.slots.pages` can register that page inside the native header,
+footer and theme shell; duplicate document, collection, archive and custom
+routes are rejected. It is an opt-in React route: a static-site consumer still
+must supply the matching `staticRoutes.routes` output, because arbitrary
+ReactNode slots are not serialized automatically. The existing Folio
+`config.collections` index remains automatic for React and static builds.
+
+See [the component reference](../apps/site/content/reference/components/entry-list/index.md).
+
+## Article category and tag archives (FOL-040 / FOL-041)
+
+Category and tag archives are an opt-in reading surface for Article content. A
+category is one archive dimension, not a column, tree, navigation level or
+route directory; tags are zero or more topic labels. Neither changes an
+Article's `path`, collection, group, section, search behavior or existing
+permalink.
+
+### Content
+
+```md
+---
+title: 为什么内容要留在 Git
+type: article
+category: 工程实践          # optional; one non-empty string
+tags:                       # optional; zero or more strings
+  - Git
+  - Content
+---
+```
+
+- Only `type: article` documents enter archives. Documents, pages and other
+  types keep their existing behavior.
+- Frontmatter identity is normalized by Core: NFC, trim, collapsed whitespace
+  and lowercase. `Frontend` and `frontend` therefore share one archive; Chinese
+  labels are preserved. `category: ""`, non-string values and a missing value
+  mean uncategorized.
+- Category display labels can be overridden without changing URLs:
+  `archive: { categoryLabels: { frontend: "前端" } }`.
+
+### Configuration
+
+```ts
+import { defineFolioConfig } from "@uichat-mira/folio";
+
+export default defineFolioConfig({
+  // ...
+  collections: [
+    {
+      path: "/blogs",
+      title: "博客",
+      // Opt in. `true` uses source labels; the object form adds display labels.
+      archive: true,
+    },
+  ],
+});
+```
+
+Route derivation uses the configured collection path, not `/blogs`:
+
+| Surface | URL |
+| --- | --- |
+| Collection index | `<collection>` |
+| Category archive | `<collection>/category/<slug>` |
+| Tag archive | `<collection>/tag/<slug>` |
+| Article | unchanged `doc.path` |
+
+`<slug>` is the Core `group.slug` (`slugify` of the normalized label): Chinese
+is preserved, ASCII is lowercased, punctuation is stripped. It is exactly one
+URL path segment. Non-ASCII slugs are percent-encoded in the request URL (for
+example `/blogs/tag/%E8%AE%BE%E8%AE%A1/` for `设计`), so a consumer that builds
+its own archive URL must `encodeURIComponent` the slug segment.
+
+### Default React UI
+
+`FolioApp` reads `collections[].archive` automatically:
+
+- the opted-in collection index gains one compact category row (only when
+  categories exist) led by `全部`; a plain click filters that collection's entry
+  list in place and does **not** change the route or add a history entry, so the
+  category switch stays on one reading layer;
+- the category row sticks directly below the site header
+  (`top: var(--folio-header-height)`) while the collection list scrolls; it
+  reuses the header's frosted canvas surface and fades into the list instead of
+  drawing a full-width rule, so entries soften as they pass underneath;
+- switching category resets the scroll position to the beginning of the
+  filtered list when the reader has already scrolled past it (the list starts
+  just below the sticky row); a shorter result set therefore never leaves the
+  reader at the footer, and clicking a chip while already above the list does
+  not jump down;
+- the category chips keep their real archive URLs, so modified clicks, middle
+  clicks, crawlers and no-JS pages still reach `<collection>/category/<slug>`;
+- Article cards in that collection and the Article metadata area expose their
+  tags as links;
+- `<collection>/category/<slug>` and `<collection>/tag/<slug>` render the
+  archive entry list, with a link back to the collection;
+- an unknown archive slug renders the normal not-found page;
+- the category row and tag links are **not** injected into the global header
+  navigation.
+
+### Static output
+
+The default static route set (`writeFolioStaticSite` without a custom `routes`
+function) emits the same archive pages as HTML:
+
+- title, description and canonical come from the archive route and inherit
+  `base` and `config.siteUrl`;
+- archive URLs are included in `sitemap.xml`;
+- `siteIndexing: "noindex"` applies to archive pages exactly as to other
+  default pages, so a preview build does not publish indexable archive pages;
+- the generated HTML is readable without JavaScript and uses the same entry
+  list, ordering and links as React; its category row starts with the active
+  `全部` chip and each chip is a normal link to the archive page. Loading the
+  React runtime upgrades that row to the in-place filter described above.
+
+Consumers that supply their own static `routes` own that page markup, as with
+every other custom static route. They can still consume the same Core index
+instead of reimplementing archives:
+
+```ts
+import {
+  buildFolioArticleArchiveIndex,
+  findFolioArticleArchiveGroup,
+} from "@uichat-mira/folio";
+```
+
+The official site (`apps/site`) is such a consumer: it builds its archive
+routes from each configured collection path and renders the same entry list and
+tag links as the default UI.
+
+### Conflict safety
+
+Archive routes participate in the normal static route safety layer. A build
+fails before writing anything when an archive URL collides with a document,
+a configured collection index, another archive route or a custom static route.
+React route derivation fails with `folio article archive route conflict` so a
+document route cannot be silently shadowed. Two distinct labels that collapse
+to the same URL slug (`C++` / `C#`) fail in Core rather than sharing one
+archive.
+
+### Non-goals
+
+No column/tree hierarchy, sub-categories, multi-select filters, tag clouds,
+pagination, comments, CMS, database, automatic header navigation or Article
+permalink change is part of this contract.
+
 
 ## Package status and installation
 
@@ -37,9 +196,66 @@ The package is ESM (`"type": "module"` with `import`/`default` export conditions
 | --- | --- |
 | `@uichat-mira/folio` | Content parsing, configuration helpers, React runtime (`FolioApp`, `FolioHeader`, `FolioDocsShell`, `FolioMarkdown`), Markdown rendering, search and doc-structure helpers |
 | `@uichat-mira/folio/vite` | The `folio()` Vite plugin, `virtual:folio/content`, and the static publishing helpers and types |
+| `@uichat-mira/folio/pwa` | Optional `folioPwa()` Vite integration and the deterministic content-version helper. Emits a manifest, a Workbox service worker and `folio-version.json`; nothing is emitted unless a consumer calls it |
+| `@uichat-mira/folio/pwa/react` | Optional `FolioPwaUpdatePrompt` and `useFolioPwaUpdate()`. Wraps the upstream `virtual:pwa-register/react` client, adds a throttled start/foreground update check and a prompt that never reloads without confirmation |
 | `@uichat-mira/folio/styles.css` | The default design tokens and stylesheet (CSS only) |
 
 Peer requirements: React `^19`, React DOM `^19`, React Router DOM `^7`, and Vite `^7`. Folio's own `engines.node` declares `>=20`, but the Vite 7 peer requires Node.js `20.19+` or `22.12+`; use Node 24 for the tested build and release workflow.
+
+## Optional PWA contract (FOL-039)
+
+The PWA entries above are additive and explicit. This section is the 0.1.x
+promise for them; it does not change the plain `folio()` contract.
+
+- **Opt-in only.** `folio()` never emits a manifest, a Service Worker or a
+  registration script. A consumer that does not call `folioPwa()` gets exactly
+  the previous behavior and does not install Workbox.
+- **Optional peers.** `vite-plugin-pwa` (`^2`) and `workbox-window` (`^7.4.1`)
+  are declared with `peerDependenciesMeta.optional`, so `npm install
+  @uichat-mira/folio` stays dependency-free for sites that do not opt in. A
+  consumer that opts in installs both.
+- **Upstream engine.** The integration uses `vite-plugin-pwa` with the
+  `generateSW` strategy and Workbox; Folio supplies configuration, not a second
+  Service Worker engine, cache layer or update state machine.
+- **Deployment scope follows `base`.** `manifest.scope`, `start_url` and `id` are
+  derived from the Vite `base`; a consumer-supplied `scope` that disagrees fails
+  the build. The same config therefore works at `/` and at `/sub-path/`.
+- **Multi-page safety.** No `navigateFallback` (an unknown URL reaches the real
+  `404.html`), no HTML in the precache, no implicit runtime caching, and
+  `cleanupOutdatedCaches` for old precaches. Unsafe `workbox` options
+  (`navigateFallback*`, HTML glob patterns) are rejected at config time.
+- **Content-only publications are visible.** `folio-version.json` is a SHA-256
+  prefix over every generated HTML page and is precached as a revisioned entry,
+  so a Markdown-only edit produces a new Service Worker. No full-site HTML
+  precache is involved.
+- **The precache boundary is enforced on the emitted worker.** Every entry that
+  can reach the Workbox manifest (`includeAssets`, `workbox.
+  additionalManifestEntries`, `workbox.manifestTransforms`) is normalised
+  (percent-decoding, query/fragment removal, dot segments, base resolution) and
+  resolved against the real build output. An entry that names a generated page —
+  `index.html`, `docs/hello/`, `docs/index`, `docs%2Fhello%2F`, `...?v=2` — fails
+  the build, and so does an entry that does not name a real artifact. Static
+  assets (`js`, `css`, `json`, `webmanifest`, images, fonts, `wasm`, `pdf`, …)
+  remain precacheable, so narrow consumer customization is preserved. If the
+  emitted manifest cannot be read, the build fails closed instead of assuming
+  there is nothing to check.
+- **Icons are validated twice.** The `icons` option must contain square 192 and
+  512 icons; `manifest.icons` may not override it, and the emitted
+  `manifest.webmanifest` is re-read to prove it still lists exactly the
+  configured icons with their sizes, types and purposes. A configured `src` must
+  resolve to a file in the build output, so an icon URL that is correct at `/`
+  but dead under a sub-path base fails the build.
+- **Registration state is observable.** `useFolioPwaUpdate()` reports
+  `supported`, `registrationState` (`"unsupported" | "registering" |
+  "registered" | "failed"`) and `registered`, derived from the upstream client
+  callbacks. Folio does not add a second Service Worker state machine, and
+  `onRegisterError` still fires on failure.
+- **Prompt-first updates.** `updateMode: "prompt"` is the default: the waiting
+  worker only activates after the reader confirms. `"auto"` is a separate
+  explicit mode and must not be paired with the prompt UI.
+- **Not in scope:** Web Push, offline article/whole-site reading, background
+  sync, offline writes, and any change to Folio's Markdown, routing, TOC, SEO,
+  sitemap, robots or 404 semantics.
 
 ## Independent consumer verification and virtual module types
 
@@ -198,6 +414,30 @@ body {
 
 These declarations are visual overrides, not a security or isolation mechanism. Re-check a real host page after importing Folio, because the affected rules apply to elements the host already styled.
 
+### Header branding without component CSS overrides (0.2.0)
+
+Folio owns the shared Header markup, link behavior, and layout. A consumer that needs
+more than the default `config.logo` image plus `config.title` text can supply its
+own brand contents through `FolioApp`'s optional `slots.headerBrand`:
+
+```tsx
+<FolioApp
+  config={config}
+  docs={docs}
+  slots={{ headerBrand: <img src="/my-wordmark.svg" alt="My site" /> }}
+/>
+```
+
+The brand content remains inside the Folio-managed home link. Without the slot,
+the default image/title rendering is unchanged. Direct `FolioHeader` consumers
+can use its optional `brand` prop for the same purpose. Style the consumer-owned
+element, not `.folio-brand`, `.folio-header`, or other package selectors; the
+Folio package remains the single source of default component styling. Other
+consumer-specific content, such as custom Home or header utility contents, may
+use their own classes and tokens.
+
+This slot is part of the npm `0.2.0` contract; historical `0.1.1` does not include it.
+
 ## Static output: default shell vs custom routes
 
 The Vite plugin writes directory-style HTML for every route (`<route>/index.html`) plus `404.html`, and, when `siteUrl` is configured, `sitemap.xml` and `robots.txt`. All routes share the same metadata pipeline: title, description, robots, canonical, Open Graph, Twitter Card, and JSON-LD.
@@ -346,6 +586,13 @@ const config = defineFolioConfig({
 });
 ```
 
+- `href` and `collection` are alternative destinations. `collection` selects
+  the first `type: doc` entry in read order (collections without documents use
+  their first entry overall) and automatically adds the collection root to
+  `activeMatch`; an empty collection falls back to its index route. An
+  explicit `href` wins when both are present, with `collection` still supplying
+  the active root. `resolveFolioNavigation(items, docs)` and `FolioHeader.docs`
+  expose this resolution; existing href-only configs are unchanged.
 - `children` entries take `label`, `href`, and optional `icon` / `description` /
   `group`. A menu is rendered when at least one child survives validation.
 - `group` names a reading task, so children that answer the same question render
@@ -510,10 +757,12 @@ const config = defineFolioConfig({
   prerendered \`index.html\`, canonical, OG, JSON-LD and sitemap entry.
   The default view is a compact, serif editorial list with separators only
   **between** rows. Empty collections render a short empty state.
-- The default home previews the primary collection plus other configured
-  collections with the same selector. `config.home` can change the featured
-  source, recent limits, block order and visibility; both React and static
-  home use that same configuration without consumer-side custom components.
+- The default home is the neutral Portal template and previews the primary
+  collection plus other configured collections with the same selector.
+  `config.home` can choose the explicit `editorial` template, change the
+  featured source, recent limits, block order and visibility; both React and
+  static home use that same configuration without consumer-side custom
+  components.
 - \`staticRoutes.routes\` custom override remains authoritative. When a
   consumer explicitly supplies its own static route array, it owns adding
   any index pages to that array.
@@ -521,12 +770,17 @@ const config = defineFolioConfig({
 As this is an unreleased PR candidate, sites pinned to
 \`@uichat-mira/folio@0.1.1\` must not claim the feature is published.
 
-## Configurable built-in home (FOL-030 candidate, not published in 0.1.1)
+## Configurable built-in home (FOL-030 / FOL-050 candidate, not published in 0.1.1)
 
 `FolioConfig.home` is a lightweight, ordered contract for the built-in home.
 It is not a theme engine or a layout DSL. It reuses `FolioConfig.collections`,
 `FolioDoc`, and the same recursive collection selector as collection indexes;
 no `/blogs`, `/projects`, or document type is hardcoded.
+
+`home.template` selects the built-in structure. Omitting it (or setting
+`template: "portal"`) renders the neutral Portal; `template: "editorial"` opts
+into the publication layout, journal defaults and editorial CSS. There is no
+implicit historical fallback: a config without `template` is a Portal.
 
 ```ts
 const config = defineFolioConfig({
@@ -537,6 +791,7 @@ const config = defineFolioConfig({
     { path: "/projects", title: "Projects" },
   ],
   home: {
+    template: "editorial",
     meta: { left: "FIELD NOTES", right: "ARCHIVE" },
     sections: [
       { type: "intro", title: "Notes from the workshop" },
@@ -552,7 +807,8 @@ const config = defineFolioConfig({
 - Section array order is render order. Omitting `sections` preserves the
   default `intro`, `featured`, `recent`, `collections`, `about` order;
   `sections: []` renders only the optional meta strip. `meta: false` hides the
-  strip.
+  strip. Portal metadata appears only when configured; explicit editorial
+  keeps its publication meta defaults.
 - `featured` accepts `path` or a `collection` route. `recent` and `collections`
   read the same date-descending selector as collection pages. A featured entry
   is excluded from `recent` even when the featured section is placed later.
@@ -561,20 +817,22 @@ const config = defineFolioConfig({
   collection or `path` throws during resolution instead of silently falling
   back to unrelated content.
 - Resolution is centralised in the public `resolveFolioHome(config, docs)`
-  model. The React home and default static home consume that model, so selected
-  content, ordering, links and `basePath` handling stay aligned. Static config
-  text is HTML-escaped; only an explicit static override body is trusted raw
-  HTML.
+  model, which now carries the selected `template`. The React home and default
+  static home consume that model, so selected template, content, ordering,
+  links, empty states and `basePath` handling stay aligned. Static config text
+  is HTML-escaped; only an explicit static override body is trusted raw HTML.
 
 ### Three supported home paths
 
-1. **Default home.** Set neither `home` nor `slots.home`. Existing React output,
-   static `index.html`, SEO metadata, navigation and no-JS behavior stay on the
-   default path.
-2. **Configured home.** Set `config.home`. The React runtime and the default
-   static build both render it. If `staticRoutes.routes` supplies a complete
-   route array, that array remains authoritative and the consumer must include
-   a matching home route (reuse `renderFolioStaticHome(context)` if useful).
+1. **Default home.** Set neither `home` nor `slots.home`. React and static
+   output render the neutral Portal, keeping SEO metadata, navigation and no-JS
+   behavior on the default path.
+2. **Configured home.** Set `config.home`; omit `template` for Portal or set
+   `template: "editorial"` for the publication layout. The React runtime and
+   the default static build both render it. If `staticRoutes.routes` supplies a
+   complete route array, that array remains authoritative and the consumer must
+   include a matching home route (reuse `renderFolioStaticHome(context)` if
+   useful).
 3. **Advanced full override.** `slots.home` still replaces the React `/` route
    completely. `staticRoutes.home` replaces only the static `/` route body and
    metadata while keeping every other generated route, `404.html`,
@@ -592,8 +850,10 @@ published.
 
 ## Public article TOC (FOL-023 candidate, not published in 0.1.1)
 
-`FolioToc` is exported from the Folio package root as a React component accepting `headings: readonly FolioHeading[]`, with optional `className` and `onNavigate`. It uses exactly the IDs in `FolioDoc.headings` (as produced by `extractHeadings`) and highlights the current chapter on scrolling. Existing documentation shells share this same component rather than duplicating TOC rendering.
+`FolioToc` is exported from the Folio package root as a React component accepting `headings: readonly FolioHeading[]`, with optional `className`, `onNavigate`, and `title`. It uses exactly the IDs in `FolioDoc.headings` (as produced by `extractHeadings`), nests h2 → h3 → h4 through the public `buildFolioOutlineTree` helper, and highlights the current chapter on scrolling. The active item is marked by a marker sliding along one continuous rail, and the outline scrolls independently so the active chapter stays visible. Existing documentation shells share this same component rather than duplicating TOC rendering.
 
 The default Folio article route automatically shows an unobtrusive right-hand TOC when its headings are nonempty. At narrow widths, a native `<details>` control makes those anchors accessible without JavaScript; React closes the panel after navigation. Ordinary pages with no headings and non-article pages do not gain empty TOC chrome. Default static article HTML includes the same TOC and heading targets; documentation's existing no-JS navigation is unchanged.
+
+Static builds can call `renderFolioStaticToc(headings, { title })` from `@uichat-mira/folio/vite` to produce the same `nav`/`content`/nested-list structure as `FolioToc`, so custom static routes no longer need a hand-written TOC template. In `FolioDocsShell`, the desktop rail is hidden below 1100px; between 781px and 1100px the same outline is available as a sticky “本页目录” flyout, and the full mobile menu plus outline remains below 780px.
 
 Example consumer: `import { FolioToc } from "@uichat-mira/folio"; <FolioToc headings={doc.headings} />`. This is a pending PR contract, not an npm `0.1.1` promise.

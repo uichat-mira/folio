@@ -1,4 +1,27 @@
 /* Public page TOC used by documentation and articles. Layout-specific overrides remain in content.css. */
+.folio-toc {
+  position: sticky;
+  top: calc(var(--folio-header-height) + 24px);
+  align-self: start;
+  max-height: calc(100vh - var(--folio-header-height) - 48px);
+  padding: 32px 20px 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.folio-toc::-webkit-scrollbar {
+  display: none;
+}
+
+/* One continuous rail; the marker slides along it instead of redrawing a
+   per-link border, which is what makes the active change read as motion. */
+.folio-toc__content {
+  position: relative;
+  border-inline-start: 1px solid var(--folio-hairline);
+  padding-inline-start: 12px;
+}
+
 .folio-toc h2 {
   margin: 0 0 8px;
   color: var(--folio-muted-soft);
@@ -8,42 +31,59 @@
   text-transform: uppercase;
 }
 
-.folio-toc ul {
+.folio-toc__list {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.folio-toc {
-  position: sticky;
-  top: 88px;
-  align-self: start;
-  height: max-content;
-  padding: 32px 20px;
+.folio-toc__list--nested {
+  padding-inline-start: 10px;
 }
 
 .folio-toc li a {
   display: block;
-  padding: 4px 0 4px 10px;
-  border-left: 2px solid transparent;
+  padding: 4px 0;
   color: var(--folio-muted);
   font-size: 13px;
   line-height: 1.45;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color .25s ease;
 }
 
 .folio-toc li a:hover,
 .folio-toc li a.active {
-  border-left-color: var(--folio-primary);
   color: var(--folio-ink);
 }
 
 .folio-toc-depth-3 a {
-  padding-left: 18px !important;
-  font-size: 12.5px !important;
+  font-size: 12.5px;
 }
 
 .folio-toc-depth-4 a {
-  padding-left: 26px !important;
-  font-size: 12px !important;
+  font-size: 12px;
 }
 
+.folio-toc__marker {
+  position: absolute;
+  top: 0;
+  left: -1px;
+  width: 2px;
+  height: 18px;
+  border-radius: 2px;
+  background: var(--folio-primary);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    top .25s cubic-bezier(0, 1, .5, 1),
+    opacity .2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folio-toc li a,
+  .folio-toc__marker {
+    transition: none;
+  }
+}

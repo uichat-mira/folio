@@ -205,6 +205,15 @@ function text(value: unknown, fallback = ""): string {
   return value == null ? fallback : String(value);
 }
 
+/**
+ * A single optional scalar field. Only a non-empty string is a valid value:
+ * arrays, objects, numbers and booleans are an invalid shape and resolve to
+ * "unset" deterministically instead of being stringified into a guessed label.
+ */
+function singleText(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
 export function sourcePathToRoute(sourcePath: string): string {
   const normalized = sourcePath.replace(/\\/g, "/").replace(/^\/+/, "");
   const withoutExt = normalized.replace(/\.md$/i, "");
@@ -217,7 +226,7 @@ export function parseFolioDoc(sourcePath: string, raw: string): FolioDoc {
   const path = text(data.path) || sourcePathToRoute(sourcePath);
   const root = sourcePath.split(/[\\/]/)[0];
   const inferredType =
-    root === "blogs" ? "article" : root === "projects" ? "project" : "doc";
+    root === "blogs" ? "article" : "doc";
 
   // Priority is frozen here and completed by the Build layer:
   //   explicit publishedAt > valid legacy date > Git first commit > unknown
@@ -227,6 +236,9 @@ export function parseFolioDoc(sourcePath: string, raw: string): FolioDoc {
   const explicitPublishedAt = normalizeFolioDate(data.publishedAt);
   const legacyPublishedAt = normalizeFolioDate(data.date);
   const explicitUpdatedAt = normalizeFolioDate(data.updatedAt);
+  const explicitCreatedAt = normalizeFolioDate(data.createdAt);
+  const explicitPerson = (value: unknown): string | undefined =>
+    typeof value === "string" && value.trim() ? value.trim() : undefined;
 
   const publishedAt = explicitPublishedAt ?? legacyPublishedAt;
   const publishedAtSource: FolioDateSource = explicitPublishedAt
@@ -247,22 +259,22 @@ export function parseFolioDoc(sourcePath: string, raw: string): FolioDoc {
     description: text(data.description),
     group: text(
       data.group,
-      inferredType === "article"
-        ? "博客"
-        : inferredType === "project"
-          ? "项目"
-          : "文档",
+      inferredType === "article" ? "博客" : "文档",
     ),
     collection: data.collection ? text(data.collection) : undefined,
     section: data.section ? text(data.section) : undefined,
     order: Number(data.order ?? 99),
     date: data.date ? text(data.date) : undefined,
     publishedAt,
+    createdAt: explicitCreatedAt,
     updatedAt: explicitUpdatedAt,
+    createdBy: explicitPerson(data.createdBy),
+    updatedBy: explicitPerson(data.updatedBy),
     dateSources: {
       publishedAt: publishedAtSource,
       updatedAt: updatedAtSource,
     },
+    category: singleText(data.category),
     tags: list(data.tags),
     status: data.status ? text(data.status) : undefined,
     cover: data.cover ? text(data.cover) : undefined,

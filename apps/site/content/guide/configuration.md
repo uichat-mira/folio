@@ -1,6 +1,6 @@
 ---
 title: 站点配置与扩展
-description: FolioConfig、Vite plugin options 与 React slots 的公共契约。
+description: 从最小 FolioConfig 到 Header、Footer 与内置首页：哪些能力由配置声明，哪些仍属于消费站。
 group: 概念
 collection: 指南
 order: 21
@@ -8,94 +8,212 @@ type: doc
 status: published
 tags:
   - Config
-  - Slots
+  - Header
+  - Footer
+  - Home
+  - Theme
 ---
 
-## FolioConfig
+配置一个 Folio 站点只有两个文件：`folio.config.ts` 声明站点身份与内容结构，`vite.config.ts` 注册插件、负责内容发现与静态输出。本文按上手顺序说明：最小配置 → 字段 → 插件 → Header → Footer → 内置首页 → 主题。
+
+导航条目的完整规则在[导航与内容清单](/guide/navigation)；React 组件与 slots 的组合方式在[用 FolioApp 与 slots 组合 React 页面](/guide/runtime-composition)；分层的职责归属在 [Core、UI、Build 与站点边界](/guide/architecture)。
+
+> 本文以 `dev` 源码为准。npm 已发布 `0.1.1` 的字段与组件边界以[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)为准，两者差异集中列在文末。
+
+## 最小可用站点
 
 ```ts
-type FolioConfig = {
-  title: string
-  description: string
-  author?: FolioAuthor | FolioAuthor[]
-  logo?: string
-  siteUrl?: string
-  base?: string
-  navigation?: {
-    label: string
-    href: string
-    /** 额外的路由前缀，命中即视为当前页；只影响高亮，不改变渲染形态。 */
-    activeMatch?: string[]
-    children?: {
-      label: string
-      href: string
-      icon?: string
-      description?: string
-      /** 阅读任务分组；省略时面板保持旧版的扁平结构。 */
-      group?: string
-    }[]
-    panel?: {
-      eyebrow?: string
-      title?: string
-      description?: string
-      overviewLabel?: string
-    }
-  }[]
-  collections?: {
-    path: string
-    title?: string
-    description?: string
-    emptyMessage?: string
-  }[]
-  home?: FolioHomeConfig
-  footer?: string | false | FolioFooterConfig
-  github?: string
-}
+// folio.config.ts
+import { defineFolioConfig } from "@uichat-mira/folio";
+
+export default defineFolioConfig({
+  title: "My Site",
+  description: "用 Markdown 维护的文档与文章站点。",
+  siteUrl: "https://example.com",
+  github: "https://github.com/example/my-site",
+});
 ```
 
-`title` 与 `description` 是必填项。`author` 是生成 Article/TechArticle JSON-LD 时的默认作者；文档 Frontmatter 的 `author` 优先，两者都缺失时不生成作者字段。`siteUrl` 也是 canonical、sitemap、robots 与 feed URL 的前置条件。
+```ts
+// vite.config.ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { folio } from "@uichat-mira/folio/vite";
+import config from "./folio.config";
 
-本页描述当前 `dev` 源码。`collections`、`home` 与 `author` 属于尚未包含在已发布 `0.1.1` 中的候选契约；已发布包的能力边界以[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)为准。
+export default defineConfig({
+  plugins: [
+    react(),
+    folio({
+      contentDir: "content",
+      config,
+      staticRoutes: true,
+    }),
+  ],
+});
+```
 
-## 门户 Footer 配置
+`defineFolioConfig` 只保留对象字面量的类型推断，不做运行时校验；`title` 与 `description` 必填，其余字段可选。字段少写不会报错，但对应能力会退回默认值或直接缺席——最典型的是 `siteUrl`：没有它就没有绝对 URL 的 canonical、`sitemap.xml`、`robots.txt` 与 feed。
 
-Footer 已抽成公开的 FolioFooter 组件（包内 src/ui/footer/）。原有字符串配置保持不变；不配置时仍显示默认 Built with Folio.，设置为 false 可以隐藏页脚。需要标准门户信息层级时使用结构化配置：
+React 入口把同一份 `config` 和 `virtual:folio/content` 交给 `FolioApp`，参考[组合 React 页面](/guide/runtime-composition)。
 
-~~~ts
+## 字段速查
+
+| 字段 | 作用 | 说明 |
+| --- | --- | --- |
+| `title` / `description` | 站点身份 | 必填。Header 品牌文字取 `title`；站点与文档的 `description` 回退也取这里。 |
+| `siteUrl` | 绝对 URL 的前置条件 | canonical、Open Graph、JSON-LD、`sitemap.xml`、`robots.txt` 与 feed 都依赖它。 |
+| `github` | Header 仓库入口 | 默认 Header 在桌面与移动菜单都渲染这个链接；不配置就不显示。 |
+| `logo` | 默认品牌图片 | Header 品牌区使用；静态页面没有 route 级图片时也作为 social image 的兜底。 |
+| `author` | 默认作者 | 生成 Article／TechArticle JSON-LD 的作者；文档 Frontmatter 的 `author` 优先，两者都缺省时省略作者字段，不编造。 |
+| `navigation` | 顶栏条目 | 详见[导航](/guide/navigation)。 |
+| `collections` | 集合索引页 | 声明“哪些路由目录要生成集合索引页”，与侧栏分组无关。 |
+| `home` | 内置首页 | 见下文“内置首页”。 |
+| `footer` | 页脚 | 字符串、`false` 或结构化配置。 |
+| `base` | 类型中保留的字段 | 当前 `dev` 源码不读取它。子路径由 Vite `base` 与 `<FolioApp basePath>` 决定，不要把它当成部署开关。 |
+
+字段的完整类型定义以 `packages/folio/src/types.ts` 为准，本页只列入口与行为，不复制整份定义。组件级 Props 见 [FolioApp](/reference/components/app)、[FolioHeader](/reference/components/header) 与 [FolioFooter](/reference/components/footer)。
+
+## 子路径部署
+
+部署在项目子路径（例如 GitHub Pages 的 `/folio/`）时，两条链路必须一致：
+
+```ts
+// vite.config.ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { resolveGithubPagesBase } from "@uichat-mira/folio";
+import { folio } from "@uichat-mira/folio/vite";
+import config from "./folio.config";
+
+const base =
+  process.env.FOLIO_SITE_BASE ??
+  resolveGithubPagesBase(process.env.GITHUB_REPOSITORY);
+
+export default defineConfig({
+  base,
+  plugins: [react(), folio({ contentDir: "content", config, staticRoutes: true })],
+});
+```
+
+```tsx
+// src/main.tsx
+<FolioApp config={config} docs={docs} basePath={import.meta.env.BASE_URL} />
+```
+
+Vite 的 `base` 决定静态输出里每条路由与资源的前缀；`FolioApp` 的 `basePath` 决定 React Router 的 `basename`，默认 `/`。两者不一致时，本地预览可能正常，部署后却会白屏或 404：文件在 `/folio/` 下，而 Router 以为自己在根路径。`resolveGithubPagesBase()` 是公开 helper，按仓库名归一化出 `/repo/`（`<owner>.github.io` 仓库则为 `/`），返回结果已带首尾斜杠。
+
+## Vite plugin
+
+```ts
+import { folio } from "@uichat-mira/folio/vite";
+
+folio({
+  contentDir: "content",
+  config,
+  exclude: (sourcePath) => /(^|\/)README\.md$/i.test(sourcePath),
+  route: (sourcePath, doc) => doc.path.replace(/^\/legacy(?=\/|$)/, ""),
+  staticRoutes: true,
+});
+```
+
+处理链是固定的：读取 Markdown → `parseFolioDoc` → `exclude` → `route` → 归一化路径 → `compareFolioDocs` 排序。因此 `route()` 决定的不只是 URL，也包括导航归属与静态输出路径；旧 URL 兼容属于消费站的迁移策略，不要求 Folio 核心认识某个旧目录。
+
+`staticRoutes` 有三态：
+
+| 取值 | 行为 |
+| --- | --- |
+| 省略或 `true` | 使用默认静态构建：为所有路由写目录式 HTML，并生成 `404.html`；配置了 `siteUrl` 时再生成 `sitemap.xml` 与 `robots.txt`。 |
+| `false` | 只提供虚拟模块与开发服务器，不写静态路由。 |
+| `FolioStaticBuildOptions` | 自定义路由、首页覆写、notFound、feed、索引策略等。 |
+
+`staticRoutes` 的完整字段、SEO 与 feed 配置见[静态构建与 SEO](/reference/seo)，构建阶段细节见 [Vite 构建集成](/reference/build-integration)。本章不重复这些清单。
+
+## Header
+
+默认 Header 由 Folio 渲染；可配置的是站点身份、顶栏条目与两个插槽：
+
+```ts
+export default defineFolioConfig({
+  title: "Acme Docs",
+  description: "产品文档与工程记录。",
+  logo: "/brand/acme-wordmark.svg",
+  github: "https://github.com/acme/docs",
+  navigation: [
+    { label: "指南", collection: "/guide" },
+    { label: "参考", href: "/reference/overview", collection: "/reference" },
+  ],
+});
+```
+
+- `config.title` 与 `config.logo` 组成默认品牌区，品牌整体链接回站点根。`config.logo` 原样作为 `<img src>` 输出：部署在子路径时要自己带上 base（如 `${import.meta.env.BASE_URL}brand/logo.svg`），或改用 `slots.headerBrand`；Footer 的结构化 logo 则会自动解析 base。
+- `config.github` 渲染 GitHub 入口；不配置时不出现。
+- `config.navigation` 决定顶栏条目；省略时 `FolioApp` 回退到 `文档`（`/docs`）与 `博客`（`/blogs`）两条内置条目。这是兜底，不是推荐配置。
+- 搜索入口与主题开关由 `ui` 开关控制，默认开启；它们属于 React 壳，静态 HTML 不包含。
+
+需要替换品牌内容时使用 `slots.headerBrand`（`dev` 候选）：它替换的是品牌区里的内容，外层的站点根链接、顶栏布局与可达性仍由 Folio 管理：
+
+```tsx
+<FolioApp
+  config={config}
+  docs={docs}
+  slots={{ headerBrand: <img src="/brand/acme-wordmark.svg" alt="Acme Docs" /> }}
+/>
+```
+
+`slots.headerActions` 用于在 Header 右侧追加消费站自己的操作（版本切换、外部入口等），不改变导航与品牌。Folio 没有整体替换 Header 的插槽：如果需要完全不同的 Header，就不要把整个站点交给 `FolioApp`，而是自行组合 `FolioHeader`／`FolioDocsShell`，边界见[组合 React 页面](/guide/runtime-composition)。
+
+## Footer
+
+`config.footer` 接受三种形态，都不需要写 React：
+
+```ts
+// 1. 字符串：整段页脚文字
+footer: "© 2026 Acme",
+
+// 2. false：完全隐藏
+footer: false,
+
+// 3. 结构化门户页脚
 footer: {
   brand: {
-    name: "Folio",
-    description: "Git-native 内容与门户发布引擎。",
-    logo: { src: "/folio-logo.svg", darkSrc: "/folio-logo-inverse.svg", alt: "Folio" },
+    name: "Acme Docs",
+    description: "产品文档与工程记录。",
+    href: "/",
+    logo: { src: "/brand/acme-mark.svg", darkSrc: "/brand/acme-mark-inverse.svg", alt: "Acme" },
   },
   groups: [
     {
-      title: "使用指南",
+      title: "开始使用",
       links: [
         { label: "快速开始", href: "/guide/getting-started" },
-        { label: "GitHub", href: "https://github.com/uichat-mira/folio", newTab: true },
+        { label: "GitHub", href: "https://github.com/acme/docs", newTab: true },
       ],
     },
   ],
   legal: {
-    copyright: "© 2026 Mira Organization",
-    // 按站点真实资质填写；没有备案信息就不要添加。
+    copyright: "© 2026 Acme",
+    // 按站点真实资质填写；没有备案信息就留空，Folio 不会替你生成。
     registrations: [],
     links: [],
   },
 },
-~~~
+```
 
-内部链接通过 React Router 跳转；以 / 开头的 Logo 资源路径会根据站点部署子路径解析。也可通过 FolioApp 的 slots.footer 完全替换默认页脚（自行提供 footer 语义元素）。
+- 不配置 `footer` 时显示默认文本 `Built with Folio.`；`footer: false` 隐藏整块页脚。
+- 内部链接（以 `/` 开头）走 React Router，外部链接保持普通 `<a>`；`newTab` 默认 `false`，外部链接也不会自动新开。
+- 页脚 Logo 以 `/` 开头时按运行时 base 解析，因此根域与 `/folio/` 子路径都能用；其他 URL 视为消费站自己负责的地址。
+- 结构化配置只覆盖常见门户信息层级，不引入主题或布局 DSL；完整自定义 DOM 用 `slots.footer`，由消费站自己提供 `<footer>` 语义与样式。
+- 文档阅读壳里可以用 `ui.footerOnDocs: false` 同时隐藏站点 Footer 与正文 `articleFooter`。这个开关只作用于 `type: doc` 的阅读布局；首页、文章与普通页面不受影响，默认 `true`。
+- Footer 是 React 组件：静态路由的 HTML 使用站点 `index.html` 模板与 `staticRoutes` 提供的正文，不会自动携带 React Footer。`slots.footer` 同样只影响运行时。
 
-技术文档的连续阅读页面可设置 \`<FolioApp ui={{ footerOnDocs: false }} />\`，隐藏 \`type: "doc"\` 路由下的全站 Footer 与文末的 \`articleFooter\` 插槽；首页、文章和集合页仍显示。默认值为 \`true\`，以保持已有消费者行为；即使提供 \`slots.footer\`，文档页也遵循这一开关。此设置只作用于 React 应用壳；静态路由正文的预渲染不会额外注入该组件。
+## 内置首页
 
-## 内置首页配置
-
-`FolioConfig.home` 只配置内置首页，不需要复制静态路由或默认组件：
+`config.home` 只配置内置首页，不需要复制默认组件，也不维护第二份首页数据：
 
 ```ts
 home: {
+  // 以下 route 都属于示例站点自己的内容，不是 Folio 内置页面。
   meta: { left: "FIELD NOTES", right: "ARCHIVE" },
   sections: [
     { type: "intro", title: "写在前面" },
@@ -107,116 +225,86 @@ home: {
 }
 ```
 
-`sections` 的数组顺序就是首页区块顺序；省略时保留默认顺序，`[]` 只保留可选的 meta 条。精选与近期内容复用 `config.collections` 的路由集合，不写死 `/blogs` 或 `/projects`。`resolveFolioHome(config, docs)` 会返回 React 与默认静态首页共用的结构化模型。
+`meta` 与 `sections` 都可选：
 
-## 三种首页路径
+- `meta: false` 隐藏顶部信息条；省略时使用默认文案。
+- `sections` 的数组顺序就是渲染顺序；省略时保留默认顺序 `intro → featured → recent → collections → about`；`sections: []` 只保留可选的 meta 条。
 
-1. **直接使用默认首页**：不设置 `home`，也不设置 `slots.home`。
-2. **通过配置自定义**：设置 `config.home`；React 与默认静态首页使用同一份选择与排序。
-3. **高级完整覆写**：`slots.home` 仍然完整替换 React 首页；`staticRoutes.home` 只替换静态 `/`，其他路由、404、sitemap 与 robots 不变。完整自定义静态 `routes` 时，该路由数组仍然是全站真相源；需要时可在其中调用 `renderFolioStaticHome(context)`。
+各区块的选择来源都落在 `config.collections` 的路由集合上，不写死 `/blogs` 或 `/projects`：
 
-静态 `staticRoutes.home` 接收显式 HTML，不能把任意 ReactNode 自动变成静态 HTML；SSR 与 React 服务端渲染由 consumer 自行负责。以上 `home` 配置与 `staticRoutes.home` 是 `dev` 候选契约，未包含在已发布的 `0.1.1` 中。
+| 区块 | 关键字段 | 说明 |
+| --- | --- | --- |
+| `intro` | `collection`、`title`、`description`、`kicker` | 介绍区；`collection` 缺省用第一个集合。 |
+| `featured` | `collection`、`path`、`label`、`readLabel` | `path` 优先于集合排序。 |
+| `recent` | `collection`、`limit`、`title`、`label`、`emptyMessage`、`endMessage` | `limit` 默认 4；被精选的条目不会重复出现。 |
+| `collections` | `paths`、`limit`、`emptyMessage` | `paths` 缺省显示除主集合外的全部集合；`limit` 默认 3。 |
+| `about` | `path`、`title`、`description`、`linkLabel` | 缺省使用第一个 `page` 类型内容。 |
 
-## Vite plugin
+同一个模型由公开的 `resolveFolioHome(config, docs)` 产出，React 首页与默认静态首页共用它，所以选择、排序与链接不会分叉。首页有三条路径，区别只在“替换到哪一层”：
+
+1. **默认首页**：既不设置 `home`，也不设置 `slots.home`。
+2. **配置自定义**：设置 `config.home`，React 与默认静态首页一起变化。
+3. **完整覆写**：`slots.home` 换掉 React 的 `/`；静态侧用 `staticRoutes.home` 只替换 `/` 的正文与元数据，或在自有 `staticRoutes.routes` 中调用 `renderFolioStaticHome(context)`（来自 `@uichat-mira/folio/vite`）。`slots.home` 不会自动生成静态 HTML。
+
+`slots.home` 的优先级高于 `config.home`：只要提供了 React 节点，React 首页就完全使用该节点，静态侧仍需单独提供对应正文。官方站就是 `slots.home` 的真实消费例，见[这个站就是 Folio 的测试用例](/reference/site)。
+
+## 主题与品牌接口
+
+> **版本边界：** `appearance`、`home.template`、`FolioHome`、`useFolioAppearance()` 已随 npm `0.2.0` 发布；历史 `0.1.1` 不包含这些 API。
+
+`config.appearance` 定义三条互不绑定的外观维度，`home.template` 单独选择内置首页结构：
 
 ```ts
-type FolioPluginOptions = {
-  contentDir?: string
-  config: FolioConfig
-  staticRoutes?: boolean | FolioStaticBuildOptions
-  exclude?: (sourcePath: string) => boolean
-  route?: (sourcePath: string, doc: FolioDoc) => string
-}
+import { defineFolioConfig } from "@uichat-mira/folio";
+
+export default defineFolioConfig({
+  title: "我的 Folio 站点",
+  description: "由 Folio 构建的内容与门户",
+  appearance: {
+    preset: "pearl",      // pearl | editorial | graphite
+    scheme: "system",     // system | light | dark
+    codePalette: "auto",  // auto | xuanzhi | xuanmo | porcelain
+  },
+  home: { template: "portal" }, // portal | editorial
+});
 ```
 
-`contentDir` 默认是 `content`。`exclude` 在解析后过滤文件，`route` 用于 consumer 级 URL 兼容。`staticRoutes` 的完整字段、SEO、索引策略与 feed 配置见 [静态构建与 SEO](/reference/seo)。
+- **Preset** 决定整站语义颜色，**Scheme** 决定浅色 / 深色（`system` 随操作系统变化）；**Code Palette** 显式选择时独立决定代码表面及语法高亮。`auto` 在 Pearl 浅色下使用 Porcelain（瓷白）、其他浅色预设使用 Xuanzhi（宣纸）、深色使用 Xuanmo（玄墨）。不会替换整站的设计主题。
+- **Home Template** 仅决定框架**内置首页**的 Portal / Editorial 渲染方式。官网自身的 `slots.home` 是自定义首页，因此它在 Design 板块中只做模板预览，不替换官网首页。
+- 在 `FolioApp` 内，`useFolioAppearance()` 提供 `appearance`、`effectiveScheme`、`preview(partial)`、`resetPreview()`。`preview()` 只在当前会话临时覆盖外观，不写本地存储；`resetPreview()` 恢复读者已有的明确选择，然后是站点配置和系统偏好。
+- Header 的用户主动明暗切换才会持久化到 `folio-theme-choice`；操作系统的最终深浅值不会伪装成读者选择。旧的 `folio-theme` 不再作为显式用户选择读取。
+- `ui.defaultTheme` 仍接受 `"light" | "dark" | "system"`，它作为 React 应用的初始偏好，优先级高于 `config.appearance.scheme`，但低于读者明确选择及临时预览。
+- React 应用由 `FolioApp` 单独维护根元素上的 `data-folio-preset`、`data-folio-theme`、`data-folio-code-palette`。消费站不得自行争抢这些状态；静态 HTML 仍由 Folio 的 CSS `prefers-color-scheme` 回退照顾无 JS 场景。
+- `ui.theme: false` 关闭读者主题切换并固定浅色渲染；如要跟随系统，请保持主题功能启用。
 
-## React slots
+需在自定义 React 页面预览内置模板时，直接使用 `<FolioHome config={config} docs={docs} template="editorial" as="div" />`。它使用真实模型和 React Router 的 basePath；嵌入已有 `<main>` 时请指定 `as="div"`，不要生成嵌套 `main`。
 
-```ts
-type FolioSlots = {
-  home?: ReactNode
-  headerActions?: ReactNode
-  articleFooter?: ReactNode
-  docNav?: (props: FolioDocNavProps) => ReactNode
-  docToc?: (props: FolioTocProps) => ReactNode
-  footer?: ReactNode
-}
-```
+官网首页 [Design 主题实验区](/#portal-design-title) 可现场切换四维配置，并复制本节同形状的 `folio.config.ts`。它使用 `FolioMarkdown` 展示真实语法配色，而非仿制代码卡片。
 
-### 可复用文档导航与页内目录
+品牌接口保持独立：`config.logo` / `config.title` 和 `slots.headerBrand` 决定 Header 品牌内容，结构化 Footer 的 `brand.logo.src` / `darkSrc` 提供对应素材。公共 `@uichat-mira/folio/styles.css` 包含 `--folio-*` Token，消费站可以添加自己的 `--site-*` 透明别名；官网不再固定覆写所有预设的核心主色。
 
-左右栏是 Folio 的独立公开组件，均从 `@uichat-mira/folio` 导出，沿用原有单入口 CSS。消费者可独立使用组件，也可组合到文档阅读壳里：
+## 发布状态与 dev 标签
 
-- `FolioDocNav`：传入 `doc`、`docs`，自动按集合与分组生成文档链接，支持 `className`、`ariaLabel`、`onNavigate`，并适配 React Router 的 `basename`。
-- `FolioToc`：传入 `headings`，按标题生成锚点与滚动高亮，支持 `className`、`onNavigate`，空列表不渲染。
+`dev` 源码与 npm `0.1.1` 的差异还包括新的主题与可组合首页 API。发表文章、写文档时不要把 `dev` 能力当成已发布能力：
 
-默认无需配置。想覆盖内置文档页的左右栏，可以使用动态渲染插槽：
+| 能力 | `dev` 源码 | npm `0.1.1` |
+| --- | --- | --- |
+| `title` / `description` / `logo` / `siteUrl` / `github` | 支持 | 支持 |
+| `navigation` 的 `label` / `href` | 支持 | 支持 |
+| `navigation` 的 `collection` 简写、`children`、`panel`、`activeMatch` | 支持 | 不支持 |
+| `collections`（含 `archive`）、`home`、`author` | 支持 | 不支持 |
+| 结构化 `footer`、`footer: false` | 支持 | 不支持（只有字符串） |
+| `slots.headerBrand` / `navigation` / `docToc` / `footer` | 支持 | 不支持 |
+| `ui.footerOnDocs` | 支持 | 不支持 |
+| `appearance.preset` / `scheme` / `codePalette`、`home.template` | 支持 | 不支持 |
+| `useFolioAppearance()` / `FolioHome` 运行时组件 | 支持 | 不支持 |
 
-```tsx
-import { FolioApp, FolioDocNav, FolioToc } from "@uichat-mira/folio";
+差异的权威描述与逐项行为在[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)；本文不把 `dev` 候选契约表述成已发布承诺。
 
-<FolioApp
-  config={config}
-  docs={docs}
-  slots={{
-    docNav: (props) => <FolioDocNav {...props} className="my-doc-nav" />,
-    docToc: (props) => <FolioToc {...props} className="my-doc-toc" />,
-  }}
-/>
-```
+## 相关文档
 
-插槽会随着当前文档自动收到新数据，桌面和打开的移动端菜单使用同一渲染方式。移动端 `props.onNavigate` 用于跳转后关闭抽屉，覆写时应继续传递。若完全替换导航 DOM，消费者应保持相应语义、布局类名和无障碍行为；独立使用 `FolioDocNav` 时需位于 React Router 内。
-
-静态 HTML 仍使用默认导航和 TOC，保证无 JS 时能浏览。React 的插槽不自动改变静态构建输出，消费者若需要自定义静态布局，应通过站点的 `staticRoutes` 管理。
-
-### 约定式项目目录与父级推导
-
-项目内容不需要手工维护目录清单，也不需要在每篇文章上填写父级 ID。按以下结构放置 Markdown，Folio 会从路由层级构建一棵项目树：
-
-~~~text
-projects/
-  com-design/
-    index.md                     # 项目概览 -> /projects/com-design
-    repeated-operations/
-      index.md                   # 子文章 -> /projects/com-design/repeated-operations
-    notes/
-      design-principles/
-        index.md                 # 深层文章，继续嵌套
-~~~
-
-Frontmatter 示例：
-
-~~~yaml
----
-type: project
-title: "ComDesign：AI 时代的设计系统实验"
-order: 2
-description: "关于设计系统的长期探索"
----
-~~~
-
-- 默认情况下，Markdown 路径自动推导 URL，目录中的 `index.md` 对应概览父节点，子目录文章成为它的后代。
-- 侧栏的子文章依 `order` 排序；当前页会高亮，上一篇／下一篇仅在同一顶层项目内移动。
-- 如果父目录暂时没有 `index.md`，导航会显示不可点击的目录分组，**不会创建假的概览链接**。
-- 显式设置 `path` 会覆写默认路由，因此也会改变导航归属；不同项目之间只按完整路径段匹配，避免相似前缀误归属。
-
-项目页面默认复用 Folio 的文档阅读布局，但使用公开的 `FolioTreeNav` 而不是 `FolioDocNav`。核心通过 `buildFolioContentTree(docs, { rootPath })` 构建可序列化的纯数据树，通过 `resolveFolioProjectTree(docs, current)` 自动按项目路径范围归组。需要独立排版时也可以自行组合：
-
-~~~tsx
-import {
-  buildFolioContentTree,
-  FolioTreeNav,
-} from "@uichat-mira/folio";
-
-const tree = buildFolioContentTree(docs, { rootPath: "/projects" });
-<FolioTreeNav tree={tree} currentPath={currentDoc.path} />;
-~~~
-
-消费者可以通过 `slots.projectNav(props)` 自定义项目导航，回调接收 `tree`、`currentPath` 和 `onNavigate`；移动端务必传递 `onNavigate` 以便跳转后关闭抽屉。`slots.docNav` 继续负责普通技术文档，不会被项目模式覆盖。
-
-Folio 的静态构建与 React 使用同一份 Core 树形模型；如需在自定义 `staticRoutes` 中保持约定式项目阅读结构，可使用构建入口 `@uichat-mira/folio/vite` 提供的 `renderFolioStaticProjectShell(context, doc, markdownHtml?)`。
-
-官方 Folio 首页就是 `slots.home` 的真实 consumer。`slots.home` 的优先级高于 `config.home`：只要提供 React 首页节点，就完全使用该节点。
-
-品牌、复杂 landing page 和额外交互属于 consumer；Folio runtime 不需要为官网增加隐藏接口。完整的首页定制边界见[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md#configurable-built-in-home-fol-030-candidate-not-published-in-011)。
+- [导航与内容清单](/guide/navigation)：顶栏条目、集合简写、侧栏树与 Collection／Section。
+- [用 FolioApp 与 slots 组合 React 页面](/guide/runtime-composition)：完整消费站配置与 slots 示例。
+- [Core、UI、Build 与站点边界](/guide/architecture)：分层、公开入口，以及默认壳与自定义页面各自的所有权。
+- [静态发布](/guide/static-publishing)：静态路由、SEO 产物与无 JS 阅读。
+- [静态构建与 SEO](/reference/seo)：`FolioStaticBuildOptions` 的完整字段。

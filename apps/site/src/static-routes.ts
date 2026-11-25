@@ -1,30 +1,31 @@
 import {
   assertNoFolioCollectionConflicts,
-  findFolioDocCollection,
   folioCollectionIndexes,
-  getFolioDocNeighbors,
   renderFolioMarkdown,
   selectFolioCollectionDocs,
   type FolioDoc,
 } from "@uichat-mira/folio";
 import {
   folioEscapeHtml,
-  renderFolioStaticProjectShell,
+  renderFolioStaticPageNav,
+  renderFolioStaticDocumentBody,
+  renderFolioStaticTreeNav,
+  renderFolioStaticToc,
   type FolioStaticBuildContext,
   type FolioStaticRoute,
 } from "@uichat-mira/folio/vite";
 import { withFolioBaseLinks } from "./content-links";
+import {
+  buildSiteArchiveModel,
+  siteArchiveDescription,
+  siteArchivePath,
+  type SiteArchiveModel,
+  type SiteArchiveTagLink,
+} from "./archive";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { HomePage } from "./HomePage";
-
-const TYPE_LABEL: Record<string, string> = {
-  doc: "文档",
-  article: "文章",
-  project: "项目",
-  page: "页面",
-};
 
 function href(base: string, path: string): string {
   const prefix = base === "/" ? "/" : base.replace(/\/+$/, "") + "/";
@@ -36,97 +37,23 @@ function markdown(doc: FolioDoc, base: string): string {
   return renderFolioMarkdown(withFolioBaseLinks(doc.body, base), { removeH1: true });
 }
 
-function renderToc(doc: FolioDoc): string {
-  if (!doc.headings.length) return "";
-  return (
-    '<aside class="folio-toc" aria-label="本页目录"><h2>本页目录</h2><ul>' +
-    doc.headings
-      .map(
-        (heading) =>
-          '<li class="folio-toc-depth-' +
-          heading.depth +
-          '"><a href="#' +
-          folioEscapeHtml(heading.id) +
-          '">' +
-          folioEscapeHtml(heading.text) +
-          "</a></li>",
-      )
-      .join("") +
-    "</ul></aside>"
-  );
-}
-
-function renderDocNav(context: FolioStaticBuildContext, doc: FolioDoc): string {
-  const collection = findFolioDocCollection(context.docs, doc);
-  if (!collection) return "";
-
-  const sections = collection.sections
-    .map(
-      (section) =>
-        "<section><h2>" +
-        folioEscapeHtml(section.title) +
-        "</h2><ul>" +
-        section.docs
-          .map(
-            (item) =>
-              '<li><a' +
-              (item.path === doc.path ? ' class="active" aria-current="page"' : "") +
-              ' href="' +
-              folioEscapeHtml(href(context.base, item.path)) +
-              '">' +
-              folioEscapeHtml(item.title) +
-              "</a></li>",
-          )
-          .join("") +
-        "</ul></section>",
-    )
-    .join("");
-
-  return '<nav class="folio-docnav" aria-label="文档目录">' + sections + "</nav>";
-}
-
-function renderPager(context: FolioStaticBuildContext, doc: FolioDoc): string {
-  const { previous, next } = getFolioDocNeighbors(context.docs, doc);
-  if (!previous && !next) return "";
-
-  const previousHtml = previous
-    ? '<a class="folio-page-nav__previous" href="' +
-      folioEscapeHtml(href(context.base, previous.path)) +
-      '"><span>上一篇</span><strong>' +
-      folioEscapeHtml(previous.title) +
-      "</strong></a>"
-    : "<span></span>";
-  const nextHtml = next
-    ? '<a class="folio-page-nav__next" href="' +
-      folioEscapeHtml(href(context.base, next.path)) +
-      '"><span>下一篇</span><strong>' +
-      folioEscapeHtml(next.title) +
-      "</strong></a>"
-    : "<span></span>";
-
-  return (
-    '<nav class="folio-page-nav" aria-label="文档分页">' +
-    previousHtml +
-    nextHtml +
-    "</nav>"
-  );
-}
-
 function renderEntryList(
   context: FolioStaticBuildContext,
   docs: FolioDoc[],
   heading: "h2" | "h3",
+  tagLinks?: ReadonlyMap<string, readonly SiteArchiveTagLink[]>,
 ): string {
   return (
     '<div class="folio-entry-list">' +
     docs
-      .map(
-        (doc, index) =>
-          '<a class="folio-entry" href="' +
-          folioEscapeHtml(href(context.base, doc.path)) +
-          '"><span class="folio-entry-number" aria-hidden="true">' +
+      .map((doc, index) => {
+        const tags = tagLinks?.get(doc.path) ?? [];
+        const number =
+          '<span class="folio-entry-number" aria-hidden="true">' +
           String(index + 1).padStart(2, "0") +
-          '</span><div class="folio-entry-copy">' +
+          "</span>";
+        const copy =
+          '<div class="folio-entry-copy">' +
           (doc.date
             ? '<time class="folio-entry-date" datetime="' +
               folioEscapeHtml(doc.date) +
@@ -134,78 +61,105 @@ function renderEntryList(
               folioEscapeHtml(doc.date) +
               "</time>"
             : "") +
-          "<" +
-          heading +
-          ' class="folio-entry-title">' +
-          folioEscapeHtml(doc.title) +
-          "</" +
-          heading +
-          ">" +
+          (tags.length
+            ? "<" +
+              heading +
+              ' class="folio-entry-title"><a class="folio-entry-link" href="' +
+              folioEscapeHtml(href(context.base, doc.path)) +
+              '">' +
+              folioEscapeHtml(doc.title) +
+              "</a></" +
+              heading +
+              ">"
+            : "<" +
+              heading +
+              ' class="folio-entry-title">' +
+              folioEscapeHtml(doc.title) +
+              "</" +
+              heading +
+              ">") +
           (doc.description
             ? '<p class="folio-entry-description">' + folioEscapeHtml(doc.description) + "</p>"
             : "") +
-          "</div><span class=\"folio-entry-arrow\" aria-hidden=\"true\">↗</span></a>",
-      )
+          (tags.length
+            ? '<span class="folio-entry-tags">' +
+              tags
+                .map(
+                  (tag) =>
+                    '<a class="folio-entry-tag" href="' +
+                    folioEscapeHtml(tag.href) +
+                    '">' +
+                    folioEscapeHtml(tag.label) +
+                    "</a>",
+                )
+                .join("") +
+              "</span>"
+            : "") +
+          "</div>";
+        const arrow = '<span class="folio-entry-arrow" aria-hidden="true">↗</span>';
+        if (!tags.length) {
+          return (
+            '<a class="folio-entry" href="' +
+            folioEscapeHtml(href(context.base, doc.path)) +
+            '">' +
+            number +
+            copy +
+            arrow +
+            "</a>"
+          );
+        }
+        return '<div class="folio-entry">' + number + copy + arrow + "</div>";
+      })
       .join("") +
     "</div>"
   );
 }
 
 function renderDoc(context: FolioStaticBuildContext, doc: FolioDoc): string {
-  return (
-    '<div class="folio-docs-runtime folio-docs-runtime--static"><div class="folio-docs-shell">' +
-    renderDocNav(context, doc) +
-    '<main class="folio-doc-main"><h1>' +
-    folioEscapeHtml(doc.title) +
-    "</h1>" +
-    (doc.description
-      ? '<p class="folio-lede">' + folioEscapeHtml(doc.description) + "</p>"
-      : "") +
-    '<article class="folio-markdown">' +
-    markdown(doc, context.base) +
-    "</article>" +
-    renderPager(context, doc) +
-    "</main>" +
-    renderToc(doc) +
-    "</div></div>"
-  );
+  return '<div class="folio-docs-runtime folio-docs-runtime--static"><div class="folio-docs-shell">' +
+    renderFolioStaticTreeNav(context, doc) +
+    '<main class="folio-doc-main">' +
+    renderFolioStaticDocumentBody(doc, markdown(doc, context.base)) +
+    renderFolioStaticPageNav(context, doc) +
+    '</main>' + renderFolioStaticToc(doc.headings) + '</div></div>';
 }
 
-function renderArticle(context: FolioStaticBuildContext, doc: FolioDoc): string {
-  const article =
-    '<main class="folio-doc-page folio-article-main">' +
-    '<div class="folio-doc-toolbar"><div class="folio-eyebrow">' +
-    folioEscapeHtml(doc.group) +
-    "</div></div><h1>" +
-    folioEscapeHtml(doc.title) +
-    "</h1>" +
-    (doc.description
-      ? '<p class="folio-lede">' + folioEscapeHtml(doc.description) + "</p>"
-      : "") +
-    '<article class="folio-markdown">' +
-    markdown(doc, context.base) +
-    "</article></main>";
-  const toc = renderToc(doc);
+function renderArticle(
+  context: FolioStaticBuildContext,
+  doc: FolioDoc,
+  archive: SiteArchiveModel,
+): string {
+  const tagLinks = archive.tagsByDoc.get(doc.path) ?? [];
+  const tags = tagLinks.length
+    ? '<nav class="folio-article-tags" aria-label="文章标签">' +
+      '<span class="folio-article-tags__label">标签</span>' +
+      tagLinks
+        .map(
+          (link) =>
+            '<a class="folio-article-tag" href="' +
+            folioEscapeHtml(link.href) +
+            '">' +
+            folioEscapeHtml(link.label) +
+            "</a>",
+        )
+        .join("") +
+      "</nav>"
+    : "";
+  const article = '<main class="folio-doc-page folio-article-main">' +
+    tags +
+    renderFolioStaticDocumentBody(doc, markdown(doc, context.base)) + '</main>';
+  const toc = renderFolioStaticToc(doc.headings);
   if (!toc) return article;
-  return (
-    '<div class="folio-article-layout"><details class="folio-article-mobile-toc"><summary>本页目录</summary>' +
-    toc +
-    "</details>" +
-    article +
-    toc +
-    "</div>"
-  );
+  return '<div class="folio-article-layout">' +
+    '<details class="folio-article-mobile-toc"><summary>本页目录</summary>' +
+    toc + '</details>' + article + toc + '</div>';
 }
 
 function renderGeneric(context: FolioStaticBuildContext, doc: FolioDoc): string {
   return (
     '<main class="folio-prerender folio-prerender--' +
     folioEscapeHtml(doc.type) +
-    '"><p class="folio-prerender__eyebrow">' +
-    folioEscapeHtml(doc.group) +
-    " · " +
-    folioEscapeHtml(TYPE_LABEL[doc.type] ?? doc.type) +
-    "</p><h1>" +
+    '"><h1>' +
     folioEscapeHtml(doc.title) +
     "</h1>" +
     (doc.description ? "<p>" + folioEscapeHtml(doc.description) + "</p>" : "") +
@@ -229,14 +183,45 @@ function renderHome(context: FolioStaticBuildContext): string {
   );
 }
 
+function renderCategoryRow(
+  context: FolioStaticBuildContext,
+  archive: SiteArchiveModel,
+  collectionPath: string,
+  collectionTitle: string,
+): string {
+  const groups = archive.byCollection.get(collectionPath)?.index.categories ?? [];
+  if (!groups.length) return "";
+  return (
+    '<nav class="folio-archive-row" aria-label="' +
+    folioEscapeHtml(collectionTitle + "分类归档") +
+    '"><ul class="folio-archive-row__list">' +
+    '<li><a class="folio-archive-chip" href="' +
+    folioEscapeHtml(href(context.base, collectionPath)) +
+    '" aria-current="true">全部</a></li>' +
+    groups
+      .map(
+        (group) =>
+          '<li><a class="folio-archive-chip" href="' +
+          folioEscapeHtml(href(context.base, siteArchivePath(collectionPath, "category", group.slug))) +
+          '">' +
+          folioEscapeHtml(group.title) +
+          "</a></li>",
+      )
+      .join("") +
+    "</ul></nav>"
+  );
+}
+
 function renderCollection(
   context: FolioStaticBuildContext,
+  archive: SiteArchiveModel,
   path: string,
   title: string,
   description: string,
   emptyMessage: string,
 ): string {
   const entries = selectFolioCollectionDocs(context.docs, path);
+  const archiveCollection = archive.byCollection.get(path);
   return (
     '<main class="folio-home folio-collection-page"><header class="folio-journal-hero folio-collection-hero">' +
     '<span class="folio-journal-kicker">COLLECTION · ' +
@@ -246,17 +231,58 @@ function renderCollection(
     "</h1>" +
     (description ? "<p>" + folioEscapeHtml(description) + "</p>" : "") +
     "</header>" +
+    renderCategoryRow(context, archive, path, title) +
     (entries.length
-      ? renderEntryList(context, entries, "h2")
+      ? renderEntryList(
+          context,
+          entries,
+          "h2",
+          archiveCollection ? archive.tagsByDoc : undefined,
+        )
       : '<p class="folio-collection-empty">' + folioEscapeHtml(emptyMessage) + "</p>") +
     "</main>"
   );
 }
 
-export function buildShowcaseStaticRoutes(
+function renderArchivePage(
+  context: FolioStaticBuildContext,
+  archive: SiteArchiveModel,
+  route: SiteArchiveModel["routes"][number],
+): string {
+  const { collection, group } = route;
+  const category = group.kind === "category";
+  return (
+    '<main class="folio-home folio-collection-page folio-archive-page">' +
+    '<header class="folio-journal-hero folio-collection-hero">' +
+    '<span class="folio-journal-kicker">' +
+    (category ? "CATEGORY ARCHIVE" : "TAG ARCHIVE") +
+    " · " +
+    group.docs.length +
+    " ARTICLES</span><h1>" +
+    folioEscapeHtml(group.title) +
+    "</h1><p>" +
+    folioEscapeHtml(
+      collection.title + " · " + (category ? "分类" : "标签") + "归档 · 共 " + group.docs.length + " 篇文章",
+    ) +
+    '</p><a class="folio-archive-back" href="' +
+    folioEscapeHtml(href(context.base, collection.path)) +
+    '">返回' +
+    folioEscapeHtml(collection.title) +
+    ' <span aria-hidden="true">↗</span></a></header>' +
+    renderEntryList(context, group.docs, "h2", archive.tagsByDoc) +
+    "</main>"
+  );
+}
+
+export function buildFolioSiteStaticRoutes(
   context: FolioStaticBuildContext,
 ): FolioStaticRoute[] {
   assertNoFolioCollectionConflicts(context.docs, context.config);
+  const archive = buildSiteArchiveModel(
+    context.config,
+    context.docs,
+    (path) => href(context.base, path),
+  );
 
   return [
     {
@@ -282,11 +308,19 @@ export function buildShowcaseStaticRoutes(
       type: "website",
       body: renderCollection(
         context,
+        archive,
         collection.path,
         collection.title,
         collection.description,
         collection.emptyMessage,
       ),
+    })),
+    ...archive.routes.map((route) => ({
+      path: route.path,
+      title: `${route.group.kind === "category" ? "分类" : "标签"}：${route.group.title}`,
+      description: siteArchiveDescription(route.collection, route.group),
+      type: "website",
+      body: renderArchivePage(context, archive, route),
     })),
     ...context.docs.map((doc) => ({
       path: doc.path,
@@ -295,10 +329,8 @@ export function buildShowcaseStaticRoutes(
       body:
         doc.type === "doc"
           ? renderDoc(context, doc)
-          : doc.type === "project"
-            ? renderFolioStaticProjectShell(context, doc, markdown(doc, context.base))
           : doc.type === "article"
-            ? renderArticle(context, doc)
+            ? renderArticle(context, doc, archive)
             : renderGeneric(context, doc),
       type: doc.type === "article" ? "article" : "website",
       image: doc.cover,

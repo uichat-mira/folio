@@ -6,13 +6,13 @@ It turns structured Markdown in a repository into a stable content model, Vite i
 
 ## Install
 
-Folio `0.1.1` is publicly available on the npm Registry. Install the published package:
+Folio `0.2.0` is the current public release on the npm Registry. Install the published package:
 
 ```bash
 npm install @uichat-mira/folio
 ```
 
-The published `0.1.1` package passed an independent Registry-installed NodeNext/Bundler, Vite and static-site consumer gate ([OIDC release + Registry acceptance](https://github.com/uichat-mira/folio/actions/runs/41282326983), attempt 2). Continue using the local tarball gate for source changes:
+Every release candidate must pass the independent tarball consumer gate before promotion, and the publish workflow verifies the real Registry-installed package after npm publication. Continue using the local gate for source changes:
 
 ```bash
 npm run release:check
@@ -20,9 +20,27 @@ npm run release:check
 
 That builds the package, audits the packed file list, and installs the resulting tarball into an isolated Vite + React consumer.
 
+### One-command project initialization (dev candidate)
+
+A new, independently packed CLI lives at `packages/create-folio`:
+
+```sh
+# Available only after @uichat-mira/create-folio is published:
+npx @uichat-mira/create-folio my-site --install
+# Equivalent npm initializer:
+npm create @uichat-mira/folio my-site -- --install
+```
+
+The CLI scaffolds a working Vite/React/Folio site with Markdown content, config,
+static build and a safe no-overwrite policy. `--install` is optional; without
+it, run `cd my-site && npm install`. The candidate has been exercised as a
+**local npm tarball through npm exec**, but is **not yet on the public Registry**.
+Do not confuse source verification with publication.
+
+
 ## Consumer contract
 
-The unchanged 0.1.x consumer boundaries are defined once in [docs/consumer-contract.md](docs/consumer-contract.md):
+The 0.2.x consumer boundaries are defined once in [docs/consumer-contract.md](docs/consumer-contract.md):
 
 - Markdown rendering is trusted-content-only. Raw HTML, `::: html` blocks, and Callout bodies are preserved without sanitization, so unreviewed submissions, scraped pages, and external PR previews must not be rendered.
 - `@uichat-mira/folio/styles.css` is a whole-site default stylesheet. It is not an isolated embed stylesheet, and importing it into an existing branded page affects that page globally.
@@ -33,6 +51,8 @@ The unchanged 0.1.x consumer boundaries are defined once in [docs/consumer-contr
 
 `@uichat-mira/folio@0.1.0` was manually bootstrapped from accepted `prod` commit `40db582b` on 2026-11-01. Folio `0.1.1` was published through GitHub Release `folio-v0.1.1` from tag commit `e4af1f7` using the npm Trusted Publishing / OIDC workflow. The initial run's Registry visibility check expired while npm processed the new package; its second attempt passed the real Registry consumer, SRI, TypeScript, Vite and static-site acceptance. The later `prod` workflow polling fix is in [PR #103](https://github.com/uichat-mira/folio/pull/103) (current `prod` `711c6c6`), without moving the release tag or republishing the version. The pre-release Chrome candidate passed 23/23 checks; live Pages HTTP smoke and downstream Mira Docs migration are separate.
 
+Folio `0.2.0` promotes the post-0.1.1 contract: PWA entrypoints, feeds and richer static metadata, Git-derived dates, Article category/tag archives, expanded React composition, appearance presets/code palettes, and reusable list surfaces.
+
 The [migration status page](https://uichat-mira.github.io/folio/reference/migration-status/) records the current state with its evidence.
 
 ## What Folio provides
@@ -41,8 +61,9 @@ The [migration status page](https://uichat-mira.github.io/folio/reference/migrat
 - Documentation, article, project, and page entry types
 - Vite content discovery and `virtual:folio/content`
 - Generated routes, navigation roots, and heading extraction
+- Theme-aware `FolioEntryList` / `FolioListPage` for first-party or external publications
 - Configurable static HTML generation
-- Lightweight built-in home configuration and home-only static override
+- Portal default home, explicit Editorial template, and home-only static override
 - Canonical, Open Graph, Twitter, and JSON-LD metadata
 - `404.html`, `sitemap.xml`, and `robots.txt`
 - GitHub Pages project-path and root-path support
@@ -53,6 +74,8 @@ The [migration status page](https://uichat-mira.github.io/folio/reference/migrat
 
 - `@uichat-mira/folio` — content model, configuration helpers, React runtime, and Markdown rendering
 - `@uichat-mira/folio/vite` — Markdown discovery, virtual manifests, and static output
+- `@uichat-mira/folio/pwa` — optional PWA build integration
+- `@uichat-mira/folio/pwa/react` — optional React update prompt/hooks
 - `@uichat-mira/folio/styles.css` — whole-site default stylesheet (not an isolated embed stylesheet)
 
 ## Development
