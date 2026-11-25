@@ -1,6 +1,6 @@
 ---
 title: 静态构建与 SEO
-description: Folio 的静态 route、metadata、JSON-LD、sitemap、robots 与 Feed 契约，并区分已发布 0.1.1 与 dev 源码。
+description: Folio 0.2.0 的静态 route、metadata、JSON-LD、sitemap、robots 与 Feed 契约，并保留 0.1.1 的历史差异。
 group: API
 collection: 参考
 order: 43
@@ -16,9 +16,9 @@ Folio 在 Vite `vite build` 的 `writeBundle` 阶段为公开 route 写出目录
 
 ## 版本状态
 
-公开 npm 版本是 `@uichat-mira/folio@0.1.1`（Release `folio-v0.1.1`，gitHead `e4af1f7`）。仓库 `dev` 源码已经合并了更多静态发布能力，但**尚未发布到 npm**；本页的“dev 源码”指本轮核对的 `origin/dev` 基线 `f49557c`。
+当前公开 npm 版本是 `@uichat-mira/folio@0.2.0`（Release `folio-v0.2.0`）。它包含此前 `dev` 上的静态发布扩展；下表保留 `0.1.1` 作为历史基线，便于老 consumer 判断升级差异。
 
-| 能力 | npm 0.1.1 | dev 源码 |
+| 能力 | npm 0.1.1 | npm 0.2.0 |
 | --- | --- | --- |
 | 静态 route、`404.html`、`sitemap.xml`、`robots.txt` | 有 | 有 |
 | canonical、Open Graph、Twitter Card、JSON-LD、route 级 `robots` | 有 | 有 |
@@ -28,7 +28,7 @@ Folio 在 Vite `vite build` 的 `writeBundle` 阶段为公开 route 写出目录
 | `FolioStaticBuildOptions.siteIndexing`（预览 noindex） | 无 | 有 |
 | `FolioStaticBuildOptions.feeds`（RSS 2.0 / Atom 1.0） | 无 | 有 |
 
-从 npm 安装 `0.1.1` 时，表格中“无”的字段既不在类型里，也不会产生输出；不要仅凭本页示例就假定它们可用。反过来，`dev` 源码的 `package.json` 版本号仍是 `0.1.1`，不能把源码里的新选项当作 npm 已发布接口。
+从 npm `0.1.1` 升级到 `0.2.0` 后，表格中原本“无”的静态发布能力进入公开类型与产物合同；后续 `dev` 的新增变化仍需以实际发布版本为准。
 
 ## FolioStaticRoute
 
@@ -42,7 +42,7 @@ type FolioStaticRoute = {
   image?: string
   robots?: string
   jsonLd?: unknown
-  lastmod?: string   // dev 源码；0.1.1 没有
+  lastmod?: string   // 0.2.0+；0.1.1 没有
   doc?: FolioDoc
 }
 ```

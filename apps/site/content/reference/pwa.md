@@ -16,7 +16,7 @@ tags:
 
 ## 版本状态
 
-这两个入口在当前 `dev` 源码中实现，**尚未发布到 npm**。已发布的 `@uichat-mira/folio@0.1.1` 没有 `./pwa` 与 `./pwa/react` exports，也没有 `vite-plugin-pwa` / `workbox-window` 的可选 peer 声明；在 `0.1.1` 上按本页示例导入会无法解析子路径。本轮核对基线为 `origin/dev` 的 `f49557c`。
+`./pwa` 与 `./pwa/react` 已随 `@uichat-mira/folio@0.2.0` 发布，并带有 `vite-plugin-pwa` / `workbox-window` 的可选 peer 声明；历史 `0.1.1` 不包含这些子路径。
 
 | 项目 | npm 0.1.1 | dev 源码 |
 | --- | --- | --- |

@@ -13,7 +13,7 @@ tags: [Popover, React, Accessibility]
 
 ## 版本与发布状态
 
-本页描述当前 `dev` 源码。npm 最新发布版 `0.1.1`（Git tag `folio-v0.1.1`）**未导出** `FolioUtilityPopover`；安装 `0.1.1` 时不能按本页示例导入该组件；本页适用于当前 `dev` 或包含该导出的后续版本。 `status: published` 仅表示文档内容已审校，不表示此组件已包含在 npm 0.1.1 中。
+本页描述的 `FolioUtilityPopover` 已随 npm `0.2.0` 发布；历史 `0.1.1` 未导出该能力。 `status: published` 表示文档内容已审校，具体可用版本仍以实际包导出为准。
 
 ## 导入与最小用法
 
@@ -22,7 +22,7 @@ import { FolioUtilityPopover } from "@uichat-mira/folio";
 
 <FolioUtilityPopover
   label="Folio 发布版本与资源"
-  trigger={<span>v0.1.1</span>}
+  trigger={<span>v0.2.0</span>}
 >
   <a href="/reference/migration-status">迁移状态</a>
   <a href="https://github.com/uichat-mira/folio/releases">版本发布页</a>

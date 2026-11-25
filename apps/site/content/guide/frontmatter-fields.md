@@ -101,7 +101,7 @@ tags:
 - 只有 `type: article` 进入分类/标签归档；`doc` 与 `page` 不参与。
 - 集合在站点配置中写了 `archive: true` 才会生成 `<collection>/category/<slug>` 与 `<collection>/tag/<slug>`；官方站 `/blogs` 已开启。
 - 归档身份来自 Frontmatter 值：NFC、去首尾空白、合并空白，并忽略 ASCII 大小写（`Frontend` 与 `frontend` 是同一个归档），中文原样保留。显示名可以单独配置，但不改变归档 URL。
-- 这些字段与归档能力属于当前 `dev` 源码（FOL-040 / FOL-041），尚未包含在已发布的 `0.1.1` 中。
+- 这些字段与归档能力由 FOL-040 / FOL-041 引入，并已随 `0.2.0` 发布；历史 `0.1.1` 不包含它们。
 
 分类、标签与 `collection` / `section` / `group` 的区别见 [内容组织与排序](/guide/organizing-content)。
 

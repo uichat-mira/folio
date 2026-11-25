@@ -1,6 +1,6 @@
 ---
 title: 首个可运行站点
-description: 用已发布的 0.1.1，从空项目到可访问文档页与静态 HTML：内容文件、Frontmatter、Vite plugin、React 入口与构建产物。
+description: 用已发布的 0.2.0，从空项目到可访问文档页与静态 HTML：内容文件、Frontmatter、Vite plugin、React 入口与构建产物。
 group: 开始
 collection: 指南
 order: 3
@@ -13,7 +13,7 @@ tags:
   - 静态构建
 ---
 
-这一页只走**已发布 npm 包 `0.1.1`** 的路径：在一个新的 Vite 7 + React 19 项目里，从空白开始建出第一篇文档，并完成静态构建。所有示例都只使用 `0.1.1` 的公开接口。
+这一页只走**已发布 npm 包 `0.2.0`** 的路径：在一个新的 Vite 7 + React 19 项目里，从空白开始建出第一篇文档，并完成静态构建。所有示例都只使用 `0.1.1` 的公开接口。
 
 如果你要修改 Folio 源码本身，请看[快速开始](/guide/getting-started)的路径 B；要把 Folio 接进已有品牌页面，先读[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)中关于整站样式表的说明。
 
@@ -36,7 +36,7 @@ tags:
 npm create vite@7 my-docs -- --template react-ts
 cd my-docs
 npm install
-npm install @uichat-mira/folio@0.1.1 react-router-dom@^7
+npm install @uichat-mira/folio@0.2.0 react-router-dom@^7
 ```
 
 这里固定 `create-vite@7`，得到 Vite 7 + React 19 的模板；`react-router-dom` 是 Folio 的 peer 依赖，需要显式安装。已有 Vite 7 + React 19 项目可以跳过脚手架，只执行最后一条安装命令。

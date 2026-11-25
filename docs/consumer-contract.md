@@ -414,7 +414,7 @@ body {
 
 These declarations are visual overrides, not a security or isolation mechanism. Re-check a real host page after importing Folio, because the affected rules apply to elements the host already styled.
 
-### Header branding without component CSS overrides (dev candidate)
+### Header branding without component CSS overrides (0.2.0)
 
 Folio owns the shared Header markup, link behavior, and layout. A consumer that needs
 more than the default `config.logo` image plus `config.title` text can supply its
@@ -436,8 +436,7 @@ Folio package remains the single source of default component styling. Other
 consumer-specific content, such as custom Home or header utility contents, may
 use their own classes and tokens.
 
-This slot is implemented on the current `dev` source line; it is not part of
-the already-published npm `0.1.1` tarball.
+This slot is part of the npm `0.2.0` contract; historical `0.1.1` does not include it.
 
 ## Static output: default shell vs custom routes
 

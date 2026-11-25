@@ -18,14 +18,14 @@ tags:
 | 我想做什么 | 阅读入口 |
 | --- | --- |
 | 了解产品和适用范围 | [Folio 是什么](/guide/introduction) |
-| 在空项目中使用已发布 npm 0.1.1 | [快速开始](/guide/getting-started) → [首个可运行站点](/guide/first-site) |
+| 在空项目中使用已发布 npm 0.2.0 | [快速开始](/guide/getting-started) → [首个可运行站点](/guide/first-site) |
 | 编写和组织 Markdown | [编写内容](/guide/authoring) → [内容组织与排序](/guide/organizing-content) |
 | 配置站点和组合 React | [站点配置](/guide/configuration) → [导航](/guide/navigation) → [React 组合](/guide/runtime-composition) |
 | 构建、部署静态站点 | [静态发布](/guide/static-publishing) → [GitHub Pages](/reference/github-pages) |
 
 ## 版本与公共契约
 
-已发布的包版本是 `@uichat-mira/folio@0.1.1`；当前 `dev` 源码包含部分尚未发布的功能，例如 PWA、Article 归档及扩展的 React 组件与 slots。按 dev 示例使用 npm 0.1.1 可能无法编译。
+当前已发布的包版本是 `@uichat-mira/folio@0.2.0`；PWA、Article 归档、扩展 React 组件与 slots 已进入公开包。后续 `dev` 仍可能包含未发布候选变化。
 
 **版本能力的单一权威来源**：[`docs/consumer-contract.md`](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)。参考页只保留与当前 API 直接相关的局部差异；`status: published` 表示文档内容已审校，**不等于 API 已进入 npm**。
 

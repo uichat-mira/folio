@@ -15,7 +15,7 @@ Folio 的 Vite 入口是 `@uichat-mira/folio/vite`。它把 Markdown 内容发�
 
 ## 版本状态
 
-已发布的 `@uichat-mira/folio@0.1.1` 支持 `folio()` 与 `staticRoutes` 的基础形态。`dev` 源码在此之上增加了首页覆写、站点索引策略、Feed 与可选 PWA 入口；它们**尚未发布到 npm**。本轮核对基线为 `origin/dev` 的 `f49557c`。
+`@uichat-mira/folio@0.2.0` 在 `folio()` 与 `staticRoutes` 基础上正式包含首页覆写、站点索引策略、Feed 与可选 PWA 入口；历史 `0.1.1` 只包含基础形态。
 
 | 项目 | npm 0.1.1 | dev 源码 |
 | --- | --- | --- |

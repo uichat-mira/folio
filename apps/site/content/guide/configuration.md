@@ -250,7 +250,7 @@ home: {
 
 ## 主题与品牌接口
 
-> **版本边界：** 以下 `appearance`、`home.template`、`FolioHome`、`useFolioAppearance()` 是当前 **`dev` 源码**的能力，**尚未进入 npm 0.1.1**。已经安装 npm 0.1.1 的项目不要直接复制使用；需等待包含这些 API 的版本正式发布。
+> **版本边界：** `appearance`、`home.template`、`FolioHome`、`useFolioAppearance()` 已随 npm `0.2.0` 发布；历史 `0.1.1` 不包含这些 API。
 
 `config.appearance` 定义三条互不绑定的外观维度，`home.template` 单独选择内置首页结构：
 
