@@ -16,13 +16,21 @@ feat/* -> dev -> test -> prod
 
 ## Repository-specific deployment exception
 
-This repository currently has one hosted runtime surface: the public GitHub Pages site.
+This repository currently has one hosted site runtime surface: the public GitHub Pages site.
 
 There are no dedicated hosted `dev` or `test` sites. Instead:
 
 - `dev` and `test` must pass the same repository build and package verification used before production.
 - Pull requests into `dev`, `test`, and `prod` run validation.
 - Only `prod` may deploy the GitHub Pages production artifact.
+
+### Optional WeChat OG image endpoint
+
+The official site may use `apps/site/worker/og-image` as an optional Cloudflare
+Worker image endpoint for WeChat link previews. It is not a second site runtime:
+it only returns the square mark or the wide social card based on the requesting
+user agent. The Pages build uses it only when the repository variable
+`FOLIO_OG_IMAGE_URL` is set.
 
 ## npm release semantics
 

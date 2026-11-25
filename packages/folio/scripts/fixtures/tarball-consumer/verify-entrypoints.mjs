@@ -67,9 +67,16 @@ const checks = [
 
       const entry = await import("@uichat-mira/folio");
       assert.equal(typeof entry.FolioApp, "function", "root entry does not export FolioApp");
-      assert.equal(typeof entry.FolioDocNav, "function", "root entry does not export FolioDocNav");
+      assert.equal(typeof entry.FolioHome, "function", "root entry does not export composable FolioHome");
+      assert.equal(typeof entry.useFolioAppearance, "function", "root entry does not export runtime appearance hook");
+      assert.equal("FolioDocNav" in entry, false, "obsolete separate sidebar entry is still exported");
       assert.equal(typeof entry.FolioToc, "function", "root entry does not export FolioToc");
+      assert.equal(typeof entry.FolioPageNav, "function", "root entry does not export FolioPageNav");
+      assert.equal(typeof entry.FolioDocMeta, "function", "root entry does not export FolioDocMeta");
+      assert.equal(typeof entry.getFolioDocMeta, "function", "root entry does not export getFolioDocMeta");
       assert.equal(typeof entry.FolioTreeNav, "function", "root entry does not export FolioTreeNav");
+      assert.equal(typeof entry.buildFolioNavigationTree, "function", "root entry does not export the unified navigation model");
+      assert.equal(typeof entry.getFolioNavigationNeighbors, "function", "root entry does not export unified reading neighbors");
       assert.equal(typeof entry.buildFolioContentTree, "function", "root entry does not export buildFolioContentTree");
       assert.equal(typeof entry.resolveFolioProjectTree, "function", "root entry does not export resolveFolioProjectTree");
       assert.equal(
@@ -87,6 +94,10 @@ const checks = [
         "function",
         "root entry does not export resolveFolioHome",
       );
+      assert.equal(typeof entry.resolveFolioAppearance, "function", "appearance resolver must ship in the tarball");
+      assert.equal(typeof entry.resolveFolioCodePalette, "function", "code palette resolver must ship in the tarball");
+      assert.deepEqual(entry.resolveFolioAppearance({}), { preset: "pearl", scheme: "system", codePalette: "auto" });
+      assert.equal(entry.resolveFolioCodePalette("xuanmo", "light"), "xuanmo");
 
       const doc = entry.parseFolioDoc(
         "docs/consumer.md",
@@ -132,6 +143,8 @@ const checks = [
       const entry = await import("@uichat-mira/folio/vite");
       assert.equal(typeof entry.folio, "function", "vite entry does not export folio()");
       assert.equal(typeof entry.renderFolioStaticProjectShell, "function", "vite entry lacks project renderer");
+      assert.equal(typeof entry.renderFolioStaticPageNav, "function", "vite entry lacks shared static pager");
+      assert.equal(typeof entry.renderFolioStaticDocMeta, "function", "vite entry lacks static document metadata");
       assert.equal(
         entry.folioVirtualModule,
         "virtual:folio/content",
@@ -169,10 +182,98 @@ const checks = [
         css.includes("--folio-primary"),
         "styles.css does not contain the Folio custom properties",
       );
-      assert.ok(css.includes(".folio-docnav"), "styles.css lacks document navigation");
+      assert.ok(css.includes(".folio-tree-nav"), "styles.css lacks unified navigation");
+      assert.equal(css.includes(".folio-docnav"), false, "legacy sidebar CSS still ships");
       assert.ok(css.includes(".folio-toc"), "styles.css lacks page TOC");
       assert.ok(css.includes(".folio-tree-nav"), "styles.css lacks project tree navigation");
       return `${entryFile} (${css.length} bytes)`;
+    },
+  },
+  {
+    // FOL-039: the optional PWA integration must resolve through the published
+    // export map from the installed tarball, without the consumer installing
+    // anything beyond the declared optional peers.
+    label: "pwa",
+    async run() {
+      for (const [subpath, file, names] of [
+        [
+          "@uichat-mira/folio/pwa",
+          "pwa.js",
+          ["folioPwa", "computeFolioContentVersion", "FOLIO_PWA_CONTENT_VERSION_FILE"],
+        ],
+        ["@uichat-mira/folio/pwa/react", "pwa-react.js", ["FolioPwaUpdatePrompt", "useFolioPwaUpdate"]],
+      ]) {
+        const url = import.meta.resolve(subpath);
+        const entryFile = fileURLToPath(url);
+        assert.match(
+          normalize(entryFile),
+          new RegExp(`\\/dist\\/${file.replace(".", "\\.")}$`),
+          `${subpath} resolved to ${entryFile}, expected dist/${file}`,
+        );
+        assert.ok(isInside(entryFile, packageDir), `${subpath} escaped the package: ${entryFile}`);
+        // The plugin half is a pure config helper and loads in Node.
+        //
+        // The React half is deliberately *not* imported here: it imports
+        // `virtual:pwa-register/react`, which only exists inside a Vite build.
+        // That is the upstream client contract (the same restriction applies to
+        // `vite-plugin-pwa` itself), so this check asserts the published entry,
+        // its declarations and that it defers to the virtual module instead of
+        // pretending a Node import works.
+        if (subpath.endsWith("/react")) {
+          const source = readFileSync(entryFile, "utf8");
+          assert.match(
+            source,
+            /from "virtual:pwa-register\/react"/,
+            `${subpath} does not delegate to the official update client`,
+          );
+          for (const name of names) {
+            assert.ok(
+              source.includes(name),
+              `${subpath} build output does not expose ${name}`,
+            );
+          }
+          const declarations = readFileSync(
+            join(dirname(entryFile), "pwa-react.d.ts"),
+            "utf8",
+          );
+          for (const name of [...names, "FolioPwaUpdateState", "FolioPwaUpdateOptions"]) {
+            assert.ok(
+              declarations.includes(name),
+              `dist/pwa-react.d.ts is missing ${name}`,
+            );
+          }
+        } else {
+          const entry = await import(subpath);
+          for (const name of names) {
+            assert.ok(name in entry, `${subpath} does not export ${name}`);
+          }
+          assert.equal(entry.FOLIO_PWA_CONTENT_VERSION_FILE, "folio-version.json");
+          // Validation runs before any build, so an unsafe consumer config fails
+          // immediately instead of shipping a broken worker.
+          assert.throws(
+            () =>
+              entry.folioPwa({
+                config: { title: "Consumer", description: "Tarball consumer" },
+                icons: [{ src: "icon-192.png", sizes: "192x192" }],
+              }),
+            /at least 512x512/,
+            "the installed folioPwa() did not validate its icons",
+          );
+          const plugins = entry.folioPwa({
+            config: { title: "Consumer", description: "Tarball consumer" },
+            icons: [
+              { src: "icon-192.png", sizes: "192x192" },
+              { src: "icon-512.png", sizes: "512x512" },
+            ],
+          });
+          assert.ok(Array.isArray(plugins) && plugins.length > 0, "folioPwa() returned no plugins");
+          assert.ok(
+            plugins.some((plugin) => plugin.name === "folio:pwa"),
+            "the installed folioPwa() did not return the Folio plugin",
+          );
+        }
+      }
+      return "dist/pwa.js + dist/pwa-react.js (folioPwa, update hook, prompt)";
     },
   },
 ];

@@ -79,7 +79,9 @@ export function FolioUtilityPopover({
           if ((event.target as HTMLElement).closest("a[href]")) setOpen(false);
         }}
       >
-        {children}
+        {/* The wrapper gives the mobile layout a single child to collapse, so
+            the panel can animate from zero height without measuring content. */}
+        <div className="folio-utility-popover__body">{children}</div>
       </div>
     </div>
   );

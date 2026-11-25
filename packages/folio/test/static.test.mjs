@@ -367,7 +367,7 @@ test("default document routes use the documentation structure shell", () => {
     );
 
     assert.match(html, /class="folio-docs-shell"/);
-    assert.match(html, /class="folio-docnav"/);
+    assert.match(html, /class="folio-tree-nav folio-tree-nav--sections"/);
     assert.match(html, /class="folio-toc"/);
     assert.match(html, /class="folio-page-nav"/);
     assert.match(html, /href="\/guide\/docs\/runtime\/"/);

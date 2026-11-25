@@ -1,0 +1,718 @@
+{
+  "meta": {
+    "purpose": "FOL-041 (#163) independent verification: external npm tarball consumer with non-/blogs collections, static archives, noindex, conflicts and React/static parity",
+    "harness": "docs/research/fol-041/verify-consumer.mjs",
+    "generatedAt": "2026-11-09T08:40:12.636Z",
+    "branch": "feat/folio-article-archives",
+    "commit": "716f5e4071c397b250fe3b57774b492e2f6cd235",
+    "shortCommit": "716f5e4",
+    "baseCommit": "c6ecaef540f33a69ba583680ed0ce02a83e69cec",
+    "dirtyWorkingTree": true,
+    "packagedSourcesDirty": "",
+    "node": "v22.23.2",
+    "platform": "darwin arm64",
+    "chrome": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "npmCache": ".npm-cache (workspace-local; sandbox workaround)",
+    "finishedAt": "2026-11-09T08:41:00.116Z"
+  },
+  "stages": [
+    {
+      "id": "tarball-and-install",
+      "status": "passed",
+      "ms": 10449
+    },
+    {
+      "id": "consumer-static-build",
+      "status": "passed",
+      "ms": 7473
+    },
+    {
+      "id": "consumer-noindex",
+      "status": "passed",
+      "ms": 5095
+    },
+    {
+      "id": "consumer-types",
+      "status": "passed",
+      "ms": 2662
+    },
+    {
+      "id": "consumer-conflicts",
+      "status": "passed",
+      "ms": 16121
+    },
+    {
+      "id": "consumer-browser",
+      "status": "passed",
+      "ms": 4378
+    }
+  ],
+  "checks": [
+    {
+      "id": "tarball-ships-public-entries",
+      "stage": "tarball-and-install",
+      "status": "passed",
+      "ms": 0,
+      "detail": {
+        "fileName": "uichat-mira-folio-0.1.1.tgz",
+        "sha256": "68fd00d46dccc7ff0c2cda6388d5d51d0ee9386ef3a3bc79775bde4cc722aad5",
+        "bytes": 99811,
+        "entryCount": 17,
+        "unpackedSize": 403129,
+        "files": [
+          "LICENSE",
+          "README.md",
+          "dist/chunk-HT25YDIZ.js",
+          "dist/chunk-LTT6SMBZ.js",
+          "dist/index.d.ts",
+          "dist/index.js",
+          "dist/pwa-react.d.ts",
+          "dist/pwa-react.js",
+          "dist/pwa-update-BrGEBxoo.d.ts",
+          "dist/pwa.d.ts",
+          "dist/pwa.js",
+          "dist/styles.css",
+          "dist/types-qxPkY5wF.d.ts",
+          "dist/virtual.d.ts",
+          "dist/vite.d.ts",
+          "dist/vite.js",
+          "package.json"
+        ]
+      }
+    },
+    {
+      "id": "tarball-installed-outside-the-repository-without-alias",
+      "stage": "tarball-and-install",
+      "status": "passed",
+      "ms": 2,
+      "detail": {
+        "version": "0.1.1",
+        "resolved": "file:../../../../../../../../var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/tarball/uichat-mira-folio-0.1.1.tgz",
+        "symlink": false
+      }
+    },
+    {
+      "id": "external-consumer-build-succeeds",
+      "stage": "consumer-static-build",
+      "status": "passed",
+      "ms": 3,
+      "detail": {
+        "routes": 20
+      }
+    },
+    {
+      "id": "consumer-routes-derive-from-configured-collection-paths",
+      "stage": "consumer-static-build",
+      "status": "passed",
+      "ms": 4,
+      "detail": {
+        "routes": 20,
+        "archiveRoutes": [
+          "/journal/category/内容模型",
+          "/journal/category/工程实践",
+          "/journal/tag/folio",
+          "/journal/tag/git",
+          "/notes/category/frontend",
+          "/notes/tag/react",
+          "/notes/tag/中文标签"
+        ]
+      }
+    },
+    {
+      "id": "generated-archive-routes-are-unique",
+      "stage": "consumer-static-build",
+      "status": "passed",
+      "ms": 0,
+      "detail": [
+        "/journal/category/内容模型",
+        "/journal/category/工程实践",
+        "/journal/tag/folio",
+        "/journal/tag/git",
+        "/notes/category/frontend",
+        "/notes/tag/react",
+        "/notes/tag/中文标签"
+      ]
+    },
+    {
+      "id": "consumer-archive-metadata-canonical-and-base",
+      "stage": "consumer-static-build",
+      "status": "passed",
+      "ms": 0,
+      "detail": [
+        {
+          "route": "/journal/category/内容模型",
+          "title": "分类：内容模型 · Consumer Journal",
+          "canonical": "https://example.test/folio-smoke/journal/category/内容模型/"
+        },
+        {
+          "route": "/journal/category/工程实践",
+          "title": "分类：工程实践 · Consumer Journal",
+          "canonical": "https://example.test/folio-smoke/journal/category/工程实践/"
+        },
+        {
+          "route": "/journal/tag/folio",
+          "title": "标签：Folio · Consumer Journal",
+          "canonical": "https://example.test/folio-smoke/journal/tag/folio/"
+        },
+        {
+          "route": "/journal/tag/git",
+          "title": "标签：Git · Consumer Journal",
+          "canonical": "https://example.test/folio-smoke/journal/tag/git/"
+        },
+        {
+          "route": "/notes/category/frontend",
+          "title": "分类：Frontend · Consumer Journal",
+          "canonical": "https://example.test/folio-smoke/notes/category/frontend/"
+        },
+        {
+          "route": "/notes/tag/react",
+          "title": "标签：React · Consumer Journal",
+          "canonical": "https://example.test/folio-smoke/notes/tag/react/"
+        },
+        {
+          "route": "/notes/tag/中文标签",
+          "title": "标签：中文标签 · Consumer Journal",
+          "canonical": "https://example.test/folio-smoke/notes/tag/中文标签/"
+        }
+      ]
+    },
+    {
+      "id": "consumer-archive-entry-lists-match-core-order",
+      "stage": "consumer-static-build",
+      "status": "passed",
+      "ms": 0,
+      "detail": "7 archive lists match the installed package's Core index"
+    },
+    {
+      "id": "consumer-shared-tag-spans-two-categories",
+      "stage": "consumer-static-build",
+      "status": "passed",
+      "ms": 0,
+      "detail": {
+        "route": "/journal/tag/folio",
+        "categories": [
+          "工程实践",
+          "内容模型"
+        ]
+      }
+    },
+    {
+      "id": "consumer-collection-index-entry-points-and-disabled-collection",
+      "stage": "consumer-static-build",
+      "status": "passed",
+      "ms": 0,
+      "detail": "opted-in collections expose chips/tag links; /docs adds no archive pages, chips or tag links"
+    },
+    {
+      "id": "consumer-sitemap-and-cjk-urls-are-consistent",
+      "stage": "consumer-static-build",
+      "status": "passed",
+      "ms": 0,
+      "detail": {
+        "locs": 19,
+        "cjk": [
+          "https://example.test/folio-smoke/journal/category/内容模型/",
+          "https://example.test/folio-smoke/journal/category/工程实践/",
+          "https://example.test/folio-smoke/notes/tag/中文标签/"
+        ]
+      }
+    },
+    {
+      "id": "consumer-robots-and-not-found",
+      "stage": "consumer-static-build",
+      "status": "passed",
+      "ms": 0,
+      "detail": "robots.txt advertises the base-prefixed sitemap; 404 is noindex"
+    },
+    {
+      "id": "consumer-archive-pages-directly-fetchable-from-served-dist",
+      "stage": "consumer-static-build",
+      "status": "passed",
+      "ms": 26,
+      "detail": {
+        "fetched": 7,
+        "outsideBaseStatus": 404,
+        "disabledStatus": 404
+      }
+    },
+    {
+      "id": "noindex-build-succeeds-and-keeps-archive-pages",
+      "stage": "consumer-noindex",
+      "status": "passed",
+      "ms": 2,
+      "detail": "20 routes still emitted"
+    },
+    {
+      "id": "noindex-applies-to-archive-pages-and-unadvertises-the-sitemap",
+      "stage": "consumer-noindex",
+      "status": "passed",
+      "ms": 0,
+      "detail": "every archive page is noindex,nofollow; sitemap exists but robots.txt no longer advertises it"
+    },
+    {
+      "id": "public-types-and-entries-resolve-from-the-tarball",
+      "stage": "consumer-types",
+      "status": "passed",
+      "ms": 0,
+      "detail": "consumer tsc NodeNext + skipLibCheck=false resolved Core, config and /vite types"
+    },
+    {
+      "id": "bare-public-entry-import-works-in-the-consumer",
+      "stage": "consumer-types",
+      "status": "passed",
+      "ms": 0,
+      "detail": "function 工程实践"
+    },
+    {
+      "id": "document-archive-route-collision-fails-the-build",
+      "stage": "consumer-conflicts",
+      "status": "passed",
+      "ms": 0,
+      "detail": "[folio] folio article archive route conflict: \"/journal/category/工程实践\" (category archive \"工程实践\" of \"Journal\") conflicts with document \"Colliding doc\""
+    },
+    {
+      "id": "collection-index-archive-route-collision-fails-the-build",
+      "stage": "consumer-conflicts",
+      "status": "passed",
+      "ms": 1,
+      "detail": "[folio] folio article archive route conflict: \"/journal/category/工程实践\" (category archive \"工程实践\" of \"Journal\") conflicts with collection index \"Shadow collection\""
+    },
+    {
+      "id": "duplicate-custom-archive-route-fails-the-build",
+      "stage": "consumer-conflicts",
+      "status": "passed",
+      "ms": 0,
+      "detail": "[folio] folio static route conflict: \"/journal/tag/folio\" (\"Tag archive A\") and \"/journal/tag/folio\" (\"Tag archive B\") both normalize to \"/journal/tag/folio\""
+    },
+    {
+      "id": "consumer-react-archive-matches-static-and-core",
+      "stage": "consumer-browser",
+      "status": "passed",
+      "ms": 0,
+      "detail": {
+        "route": "/journal/category/工程实践",
+        "entries": 1
+      }
+    },
+    {
+      "id": "consumer-react-shared-tag-page-matches-static",
+      "stage": "consumer-browser",
+      "status": "passed",
+      "ms": 0,
+      "detail": {
+        "entries": 2
+      }
+    },
+    {
+      "id": "consumer-static-archive-works-without-javascript",
+      "stage": "consumer-browser",
+      "status": "passed",
+      "ms": 0,
+      "detail": {
+        "page": true,
+        "entries": [
+          "/folio-smoke/journal/alpha/"
+        ]
+      }
+    },
+    {
+      "id": "external-consumer-browser-has-no-page-exceptions",
+      "stage": "consumer-browser",
+      "status": "passed",
+      "ms": 0,
+      "detail": {
+        "browser": "Chrome/156.0.8078.81",
+        "consoleEntries": 0
+      }
+    }
+  ],
+  "commands": [
+    {
+      "command": "npm run build -w @uichat-mira/folio  (cwd .)",
+      "status": "passed",
+      "exitCode": 0,
+      "outputTail": [
+        "ESM dist/pwa.js            28.95 KB",
+        "ESM dist/vite.js           71.00 KB",
+        "ESM ⚡️ Build success in 77ms",
+        "DTS Build start",
+        "DTS ⚡️ Build success in 2434ms",
+        "DTS dist/index.d.ts               25.04 KB",
+        "DTS dist/pwa-react.d.ts           3.94 KB",
+        "DTS dist/pwa.d.ts                 4.56 KB",
+        "DTS dist/vite.d.ts                6.53 KB",
+        "DTS dist/pwa-update-BrGEBxoo.d.ts 2.48 KB",
+        "DTS dist/types-qxPkY5wF.d.ts      13.67 KB",
+        "styles: 10 source(s) -> dist/styles.css (69624 bytes)"
+      ],
+      "tailLines": 12
+    },
+    {
+      "command": "npm pack --ignore-scripts --pack-destination /var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/tarball --json  (cwd packages/folio)",
+      "status": "passed",
+      "exitCode": 0,
+      "outputTail": [
+        "        \"mode\": 420",
+        "      },",
+        "      {",
+        "        \"path\": \"package.json\",",
+        "        \"size\": 3092,",
+        "        \"mode\": 420",
+        "      }",
+        "    ],",
+        "    \"entryCount\": 17,",
+        "    \"bundled\": []",
+        "  }",
+        "]"
+      ],
+      "tailLines": 12
+    },
+    {
+      "command": "npm install --no-audit --no-fund --prefer-offline /var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/tarball/uichat-mira-folio-0.1.1.tgz vite@^7 @vitejs/plugin-react@^5 react@^19 react-dom@^19 react-router-dom@^7 typescript @types/react@^19 @types/react-dom@^19 @types/node@^24  (cwd ../../../../../../../var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer)",
+      "status": "passed",
+      "exitCode": 0,
+      "outputTail": [
+        "added 192 packages in 7s"
+      ],
+      "tailLines": 12
+    },
+    {
+      "command": "/Users/tao/.local/share/fnm/node-versions/v22.23.2/installation/bin/node /var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/vite/bin/vite.js build --outDir dist --emptyOutDir  (cwd ../../../../../../../var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer)",
+      "status": "passed",
+      "exitCode": 0,
+      "outputTail": [
+        "dist/assets/architectureDiagram-5GKGNRK7-ClxhzeL9.js  151.83 kB │ gzip:  43.15 kB",
+        "dist/assets/katex-HP8lGamR.js                         261.31 kB │ gzip:  77.57 kB",
+        "dist/assets/cytoscape.esm-BDkkwuE4.js                 443.17 kB │ gzip: 141.98 kB",
+        "dist/assets/index-wvF74ODZ.js                         560.13 kB │ gzip: 179.97 kB",
+        "dist/assets/mermaid.core-DfRltw3i.js                  663.24 kB │ gzip: 162.33 kB",
+        "dist/assets/cynefin-OW5HDTMX-BVB82lvX.js              687.91 kB │ gzip: 154.14 kB",
+        "✓ built in 5.48s",
+        "",
+        "(!) Some chunks are larger than 500 kB after minification. Consider:",
+        "- Using dynamic import() to code-split the application",
+        "- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks",
+        "- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit."
+      ],
+      "tailLines": 20
+    },
+    {
+      "command": "/Users/tao/.local/share/fnm/node-versions/v22.23.2/installation/bin/node /var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/vite/bin/vite.js build --outDir dist-noindex --emptyOutDir  (cwd ../../../../../../../var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer)",
+      "status": "passed",
+      "exitCode": 0,
+      "outputTail": [
+        "dist-noindex/assets/architectureDiagram-5GKGNRK7-DmbKm_c9.js  151.83 kB │ gzip:  43.15 kB",
+        "dist-noindex/assets/katex-HP8lGamR.js                         261.31 kB │ gzip:  77.57 kB",
+        "dist-noindex/assets/cytoscape.esm-BDkkwuE4.js                 443.17 kB │ gzip: 141.98 kB",
+        "dist-noindex/assets/index-DlkiOPQw.js                         560.11 kB │ gzip: 179.95 kB",
+        "dist-noindex/assets/mermaid.core--X8RsLMK.js                  663.24 kB │ gzip: 162.33 kB",
+        "dist-noindex/assets/cynefin-OW5HDTMX-gTywMVXc.js              687.91 kB │ gzip: 154.14 kB",
+        "✓ built in 4.84s",
+        "",
+        "(!) Some chunks are larger than 500 kB after minification. Consider:",
+        "- Using dynamic import() to code-split the application",
+        "- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks",
+        "- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit."
+      ],
+      "tailLines": 20
+    },
+    {
+      "command": "/Users/tao/.local/share/fnm/node-versions/v22.23.2/installation/bin/node /var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/typescript/bin/tsc -p tsconfig.json  (cwd ../../../../../../../var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer)",
+      "status": "passed",
+      "exitCode": 0,
+      "outputTail": [],
+      "tailLines": 12
+    },
+    {
+      "command": "/Users/tao/.local/share/fnm/node-versions/v22.23.2/installation/bin/node --input-type=module -e \"import { buildFolioArticleArchiveIndex, parseFolioDoc } from \\\"@uichat-mira/folio\\\"; const doc = parseFolioDoc(\\\"journal/a.md\\\", \\\"---\\\\ntitle: A\\\\ntype: article\\\\ncategory: 工程实践\\\\ntags: [Folio]\\\\n---\\\\nbody\\\"); console.log(typeof buildFolioArticleArchiveIndex, buildFolioArticleArchiveIndex([doc]).categories[0].slug);\"  (cwd ../../../../../../../var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer)",
+      "status": "passed",
+      "exitCode": 0,
+      "outputTail": [
+        "function 工程实践"
+      ],
+      "tailLines": 12
+    },
+    {
+      "command": "/Users/tao/.local/share/fnm/node-versions/v22.23.2/installation/bin/node /var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/vite/bin/vite.js build --outDir dist-conflict-doc --emptyOutDir  (cwd ../../../../../../../var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer)",
+      "status": "failed",
+      "exitCode": 1,
+      "outputTail": [
+        "error during build:",
+        "[folio] folio article archive route conflict: \"/journal/category/工程实践\" (category archive \"工程实践\" of \"Journal\") conflicts with document \"Colliding doc\"",
+        "    at claimArchive (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/@uichat-mira/folio/dist/vite.js:1164:13)",
+        "    at buildStaticArchiveModel (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/@uichat-mira/folio/dist/vite.js:1190:20)",
+        "    at defaultRoutes (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/@uichat-mira/folio/dist/vite.js:1303:19)",
+        "    at writeFolioStaticSite (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/@uichat-mira/folio/dist/vite.js:1382:47)",
+        "    at Object.writeBundle (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/@uichat-mira/folio/dist/vite.js:1515:7)",
+        "    at Object.handler (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/vite/dist/node/chunks/config.js:33994:13)",
+        "    at file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/rollup/dist/es/shared/node-entry.js:24130:40",
+        "    at async Promise.all (index 0)",
+        "    at async PluginDriver.hookParallel (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/rollup/dist/es/shared/node-entry.js:24040:9)",
+        "    at async file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/rollup/dist/es/shared/node-entry.js:25123:13"
+      ],
+      "tailLines": 20
+    },
+    {
+      "command": "/Users/tao/.local/share/fnm/node-versions/v22.23.2/installation/bin/node /var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/vite/bin/vite.js build --outDir dist-conflict-collection --emptyOutDir  (cwd ../../../../../../../var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer)",
+      "status": "failed",
+      "exitCode": 1,
+      "outputTail": [
+        "error during build:",
+        "[folio] folio article archive route conflict: \"/journal/category/工程实践\" (category archive \"工程实践\" of \"Journal\") conflicts with collection index \"Shadow collection\"",
+        "    at claimArchive (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/@uichat-mira/folio/dist/vite.js:1164:13)",
+        "    at buildStaticArchiveModel (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/@uichat-mira/folio/dist/vite.js:1190:20)",
+        "    at defaultRoutes (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/@uichat-mira/folio/dist/vite.js:1303:19)",
+        "    at writeFolioStaticSite (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/@uichat-mira/folio/dist/vite.js:1382:47)",
+        "    at Object.writeBundle (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/@uichat-mira/folio/dist/vite.js:1515:7)",
+        "    at Object.handler (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/vite/dist/node/chunks/config.js:33994:13)",
+        "    at file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/rollup/dist/es/shared/node-entry.js:24130:40",
+        "    at async Promise.all (index 0)",
+        "    at async PluginDriver.hookParallel (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/rollup/dist/es/shared/node-entry.js:24040:9)",
+        "    at async file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/rollup/dist/es/shared/node-entry.js:25123:13"
+      ],
+      "tailLines": 20
+    },
+    {
+      "command": "/Users/tao/.local/share/fnm/node-versions/v22.23.2/installation/bin/node /var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/vite/bin/vite.js build --config vite.conflict-custom.config.ts --outDir dist-conflict-custom --emptyOutDir  (cwd ../../../../../../../var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer)",
+      "status": "failed",
+      "exitCode": 1,
+      "outputTail": [
+        "error during build:",
+        "[folio] folio static route conflict: \"/journal/tag/folio\" (\"Tag archive A\") and \"/journal/tag/folio\" (\"Tag archive B\") both normalize to \"/journal/tag/folio\"",
+        "    at file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/@uichat-mira/folio/dist/vite.js:821:13",
+        "    at Array.map (<anonymous>)",
+        "    at writeFolioStaticOutputs (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/@uichat-mira/folio/dist/vite.js:817:35)",
+        "    at writeFolioStaticSite (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/@uichat-mira/folio/dist/vite.js:1395:28)",
+        "    at Object.writeBundle (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/@uichat-mira/folio/dist/vite.js:1515:7)",
+        "    at Object.handler (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/vite/dist/node/chunks/config.js:33994:13)",
+        "    at file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/rollup/dist/es/shared/node-entry.js:24130:40",
+        "    at async Promise.all (index 0)",
+        "    at async PluginDriver.hookParallel (file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/rollup/dist/es/shared/node-entry.js:24040:9)",
+        "    at async file:///private/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl/consumer/node_modules/rollup/dist/es/shared/node-entry.js:25123:13"
+      ],
+      "tailLines": 12
+    }
+  ],
+  "artifacts": {
+    "consumerRoot": "/var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio041-consumer-lKjdzl",
+    "tarball": {
+      "fileName": "uichat-mira-folio-0.1.1.tgz",
+      "sha256": "68fd00d46dccc7ff0c2cda6388d5d51d0ee9386ef3a3bc79775bde4cc722aad5",
+      "bytes": 99811,
+      "entryCount": 17,
+      "unpackedSize": 403129,
+      "files": [
+        "LICENSE",
+        "README.md",
+        "dist/chunk-HT25YDIZ.js",
+        "dist/chunk-LTT6SMBZ.js",
+        "dist/index.d.ts",
+        "dist/index.js",
+        "dist/pwa-react.d.ts",
+        "dist/pwa-react.js",
+        "dist/pwa-update-BrGEBxoo.d.ts",
+        "dist/pwa.d.ts",
+        "dist/pwa.js",
+        "dist/styles.css",
+        "dist/types-qxPkY5wF.d.ts",
+        "dist/virtual.d.ts",
+        "dist/vite.d.ts",
+        "dist/vite.js",
+        "package.json"
+      ]
+    },
+    "expected": {
+      "collections": [
+        {
+          "path": "/journal",
+          "title": "Journal",
+          "archive": {
+            "categoryLabels": {
+              "工程实践": "工程实践"
+            }
+          }
+        },
+        {
+          "path": "/notes",
+          "title": "Notes",
+          "archive": true
+        },
+        {
+          "path": "/docs",
+          "title": "Docs"
+        }
+      ],
+      "docs": [
+        {
+          "path": "/docs/guide",
+          "type": "doc",
+          "tags": [
+            "React"
+          ]
+        },
+        {
+          "path": "/docs/note",
+          "type": "page",
+          "tags": []
+        },
+        {
+          "path": "/journal/alpha",
+          "type": "article",
+          "tags": [
+            "Folio",
+            "Git"
+          ]
+        },
+        {
+          "path": "/journal/beta",
+          "type": "article",
+          "tags": [
+            "Folio"
+          ]
+        },
+        {
+          "path": "/journal/gamma",
+          "type": "article",
+          "tags": []
+        },
+        {
+          "path": "/notes/one",
+          "type": "article",
+          "tags": [
+            "React",
+            "中文标签"
+          ]
+        },
+        {
+          "path": "/notes/three",
+          "type": "article",
+          "tags": []
+        },
+        {
+          "path": "/notes/two",
+          "type": "article",
+          "tags": [
+            "react"
+          ]
+        }
+      ],
+      "archives": [
+        {
+          "kind": "category",
+          "route": "/journal/category/内容模型",
+          "id": "内容模型",
+          "slug": "内容模型",
+          "title": "内容模型",
+          "docs": [
+            "/journal/beta"
+          ]
+        },
+        {
+          "kind": "category",
+          "route": "/journal/category/工程实践",
+          "id": "工程实践",
+          "slug": "工程实践",
+          "title": "工程实践",
+          "docs": [
+            "/journal/alpha"
+          ]
+        },
+        {
+          "kind": "tag",
+          "route": "/journal/tag/folio",
+          "id": "folio",
+          "slug": "folio",
+          "title": "Folio",
+          "docs": [
+            "/journal/alpha",
+            "/journal/beta"
+          ]
+        },
+        {
+          "kind": "tag",
+          "route": "/journal/tag/git",
+          "id": "git",
+          "slug": "git",
+          "title": "Git",
+          "docs": [
+            "/journal/alpha"
+          ]
+        },
+        {
+          "kind": "category",
+          "route": "/notes/category/frontend",
+          "id": "frontend",
+          "slug": "frontend",
+          "title": "Frontend",
+          "docs": [
+            "/notes/one",
+            "/notes/two"
+          ]
+        },
+        {
+          "kind": "tag",
+          "route": "/notes/tag/react",
+          "id": "react",
+          "slug": "react",
+          "title": "React",
+          "docs": [
+            "/notes/one",
+            "/notes/two"
+          ]
+        },
+        {
+          "kind": "tag",
+          "route": "/notes/tag/中文标签",
+          "id": "中文标签",
+          "slug": "中文标签",
+          "title": "中文标签",
+          "docs": [
+            "/notes/one"
+          ]
+        }
+      ],
+      "routes": [
+        "/",
+        "/404",
+        "/docs",
+        "/docs/guide",
+        "/docs/note",
+        "/journal",
+        "/journal/alpha",
+        "/journal/beta",
+        "/journal/category/内容模型",
+        "/journal/category/工程实践",
+        "/journal/gamma",
+        "/journal/tag/folio",
+        "/journal/tag/git",
+        "/notes",
+        "/notes/category/frontend",
+        "/notes/one",
+        "/notes/tag/react",
+        "/notes/tag/中文标签",
+        "/notes/three",
+        "/notes/two"
+      ]
+    },
+    "screenshots": {
+      "consumerCategory": {
+        "path": "docs/research/fol-041/results/screenshots/consumer-category.png",
+        "bytes": 37872
+      },
+      "consumerTag": {
+        "path": "docs/research/fol-041/results/screenshots/consumer-tag.png",
+        "bytes": 42906
+      },
+      "consumerNoJs": {
+        "path": "docs/research/fol-041/results/screenshots/consumer-nojs-category.png",
+        "bytes": 28028
+      }
+    }
+  },
+  "summary": {
+    "status": "passed",
+    "total": 23,
+    "passed": 23,
+    "failed": 0
+  }
+}

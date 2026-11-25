@@ -14,6 +14,7 @@ import type {
   FolioHomeIntroSectionConfig,
   FolioHomeRecentSectionConfig,
   FolioHomeSectionConfig,
+  FolioHomeTemplate,
 } from "../types";
 
 export type FolioHomeIntroSection = {
@@ -70,6 +71,7 @@ export type FolioHomeSection =
   | FolioHomeAboutSection;
 
 export type FolioHomeModel = {
+  template: FolioHomeTemplate;
   meta?: {
     left: string;
     right: string;
@@ -77,16 +79,41 @@ export type FolioHomeModel = {
   sections: FolioHomeSection[];
 };
 
-const DEFAULT_META_LEFT = "PERSONAL JOURNAL ✳";
-const DEFAULT_META_RIGHT = "READ · COLLECT · REMEMBER";
-const DEFAULT_KICKER = "写给生活的零碎记录";
-const DEFAULT_FEATURED_LABEL = "FEATURED STORY";
-const DEFAULT_READ_LABEL = "开始阅读";
-const DEFAULT_RECENT_TITLE = "近期内容";
-const DEFAULT_RECENT_LABEL = "01 / READING";
+type FolioHomeDefaults = {
+  metaLeft?: string;
+  metaRight?: string;
+  kicker: string;
+  featuredLabel: string;
+  readLabel: string;
+  recentTitle: string;
+  recentLabel: string;
+  endMessage: string;
+  aboutLink: string;
+};
+
+const PORTAL_DEFAULTS: FolioHomeDefaults = {
+  kicker: "",
+  featuredLabel: "FEATURED",
+  readLabel: "阅读全文",
+  recentTitle: "近期内容",
+  recentLabel: "RECENT",
+  endMessage: "更多内容正在准备中。",
+  aboutLink: "了解更多",
+};
+
+const EDITORIAL_DEFAULTS: FolioHomeDefaults = {
+  metaLeft: "PERSONAL JOURNAL ✳",
+  metaRight: "READ · COLLECT · REMEMBER",
+  kicker: "写给生活的零碎记录",
+  featuredLabel: "FEATURED STORY",
+  readLabel: "开始阅读",
+  recentTitle: "近期内容",
+  recentLabel: "01 / READING",
+  endMessage: "更多记录，正在慢慢写下。",
+  aboutLink: "读读关于小站",
+};
+
 const DEFAULT_EMPTY_MESSAGE = "这里还没有内容。";
-const DEFAULT_END_MESSAGE = "更多记录，正在慢慢写下。";
-const DEFAULT_ABOUT_LINK = "读读关于小站";
 const DEFAULT_SECTION_TYPES = [
   "intro",
   "featured",
@@ -170,6 +197,7 @@ function resolveFeatured(
   docs: readonly FolioDoc[],
   collections: FolioCollectionIndex[],
   primary: FolioCollectionIndex | undefined,
+  defaults: FolioHomeDefaults,
 ): FolioHomeFeaturedSection | undefined {
   const source = sourceDocs(docs, collections, section.collection, primary);
   const explicitPath = section.path === undefined
@@ -192,8 +220,8 @@ function resolveFeatured(
     collection: source.collection,
     number,
     total: Math.max(source.docs.length, number),
-    label: homeText(section.label, DEFAULT_FEATURED_LABEL, "featured label"),
-    readLabel: homeText(section.readLabel, DEFAULT_READ_LABEL, "featured readLabel"),
+    label: homeText(section.label, defaults.featuredLabel, "featured label"),
+    readLabel: homeText(section.readLabel, defaults.readLabel, "featured readLabel"),
   };
 }
 
@@ -202,13 +230,14 @@ function resolveIntro(
   config: FolioConfig,
   collections: FolioCollectionIndex[],
   primary: FolioCollectionIndex | undefined,
+  defaults: FolioHomeDefaults,
 ): FolioHomeIntroSection {
   const collection = collectionForPath(collections, section.collection, primary);
   return {
     type: "intro",
     title: homeText(section.title, config.title, "intro title"),
     description: homeText(section.description, config.description, "intro description"),
-    kicker: homeText(section.kicker, DEFAULT_KICKER, "intro kicker"),
+    kicker: homeText(section.kicker, defaults.kicker, "intro kicker"),
     collection,
   };
 }
@@ -219,6 +248,7 @@ function resolveRecent(
   collections: FolioCollectionIndex[],
   primary: FolioCollectionIndex | undefined,
   featuredPaths: Set<string>,
+  defaults: FolioHomeDefaults,
 ): FolioHomeRecentSection {
   const source = sourceDocs(docs, collections, section.collection, primary);
   const available = source.docs.filter((doc) => !featuredPaths.has(doc.path));
@@ -227,10 +257,10 @@ function resolveRecent(
     type: "recent",
     docs: available.slice(0, limit),
     collection: source.collection,
-    title: homeText(section.title, source.collection?.title ?? DEFAULT_RECENT_TITLE, "recent title"),
-    label: homeText(section.label, DEFAULT_RECENT_LABEL, "recent label"),
+    title: homeText(section.title, source.collection?.title ?? defaults.recentTitle, "recent title"),
+    label: homeText(section.label, defaults.recentLabel, "recent label"),
     emptyMessage: homeText(section.emptyMessage, DEFAULT_EMPTY_MESSAGE, "recent emptyMessage"),
-    endMessage: homeText(section.endMessage, DEFAULT_END_MESSAGE, "recent endMessage"),
+    endMessage: homeText(section.endMessage, defaults.endMessage, "recent endMessage"),
     hadEntries: source.docs.length > 0,
   };
 }
@@ -280,6 +310,7 @@ function resolveAbout(
   section: FolioHomeAboutSectionConfig,
   config: FolioConfig,
   docs: readonly FolioDoc[],
+  defaults: FolioHomeDefaults,
 ): FolioHomeAboutSection | undefined {
   const explicitPath = section.path === undefined
     ? undefined
@@ -298,8 +329,17 @@ function resolveAbout(
     doc,
     title: homeText(section.title, doc.title, "about title"),
     description: homeText(section.description, doc.description || config.description, "about description"),
-    linkLabel: homeText(section.linkLabel, DEFAULT_ABOUT_LINK, "about linkLabel"),
+    linkLabel: homeText(section.linkLabel, defaults.aboutLink, "about linkLabel"),
   };
+}
+
+function homeTemplate(home: FolioHomeConfig): FolioHomeTemplate {
+  const value = home.template;
+  if (value === undefined) return "portal";
+  if (value !== "portal" && value !== "editorial") {
+    throw new Error('folio home template must be "portal" or "editorial"');
+  }
+  return value;
 }
 
 function homeConfig(config: FolioConfig): FolioHomeConfig {
@@ -331,15 +371,18 @@ function sectionConfigs(home: FolioHomeConfig): FolioHomeSectionConfig[] {
 
 /**
  * Resolves the built-in home page into a platform-neutral model. React and
- * static rendering both consume this function so their selection, ordering and
- * links cannot drift. Passing a config without `home` returns the current
- * default editorial model.
+ * static rendering both consume this function so their template selection,
+ * content, ordering and links cannot drift. Omitting `home` (or
+ * `home.template`) selects the neutral Portal template; `editorial` must be
+ * requested explicitly.
  */
 export function resolveFolioHome(
   config: FolioConfig,
   docs: readonly FolioDoc[],
 ): FolioHomeModel {
   const home = homeConfig(config);
+  const template = homeTemplate(home);
+  const defaults = template === "editorial" ? EDITORIAL_DEFAULTS : PORTAL_DEFAULTS;
   const collections = folioCollectionIndexes(config);
   const primary = collections[0];
   const configs = sectionConfigs(home);
@@ -347,7 +390,7 @@ export function resolveFolioHome(
   const featuredPaths = new Set<string>();
   for (const section of configs) {
     if (section.type !== "featured") continue;
-    const featured = resolveFeatured(section, docs, collections, primary);
+    const featured = resolveFeatured(section, docs, collections, primary, defaults);
     if (featured) featuredPaths.add(featured.doc.path);
   }
 
@@ -355,15 +398,15 @@ export function resolveFolioHome(
   for (const section of configs) {
     switch (section.type) {
       case "intro":
-        sections.push(resolveIntro(section, config, collections, primary));
+        sections.push(resolveIntro(section, config, collections, primary, defaults));
         break;
       case "featured": {
-        const featured = resolveFeatured(section, docs, collections, primary);
+        const featured = resolveFeatured(section, docs, collections, primary, defaults);
         if (featured) sections.push(featured);
         break;
       }
       case "recent":
-        sections.push(resolveRecent(section, docs, collections, primary, featuredPaths));
+        sections.push(resolveRecent(section, docs, collections, primary, featuredPaths, defaults));
         break;
       case "collections": {
         const resolved = resolveCollections(section, docs, collections, primary);
@@ -371,19 +414,26 @@ export function resolveFolioHome(
         break;
       }
       case "about": {
-        const resolved = resolveAbout(section, config, docs);
+        const resolved = resolveAbout(section, config, docs, defaults);
         if (resolved) sections.push(resolved);
         break;
       }
     }
   }
 
-  const meta = home.meta === false
+  const resolvedMeta = home.meta === false
     ? undefined
-    : {
-        left: homeText(home.meta?.left, DEFAULT_META_LEFT, "meta left"),
-        right: homeText(home.meta?.right, DEFAULT_META_RIGHT, "meta right"),
-      };
+    : home.meta === undefined
+      ? defaults.metaLeft === undefined
+        ? undefined
+        : { left: defaults.metaLeft, right: defaults.metaRight ?? "" }
+      : {
+          left: homeText(home.meta.left, defaults.metaLeft ?? "", "meta left"),
+          right: homeText(home.meta.right, defaults.metaRight ?? "", "meta right"),
+        };
+  const meta = resolvedMeta && (resolvedMeta.left || resolvedMeta.right)
+    ? resolvedMeta
+    : undefined;
 
-  return { meta, sections };
+  return { template, meta, sections };
 }

@@ -12,7 +12,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import test, { after } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { parseFolioDoc } from "../dist/index.js";
+import { parseFolioDoc, getFolioDocByline } from "../dist/index.js";
 import { folio } from "../dist/vite.js";
 
 // FOL-025 (Issue #124): build-time Git dates plus independent frontmatter
@@ -310,6 +310,9 @@ test("a shallow clone never presents its earliest visible commit as first", () =
   assert.equal(doc.publishedAt, undefined);
   assert.equal(doc.dateSources.publishedAt, "unknown");
   assert.equal(doc.dateSources.historyComplete, false);
+  assert.equal(doc.createdAt, undefined);
+  assert.equal(doc.createdBy, undefined);
+  assert.equal(doc.updatedBy, "Folio Date Test");
   assert.match(warnings.join("\n"), /shallow Git clone/i);
   assert.match(warnings.join("\n"), /fetch-depth: 0/);
 });
@@ -385,4 +388,82 @@ test("the build does not use file mtimes as dates", () => {
   const doc = bySourcePath(loadDocs(root), "docs/mtime.md");
   assert.equal(doc.updatedAt, "2024-01-01T19:04:05.000Z");
   assert.notEqual(doc.updatedAt, future.toISOString());
+});
+
+test("Git-first and Git-last authors and timestamps become page history by default", () => {
+  const root=createRepository();
+  git(root,["config","user.name","Alice Creator"]);
+  writeDoc(root,"docs/provenance.md","---\ntitle: Provenance\n---\nfirst\n");
+  commit(root,"initial",FIRST_COMMIT);
+  git(root,["config","user.name","Bob Editor"]);
+  writeDoc(root,"docs/provenance.md","---\ntitle: Provenance\n---\nupdated\n");
+  commit(root,"updated",SECOND_COMMIT);
+
+  const doc=bySourcePath(loadDocs(root),"docs/provenance.md");
+  assert.equal(doc.createdAt,"2024-01-01T19:04:05.000Z");
+  assert.equal(doc.updatedAt,"2024-02-03T11:05:06.000Z");
+  assert.equal(doc.createdBy,"Alice Creator");
+  assert.equal(doc.updatedBy,"Bob Editor");
+  assert.equal(doc.gitHistory?.first?.author,"Alice Creator");
+  assert.equal(doc.gitHistory?.last?.author,"Bob Editor");
+  assert.equal(doc.publishedAt,doc.createdAt);
+});
+
+test("Frontmatter overrides four independent history fields without replacing editorial authorship", () => {
+  const root=createRepository();
+  writeDoc(root,"docs/override.md",
+    "---\ntitle: Override\ncreatedAt: 2020-06-01\ncreatedBy: Explicit Founder\nupdatedBy: Explicit Maintainer\nupdatedAt: 2025-07-08\nauthor: Article Writer\npublishedAt: 2022-01-01\n---\nfirst\n");
+  commit(root,"original",FIRST_COMMIT);
+  writeDoc(root,"docs/override.md",
+    "---\ntitle: Override\ncreatedAt: 2020-06-01\ncreatedBy: Explicit Founder\nupdatedBy: Explicit Maintainer\nupdatedAt: 2025-07-08\nauthor: Article Writer\npublishedAt: 2022-01-01\n---\nupdated\n");
+  commit(root,"changed",SECOND_COMMIT);
+  const doc=bySourcePath(loadDocs(root),"docs/override.md");
+  assert.equal(doc.createdAt,"2020-06-01T00:00:00.000Z");
+  assert.equal(doc.updatedAt,"2025-07-08T00:00:00.000Z");
+  assert.equal(doc.createdBy,"Explicit Founder");
+  assert.equal(doc.updatedBy,"Explicit Maintainer");
+  assert.equal(doc.publishedAt,"2022-01-01T00:00:00.000Z");
+  assert.equal(doc.data.author,"Article Writer");
+  assert.equal(doc.gitHistory?.first?.author,"Folio Date Test");
+  assert.equal(doc.gitHistory?.last?.committedAt,"2024-02-03T11:05:06.000Z");
+});
+
+test("invalid createdAt and missing history do not create fictitious metadata",()=>{
+  const root=createRepository();
+  writeDoc(root,"docs/invalid.md",
+    "---\ntitle: Invalid\ncreatedAt: not-a-date\ncreatedBy: \n---\nbody\n");
+  const unseen=bySourcePath(loadDocs(root),"docs/invalid.md");
+  assert.equal(unseen.createdAt,undefined);
+  assert.equal(unseen.createdBy,undefined);
+  assert.equal(unseen.updatedBy,undefined);
+  commit(root,"committed",FIRST_COMMIT);
+  const committed=bySourcePath(loadDocs(root),"docs/invalid.md");
+  assert.equal(committed.createdAt,"2024-01-01T19:04:05.000Z");
+  assert.equal(committed.createdBy,"Folio Date Test");
+});
+
+
+test("GitHub noreply author links to avatar without exposing email or requiring a network call", () => {
+  const root = createRepository();
+  git(root, ["config", "user.name", "Sample Creator"]);
+  git(root, ["config", "user.email", "12345+sample-creator@users.noreply.github.com"]);
+  writeDoc(root, "docs/avatars.md", "---\ntitle: GitHub identity\n---\nDocument body\n");
+  commit(root, "add GitHub author", FIRST_COMMIT);
+  const doc = bySourcePath(loadDocs(root), "docs/avatars.md");
+  assert.equal(doc.createdBy, "Sample Creator");
+  assert.equal(doc.gitHistory?.first?.githubAvatarUrl, "https://avatars.githubusercontent.com/u/12345?s=64");
+  assert.equal(getFolioDocByline(doc)?.author?.avatar, "https://avatars.githubusercontent.com/u/12345?s=64");
+  assert.doesNotMatch(JSON.stringify(doc), /users\.noreply\.github\.com|12345\+sample-creator/);
+});
+
+test("an unrelated editorial author must not inherit the Git committer's avatar", () => {
+  const root = createRepository();
+  git(root, ["config", "user.name", "Sample Creator"]);
+  git(root, ["config", "user.email", "12345+sample-creator@users.noreply.github.com"]);
+  writeDoc(root, "blogs/editorial.md", "---\ntitle: Editorial\nauthor: Editorial Office\n---\nArticle body\n");
+  commit(root, "add editorial article", FIRST_COMMIT);
+  const doc = bySourcePath(loadDocs(root), "blogs/editorial.md");
+  assert.equal(doc.gitHistory?.first?.githubAvatarUrl, "https://avatars.githubusercontent.com/u/12345?s=64");
+  assert.equal(getFolioDocByline(doc)?.author?.name, "Editorial Office");
+  assert.equal(getFolioDocByline(doc)?.author?.avatar, undefined);
 });

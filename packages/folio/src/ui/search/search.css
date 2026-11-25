@@ -1,0 +1,97 @@
+/* Search */
+.folio-search-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: start center;
+  padding: min(12vh, 96px) 18px 24px;
+  background: rgba(15, 14, 13, .42);
+  backdrop-filter: blur(6px);
+}
+
+.folio-search-dialog {
+  width: min(680px, 100%);
+  overflow: hidden;
+  border: 1px solid var(--folio-hairline);
+  border-radius: var(--folio-radius-xl);
+  background: var(--folio-canvas);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, .18);
+}
+
+.folio-search-input-wrap {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 58px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--folio-hairline);
+}
+
+.folio-search-input-wrap svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--folio-muted);
+  stroke-width: 1.8;
+}
+
+.folio-search-input-wrap input {
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--folio-ink);
+  font-size: 15px;
+}
+
+.folio-search-input-wrap button {
+  border: 0;
+  background: transparent;
+  color: var(--folio-muted);
+  cursor: pointer;
+  font: 11px var(--folio-font-mono);
+}
+
+.folio-search-results {
+  max-height: min(60vh, 520px);
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.folio-search-results button {
+  display: grid;
+  width: 100%;
+  gap: 4px;
+  padding: 12px 13px;
+  border: 0;
+  border-radius: var(--folio-radius-md);
+  background: transparent;
+  color: var(--folio-ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.folio-search-results button.active,
+.folio-search-results button:hover {
+  background: var(--folio-surface-soft);
+}
+
+.folio-search-results strong { font-size: 14px; }
+.folio-search-results span { color: var(--folio-muted); font-size: 12px; line-height: 1.45; }
+.folio-search-empty { margin: 28px 18px; color: var(--folio-muted); }
+
+.folio-search-footer {
+  display: flex;
+  gap: 18px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--folio-hairline);
+  color: var(--folio-muted-soft);
+  font: 10px var(--folio-font-mono);
+}
+
+@media (max-width: 780px) {
+  .folio-search-overlay { padding-top: 18px; }
+  .folio-search-footer { display: none; }
+}

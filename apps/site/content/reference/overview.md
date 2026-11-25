@@ -1,6 +1,6 @@
 ---
 title: 参考索引
-description: 按任务查找 Folio 公共 API、Frontmatter 字段、静态构建、部署、案例与附录。
+description: 按任务查找 Folio 内容与配置 API、React 组件、静态构建、PWA、部署和历史资料。
 group: API
 collection: 参考
 order: 40
@@ -11,63 +11,54 @@ tags:
   - API
   - Index
 ---
+本页按**开发者要解决的问题**组织参考资料：字段、公共 API、构建产物、版本边界和部署条件。第一次接触 Folio 时，请先沿 [指南](/guide/introduction) 阅读。
 
-这一侧是**查到具体事实**的阅读模式：字段、边界、构建阶段、部署条件。如果你要的是按顺序读懂的路径，去 [指南](/guide/introduction)；本页只负责把参考材料按任务组织起来，不重复产品介绍。
+## 从任务开始
 
-## Canonical identity
-
-```text
-repository     uichat-mira/folio
-package        @uichat-mira/folio
-vite module    virtual:folio/content
-runtime        FolioApp
-plugin         folio()
-```
-
-当前公开版本是 `0.1.1`。`dev` 源码可能包含尚未发布的候选契约，相关页面会单独标注。
-
-## 按任务查找
-
-| 任务 | 文档 |
+| 我想做什么 | 阅读入口 |
 | --- | --- |
-| 查 Frontmatter 字段和默认值 | [Frontmatter 参考](/reference/frontmatter) |
-| 查看内置 React 组件及目录父子关系示例 | [组件](/reference/components) |
-| 接入 Vite plugin、理解构建阶段 | [Vite 构建集成](/reference/build-integration) |
-| 生成静态 HTML、metadata、sitemap 与 robots | [静态构建与 SEO](/reference/seo) |
-| 发布到 GitHub Pages 或下游平台 | [部署到 GitHub Pages](/reference/github-pages)、[Cloudflare Pages 案例](/reference/cloudflare-pages) |
-| 查看 MiraDocs → Folio 迁移事实 | [迁移状态](/reference/migration-status) |
-| 维护官方站文档 | [官方站点内容维护约定](/reference/content-maintenance) |
+| 了解产品和适用范围 | [Folio 是什么](/guide/introduction) |
+| 在空项目中使用已发布 npm 0.2.0 | [快速开始](/guide/getting-started) → [首个可运行站点](/guide/first-site) |
+| 编写和组织 Markdown | [编写内容](/guide/authoring) → [内容组织与排序](/guide/organizing-content) |
+| 配置站点和组合 React | [站点配置](/guide/configuration) → [导航](/guide/navigation) → [React 组合](/guide/runtime-composition) |
+| 构建、部署静态站点 | [静态发布](/guide/static-publishing) → [GitHub Pages](/reference/github-pages) |
 
-## 要按顺序读懂，去指南
+## 版本与公共契约
 
-下面这些页面讲的是“怎么用”，因此归在 [指南](/guide/introduction)，不在这里重复：
+当前已发布的包版本是 `@uichat-mira/folio@0.2.0`；PWA、Article 归档、扩展 React 组件与 slots 已进入公开包。后续 `dev` 仍可能包含未发布候选变化。
 
-| 任务 | 文档 |
+**版本能力的单一权威来源**：[`docs/consumer-contract.md`](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)。参考页只保留与当前 API 直接相关的局部差异；`status: published` 表示文档内容已审校，**不等于 API 已进入 npm**。
+
+## 内容与配置 API
+
+| 主题 | 参考 |
 | --- | --- |
-| 安装、运行仓库或接入 consumer | [快速开始](/guide/getting-started) |
-| 编写文档、文章、项目和页面 | [编写内容](/guide/authoring) |
-| 理解 `FolioDoc`、路径和类型推断 | [内容模型](/guide/content-model) |
-| 配置导航、分组、排序和首页 | [站点配置与扩展](/guide/configuration)、[导航与内容清单](/guide/navigation) |
-| 使用 Markdown、Callout、Mermaid 与标题锚点 | [Markdown Runtime](/guide/markdown-runtime) |
-| 组合 React runtime 与 official site | [只用公开 API 组合站点](/guide/runtime-composition) |
-| 生成静态 HTML 的完整流程 | [静态发布](/guide/static-publishing) |
+| `FolioDoc`、Frontmatter、字段默认值与日期 | [Frontmatter 参考](/reference/frontmatter) |
+| 站点配置、导航集合、运行时组合 | [配置指南](/guide/configuration) · [导航指南](/guide/navigation) |
+| Article 单分类、多标签及 `collections[].archive`（dev） | [Article 分类与标签归档](/reference/article-archives) |
+| React 组件、Props、slots 与阅读壳 | [React 组件 API](/reference/components) |
+| 设计思想、主题预设与真实模板演示（dev） | [设计系统：秩序与气质](/reference/design/principles) |
+| 语义 Token、代码色板与实时变量图鉴（dev） | [Token 图鉴](/reference/design/tokens) |
 
+## 构建与发布 API
 
-## 公开入口
+| 主题 | 参考 |
+| --- | --- |
+| `folio()`、`virtual:folio/content`、`staticRoutes` | [Vite 构建集成](/reference/build-integration) |
+| 静态 HTML、canonical、JSON-LD、sitemap、robots、RSS/Atom | [静态构建与 SEO](/reference/seo) |
+| `folioPwa()`、更新提示、Service Worker 缓存边界（dev） | [可选 PWA](/reference/pwa) |
+| GitHub Pages 子路径及发布工作流 | [部署到 GitHub Pages](/reference/github-pages) |
+| 下游平台参考 | [Cloudflare Pages 案例](/reference/cloudflare-pages) |
 
-- `@uichat-mira/folio`：内容解析、配置 helper、React runtime、Markdown 渲染、搜索与文档结构。
-- `@uichat-mira/folio/vite`：`folio()` Vite plugin、`virtual:folio/content` 与静态构建 helper。
-- `@uichat-mira/folio/styles.css`：whole-site 默认样式表，不是隔离的 embed stylesheet。
+## 实例、维护与历史资料
 
-## 参考、案例与附录
+下列内容**不是 Folio 公共 API**，应当作为实例或辅助资料阅读。
 
-这些材料不是入门路径的替代品：
+- [官方站作为公开 API 消费者的实例](/reference/site)
+- [官方站内容维护约定](/reference/content-maintenance)
+- [MiraDocs → Folio 历史迁移快照](/reference/migration-status)
+- 旧站保留的第三方**非官方**设计研究：[Apple](/reference/examples/apple)、[Claude](/reference/examples/claude)、[Supabase](/reference/examples/supabase)、[产品设计系统](/reference/examples/product-design-system)
+- 辅助工具：[Typora 图片上传 R2](/reference/typora-r2)
+- [博客](/blogs) · [关于 Folio](/about)
 
-- [案例：这个站就是 Folio 的测试用例](/reference/site)
-- [产品设计系统](/reference/examples/product-design-system)
-- [Apple 设计研究](/reference/examples/apple)
-- [Claude 设计研究](/reference/examples/claude)
-- [Supabase 设计研究](/reference/examples/supabase)
-- [在 Typora 中自动将图片上传到 Cloudflare R2](/reference/typora-r2)
-- [为什么要先让自己使用 Folio](/blogs/why-folio)
-- [Folio 项目](/projects/folio)
+这是一份**导航索引**，不是第二套 API 类型定义、版本矩阵或新增内容分类系统。

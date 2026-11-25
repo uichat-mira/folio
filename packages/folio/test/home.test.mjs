@@ -68,8 +68,10 @@ const docs = [
   doc("/info/about", { type: "page", order: 1, title: "About this site", description: "About body" }),
 ];
 
-test("home model defaults mirror the editorial home selection and exclude the featured story from recent", () => {
+test("home model defaults to the neutral Portal selection and excludes the featured story from recent", () => {
   const model = resolveFolioHome(baseConfig(), docs);
+  assert.equal(model.template, "portal");
+  assert.equal(model.meta, undefined);
   assert.deepEqual(model.sections.map((section) => section.type), [
     "intro",
     "featured",
@@ -81,12 +83,51 @@ test("home model defaults mirror the editorial home selection and exclude the fe
   assert.equal(featured.type, "featured");
   assert.equal(featured.doc.path, "/notes/second");
   assert.equal(featured.total, 3);
+  assert.equal(featured.label, "FEATURED");
+  assert.equal(featured.readLabel, "阅读全文");
   const recent = model.sections[2];
+  assert.equal(recent.label, "RECENT");
+  assert.equal(recent.endMessage, "更多内容正在准备中。");
   assert.deepEqual(recent.docs.map((item) => item.path), ["/notes/first", "/notes/third"]);
   const collections = model.sections[3];
   assert.deepEqual(collections.collections.map((entry) => entry.collection.path), ["/projects"]);
   const about = model.sections[4];
   assert.equal(about.doc.path, "/info/about");
+});
+
+test("explicit editorial template keeps the publication defaults", () => {
+  const model = resolveFolioHome(baseConfig({
+    home: {
+      template: "editorial",
+    },
+  }), docs);
+  assert.equal(model.template, "editorial");
+  assert.deepEqual(model.meta, {
+    left: "PERSONAL JOURNAL ✳",
+    right: "READ · COLLECT · REMEMBER",
+  });
+  assert.equal(model.sections[0].kicker, "写给生活的零碎记录");
+  assert.equal(model.sections[1].label, "FEATURED STORY");
+  assert.equal(model.sections[1].readLabel, "开始阅读");
+  assert.equal(model.sections[2].label, "01 / READING");
+  assert.equal(model.sections[2].endMessage, "更多记录，正在慢慢写下。");
+});
+
+test("portal metadata only appears when configured", () => {
+  const model = resolveFolioHome(baseConfig({
+    home: { meta: { left: "KNOWLEDGE", right: "INDEX" } },
+  }), docs);
+  assert.deepEqual(model.meta, { left: "KNOWLEDGE", right: "INDEX" });
+
+  const hidden = resolveFolioHome(baseConfig({
+    home: { meta: false },
+  }), docs);
+  assert.equal(hidden.meta, undefined);
+
+  const blank = resolveFolioHome(baseConfig({
+    home: { meta: {} },
+  }), docs);
+  assert.equal(blank.meta, undefined);
 });
 
 test("configured home controls source, block visibility and order without hardcoded collection names", () => {
@@ -161,9 +202,9 @@ test("static configured home uses the same order, basePath links and escaped tex
   }), (context, outDir) => {
     writeFolioStaticSite(context);
     const html = readFileSync(resolve(outDir, "index.html"), "utf8");
-    assert.ok(html.indexOf("folio-editorial-feature") < html.indexOf("folio-editorial-recent"));
-    assert.ok(html.indexOf("folio-editorial-recent") < html.indexOf("folio-editorial-side-section"));
-    assert.ok(html.indexOf("folio-editorial-side-section") < html.indexOf("folio-editorial-intro"));
+    assert.ok(html.indexOf("folio-portal-feature") < html.indexOf("folio-portal-recent"));
+    assert.ok(html.indexOf("folio-portal-recent") < html.indexOf("folio-portal-collection"));
+    assert.ok(html.indexOf("folio-portal-collection") < html.indexOf("folio-portal-hero"));
     assert.match(html, /href="\/moyu\/notes\/second\/"/);
     assert.match(html, /href="\/moyu\/notes\/first\/"/);
     assert.match(html, /href="\/moyu\/projects\/folio\/"/);
@@ -217,6 +258,47 @@ test("configuring home does not change other static routes, 404, sitemap or robo
     assert.match(sitemap, /https:\/\/example\.com\/moyu\/notes\/second\//);
     assert.match(sitemap, /https:\/\/example\.com\/moyu\/projects\//);
     assert.match(readFileSync(resolve(outDir, "robots.txt"), "utf8"), /Sitemap: https:\/\/example\.com\/moyu\/sitemap\.xml/);
+  });
+});
+
+test("static default home is a neutral Portal built from real config and content", () => {
+  fixture(docs, baseConfig(), (context) => {
+    const html = renderFolioStaticHome(context);
+    assert.match(html, /<main class="folio-home folio-home--portal">/);
+    assert.doesNotMatch(html, /folio-editorial-home|PERSONAL JOURNAL|写给生活的零碎记录|FEATURED STORY|THE NOTEBOOK/);
+    assert.match(html, /<h1>Field Notes<\/h1>/);
+    assert.match(html, /<p class="folio-portal-description">A small journal<\/p>/);
+    assert.match(html, /class="folio-portal-feature"/);
+    assert.match(html, /folio-portal-recent/);
+    assert.match(html, /folio-portal-collections/);
+    assert.match(html, /folio-portal-about/);
+    assert.match(html, /href="\/moyu\/notes\/second\/"/);
+    assert.match(html, /href="\/moyu\/projects\/folio\/"/);
+    assert.match(html, /href="\/moyu\/info\/about\/"/);
+  });
+});
+
+test("static default home keeps useful empty states without docs or collections", () => {
+  fixture([], baseConfig({ collections: [] }), (context) => {
+    const html = renderFolioStaticHome(context);
+    assert.match(html, /<main class="folio-home folio-home--portal">/);
+    assert.match(html, /<h1>Field Notes<\/h1>/);
+    assert.match(html, /<p class="folio-portal-description">A small journal<\/p>/);
+    assert.match(html, /这里还没有内容。/);
+    assert.doesNotMatch(html, /folio-portal-feature|folio-portal-collections|folio-portal-about/);
+  });
+});
+
+test("static explicit editorial template renders the publication layout", () => {
+  fixture(docs, baseConfig({ home: { template: "editorial", meta: false } }), (context) => {
+    const html = renderFolioStaticHome(context);
+    assert.match(html, /<main class="folio-home folio-journal-home folio-editorial-home">/);
+    assert.match(html, /class="folio-editorial-feature"/);
+    assert.match(html, /class="folio-editorial-recent"/);
+    assert.match(html, /class="folio-editorial-about"/);
+    assert.match(html, /FEATURED STORY/);
+    assert.match(html, /01 \/ READING/);
+    assert.doesNotMatch(html, /folio-home--portal/);
   });
 });
 
@@ -306,6 +388,7 @@ test("home configuration failures are explicit", () => {
     [{ home: { sections: [{ type: "recent", collection: "/info" }] } }, /not a configured collection/],
     [{ home: { sections: [{ type: "collections", paths: ["/notes", "/notes/"] }] } }, /duplicates/],
     [{ home: { sections: [{ type: "intro", title: 3 }] } }, /must be a string/],
+    [{ home: { template: "magazine" } }, /template must be/],
   ];
   for (const [overrides, expected] of cases) {
     assert.throws(
@@ -321,6 +404,7 @@ test("renderFolioStaticHome exposes the same configured body used by the default
     home: { sections: [{ type: "intro", title: "Exported home" }] },
   }), (context) => {
     const html = renderFolioStaticHome(context);
+    assert.match(html, /<main class="folio-home folio-home--portal">/);
     assert.match(html, /<h1>Exported home<\/h1>/);
     assert.match(html, /href="\/moyu\/notes\/"/);
   });

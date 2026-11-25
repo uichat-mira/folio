@@ -12,7 +12,8 @@
 import { execFileSync } from "node:child_process";
 import { realpathSync } from "node:fs";
 import { isAbsolute, relative, resolve } from "node:path";
-import type { FolioDoc } from "../types";
+import type { FolioDoc, FolioGitRevision } from "../types";
+import { githubAvatarsForAuthors } from "./github-avatars";
 
 const GIT_TIMEOUT_MS = 20_000;
 // A full-history `--name-status` read is bounded by this buffer; a repository
@@ -24,6 +25,11 @@ const GIT_MAX_BUFFER = 64 * 1024 * 1024;
 export type FolioGitPathDates = {
   first?: string;
   last?: string;
+  firstAuthor?: string;
+  lastAuthor?: string;
+  firstSha?: string;
+  firstEmail?: string;
+  firstGithubAvatarUrl?: string;
 };
 
 /** Result of one bounded read of the content directory's Git history. */
@@ -39,7 +45,7 @@ export type FolioGitDates = {
 };
 
 type GitChange = { status: string; paths: string[] };
-type GitCommit = { timestamp: number; changes: GitChange[] };
+type GitCommit = { sha: string; timestamp: number; author?: string; authorEmail?: string; changes: GitChange[] };
 
 const warnedRepositories = new Set<string>();
 
@@ -93,7 +99,7 @@ function canonicalPath(path: string): string {
 }
 
 /**
- * Parse `git log -z --format=%x1e...%x1f%cI --name-status -M` output.
+ * Parse Git commit timestamps and author names from the NUL-separated log.
  * Records are RS-separated, header fields are US-separated and every status /
  * path token is NUL-separated, so spaces, tabs and non-ASCII paths are safe.
  */
@@ -106,7 +112,8 @@ export function parseGitHistory(buffer: Buffer): GitCommit[] {
     const headerEnd = record.indexOf("\x00");
     if (headerEnd < 0) continue;
 
-    const [sha, committedIso] = record.slice(0, headerEnd).split("\x1f");
+    const [sha, committedIso, authorRaw, emailRaw] = record.slice(0, headerEnd).split("\x1f");
+    const author = authorRaw?.trim() || undefined;
     const timestamp = committedIso ? Date.parse(committedIso) : Number.NaN;
     if (!sha || Number.isNaN(timestamp)) continue;
 
@@ -129,7 +136,7 @@ export function parseGitHistory(buffer: Buffer): GitCommit[] {
       }
     }
 
-    commits.push({ timestamp, changes });
+    commits.push({ sha, timestamp, author, authorEmail: emailRaw?.trim(), changes });
   }
 
   return commits;
@@ -215,7 +222,7 @@ export function readFolioGitDates(contentDir: string): FolioGitDates | undefined
     "--no-color",
     "--no-decorate",
     "-z",
-    "--format=%x1e%H%x1f%cI",
+    "--format=%x1e%H%x1f%cI%x1f%an%x1f%ae",
     "--name-status",
     "-M",
     "--",
@@ -241,9 +248,18 @@ export function readFolioGitDates(contentDir: string): FolioGitDates | undefined
         const [from, to] = change.paths;
         const inherited = history.get(from);
         history.delete(from);
-        const entry = history.get(to) ?? { first: iso, last: iso };
-        if (inherited?.first) entry.first = inherited.first;
+        const entry = history.get(to) ?? {
+          first: iso, last: iso, firstAuthor: commit.author,
+          firstSha: commit.sha, firstEmail: commit.authorEmail,
+        };
+        if (inherited?.first) {
+          entry.first = inherited.first;
+          entry.firstAuthor = inherited.firstAuthor;
+          entry.firstSha = inherited.firstSha;
+          entry.firstEmail = inherited.firstEmail;
+        }
         entry.last = iso;
+        entry.lastAuthor = commit.author;
         history.set(to, entry);
         continue;
       }
@@ -251,7 +267,11 @@ export function readFolioGitDates(contentDir: string): FolioGitDates | undefined
       if (status === "C") {
         // A copy starts its own history; it does not inherit the source first
         // commit, because the copied content entered the repository here.
-        history.set(change.paths[1], { first: iso, last: iso });
+        history.set(change.paths[1], {
+          first: iso, last: iso,
+          firstAuthor: commit.author, lastAuthor: commit.author,
+          firstSha: commit.sha, firstEmail: commit.authorEmail,
+        });
         continue;
       }
 
@@ -261,9 +281,18 @@ export function readFolioGitDates(contentDir: string): FolioGitDates | undefined
       }
 
       const path = change.paths[0];
-      const entry = history.get(path) ?? { first: iso, last: iso };
-      entry.first ??= iso;
+      const entry = history.get(path) ?? {
+        first: iso, last: iso, firstAuthor: commit.author,
+          firstSha: commit.sha, firstEmail: commit.authorEmail,
+      };
+      if (!entry.first) {
+        entry.first = iso;
+        entry.firstAuthor = commit.author;
+        entry.firstSha = commit.sha;
+        entry.firstEmail = commit.authorEmail;
+      }
       entry.last = iso;
+      entry.lastAuthor = commit.author;
       history.set(path, entry);
     }
   }
@@ -273,6 +302,19 @@ export function readFolioGitDates(contentDir: string): FolioGitDates | undefined
     const key = toPosix(relative(absoluteContent, resolve(repository, path)));
     if (key.startsWith("..") || isAbsolute(key)) continue;
     paths.set(key, dates);
+  }
+
+  // Resolve avatars once per unique author for the entire manifest. This is
+  // optional: ordinary Git history and a working build never depend on GitHub.
+  // Email/SHA stay in the build layer; FolioDoc receives only a verified URL.
+  const origin = runGitText(repository, ["remote", "get-url", "origin"])?.trim();
+  const avatars = githubAvatarsForAuthors(origin, [...paths.values()]
+    .filter((entry) => entry.firstEmail && entry.firstSha)
+    .map((entry) => ({ email: entry.firstEmail!, sha: entry.firstSha! })));
+  for (const entry of paths.values()) {
+    if (!shallow && entry.firstEmail && entry.firstSha) {
+      entry.firstGithubAvatarUrl = avatars.get(entry.firstEmail)?.avatarUrl;
+    }
   }
 
   return { complete: !shallow, paths };
@@ -312,10 +354,21 @@ export function applyFolioGitDates(
     updatedAtSource = "git-last-commit";
   }
 
+  const first: FolioGitRevision | undefined = git.complete && entry?.first
+    ? { committedAt: entry.first, author: entry.firstAuthor, githubAvatarUrl: entry.firstGithubAvatarUrl }
+    : undefined;
+  const last: FolioGitRevision | undefined = entry?.last
+    ? { committedAt: entry.last, author: entry.lastAuthor }
+    : undefined;
+
   return {
     ...doc,
     publishedAt,
+    createdAt: doc.createdAt ?? first?.committedAt,
     updatedAt,
+    createdBy: doc.createdBy ?? first?.author,
+    updatedBy: doc.updatedBy ?? last?.author,
+    gitHistory: first || last ? { first, last } : undefined,
     dateSources: {
       publishedAt: publishedAtSource,
       updatedAt: updatedAtSource,

@@ -1,0 +1,17 @@
+name = "folio-og-image"
+main = "worker.js"
+compatibility_date = "2026-11-07"
+workers_dev = true
+
+[vars]
+ORIGIN = "https://uichat-mira.github.io"
+WECHAT_IMAGE = "/folio/icon-512.png"
+DEFAULT_IMAGE = "/folio/folio-og-1200x630.png"
+
+# Optional custom domain. Once the tomz.io zone is in the same Cloudflare
+# account, uncomment this block and redeploy; Wrangler creates the proxied DNS
+# record and certificate. Prefer this over workers.dev for WeChat, whose
+# crawler may not reach *.workers.dev from mainland China.
+# routes = [
+#   { pattern = "folio-og.tomz.io", custom_domain = true }
+# ]

@@ -1,0 +1,483 @@
+{
+  "meta": {
+    "generatedAt": "2026-11-09T07:13:14.077Z",
+    "harness": "docs/research/fol-040/verify-core.mjs",
+    "purpose": "FOL-040 (#162) independent verification of the Article category/tag archive Core contract",
+    "branch": "feat/folio-article-archives",
+    "commit": "da6202d70c485e7545708fbf8d36ed23cbce8c68",
+    "shortCommit": "da6202d",
+    "dirtyWorkingTree": true,
+    "packagedSourcesDirty": "",
+    "node": "v22.23.2",
+    "platform": "darwin arm64",
+    "package": {
+      "name": "@uichat-mira/folio",
+      "version": "0.1.1",
+      "main": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "siteContentFiles": 45,
+    "commands": [
+      {
+        "command": "npm run build -w @uichat-mira/folio (cwd: .)",
+        "status": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "node packages/folio/scripts/dependency-layers.mjs",
+        "status": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "esbuild --bundle src/core/article-archive.ts --metafile",
+        "status": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "node <standalone article-archive bundle probe>",
+        "status": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm pack --ignore-scripts --pack-destination /var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio-fol040-consumer-NuwIjl/tarball --json (cwd: packages/folio)",
+        "status": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "npm install --no-audit --no-fund --prefer-offline /var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio-fol040-consumer-NuwIjl/tarball/uichat-mira-folio-0.1.1.tgz @types/react@^19 @types/react-dom@^19 @types/node@^24 (cwd: ../../../../../../../var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio-fol040-consumer-NuwIjl/consumer)",
+        "status": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "node verify.mjs (external consumer importing @uichat-mira/folio)",
+        "status": "passed",
+        "exitCode": 0
+      },
+      {
+        "command": "tsc -p tsconfig.json (external consumer, NodeNext, skipLibCheck=false)",
+        "status": "passed",
+        "exitCode": 0
+      }
+    ],
+    "siteContent": {
+      "files": 45,
+      "byType": {
+        "page": 7,
+        "article": 4,
+        "doc": 34
+      }
+    },
+    "finishedAt": "2026-11-09T07:13:22.722Z"
+  },
+  "stages": [
+    {
+      "id": "package-build-and-public-entry",
+      "status": "passed",
+      "ms": 2618
+    },
+    {
+      "id": "real-content-chain",
+      "status": "passed",
+      "ms": 114
+    },
+    {
+      "id": "markdown-to-archive-index-edge-contract",
+      "status": "passed",
+      "ms": 7
+    },
+    {
+      "id": "schema-and-docs-consistency",
+      "status": "passed",
+      "ms": 54
+    },
+    {
+      "id": "core-is-react-and-dom-free",
+      "status": "passed",
+      "ms": 108
+    },
+    {
+      "id": "external-npm-tarball-consumer",
+      "status": "passed",
+      "ms": 5610
+    }
+  ],
+  "checks": [
+    {
+      "id": "dist-entry-exists",
+      "stage": "package-build-and-public-entry",
+      "status": "passed",
+      "ms": 0,
+      "detail": "packages/folio/dist/index.js present"
+    },
+    {
+      "id": "public-entry-exports-the-minimal-archive-api",
+      "stage": "package-build-and-public-entry",
+      "status": "passed",
+      "ms": 0,
+      "detail": "[\"buildFolioArticleArchiveIndex\",\"findFolioArticleArchiveGroup\",\"normalizeFolioArticleArchiveId\",\"folioArticleArchiveSlug\"]"
+    },
+    {
+      "id": "built-declarations-expose-the-public-archive-types",
+      "stage": "package-build-and-public-entry",
+      "status": "passed",
+      "ms": 0,
+      "detail": "all four functions, three result types and FolioArticleArchiveConfig are declared in dist/index.d.ts"
+    },
+    {
+      "id": "real-content-parses-through-public-parser",
+      "stage": "real-content-chain",
+      "status": "passed",
+      "ms": 34,
+      "detail": "{\"files\":45,\"byType\":{\"page\":7,\"article\":4,\"doc\":34}}"
+    },
+    {
+      "id": "old-content-category-is-unset-everywhere",
+      "stage": "real-content-chain",
+      "status": "passed",
+      "ms": 0,
+      "detail": "45/45 existing site documents keep category === undefined"
+    },
+    {
+      "id": "old-content-tags-parse-exactly-as-before",
+      "stage": "real-content-chain",
+      "status": "passed",
+      "ms": 6,
+      "detail": "{\"documents\":45,\"tagLists\":124}"
+    },
+    {
+      "id": "old-content-paths-and-ids-unchanged",
+      "stage": "real-content-chain",
+      "status": "passed",
+      "ms": 4,
+      "detail": "every existing document keeps its independently derived route and id"
+    },
+    {
+      "id": "old-content-search-behavior-unchanged",
+      "stage": "real-content-chain",
+      "status": "passed",
+      "ms": 49,
+      "detail": "tag text and Chinese title still searchable; categories add no search dimension"
+    },
+    {
+      "id": "old-content-collection-collection-behavior-unchanged",
+      "stage": "real-content-chain",
+      "status": "passed",
+      "ms": 6,
+      "detail": "{\"guide\":14,\"reference\":26,\"categoryDoesNotAffectSelection\":true}"
+    },
+    {
+      "id": "old-content-archive-index-is-safe-and-article-only",
+      "stage": "real-content-chain",
+      "status": "passed",
+      "ms": 0,
+      "detail": "{\"articles\":4,\"categories\":0,\"tagGroups\":[{\"id\":\"content\",\"title\":\"Content\",\"docs\":1},{\"id\":\"content model\",\"title\":\"Content Model\",\"docs\":1},{\"id\":\"dogfood\",\"title\":\"Dogfood\",\"docs\":1},{\"id\":\"folio\",\"title\":\"Folio\",\"docs\":1},{\"id\":\"git\",\"title\":\"Git\",\"docs\":1},{\"id\":\"navigation\",\"title\":\"Navigation\",\"docs\":1},{\"id\":\"react\",\"title\":\"React\",\"docs\":1},{\"id\":\"search\",\"title\":\"Search\",\"docs\":1},{\"id\":\"static build\",\"title\":\"Static Build\",\"docs\":1},{\"id\":\"vite\",\"title\":\"Vite\",\"docs\":1},{\"id\":\"workflow\",\"title\":\"Workflow\",\"docs\":1}]}"
+    },
+    {
+      "id": "fixtures-parse-through-frontmatter-then-foliodoc",
+      "stage": "markdown-to-archive-index-edge-contract",
+      "status": "passed",
+      "ms": 0,
+      "detail": "{\"parsed\":14,\"articleCount\":12}"
+    },
+    {
+      "id": "archive-index-groups-categories-and-tags",
+      "stage": "markdown-to-archive-index-edge-contract",
+      "status": "passed",
+      "ms": 0,
+      "detail": "{\"categories\":[{\"kind\":\"category\",\"id\":\"frontend\",\"slug\":\"frontend\",\"title\":\"Frontend\",\"docs\":[{\"path\":\"/articles/frontend-new\",\"type\":\"article\",\"date\":\"2026-03-01\",\"order\":1},{\"path\":\"/articles/frontend-mid\",\"type\":\"article\",\"date\":\"2026-02-01\",\"order\":2}]},{\"kind\":\"category\",\"id\":\"i̇stanbul\",\"slug\":\"istanbul\",\"title\":\"İstanbul\",\"docs\":[{\"path\":\"/articles/unicode-istanbul\",\"type\":\"article\",\"date\":\"2025-07-01\",\"order\":99}]},{\"kind\":\"category\",\"id\":\"tie\",\"slug\":\"tie\",\"title\":\"Tie\",\"docs\":[{\"path\":\"/articles/tie-a\",\"type\":\"article\",\"date\":\"2025-10-01\",\"order\":5},{\"path\":\"/articles/tie-b\",\"type\":\"article\",\"date\":\"2025-10-01\",\"order\":5}]},{\"kind\":\"category\",\"id\":\"前端\",\"slug\":\"前端\",\"title\":\"前端\",\"docs\":[{\"path\":\"/articles/chinese\",\"type\":\"article\",\"date\":\"2026-01-01\",\"order\":3}]}],\"tags\":[{\"kind\":\"tag\",\"id\":\"arraytag\",\"slug\":\"arraytag\",\"title\":\"ArrayTag\",\"docs\":[{\"path\":\"/articles/invalid-category-array\",\"type\":\"article\",\"date\":\"2025-09-01\",\"order\":99}]},{\"kind\":\"tag\",\"id\":\"react\",\"slug\":\"react\",\"title\":\"React\",\"docs\":[{\"path\":\"/articles/frontend-new\",\"type\":\"article\",\"date\":\"2026-03-01\",\"order\":1},{\"path\":\"/articles/frontend-mid\",\"type\":\"article\",\"date\":\"2026-02-01\",\"order\":2},{\"path\":\"/articles/chinese\",\"type\":\"article\",\"date\":\"2026-01-01\",\"order\":3},{\"path\":\"/articles/tag-string\",\"type\":\"article\",\"date\":\"2025-12-01\",\"order\":99},{\"path\":\"/articles/dupe-tags\",\"type\":\"article\",\"date\":\"2025-11-01\",\"order\":99}]},{\"kind\":\"tag\",\"id\":\"real\",\"slug\":\"real\",\"title\":\"Real\",\"docs\":[{\"path\":\"/articles/empty-tags\",\"type\":\"article\",\"date\":\"2025-06-01\",\"order\":99}]},{\"kind\":\"tag\",\"id\":\"runtime\",\"slug\":\"runtime\",\"title\":\"Runtime\",\"docs\":[{\"path\":\"/articles/frontend-new\",\"type\":\"article\",\"date\":\"2026-03-01\",\"order\":1}]},{\"kind\":\"tag\",\"id\":\"tie\",\"slug\":\"tie\",\"title\":\"Tie\",\"docs\":[{\"path\":\"/articles/tie-a\",\"type\":\"article\",\"date\":\"2025-10-01\",\"order\":5},{\"path\":\"/articles/tie-b\",\"type\":\"article\",\"date\":\"2025-10-01\",\"order\":5}]},{\"kind\":\"tag\",\"id\":\"vue\",\"slug\":\"vue\",\"title\":\"Vue\",\"docs\":[{\"path\":\"/articles/tag-string\",\"type\":\"article\",\"date\":\"2025-12-01\",\"order\":99}]},{\"kind\":\"tag\",\"id\":\"中文标签\",\"slug\":\"中文标签\",\"title\":\"中文标签\",\"docs\":[{\"path\":\"/articles/chinese\",\"type\":\"article\",\"date\":\"2026-01-01\",\"order\":3}]}],\"uncategorized\":[\"/articles/plain\",\"/articles/tag-string\",\"/articles/dupe-tags\",\"/articles/invalid-category-array\",\"/articles/invalid-category-number\",\"/articles/empty-tags\"],\"untagged\":[\"/articles/plain\",\"/articles/invalid-category-number\",\"/articles/unicode-istanbul\"]}"
+    },
+    {
+      "id": "archive-groups-return-the-original-full-documents",
+      "stage": "markdown-to-archive-index-edge-contract",
+      "status": "passed",
+      "ms": 0,
+      "detail": "category/tag groups contain the original FolioDoc references (no re-parse, no copy)"
+    },
+    {
+      "id": "archive-order-is-stable-date-desc-then-order-then-path",
+      "stage": "markdown-to-archive-index-edge-contract",
+      "status": "passed",
+      "ms": 0,
+      "detail": "{\"categorySlugs\":[\"frontend\",\"istanbul\",\"tie\",\"前端\"],\"categoryTitles\":[\"Frontend\",\"İstanbul\",\"Tie\",\"前端\"]}"
+    },
+    {
+      "id": "archive-index-is-order-independent-and-does-not-mutate-the-input",
+      "stage": "markdown-to-archive-index-edge-contract",
+      "status": "passed",
+      "ms": 0,
+      "detail": "forward vs reversed input produce identical indexes; caller array untouched"
+    },
+    {
+      "id": "category-display-label-override-changes-title-only",
+      "stage": "markdown-to-archive-index-edge-contract",
+      "status": "passed",
+      "ms": 0,
+      "detail": "{\"kind\":\"category\",\"id\":\"frontend\",\"slug\":\"frontend\",\"title\":\"前端开发\",\"docs\":[{\"id\":\"articles-frontend-new\",\"path\":\"/articles/frontend-new\",\"sourcePath\":\"articles/frontend-new.md\",\"type\":\"article\",\"title\":\"Frontend new\",\"description\":\"\",\"group\":\"文档\",\"collection\":\"Alpha\",\"order\":1,\"date\":\"2026-03-01\",\"publishedAt\":\"2026-03-01T00:00:00.000Z\",\"dateSources\":{\"publishedAt\":\"legacy-date\",\"updatedAt\":\"unknown\"},\"category\":\"Frontend\",\"tags\":[\"React\",\"Runtime\"],\"body\":\"\\n## Body\\n\\nFixture body.\\n\",\"headings\":[{\"depth\":2,\"text\":\"Body\",\"id\":\"body\"}],\"data\":{\"title\":\"Frontend new\",\"type\":\"article\",\"category\":\"Frontend\",\"tags\":[\"React\",\"Runtime\"],\"date\":\"2026-03-01\",\"collection\":\"Alpha\",\"order\":1}},{\"id\":\"articles-frontend-mid\",\"path\":\"/articles/frontend-mid\",\"sourcePath\":\"articles/frontend-mid.md\",\"type\":\"article\",\"title\":\"Frontend mid\",\"description\":\"\",\"group\":\"文档\",\"collection\":\"Beta\",\"order\":2,\"date\":\"2026-02-01\",\"publishedAt\":\"2026-02-01T00:00:00.000Z\",\"dateSources\":{\"publishedAt\":\"legacy-date\",\"updatedAt\":\"unknown\"},\"category\":\"frontend\",\"tags\":[\"react\"],\"body\":\"\\n## Body\\n\\nFixture body.\\n\",\"headings\":[{\"depth\":2,\"text\":\"Body\",\"id\":\"body\"}],\"data\":{\"title\":\"Frontend mid\",\"type\":\"article\",\"category\":\"frontend\",\"tags\":[\"react\"],\"date\":\"2026-02-01\",\"collection\":\"Beta\",\"order\":2}}]}"
+    },
+    {
+      "id": "empty-or-invalid-category-overrides-fall-back-safely",
+      "stage": "markdown-to-archive-index-edge-contract",
+      "status": "passed",
+      "ms": 0,
+      "detail": "empty label, non-string label and empty key all fall back to the source spelling"
+    },
+    {
+      "id": "conflicting-category-display-labels-fail-explicitly",
+      "stage": "markdown-to-archive-index-edge-contract",
+      "status": "passed",
+      "ms": 0,
+      "detail": "folio article archive: conflicting category display labels for \"frontend\": \"Alpha\" from key \"frontend\" vs \"Beta\" from key \"Frontend\""
+    },
+    {
+      "id": "two-categories-with-one-display-label-fail-explicitly",
+      "stage": "markdown-to-archive-index-edge-contract",
+      "status": "passed",
+      "ms": 0,
+      "detail": "folio article archive: duplicate category display label \"web\" for \"frontend\" and \"前端\""
+    },
+    {
+      "id": "url-identifier-collision-fails-instead-of-silently-sharing",
+      "stage": "markdown-to-archive-index-edge-contract",
+      "status": "passed",
+      "ms": 0,
+      "detail": "folio article archive: category URL identifier collision: \"c\" is shared by \"c#\" and \"c++\""
+    },
+    {
+      "id": "identity-without-url-safe-character-fails-explicitly",
+      "stage": "markdown-to-archive-index-edge-contract",
+      "status": "passed",
+      "ms": 0,
+      "detail": "folio article archive: category \"+++\" has no URL-safe identifier"
+    },
+    {
+      "id": "normalization-is-deterministic-for-case-whitespace-and-unicode",
+      "stage": "markdown-to-archive-index-edge-contract",
+      "status": "passed",
+      "ms": 0,
+      "detail": "case/whitespace/NFC/Chinese behaviour is deterministic and idempotent"
+    },
+    {
+      "id": "find-group-resolves-by-slug-and-canonical-id",
+      "stage": "markdown-to-archive-index-edge-contract",
+      "status": "passed",
+      "ms": 0,
+      "detail": "slug/id lookup works for ASCII and Chinese; unknown/empty identifiers return undefined"
+    },
+    {
+      "id": "single-category-scalar-contract-holds",
+      "stage": "markdown-to-archive-index-edge-contract",
+      "status": "passed",
+      "ms": 0,
+      "detail": "category is scalar-only; doc/page/project never enter article archives"
+    },
+    {
+      "id": "archives-span-the-caller-supplied-documents",
+      "stage": "markdown-to-archive-index-edge-contract",
+      "status": "passed",
+      "ms": 0,
+      "detail": "{\"alphaArticles\":2,\"betaArticles\":1,\"note\":\"multi-collection scope is the caller's document set, matching FOL-022 collection behaviour\"}"
+    },
+    {
+      "id": "schema-compiles-as-json-schema-2020-12",
+      "stage": "schema-and-docs-consistency",
+      "status": "passed",
+      "ms": 19,
+      "detail": "https://uichat-mira.github.io/folio/schemas/content.schema.json compiled with ajv 2020"
+    },
+    {
+      "id": "schema-documents-category-and-tag-archive-contract",
+      "stage": "schema-and-docs-consistency",
+      "status": "passed",
+      "ms": 0,
+      "detail": "category string + archive-dimension wording, tags string array, additionalProperties kept"
+    },
+    {
+      "id": "category-schema-and-parser-agree-on-valid-and-invalid-shapes",
+      "stage": "schema-and-docs-consistency",
+      "status": "passed",
+      "ms": 0,
+      "detail": "[{\"input\":\"Frontend\",\"schemaAccepted\":true,\"parsed\":\"Frontend\"},{\"input\":\"前端\",\"schemaAccepted\":true,\"parsed\":\"前端\"},{\"input\":\"  Frontend  \",\"schemaAccepted\":true,\"parsed\":\"Frontend\"},{\"input\":\"\",\"schemaAccepted\":true},{\"input\":\"   \",\"schemaAccepted\":true},{\"input\":[\"A\",\"B\"],\"schemaAccepted\":false},{\"input\":{\"name\":\"A\"},\"schemaAccepted\":false},{\"input\":2026,\"schemaAccepted\":false},{\"input\":true,\"schemaAccepted\":false}]"
+    },
+    {
+      "id": "real-site-category-and-tags-fields-satisfy-content-schema",
+      "stage": "schema-and-docs-consistency",
+      "status": "passed",
+      "ms": 13,
+      "detail": "45/45 existing documents: category is absent or a schema-valid string; tags are schema-valid string arrays"
+    },
+    {
+      "id": "real-site-schema-drift-is-pre-existing-and-category-unrelated",
+      "stage": "schema-and-docs-consistency",
+      "status": "passed",
+      "ms": 14,
+      "detail": "{\"note\":\"pre-existing, out of FOL-040 scope: both files have an unquoted ':' in description; loose frontmatter parsing yields a string order. No category/tag deviation and no FOL-040 change to these files.\",\"failures\":[{\"sourcePath\":\"reference/examples/claude.md\",\"fields\":[\"order\"],\"errors\":[\"must be number\"]},{\"sourcePath\":\"reference/examples/supabase.md\",\"fields\":[\"order\"],\"errors\":[\"must be number\"]}]}"
+    },
+    {
+      "id": "legacy-tags-string-form-remains-supported-by-the-parser",
+      "stage": "schema-and-docs-consistency",
+      "status": "passed",
+      "ms": 0,
+      "detail": "known pre-FOL-040 divergence recorded: schema requires string[]; parser still accepts legacy '|' string"
+    },
+    {
+      "id": "architecture-doc-describes-the-implemented-contract",
+      "stage": "schema-and-docs-consistency",
+      "status": "passed",
+      "ms": 2,
+      "detail": "docs/architecture.md documents grouping, fallback labels, ordering, collisions and article-only scope"
+    },
+    {
+      "id": "archive-core-source-imports-only-core",
+      "stage": "core-is-react-and-dom-free",
+      "status": "passed",
+      "ms": 0,
+      "detail": "[\"../types\",\"./content\"]"
+    },
+    {
+      "id": "archive-core-source-has-no-dom-globals",
+      "stage": "core-is-react-and-dom-free",
+      "status": "passed",
+      "ms": 0,
+      "detail": "no DOM global access in src/core/article-archive.ts"
+    },
+    {
+      "id": "layer-gate-passes-on-the-real-source-tree",
+      "stage": "core-is-react-and-dom-free",
+      "status": "passed",
+      "ms": 57,
+      "detail": "[layers] ok  56 modules (27 ui, 11 build, 17 core, 1 entry), 137 relative edges, 0 non-module specifier(s) ignored"
+    },
+    {
+      "id": "esbuild-metafile-proves-the-core-module-pulls-in-no-react",
+      "stage": "core-is-react-and-dom-free",
+      "status": "passed",
+      "ms": 51,
+      "detail": "{\"inputs\":77,\"bundledModules\":[\"node_modules/yaml/dist/nodes/identity.js\",\"node_modules/yaml/dist/visit.js\",\"node_modules/yaml/dist/doc/directives.js\",\"node_modules/yaml/dist/doc/anchors.js\",\"node_modules/yaml/dist/doc/applyReviver.js\",\"node_modules/yaml/dist/nodes/toJS.js\",\"node_modules/yaml/dist/nodes/Node.js\",\"node_modules/yaml/dist/nodes/Alias.js\",\"node_modules/yaml/dist/nodes/Scalar.js\",\"node_modules/yaml/dist/doc/createNode.js\",\"node_modules/yaml/dist/nodes/Collection.js\",\"node_modules/yaml/dist/stringify/stringifyComment.js\",\"node_modules/yaml/dist/stringify/foldFlowLines.js\",\"node_modules/yaml/dist/stringify/stringifyString.js\",\"node_modules/yaml/dist/stringify/stringify.js\",\"node_modules/yaml/dist/stringify/stringifyPair.js\",\"node_modules/yaml/dist/log.js\",\"node_modules/yaml/dist/schema/yaml-1.1/merge.js\",\"node_modules/yaml/dist/nodes/addPairToJSMap.js\",\"node_modules/yaml/dist/nodes/Pair.js\",\"node_modules/yaml/dist/stringify/stringifyCollection.js\",\"node_modules/yaml/dist/nodes/YAMLMap.js\",\"node_modules/yaml/dist/schema/common/map.js\",\"node_modules/yaml/dist/nodes/YAMLSeq.js\",\"node_modules/yaml/dist/schema/common/seq.js\",\"node_modules/yaml/dist/schema/common/string.js\",\"node_modules/yaml/dist/schema/common/null.js\",\"node_modules/yaml/dist/schema/core/bool.js\",\"node_modules/yaml/dist/stringify/stringifyNumber.js\",\"node_modules/yaml/dist/schema/core/float.js\",\"node_modules/yaml/dist/schema/core/int.js\",\"node_modules/yaml/dist/schema/core/schema.js\",\"node_modules/yaml/dist/schema/json/schema.js\",\"node_modules/yaml/dist/schema/yaml-1.1/binary.js\",\"node_modules/yaml/dist/schema/yaml-1.1/pairs.js\",\"node_modules/yaml/dist/schema/yaml-1.1/omap.js\",\"node_modules/yaml/dist/schema/yaml-1.1/bool.js\",\"node_modules/yaml/dist/schema/yaml-1.1/float.js\",\"node_modules/yaml/dist/schema/yaml-1.1/int.js\",\"node_modules/yaml/dist/schema/yaml-1.1/set.js\",\"node_modules/yaml/dist/schema/yaml-1.1/timestamp.js\",\"node_modules/yaml/dist/schema/yaml-1.1/schema.js\",\"node_modules/yaml/dist/schema/tags.js\",\"node_modules/yaml/dist/schema/Schema.js\",\"node_modules/yaml/dist/stringify/stringifyDocument.js\",\"node_modules/yaml/dist/doc/Document.js\",\"node_modules/yaml/dist/errors.js\",\"node_modules/yaml/dist/compose/resolve-props.js\",\"node_modules/yaml/dist/compose/util-contains-newline.js\",\"node_modules/yaml/dist/compose/util-flow-indent-check.js\",\"node_modules/yaml/dist/compose/util-map-includes.js\",\"node_modules/yaml/dist/compose/resolve-block-map.js\",\"node_modules/yaml/dist/compose/resolve-block-seq.js\",\"node_modules/yaml/dist/compose/resolve-end.js\",\"node_modules/yaml/dist/compose/resolve-flow-collection.js\",\"node_modules/yaml/dist/compose/compose-collection.js\",\"node_modules/yaml/dist/compose/resolve-block-scalar.js\",\"node_modules/yaml/dist/compose/resolve-flow-scalar.js\",\"node_modules/yaml/dist/compose/compose-scalar.js\",\"node_modules/yaml/dist/compose/util-empty-scalar-position.js\",\"node_modules/yaml/dist/compose/compose-node.js\",\"node_modules/yaml/dist/compose/compose-doc.js\",\"node_modules/yaml/dist/compose/composer.js\",\"node_modules/yaml/dist/parse/cst-scalar.js\",\"node_modules/yaml/dist/parse/cst-stringify.js\",\"node_modules/yaml/dist/parse/cst-visit.js\",\"node_modules/yaml/dist/parse/cst.js\",\"node_modules/yaml/dist/parse/lexer.js\",\"node_modules/yaml/dist/parse/line-counter.js\",\"node_modules/yaml/dist/parse/parser.js\",\"node_modules/yaml/dist/public-api.js\",\"node_modules/yaml/dist/index.js\",\"node_modules/marked/lib/marked.esm.js\",\"packages/folio/src/core/heading-ids.ts\",\"packages/folio/src/core/dates.ts\",\"packages/folio/src/core/content.ts\",\"packages/folio/src/core/article-archive.ts\"],\"standaloneRun\":{\"categories\":1,\"tags\":1}}"
+    },
+    {
+      "id": "tarball-contains-public-dist-entry-and-declarations",
+      "stage": "external-npm-tarball-consumer",
+      "status": "passed",
+      "ms": 0,
+      "detail": "17 files, 96399 bytes"
+    },
+    {
+      "id": "tarball-is-installed-as-a-real-package-not-a-workspace-link",
+      "stage": "external-npm-tarball-consumer",
+      "status": "passed",
+      "ms": 1,
+      "detail": "{\"version\":\"0.1.1\",\"resolved\":\"file:../../../../../../../../var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio-fol040-consumer-NuwIjl/tarball/uichat-mira-folio-0.1.1.tgz\"}"
+    },
+    {
+      "id": "installed-dist-bytes-match-the-built-package",
+      "stage": "external-npm-tarball-consumer",
+      "status": "passed",
+      "ms": 1,
+      "detail": "{\"indexJsSha256\":\"8e38bd6ef08f0e87997a77f993494dce24597a3af5e4e054d0322b91f0eff991\"}"
+    },
+    {
+      "id": "external-consumer-imports-public-entry-and-builds-the-index",
+      "stage": "external-npm-tarball-consumer",
+      "status": "passed",
+      "ms": 0,
+      "detail": "{\"consumer\":\"external-tarball\",\"packageEntry\":\"import '@uichat-mira/folio' resolved without workspace/file alias\",\"categories\":[{\"id\":\"frontend\",\"slug\":\"frontend\",\"title\":\"前端开发\",\"docs\":[\"/blogs/c0\"]},{\"id\":\"前端\",\"slug\":\"前端\",\"title\":\"前端\",\"docs\":[\"/blogs/c2\"]}],\"tags\":[{\"id\":\"react\",\"docs\":[\"/blogs/c0\",\"/blogs/c1\",\"/blogs/c2\"]},{\"id\":\"runtime\",\"docs\":[\"/blogs/c0\"]},{\"id\":\"中文标签\",\"docs\":[\"/blogs/c2\"]}],\"uncategorized\":[\"/blogs/c1\"]}"
+    },
+    {
+      "id": "external-consumer-types-resolve-from-tarball-declarations",
+      "stage": "external-npm-tarball-consumer",
+      "status": "passed",
+      "ms": 0,
+      "detail": "TypeScript NodeNext + skipLibCheck=false resolved all public archive types from dist/index.d.ts"
+    }
+  ],
+  "tarball": {
+    "fileName": "uichat-mira-folio-0.1.1.tgz",
+    "sha256": "b1eabb9c85aea7e7cecbe00dcac3757e26e94e00de820d4afdb3e550fd22baf2",
+    "bytes": 96399,
+    "entryCount": 17,
+    "unpackedSize": 386223,
+    "packedFiles": [
+      "LICENSE",
+      "README.md",
+      "dist/chunk-FS4K2DL3.js",
+      "dist/chunk-LTT6SMBZ.js",
+      "dist/index.d.ts",
+      "dist/index.js",
+      "dist/pwa-react.d.ts",
+      "dist/pwa-react.js",
+      "dist/pwa-update-BrGEBxoo.d.ts",
+      "dist/pwa.d.ts",
+      "dist/pwa.js",
+      "dist/styles.css",
+      "dist/types-qxPkY5wF.d.ts",
+      "dist/virtual.d.ts",
+      "dist/vite.d.ts",
+      "dist/vite.js",
+      "package.json"
+    ],
+    "sourceCommit": "da6202d70c485e7545708fbf8d36ed23cbce8c68",
+    "sourceDirty": false
+  },
+  "consumer": {
+    "installLogTail": [
+      "added 142 packages in 4s"
+    ],
+    "installedVersion": "0.1.1",
+    "symlink": false,
+    "lockResolved": "file:../../../../../../../../var/folders/fb/9xrmkmd55534jz_116_6vlg40000gp/T/folio-fol040-consumer-NuwIjl/tarball/uichat-mira-folio-0.1.1.tgz",
+    "tarballSha256": "b1eabb9c85aea7e7cecbe00dcac3757e26e94e00de820d4afdb3e550fd22baf2",
+    "probe": {
+      "consumer": "external-tarball",
+      "packageEntry": "import '@uichat-mira/folio' resolved without workspace/file alias",
+      "categories": [
+        {
+          "id": "frontend",
+          "slug": "frontend",
+          "title": "前端开发",
+          "docs": [
+            "/blogs/c0"
+          ]
+        },
+        {
+          "id": "前端",
+          "slug": "前端",
+          "title": "前端",
+          "docs": [
+            "/blogs/c2"
+          ]
+        }
+      ],
+      "tags": [
+        {
+          "id": "react",
+          "docs": [
+            "/blogs/c0",
+            "/blogs/c1",
+            "/blogs/c2"
+          ]
+        },
+        {
+          "id": "runtime",
+          "docs": [
+            "/blogs/c0"
+          ]
+        },
+        {
+          "id": "中文标签",
+          "docs": [
+            "/blogs/c2"
+          ]
+        }
+      ],
+      "uncategorized": [
+        "/blogs/c1"
+      ]
+    }
+  },
+  "summary": {
+    "status": "passed",
+    "total": 41,
+    "passed": 41,
+    "failed": 0
+  }
+}

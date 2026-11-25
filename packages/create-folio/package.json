@@ -1,0 +1,29 @@
+{
+  "name": "@uichat-mira/create-folio",
+  "version": "0.1.1",
+  "description": "Create a new Folio static site with one command",
+  "type": "module",
+  "bin": {
+    "create-folio": "./bin/create-folio.mjs"
+  },
+  "files": [
+    "bin",
+    "template",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uichat-mira/folio.git",
+    "directory": "packages/create-folio"
+  }
+}

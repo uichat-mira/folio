@@ -8,14 +8,19 @@
 // Changing a list here is a contract change: it must be justified by a task
 // that is allowed to touch the design system, not by a build refactor.
 
-// `:root` token declarations in source order (37 tokens). Order is asserted
+// `:root` token declarations in source order (54 tokens). Order is asserted
 // exactly, so renaming, removing or reordering a token fails the gate.
 export const ROOT_TOKEN_ORDER = [
   "--folio-primary",
   "--folio-primary-active",
   "--folio-primary-disabled",
+  "--folio-brand-accent",
+  "--folio-selection-bg",
   "--folio-ink",
   "--folio-body",
+  "--folio-prose-body",
+  "--folio-prose-leading",
+  "--folio-prose-paragraph-gap",
   "--folio-body-strong",
   "--folio-muted",
   "--folio-muted-soft",
@@ -24,6 +29,7 @@ export const ROOT_TOKEN_ORDER = [
   "--folio-canvas",
   "--folio-surface-soft",
   "--folio-surface-card",
+  "--folio-blockquote-bg",
   "--folio-surface-dark",
   "--folio-surface-dark-elevated",
   "--folio-on-primary",
@@ -36,7 +42,18 @@ export const ROOT_TOKEN_ORDER = [
   "--folio-error",
   "--folio-font-sans",
   "--folio-font-display",
+  "--folio-font-reading-heading",
+  "--folio-font-article-title",
+  "--folio-reading-heading-weight",
+  "--folio-reading-article-title-font",
+  "--folio-reading-article-title-tracking",
+  "--folio-reading-doc-title-font",
+  "--folio-reading-doc-title-tracking",
+  "--folio-reading-section-title-font",
+  "--folio-reading-section-title-tracking",
+  "--folio-reading-section-title-margin",
   "--folio-font-mono",
+  "--folio-header-height",
   "--folio-radius-sm",
   "--folio-radius-md",
   "--folio-radius-lg",
@@ -80,6 +97,7 @@ export const TOKEN_SAMPLE_VALUES = {
   "--folio-ink": "#141413",
   "--folio-canvas": "#faf9f5",
   "--folio-hairline": "#e6dfd8",
+  "--folio-header-height": "64px",
   "--folio-radius-md": "8px",
   "--folio-space-lg": "24px",
 };
@@ -131,8 +149,6 @@ export const REQUIRED_SELECTOR_FAMILIES = [
       ".folio-card-grid",
       ".folio-home",
       ".folio-doc-page",
-      ".folio-doc-toolbar",
-      ".folio-eyebrow",
       ".folio-lede",
       ".folio-not-found",
     ],
@@ -190,6 +206,7 @@ export const REQUIRED_SELECTOR_FAMILIES = [
     id: "markdown",
     selectors: [
       ".folio-markdown",
+      ".folio-markdown .folio-table-scroll",
       ".folio-markdown pre",
       ".folio-markdown pre code.hljs",
       ".md-custom-block",
@@ -221,9 +238,12 @@ export const REQUIRED_SELECTOR_FAMILIES = [
     selectors: [
       ".folio-docs-runtime",
       ".folio-docs-shell",
-      ".folio-docnav",
+      ".folio-tree-nav",
       ".folio-doc-main",
       ".folio-toc",
+      ".folio-toc__content",
+      ".folio-toc__list",
+      ".folio-toc__marker",
       ".folio-page-nav",
       ".folio-docs-mobile-bar",
       ".folio-docs-overlay",
@@ -252,11 +272,13 @@ export const REQUIRED_DECLARATIONS = {
   ".folio-card": "border-radius: var(--folio-radius-xl)",
   ".folio-footer": "text-align: center",
   ".folio-not-found": "text-align: center",
-  ".folio-markdown": "line-height: 1.78",
+  ".folio-markdown": "line-height: var(--folio-prose-leading)",
+  // Wide tables must scroll inside the reading column, never the document.
+  ".folio-markdown .folio-table-scroll": "overflow-x: auto",
   ".folio-search-overlay": "position: fixed",
   ".folio-search-dialog": "width: min(680px, 100%)",
   ".folio-docs-shell": "grid-template-columns: 250px",
-  ".folio-docnav": "position: sticky",
+  ".folio-tree-nav": "position: sticky",
   ".folio-doc-main": "padding: 48px 48px 96px",
   ".folio-page-nav": "display: grid",
   ".folio-prerender": "width: min(900px",
@@ -284,8 +306,8 @@ export const CASCADE_ORDER = [
   [".folio-search-overlay", ".folio-footer"],
   // Footer is the final component stylesheet now; the public footer rule
   // remains stable while its styles move into its owning module.
-  [".folio-docs-shell", ".folio-docnav"],
-  [".folio-docnav", ".folio-tree-nav__groups"],
+  [".folio-docs-shell", ".folio-tree-nav"],
+  [".folio-tree-nav", ".folio-tree-nav__groups"],
   [".folio-tree-nav__groups", ".folio-toc"],
   [".folio-toc", ".folio-footer"],
 ];
@@ -299,7 +321,7 @@ export const CONSUMER_CSS_SELECTORS = [
   ".folio-search-overlay",
   ".folio-share-button",
   ".folio-docs-shell",
-  ".folio-docnav",
+  ".folio-tree-nav",
   ".folio-page-nav",
   ".folio-prerender",
   ".folio-static-doc-menu",
@@ -308,3 +330,15 @@ export const CONSUMER_CSS_SELECTORS = [
 // A token declaration must also reach the built CSS asset, proving the
 // aggregated file (not some unrelated stylesheet) was bundled.
 export const CONSUMER_CSS_TOKENS = ["--folio-primary", "--folio-canvas"];
+
+// Component ownership of the aggregated stylesheet. Every component-owned rule
+// lives in the module stylesheet registered in `styles/manifest.mjs`; only the
+// page frames below stay in `src/styles/content.css` because several
+// components (reading pages, collections, home) share them. The gate rejects
+// any other selector in that file, so component rules cannot silently drift
+// back into the shared source.
+export const CONTENT_SHARED_SELECTORS = [
+  ".folio-content",
+  ".folio-doc-page",
+  ".folio-home",
+];

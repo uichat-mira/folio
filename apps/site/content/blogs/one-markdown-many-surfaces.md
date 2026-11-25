@@ -5,6 +5,7 @@ group: 专题
 date: 2026-11-04
 author: Folio 示例内容 · AI Worker
 type: article
+category: 工程实践
 status: dev-sample
 tags:
   - Vite
@@ -74,10 +75,10 @@ React 与静态输出可以长得不完全一样，但核心阅读路径不应�
 
 ## 边界与未完成项
 
-当前实现也有明确边界。搜索是客户端对标题、描述、分组、标签和正文做子串匹配，没有分面筛选，也没有标签聚合页；这些能力如果被写进内容当作“已支持”，就是假的。静态输出虽然包含正文，但 Mermaid 图表在无 JS 时只保留源码文本，真正的图形需要运行时加载。
+当前实现也有明确边界。搜索仍是客户端子串匹配，**没有分面筛选或聚合过滤器**；但当前 `dev` 已支持对开启 `collections[].archive` 的 Article 集合生成[分类与标签归档页](/reference/article-archives)，不能再宣称“没有标签聚合页”。该归档能力已随 npm 0.2.0 发布；0.1.1 不包含该能力。静态输出虽然包含正文，但 Mermaid 图表在无 JS 时只保留源码文本，真正的图形需要运行时加载。
 
 想继续沿着这条数据流往下看，可以阅读：
 
-- [从一个内容文件到最终静态页面](/showcase/from-file-to-page)；
+- [静态发布与 SEO](/guide/static-publishing)；
 - [导航与内容清单](/guide/navigation)；
 - [静态构建与 SEO](/reference/seo)。

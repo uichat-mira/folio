@@ -2,6 +2,8 @@
 // be produced from `styles/manifest.mjs` and must still contain the frozen
 // token block, the five global rules, and the component/static class rules
 // that React and static HTML share, in a cascade order that keeps tokens first.
+// The gate also enforces component ownership: `src/styles/content.css` may only
+// keep the shared page frames listed in `styles/contract.mjs`.
 //
 // `npm run pack:verify` calls `verifyStylesheet()` so the check cannot be
 // bypassed by a single card, and the script is also a CLI:
@@ -37,6 +39,7 @@ import {
 import { STYLE_SOURCES } from "../styles/manifest.mjs";
 import {
   CASCADE_ORDER,
+  CONTENT_SHARED_SELECTORS,
   DARK_TOKEN_ORDER,
   GLOBAL_RULES,
   REQUIRED_DECLARATIONS,
@@ -296,6 +299,29 @@ export function verifyStylesheet({
   }
 
   const indexOf = ruleIndexMap(rules);
+
+  // 5b. Component ownership: the shared content source keeps only the page
+  // frames that several components render. Letting component rules grow back
+  // into `src/styles/content.css` would silently undo the FOL-020 split, so it
+  // fails here even though the aggregate itself would still be valid CSS.
+  const contentSource = aggregation.sources.find(
+    (source) => source.relative === "src/styles/content.css",
+  );
+  if (contentSource) {
+    const offenders = [];
+    for (const rule of scanRules(maskComments(contentSource.text)).rules) {
+      if (rule.prelude.startsWith("@")) continue;
+      for (const selector of splitSelectorList(rule.prelude)) {
+        if (!CONTENT_SHARED_SELECTORS.includes(selector)) offenders.push(selector);
+      }
+    }
+    if (offenders.length > 0) {
+      fail(
+        "ownership:content",
+        `src/styles/content.css owns ${[...new Set(offenders)].length} component rule(s) that belong to a module stylesheet in styles/manifest.mjs: ${[...new Set(offenders)].join(", ")}; content.css keeps only ${CONTENT_SHARED_SELECTORS.join(", ")}`,
+      );
+    }
+  }
 
   // 6. Token block: exact names in exact order.
   const rootRule = findRule(rules, [":root"]);

@@ -41,22 +41,23 @@ author:
 | --- | --- | --- |
 | `id` | 稳定内容标识 | 由 `path` 生成 |
 | `path` | 显式 route | 由 Markdown 文件路径生成 |
-| `type` | doc / article / project / page / 自定义字符串 | 按目录推断：`blogs/*` → article，`projects/*` → project，其他 → doc |
+| `type` | doc / article / page / 自定义字符串 | 按目录推断：`blogs/*` → article，其他（含 `projects/*`）→ doc；旧 project 仅作兼容 |
 | `title` | 页面、导航与 SEO 标题 | route path |
 | `description` | 摘要与 metadata | 空字符串 |
 | `group` | sidebar 分组 | 按 entry type 生成 |
 | `order` | 组内排序数字 | `99` |
 | `collection` / `section` | consumer 级集合与章节 | 未设置 |
 | `date` | 文章日期 | 未设置；文章间按日期倒序 |
-| `tags` | 标签数组或 `|` / `,` 分隔字符串 | 空数组 |
-| `status` | 内容或项目状态 | 未设置 |
+| `tags` | 多标签：数组或 `|` / `,` / `，` 分隔字符串 | 空数组；Article 可生成标签归档（0.2.0+） |
+| `category` | Article 可选的单分类归档字段（0.2.0+） | 未设置；只有非空字符串有效 |
+| `status` | 可扩展的内容状态 | 未设置；本站的 `published` / `draft` / `reference` 是内容编辑成熟度，不是 npm 发布状态 |
 | `cover` | 封面或分享图 | 未设置 |
 
-`collection`、`section` 与下文的日期字段属于当前 `dev` 源码中的候选契约，尚未包含在已发布的 `0.1.1` 中。
+`collection`、`section` 早在 npm 0.1.1 已存在；`category`、Article 归档与 Git-native 日期扩展已随 npm 0.2.0 发布。参见 [Article 归档参考](/reference/article-archives) 与[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)。
 
 ## 日期字段
 
-`publishedAt`、`updatedAt` 与 `dateSources` 是 `dev` 源码中的候选契约，尚未包含在已发布的 `0.1.1` 中：
+`publishedAt`、`updatedAt` 与 `dateSources` 已随 `0.2.0` 发布；历史 `0.1.1` 不包含这些字段：
 
 - 显式 `publishedAt` / `updatedAt` 优先；
 - 旧 `date` 字段可作为 `publishedAt`；
@@ -76,3 +77,17 @@ author:
 - [内容协议](/guide/content-contract)
 - [编写内容](/guide/authoring)
 - [内容模型](/guide/content-model)
+
+
+## Git-native 创建和修订信息
+
+Folio 会自动读取 Git 历史，记录首次提交时间、最近提交时间和两次提交的作者。它们保留在 `FolioDoc`，供 [FolioDocMeta](/reference/components/doc-meta) 等组件使用；默认署名栏只显示作者、日期和预计阅读时间，不展开四字段表格。以下字段均可在 YAML Frontmatter 独立覆写：
+
+~~~yaml
+createdAt: 2024-06-01
+updatedAt: 2026-11-07
+createdBy: 原作者
+updatedBy: 最近修改者
+~~~
+
+`publishedAt` 和 `author` 仍用于作品发布时间与署名，不强制与 Git 文件记录相同。仓库历史不完整时，Folio 不虚构首次提交的信息；未追踪内容也不填入构建时间。

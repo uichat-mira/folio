@@ -70,7 +70,7 @@
 /* The source HTML is split across Markdown files; do not repeat the source page dividers at joins. */
 .claude-visual .band{ border-bottom:0; }
 .claude-visual + .claude-visual .band{ padding-top:var(--sp-lg); }
-.folio-markdown .claude-visual h2{ border-top:0; padding-top:0; }
+.claude-visual h2{ border-top:0; padding-top:0; }
 
   .claude-visual .docnav{
     position:sticky; top:0; height:100vh; overflow-y:auto;
