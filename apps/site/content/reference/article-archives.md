@@ -17,7 +17,7 @@ Article 分类与标签归档（FOL-040 / FOL-041）是按集合启用的阅读�
 
 ## 版本状态
 
-该能力在当前 `dev` 源码中实现，**尚未发布到 npm**。已发布的 `@uichat-mira/folio@0.1.1` 没有 `config.collections`，没有 `archive` 配置，也没有 `buildFolioArticleArchiveIndex()` 等 Core 导出；按本页示例在 `0.1.1` 上配置不会产生归档 route。本轮核对基线为 `origin/dev` 的 `f49557c`。
+该能力已随 `@uichat-mira/folio@0.2.0` 发布。历史 `0.1.1` 没有 `config.collections`、`archive` 配置或 `buildFolioArticleArchiveIndex()` 等 Core 导出。
 
 ## 分类不是栏目
 

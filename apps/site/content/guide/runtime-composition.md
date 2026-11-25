@@ -89,7 +89,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 
 ## 一套完整消费站
 
-下面是一套 **适用于当前 `dev`、尚未发布到 npm 0.1.1 的组合示例**。它演示配置文件、Vite 配置与 React 入口如何对应，**并非从空目录直接运行的完整工程**。运行前还需在 `content/` 中创建与 `/guide/*`、`/reference/*`、`/notes/*`、`/about` 对应的 Markdown，提供 `public/brand/acme-wordmark.svg`、`acme-mark.svg`、`acme-mark-inverse.svg` 等示例品牌资源，创建可选的 `src/site.css`（只放自有样式和 `--folio-*` 变量），并安装所需 peer dependencies。若需要从空项目逐步运行，请先使用 [首个可运行站点](/guide/first-site) 的 **npm 0.1.1** 路径，注意两者 API 版本不同。
+下面是一套 **适用于 npm 0.2.0 / 当前 `dev` 的组合示例**。它演示配置文件、Vite 配置与 React 入口如何对应，**并非从空目录直接运行的完整工程**。运行前还需在 `content/` 中创建与 `/guide/*`、`/reference/*`、`/notes/*`、`/about` 对应的 Markdown，提供 `public/brand/acme-wordmark.svg`、`acme-mark.svg`、`acme-mark-inverse.svg` 等示例品牌资源，创建可选的 `src/site.css`（只放自有样式和 `--folio-*` 变量），并安装所需 peer dependencies。若需要从空项目逐步运行，请先使用 [首个可运行站点](/guide/first-site) 的 **npm 0.2.0** 路径。
 
 ```ts
 // folio.config.ts

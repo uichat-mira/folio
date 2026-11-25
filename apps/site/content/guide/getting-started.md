@@ -1,6 +1,6 @@
 ---
 title: 快速开始
-description: 选择消费已发布的 npm 0.1.1，或在 Folio 仓库中开发 dev 源码，并跑起第一个可访问页面。
+description: 选择消费已发布的 npm 0.2.0，或在 Folio 仓库中开发 dev 源码，并跑起第一个可访问页面。
 group: 开始
 collection: 指南
 order: 2
@@ -16,7 +16,7 @@ tags:
 
 | 你的目标 | 走哪条路径 | 入口 |
 | --- | --- | --- |
-| 在自己的 Vite + React 项目里建站，不修改 Folio 源码 | 路径 A：消费 `0.1.1` | 安装 npm 包 |
+| 在自己的 Vite + React 项目里建站，不修改 Folio 源码 | 路径 A：消费 `0.2.0` | 安装 npm 包 |
 | 修改 Folio package、官方站或文档，验证未发布改动 | 路径 B：开发 `dev` 源码 | 克隆仓库 |
 
 如果只是想判断 Folio 是否适合你的场景，先读[Folio 是什么](/guide/introduction)。
@@ -30,14 +30,14 @@ tags:
 
 > **开发中：npx 初始化器**。本地已增加 `@uichat-mira/create-folio`，
 > 未来发布后可用 `npx @uichat-mira/create-folio my-site --install`。
-> **当前尚未发布到 npm**，本页的正式安装路径仍是下文的 0.1.1。
+> 初始化器仍未单独发布到 npm；正式安装路径使用下文的 `@uichat-mira/folio@0.2.0`。
 
-## 路径 A：消费已发布的 0.1.1
+## 路径 A：消费已发布的 0.2.0
 
 适合：已有或新建的 Vite 7 + React 19 项目，只使用 npm 上的公开包。
 
 ```bash
-npm install @uichat-mira/folio@0.1.1 react-router-dom@^7
+npm install @uichat-mira/folio@0.2.0 react-router-dom@^7
 ```
 
 安装后只使用三个公开入口：
@@ -50,14 +50,7 @@ npm install @uichat-mira/folio@0.1.1 react-router-dom@^7
 
 最小接入分四步：创建 `content/` 下的 Markdown、写 `folio.config.ts`、在 `vite.config.ts` 注册 `folio()`、在 React 入口挂载 `FolioApp`。完整文件内容、`base`/`basePath` 与 CSS 导入见[首个可运行站点](/guide/first-site)。
 
-`0.1.1` 不包含当前 `dev` 的候选能力，包括但不限于：
-
-- Frontmatter 的 `publishedAt`、`updatedAt`、`dateSources`；
-- `config.collections`、`config.home`、collection archive；
-- 结构化导航的 `children`/`panel`/`activeMatch`，以及 `headerBrand`/`docToc` 等扩展 slots；
-- 可选 PWA 集成。
-
-这些能力只在源码 `dev` 中存在。写 `0.1.1` 项目时不要从其他页面复制它们；公开边界以[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)为准。
+`0.2.0` 已包含此前只存在于 `dev` 的主要能力：Git-native 日期、collection / Article 归档、结构化导航与扩展 slots、可组合首页、主题/代码配色以及可选 PWA 集成。公开边界以[消费者契约](https://github.com/uichat-mira/folio/blob/dev/docs/consumer-contract.md)为准；后续 `dev` 仍可能继续包含尚未发布的候选变化。
 
 ## 路径 B：在 Folio 仓库开发 dev 源码
 
@@ -82,7 +75,7 @@ npm run dev
 | `npm run validate` | 类型检查、package 测试、OG worker 测试与站点构建 |
 | `npm run release:check` | 完整发布校验，额外包含打包审计与隔离 consumer 验证 |
 
-源码路径的边界：`dev` 分支会包含已合并但尚未发布的候选契约。官方站会直接使用这些能力，因此页面示例可能标注「dev 候选」。如果你在准备 `0.1.1` consumer 文档，必须回到已发布包与消费者契约核对，不能把源码行为写成已发布行为。两条路径的版本差异也记录在[内容协议](/guide/content-contract#版本边界)中。
+源码路径的边界：`dev` 分支会包含已合并但尚未发布的候选契约。官方站会直接使用这些能力，因此页面示例可能标注「dev 候选」。如果你在准备 consumer 文档，必须回到当前已发布包与消费者契约核对，不能把后续源码行为提前写成已发布行为。两条路径的版本差异也记录在[内容协议](/guide/content-contract#版本边界)中。
 
 ## 下一步
 

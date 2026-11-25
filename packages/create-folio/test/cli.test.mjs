@@ -18,7 +18,7 @@ test("npx initializer creates a Folio site without installing or touching its pa
     const project = resolve(root, "my-folio");
     const pkg = JSON.parse(readFileSync(resolve(project, "package.json"), "utf8"));
     assert.equal(pkg.name, "my-folio");
-    assert.equal(pkg.dependencies["@uichat-mira/folio"], "^0.1.1");
+    assert.equal(pkg.dependencies["@uichat-mira/folio"], "^0.2.0");
     for (const file of ["index.html", "folio.config.ts", "vite.config.ts",
       "src/main.tsx", "content/hello.md", ".gitignore", "tsconfig.json"]) {
       assert.ok(existsSync(resolve(project, file)), file + " should be included in package");

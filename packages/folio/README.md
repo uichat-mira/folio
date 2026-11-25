@@ -4,7 +4,7 @@ Folio is a Git-native documentation, publishing, and project portal runtime for 
 
 It keeps Markdown, navigation, routing, SEO, and static deployment inside a stable package contract while allowing every consumer to keep its own UI, branding, and product-specific behavior.
 
-## 0.1.x consumer contract
+## 0.2.x consumer contract
 
 Markdown rendering is trusted-content-only: raw HTML, `::: html`, and Callout bodies are preserved without sanitization. `styles.css` is a whole-site stylesheet, not an isolated embed stylesheet. The default static document shell works without JavaScript, while custom static route bodies are site-owned.
 
@@ -12,7 +12,7 @@ The canonical boundary list, trusted Markdown example, stylesheet caveats, stati
 
 ## Install
 
-Folio `0.1.1` is publicly released through [GitHub Release `folio-v0.1.1`](https://github.com/uichat-mira/folio/releases/tag/folio-v0.1.1) and the [OIDC publish workflow](https://github.com/uichat-mira/folio/actions/runs/41282326983), following the manual `0.1.0` bootstrap. The patch retains the same public API and ships the corrected installation README. Install the latest Folio with:
+Folio `0.2.0` is the current public release, published from the reviewed `prod` lineage through [GitHub Release `folio-v0.2.0`](https://github.com/uichat-mira/folio/releases/tag/folio-v0.2.0) and npm Trusted Publishing / OIDC. It promotes the post-0.1.1 source line into a supported package contract. Install the latest Folio with:
 
 ```bash
 npm install @uichat-mira/folio
@@ -45,12 +45,10 @@ export default defineConfig({
 
 The plugin discovers Markdown, parses YAML Frontmatter, and exposes content through `virtual:folio/content`. It can also generate route-level HTML, canonical and social metadata, JSON-LD, `404.html`, `sitemap.xml`, and `robots.txt`.
 
-## Visual presets and code highlighting (next release)
+## Visual presets and code highlighting
 
-The current source branch implements the FOL-049 appearance contract. **The npm
-`0.1.1` release above does not yet contain these settings.** After a release
-from the Folio `prod` lineage, the same `FolioConfig` drives both React and
-static output:
+Folio `0.2.0` includes the FOL-049 appearance contract. The same
+`FolioConfig` drives both React and static output:
 
 ```ts
 import { defineFolioConfig } from "@uichat-mira/folio";
@@ -547,9 +545,9 @@ Verified on 2026-11-01:
 
 The predecessor `@uichat-mira/docs` package stays available for existing consumers during migration.
 
-## Appearance previews and composable homes (dev candidate, FOL-051)
+## Appearance previews and composable homes (0.2.0, FOL-051)
 
-These APIs are available from source on `dev`; npm `0.1.1` does **not** include them yet. Import the single `@uichat-mira/folio/styles.css` entry as usual.
+These APIs are included in npm `0.2.0`. Import the single `@uichat-mira/folio/styles.css` entry as usual.
 
 ```tsx
 import { FolioApp, FolioHome, useFolioAppearance, type FolioConfig, type FolioDoc } from "@uichat-mira/folio";
